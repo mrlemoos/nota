@@ -6,6 +6,8 @@ import {
 } from '@tiptap/react';
 import {
   createContext,
+  lazy,
+  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -13,16 +15,28 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { SimpleTooltip, TooltipProvider } from '@/components/ui/tooltip';
+import { pdfPreviewSrc } from '@/lib/pdf-preview-url';
 import { cn } from '@/lib/utils';
 import { getBrowserClient } from '../../lib/supabase/browser';
 import {
   PDF_SIGNED_URL_TTL_SEC,
   downloadPdfFromSignedUrl,
 } from '../../lib/pdf-attachment-client';
-import { NOTE_PDFS_BUCKET, deleteNoteAttachment } from '../../models/note-attachments';
+import {
+  NOTE_PDFS_BUCKET,
+  deleteNoteAttachment,
+  updateNoteAttachmentFilename,
+} from '../../models/note-attachments';
 import type { NoteAttachment } from '~/types/database.types';
+
+const PdfJsModalPreviewLazy = lazy(() =>
+  import('@/components/pdf-js-modal-preview').then((m) => ({
+    default: m.PdfJsModalPreview,
+  })),
+);
 
 export type NotePdfDocContextValue = {
   noteId: string;
@@ -32,6 +46,8 @@ export type NotePdfDocContextValue = {
 };
 
 const NotePdfDocContext = createContext<NotePdfDocContextValue | null>(null);
+
+const MAX_ATTACHMENT_FILENAME_LEN = 200;
 
 export function useNotePdfDocContext() {
   return useContext(NotePdfDocContext);
@@ -54,11 +70,21 @@ export function NotePdfDocProvider({
 function NotePdfNodeView(props: NodeViewProps) {
   const ctx = useNotePdfDocContext();
   const previewDialogRef = useRef<HTMLDialogElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
+  const renameMutexRef = useRef(false);
+  const renameCancelRef = useRef(false);
+  const skipRenameBlurRef = useRef(false);
+  const updateAttributesRef = useRef(props.updateAttributes);
+  updateAttributesRef.current = props.updateAttributes;
+
   const [preview, setPreview] = useState<{ filename: string; url: string } | null>(
     null,
   );
+  const [pdfPreviewUseIframe, setPdfPreviewUseIframe] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [renaming, setRenaming] = useState(false);
+  const [draftFilename, setDraftFilename] = useState('');
 
   const attachmentId = props.node.attrs.attachmentId as string | null;
   const filenameAttr = (props.node.attrs.filename as string) || 'PDF';
@@ -68,6 +94,92 @@ function NotePdfNodeView(props: NodeViewProps) {
     : undefined;
 
   const displayName = attachment?.filename ?? filenameAttr;
+
+  useEffect(() => {
+    if (preview?.url) {
+      setPdfPreviewUseIframe(false);
+    }
+  }, [preview?.url]);
+
+  const onPdfJsRenderFailed = useCallback(() => {
+    setPdfPreviewUseIframe(true);
+  }, []);
+
+  useEffect(() => {
+    if (renaming && renameInputRef.current) {
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
+    }
+  }, [renaming]);
+
+  const startRename = useCallback(() => {
+    if (!attachment) return;
+    setActionError(null);
+    renameCancelRef.current = false;
+    setDraftFilename(displayName);
+    setRenaming(true);
+  }, [attachment, displayName]);
+
+  const cancelRename = useCallback(() => {
+    renameCancelRef.current = true;
+    skipRenameBlurRef.current = true;
+    setRenaming(false);
+  }, []);
+
+  const endRenameWithoutBlurCommit = useCallback(() => {
+    skipRenameBlurRef.current = true;
+    setRenaming(false);
+  }, []);
+
+  const applyRename = useCallback(async () => {
+    if (skipRenameBlurRef.current) {
+      skipRenameBlurRef.current = false;
+      return;
+    }
+    if (renameCancelRef.current) {
+      renameCancelRef.current = false;
+      return;
+    }
+    if (!attachment || !ctx) return;
+    if (renameMutexRef.current) return;
+
+    const next = draftFilename.trim();
+    if (!next) {
+      endRenameWithoutBlurCommit();
+      return;
+    }
+    if (next.length > MAX_ATTACHMENT_FILENAME_LEN) {
+      setActionError(`Name must be at most ${MAX_ATTACHMENT_FILENAME_LEN} characters.`);
+      return;
+    }
+    if (next === displayName) {
+      endRenameWithoutBlurCommit();
+      return;
+    }
+
+    renameMutexRef.current = true;
+    setActionError(null);
+    try {
+      const client = getBrowserClient();
+      await updateNoteAttachmentFilename(client, attachment.id, next);
+      updateAttributesRef.current({ filename: next });
+      ctx.revalidate();
+      skipRenameBlurRef.current = true;
+      setRenaming(false);
+    } catch (e) {
+      setActionError(
+        e instanceof Error ? e.message : 'Could not rename file',
+      );
+    } finally {
+      renameMutexRef.current = false;
+    }
+  }, [
+    attachment,
+    ctx,
+    draftFilename,
+    displayName,
+    endRenameWithoutBlurCommit,
+  ]);
 
   const openPreview = useCallback(async () => {
     if (!attachment) return;
@@ -171,9 +283,43 @@ function NotePdfNodeView(props: NodeViewProps) {
     >
       <TooltipProvider>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="min-w-0 flex-1 truncate text-sm font-medium text-foreground">
-            {displayName}
-          </span>
+          {renaming && attachment ? (
+            <input
+              ref={renameInputRef}
+              type="text"
+              value={draftFilename}
+              onChange={(e) => setDraftFilename(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  void applyRename();
+                }
+                if (e.key === 'Escape') {
+                  e.preventDefault();
+                  cancelRename();
+                }
+              }}
+              onBlur={() => {
+                void applyRename();
+              }}
+              maxLength={MAX_ATTACHMENT_FILENAME_LEN}
+              className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              aria-label="PDF display name"
+            />
+          ) : (
+            <SimpleTooltip label="Double-click to rename" side="top">
+              <span
+                className="min-w-0 flex-1 cursor-text truncate text-sm font-medium text-foreground"
+                onDoubleClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  startRename();
+                }}
+              >
+                {displayName}
+              </span>
+            </SimpleTooltip>
+          )}
           {missing ? (
             <div className="flex shrink-0 items-center gap-1">
               <span className="text-xs text-muted-foreground">
@@ -245,44 +391,66 @@ function NotePdfNodeView(props: NodeViewProps) {
           </p>
         ) : null}
 
-        <dialog
-          ref={previewDialogRef}
-          className="fixed left-1/2 top-1/2 z-50 w-[min(100vw-2rem,56rem)] max-h-[min(100vh-2rem,90vh)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-0 shadow-lg [&::backdrop]:bg-black/50"
-          onClick={(ev) => {
-            if (ev.target === previewDialogRef.current) {
-              closePreview();
-            }
-          }}
-        >
-          <div className="flex max-h-[min(100vh-2rem,90vh)] flex-col">
-            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-              <h4 className="min-w-0 truncate text-sm font-medium text-foreground">
-                {preview?.filename ?? 'Preview'}
-              </h4>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={closePreview}
+        {typeof document !== 'undefined'
+          ? createPortal(
+              <dialog
+                ref={previewDialogRef}
+                className="fixed left-1/2 top-1/2 z-50 w-[min(100vw-2rem,56rem)] max-h-[min(100vh-2rem,90vh)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-0 shadow-lg [&::backdrop]:bg-black/50"
+                onClick={(ev) => {
+                  if (ev.target === previewDialogRef.current) {
+                    closePreview();
+                  }
+                }}
               >
-                Close
-              </Button>
-            </div>
-            <div className="min-h-[50vh] flex-1 bg-muted/30">
-              {previewLoading ? (
-                <div className="flex h-[50vh] items-center justify-center text-sm text-muted-foreground">
-                  Loading preview…
+                <div className="flex max-h-[min(100vh-2rem,90vh)] flex-col">
+                  <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+                    <h4 className="min-w-0 truncate text-sm font-medium text-foreground">
+                      {preview?.filename ?? 'Preview'}
+                    </h4>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={closePreview}
+                    >
+                      Close
+                    </Button>
+                  </div>
+                  <div className="min-h-[50vh] flex-1 bg-muted/30">
+                    {previewLoading ? (
+                      <div className="flex h-[50vh] items-center justify-center text-sm text-muted-foreground">
+                        Loading preview…
+                      </div>
+                    ) : preview ? (
+                      pdfPreviewUseIframe ? (
+                        <iframe
+                          title={preview.filename}
+                          src={pdfPreviewSrc(preview.url)}
+                          className="h-[min(80vh,720px)] w-full border-0 bg-background"
+                        />
+                      ) : (
+                        <Suspense
+                          fallback={
+                            <div className="flex h-[min(80vh,720px)] w-full items-center justify-center text-sm text-muted-foreground">
+                              Loading preview…
+                            </div>
+                          }
+                        >
+                          <PdfJsModalPreviewLazy
+                            url={preview.url}
+                            documentTitle={preview.filename}
+                            onRenderFailed={onPdfJsRenderFailed}
+                            className="bg-muted/30"
+                          />
+                        </Suspense>
+                      )
+                    ) : null}
+                  </div>
                 </div>
-              ) : preview ? (
-                <iframe
-                  title={preview.filename}
-                  src={preview.url}
-                  className="h-[min(80vh,720px)] w-full border-0 bg-background"
-                />
-              ) : null}
-            </div>
-          </div>
-        </dialog>
+              </dialog>,
+              document.body,
+            )
+          : null}
       </TooltipProvider>
     </NodeViewWrapper>
   );

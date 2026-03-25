@@ -229,9 +229,23 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground backdrop-blur-md;
   }
   html {
     @apply font-sans;
   }
+}
+
+/*
+ * Electron shell: unlayered so these beat Tailwind utilities (e.g. notes root gradient).
+ * Native vibrancy + transparent html/body are both required for macOS; see nota-electron main.
+ */
+html.nota-electron,
+html.nota-electron body {
+  background-color: transparent;
+}
+
+html.nota-electron .nota-notes-root {
+  background-color: transparent;
+  background-image: none;
 }

@@ -4,6 +4,7 @@ import type { UIMatch } from 'react-router';
 import { Dialog } from '@base-ui/react/dialog';
 import { Command } from 'cmdk';
 import { cn } from '@/lib/utils';
+import { isEditableTarget } from '../lib/is-editable-target';
 import type { Note } from '~/types/database.types';
 
 const NOTES_ACTION = '/notes';
@@ -25,26 +26,6 @@ function notesFromMatches(matches: UIMatch[]): Note[] {
     }
   }
   return [];
-}
-
-function isEditableTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) {
-    return false;
-  }
-  if (target.isContentEditable) {
-    return true;
-  }
-  if (target.closest('[contenteditable="true"]')) {
-    return true;
-  }
-  if (target.closest('.tiptap-editor')) {
-    return true;
-  }
-  const tag = target.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
-    return true;
-  }
-  return target.closest('input, textarea, select') !== null;
 }
 
 export function CommandPalette(): JSX.Element {

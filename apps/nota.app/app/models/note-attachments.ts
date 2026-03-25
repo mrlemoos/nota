@@ -67,3 +67,22 @@ export async function deleteNoteAttachment(
     throw new Error(`Failed to delete note attachment: ${error.message}`);
   }
 }
+
+export async function updateNoteAttachmentFilename(
+  client: TypedSupabaseClient,
+  id: string,
+  filename: string,
+) {
+  const { data, error } = await client
+    .from('note_attachments')
+    .update({ filename })
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to rename attachment: ${error.message}`);
+  }
+
+  return data as NoteAttachment;
+}

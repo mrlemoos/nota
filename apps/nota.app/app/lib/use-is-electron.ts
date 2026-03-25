@@ -5,7 +5,12 @@ export function useIsElectron() {
 
   useLayoutEffect(() => {
     if (typeof window === 'undefined') return;
-    setIsElectron(navigator.userAgent.toLowerCase().includes('electron'));
+    // Prefer the Nota preload bridge; recent Electron builds often omit "Electron" from the UA.
+    const hasShellBridge = typeof window.nota !== 'undefined';
+    const uaSaysElectron = navigator.userAgent
+      .toLowerCase()
+      .includes('electron');
+    setIsElectron(hasShellBridge || uaSaysElectron);
   }, []);
 
   return isElectron;

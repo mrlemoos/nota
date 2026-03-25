@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { revertLinkPreviewToParagraph } from './link-preview-scan';
 
 type OgPreviewJson = {
   url: string;
@@ -35,17 +36,33 @@ async function fetchOgPreviewClient(href: string): Promise<OgPreviewJson> {
   return data;
 }
 
+function linkPreviewHasPersistedMeta(node: {
+  attrs: Record<string, unknown>;
+}): boolean {
+  return Boolean(
+    String(node.attrs['title'] ?? '').trim() ||
+      String(node.attrs['description'] ?? '').trim() ||
+      String(node.attrs['image'] ?? '').trim(),
+  );
+}
+
 function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   const href = (props.node.attrs['href'] as string) || '';
+  const linkTextAttr = (props.node.attrs['linkText'] as string) || '';
   const titleAttr = (props.node.attrs['title'] as string) || '';
   const descriptionAttr = (props.node.attrs['description'] as string) || '';
   const imageAttr = (props.node.attrs['image'] as string) || '';
 
-  const [loading, setLoading] = useState(false);
+  const hasMeta = Boolean(titleAttr || descriptionAttr || imageAttr);
+  const [loading, setLoading] = useState(() => Boolean(href) && !hasMeta);
   const [error, setError] = useState<string | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
   const updateAttributesRef = useRef(props.updateAttributes);
   updateAttributesRef.current = props.updateAttributes;
+  const editorRef = useRef(props.editor);
+  editorRef.current = props.editor;
+  const getPosRef = useRef(props.getPos);
+  getPosRef.current = props.getPos;
 
   useEffect(() => {
     if (!href) return;
@@ -56,13 +73,34 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
       try {
         const data = await fetchOgPreviewClient(href);
         if (cancelled) return;
+        const title = (data.title ?? '').trim();
+        const desc = (data.description ?? '').trim();
+        const image = (data.image ?? '').trim();
+        const pos = getPosRef.current();
+        if (typeof pos !== 'number') return;
+        const current = editorRef.current.state.doc.nodeAt(pos);
+        if (!current || current.type.name !== 'linkPreview') return;
+
+        if (!title && !desc && !image) {
+          if (!linkPreviewHasPersistedMeta(current)) {
+            revertLinkPreviewToParagraph(editorRef.current, getPosRef.current);
+          }
+          return;
+        }
         updateAttributesRef.current({
           title: data.title ?? '',
           description: data.description ?? '',
           image: data.image ?? '',
         });
       } catch (e) {
-        if (!cancelled) {
+        if (cancelled) return;
+        const pos = getPosRef.current();
+        if (typeof pos !== 'number') return;
+        const current = editorRef.current.state.doc.nodeAt(pos);
+        if (!current || current.type.name !== 'linkPreview') return;
+        if (!linkPreviewHasPersistedMeta(current)) {
+          revertLinkPreviewToParagraph(editorRef.current, getPosRef.current);
+        } else {
           setError(e instanceof Error ? e.message : 'Preview failed');
         }
       } finally {
@@ -75,7 +113,38 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   }, [href, refreshNonce]);
 
   const displayTitle = titleAttr || href;
-  const hasMeta = Boolean(titleAttr || descriptionAttr || imageAttr);
+  const displayLinkLabel = linkTextAttr.trim() || href;
+
+  if (loading && !hasMeta) {
+    return (
+      <NodeViewWrapper
+        as="div"
+        className={cn(
+          'link-preview-loading my-3 flex min-w-0 items-center gap-2',
+          props.selected &&
+            'rounded-sm ring-2 ring-ring/40 ring-offset-2 ring-offset-background',
+        )}
+        data-drag-handle
+        aria-busy="true"
+        aria-label="Loading link preview"
+      >
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tiptap-link min-w-0 flex-1 break-words text-base"
+        >
+          {displayLinkLabel}
+        </a>
+        <span
+          className="inline-flex size-4 shrink-0 items-center justify-center"
+          aria-hidden
+        >
+          <span className="size-3.5 animate-spin rounded-full border-2 border-muted-foreground/20 border-t-muted-foreground/55" />
+        </span>
+      </NodeViewWrapper>
+    );
+  }
 
   return (
     <NodeViewWrapper
@@ -131,9 +200,6 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
               {descriptionAttr}
             </p>
           ) : null}
-          {loading && !hasMeta ? (
-            <p className="text-xs text-muted-foreground">Loading preview…</p>
-          ) : null}
           {error ? (
             <p className="text-xs text-destructive" role="alert">
               {error}
@@ -159,6 +225,12 @@ export const LinkPreview = Node.create({
         parseHTML: (el) => el.getAttribute('data-href') ?? '',
         renderHTML: (attrs) =>
           attrs.href ? { 'data-href': attrs.href } : {},
+      },
+      linkText: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-link-text') ?? '',
+        renderHTML: (attrs) =>
+          attrs.linkText ? { 'data-link-text': attrs.linkText } : {},
       },
       title: {
         default: '',

@@ -118,9 +118,26 @@ export default function NotesLayout() {
       ) : null}
       <div
         className={cn(
-          'flex h-dvh min-h-0 bg-linear-to-b from-muted/25 to-background',
+          'nota-notes-root flex h-dvh min-h-0 bg-linear-to-b from-muted/25 to-background',
         )}
       >
+        {!open ? (
+          <div
+            className={cn(
+              'fixed z-40 flex items-center',
+              isElectron
+                ? 'pointer-events-none top-0 left-0 min-h-[52px] pl-20 pt-[env(safe-area-inset-top)]'
+                : 'left-4 top-4',
+            )}
+          >
+            <SidebarToggle
+              className={cn(
+                'text-foreground',
+                isElectron && 'pointer-events-auto',
+              )}
+            />
+          </div>
+        ) : null}
         <aside
           className={cn(
             'flex h-full min-h-0 flex-col transition-all duration-300 ease-in-out',
@@ -130,11 +147,18 @@ export default function NotesLayout() {
           aria-hidden={!open}
         >
           <TooltipProvider>
-            <div className="flex shrink-0 items-center justify-between p-4">
+            <div
+              className={cn(
+                'flex shrink-0 items-center justify-between pr-4 pb-4',
+                isElectron
+                  ? 'pl-20 pt-[max(1rem,env(safe-area-inset-top))]'
+                  : 'pl-4 pt-4',
+              )}
+            >
               <h2 className="font-serif text-lg font-semibold tracking-normal">
                 Notes
               </h2>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Form method="post">
                   <Button
                     type="submit"
@@ -311,13 +335,15 @@ export default function NotesLayout() {
 
         <main
           ref={registerScrollRoot}
-          className={cn('min-h-0 flex-1 overflow-auto', notesChrome)}
-        >
-          {!open && (
-            <div className="p-2">
-              <SidebarToggle className="text-foreground" />
-            </div>
+          className={cn(
+            'min-h-0 flex-1 overflow-auto',
+            notesChrome,
+            // Stable top inset so sidebar toggle does not shift scroll layout.
+            isElectron
+              ? 'pt-[max(3.5rem,calc(env(safe-area-inset-top)+2.75rem))]'
+              : 'pt-16',
           )}
+        >
           <Outlet />
         </main>
       </div>

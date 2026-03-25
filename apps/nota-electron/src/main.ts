@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron';
+import { existsSync } from 'node:fs';
 import { spawn, ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -15,27 +16,49 @@ let mainWindow: BrowserWindow | null = null;
 let serverProcess: ChildProcess | null = null;
 
 const isDev = !app.isPackaged;
+const isDarwin = process.platform === 'darwin';
 
 function createWindow(): void {
+  const preloadPath = path.join(__dirname, 'preload.js');
+
+  if (!existsSync(preloadPath)) {
+    console.error(
+      `[nota-electron] Preload missing at ${preloadPath}. Build the shell: cd apps/nota-electron && npm run build`,
+    );
+  } else if (isDev) {
+    console.log(`[nota-electron] Preload ok: ${preloadPath}`);
+  }
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     titleBarStyle: 'hiddenInset',
+    transparent: true,
+    // Without vibrancy, transparent windows often composite as solid black on macOS.
+    ...(isDarwin
+      ? {
+          vibrancy: 'under-window' as const,
+          visualEffectState: 'followWindow' as const,
+        }
+      : {}),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      preload: preloadPath,
     },
   });
 
+  const win = mainWindow;
+
   // Load the app
   if (isDev) {
-    mainWindow.loadURL(DEV_URL);
+    win.loadURL(DEV_URL);
   } else {
-    mainWindow.loadURL(PROD_URL);
+    win.loadURL(PROD_URL);
   }
 
-  mainWindow.on('closed', () => {
+  win.on('closed', () => {
     mainWindow = null;
   });
 }

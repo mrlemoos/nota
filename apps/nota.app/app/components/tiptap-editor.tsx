@@ -2,7 +2,6 @@ import type { Editor } from '@tiptap/core';
 import { Node } from '@tiptap/pm/model';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import {
   useCallback,
@@ -16,6 +15,7 @@ import {
 import { useRevalidator } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { LinkPreview } from './tiptap/link-preview-extension';
+import { NotaLink } from './tiptap/nota-link';
 import { convertLinkOnlyParagraphs } from './tiptap/link-preview-scan';
 import {
   NotePdf,
@@ -89,7 +89,7 @@ export function TipTapEditor({
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Link.configure({
+      NotaLink.configure({
         autolink: true,
         linkOnPaste: true,
         openOnClick: true,

@@ -12,6 +12,7 @@ import { useStickyDocTitle } from '../context/sticky-doc-title';
 import { persistedDisplayTitle } from '../lib/note-title';
 import { getBrowserClient } from '../lib/supabase/browser';
 import { useRootLoaderData } from '../root';
+import { mergeUpdatedNoteLocalContent } from '../lib/note-updated-content-merge';
 import { updateNote } from '../models/notes';
 import type { Json, Note, NoteAttachment } from '~/types/database.types';
 
@@ -117,7 +118,13 @@ export function NoteEditor({
         const updatedNote = await updateNote(client, note.id, { title: next });
         lastSavedTitle.current = next;
         setSaveStatus('saved');
-        onNoteUpdated?.(updatedNote);
+        onNoteUpdated?.(
+          mergeUpdatedNoteLocalContent(
+            updatedNote,
+            pendingContentRef.current,
+            lastSavedContent.current as Json,
+          ),
+        );
       } catch (error) {
         console.error('Failed to save title:', error);
         setSaveStatus('error');
@@ -157,7 +164,13 @@ export function NoteEditor({
         });
         lastSavedContent.current = toSave as Json;
         setSaveStatus('saved');
-        onNoteUpdated?.(updatedNote);
+        onNoteUpdated?.(
+          mergeUpdatedNoteLocalContent(
+            updatedNote,
+            pendingContentRef.current,
+            toSave as Json,
+          ),
+        );
       } catch (error) {
         console.error('Failed to save note:', error);
         setSaveStatus('error');
@@ -202,10 +215,10 @@ export function NoteEditor({
           autoComplete="off"
           aria-label="Note title"
           rows={1}
-          className="min-h-0 min-w-0 flex-1 resize-none overflow-hidden break-words border-0 bg-transparent p-0 font-sans text-4xl font-semibold leading-tight tracking-tight text-foreground placeholder:text-muted-foreground/70 focus:outline-none md:text-5xl"
+          className="min-h-0 min-w-0 flex-1 resize-none overflow-hidden break-words border-0 bg-transparent p-0 font-sans text-4xl font-black leading-tight tracking-tight text-pretty text-foreground placeholder:text-muted-foreground/70 focus:outline-none md:text-5xl"
         />
         <div
-          className="flex shrink-0 items-start justify-end pt-3 md:pt-4"
+          className="flex shrink-0 items-start justify-end gap-2 pt-3 md:pt-4"
           aria-live="polite"
         >
           {saveStatus === 'saving' && (

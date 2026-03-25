@@ -20,7 +20,7 @@ it('should calculate sum', () => {
 });
 
 // ✅ GOOD - Clear AAA sections
-it('should calculate sum', () => {
+test('should calculate sum', () => {
   // Arrange
   const a = 5;
   const b = 10;
@@ -57,7 +57,7 @@ When multiple related assertions are needed, keep them in the Assert section:
 
 ```typescript
 // ✅ GOOD
-it('should create user with defaults', () => {
+test('should create user with defaults', () => {
   // Arrange
   const email = 'test@example.com';
 
@@ -75,7 +75,7 @@ it('should create user with defaults', () => {
 
 ```typescript
 // ✅ GOOD
-it('should fetch data', async () => {
+test('should fetch data', async () => {
   // Arrange
   const fetcher = mockApi();
   fetcher.mockResolvedValue({ data: 'value' });
@@ -95,7 +95,7 @@ If a section has nothing to arrange (e.g., testing a pure function with inline v
 
 ```typescript
 // ✅ GOOD - No arrange needed
-it('should return true for valid email', () => {
+test('should return true for valid email', () => {
   // Act
   const result = isValidEmail('user@example.com');
 
