@@ -30,6 +30,17 @@
   cursor: grabbing;
 }
 
+.tiptap-editor .tiptap-code-block pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-size: inherit;
+}
+
+.tiptap-editor .nota-mermaid-preview-inner svg {
+  height: auto;
+}
+
 .tiptap-editor .ProseMirror p {
   margin: 0.75em 0;
   line-height: 1.6;

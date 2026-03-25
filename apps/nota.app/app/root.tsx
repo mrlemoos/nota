@@ -13,6 +13,7 @@ import {
 import '../styles.css';
 
 import { SignedInCommandPalette } from './signed-in-command-palette';
+import { NoteEditorCommandsProvider } from './context/note-editor-commands';
 import { StickyDocTitleProvider } from './context/sticky-doc-title';
 import { ThemeProvider } from './components/theme-provider';
 import { getAuthUser } from './lib/supabase/auth';
@@ -63,8 +64,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="font-sans">
         <ThemeProvider defaultTheme="system" storageKey="nota-ui-theme">
           <StickyDocTitleProvider>
-            <SignedInCommandPalette />
-            {children}
+            <NoteEditorCommandsProvider>
+              <SignedInCommandPalette />
+              {children}
+            </NoteEditorCommandsProvider>
           </StickyDocTitleProvider>
         </ThemeProvider>
         <ScrollRestoration />

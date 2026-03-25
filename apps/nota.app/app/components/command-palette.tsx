@@ -11,6 +11,7 @@ import type { UIMatch } from 'react-router';
 import { Dialog } from '@base-ui/react/dialog';
 import { Command } from 'cmdk';
 import { cn } from '@/lib/utils';
+import { useNoteEditorCommands } from '../context/note-editor-commands';
 import { useTheme } from './theme-provider';
 import type { Note } from '~/types/database.types';
 
@@ -49,6 +50,7 @@ export function CommandPalette(): JSX.Element {
   const busy = fetcher.state === 'submitting' || fetcher.state === 'loading';
   const pendingAction = fetcher.formAction ?? '';
   const { theme, setTheme } = useTheme();
+  const { insertMermaidAtCursor, canInsertMermaid } = useNoteEditorCommands();
   const commandInputRef = useRef<HTMLInputElement | null>(null);
   const [newNoteHotkeyLabel, setNewNoteHotkeyLabel] = useState('⌘N');
 
@@ -219,6 +221,31 @@ export function CommandPalette(): JSX.Element {
                   heading="This note"
                   className={groupHeadingClassName}
                 >
+                  <Command.Item
+                    value="insert-mermaid-diagram"
+                    disabled={!canInsertMermaid}
+                    keywords={[
+                      'mermaid',
+                      'diagram',
+                      'flowchart',
+                      'chart',
+                      'graph',
+                      'insert',
+                    ]}
+                    onSelect={() => {
+                      if (!canInsertMermaid) return;
+                      insertMermaidAtCursor();
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      'flex cursor-pointer items-center rounded-md px-2 py-2 text-sm',
+                      'text-foreground outline-none select-none',
+                      'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                      'aria-disabled:pointer-events-none aria-disabled:opacity-50',
+                    )}
+                  >
+                    Insert Mermaid diagram
+                  </Command.Item>
                   <Command.Item
                     value="delete-this-note"
                     disabled={busy}

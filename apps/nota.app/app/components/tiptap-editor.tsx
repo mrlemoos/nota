@@ -3,6 +3,7 @@ import { Node } from '@tiptap/pm/model';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
+import { NotaCodeBlock } from './tiptap/nota-code-block';
 import {
   useCallback,
   useEffect,
@@ -27,6 +28,7 @@ import {
   uploadPdfAndCreateRecord,
 } from '../lib/pdf-attachment-client';
 import type { NoteAttachment } from '~/types/database.types';
+import { useRegisterNoteEditorMermaidInserter } from '../context/note-editor-commands';
 
 function isDocContentEqual(editor: Editor, content: unknown): boolean {
   if (content === null || content === undefined) {
@@ -88,7 +90,10 @@ export function TipTapEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      NotaCodeBlock,
       NotaLink.configure({
         autolink: true,
         linkOnPaste: true,
@@ -111,6 +116,8 @@ export function TipTapEditor({
       onUpdate(ed.getJSON());
     },
   });
+
+  useRegisterNoteEditorMermaidInserter(editor);
 
   useEffect(() => {
     setIsMounted(true);
