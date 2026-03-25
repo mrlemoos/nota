@@ -5,6 +5,7 @@ import { Dialog } from '@base-ui/react/dialog';
 import { Command } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { isEditableTarget } from '../lib/is-editable-target';
+import { useTheme } from './theme-provider';
 import type { Note } from '~/types/database.types';
 
 const NOTES_ACTION = '/notes';
@@ -38,6 +39,7 @@ export function CommandPalette(): JSX.Element {
   const fetcher = useFetcher();
   const busy = fetcher.state === 'submitting' || fetcher.state === 'loading';
   const pendingAction = fetcher.formAction ?? '';
+  const { theme, setTheme } = useTheme();
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent): void => {
     if (e.key !== 'k' && e.key !== 'K') {
@@ -190,6 +192,92 @@ export function CommandPalette(): JSX.Element {
                   </Command.Item>
                 </Command.Group>
               ) : null}
+              <Command.Group
+                heading="Appearance"
+                className={groupHeadingClassName}
+              >
+                <Command.Item
+                  value="use-light-theme"
+                  keywords={[
+                    'light',
+                    'appearance',
+                    'theme',
+                    'color scheme',
+                    'mode',
+                  ]}
+                  onSelect={() => {
+                    setTheme('light');
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'flex cursor-pointer items-center rounded-md px-2 py-2 text-sm',
+                    'text-foreground outline-none select-none',
+                    'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                  )}
+                >
+                  Use light theme
+                  {theme === 'light' ? (
+                    <span className="ml-auto text-muted-foreground">
+                      (current)
+                    </span>
+                  ) : null}
+                </Command.Item>
+                <Command.Item
+                  value="use-dark-theme"
+                  keywords={[
+                    'dark',
+                    'appearance',
+                    'theme',
+                    'color scheme',
+                    'mode',
+                  ]}
+                  onSelect={() => {
+                    setTheme('dark');
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'flex cursor-pointer items-center rounded-md px-2 py-2 text-sm',
+                    'text-foreground outline-none select-none',
+                    'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                  )}
+                >
+                  Use dark theme
+                  {theme === 'dark' ? (
+                    <span className="ml-auto text-muted-foreground">
+                      (current)
+                    </span>
+                  ) : null}
+                </Command.Item>
+                <Command.Item
+                  value="use-system-theme"
+                  keywords={[
+                    'system',
+                    'auto',
+                    'os',
+                    'default',
+                    'appearance',
+                    'theme',
+                    'color scheme',
+                    'mode',
+                  ]}
+                  onSelect={() => {
+                    setTheme('system');
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    'flex cursor-pointer items-center rounded-md px-2 py-2 text-sm',
+                    'text-foreground outline-none select-none',
+                    'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                  )}
+                >
+                  Use system theme
+                  {theme === 'system' ? (
+                    <span className="ml-auto text-muted-foreground">
+                      (current)
+                    </span>
+                  ) : null}
+                </Command.Item>
+              </Command.Group>
               <Command.Group
                 heading="Account"
                 className={groupHeadingClassName}
