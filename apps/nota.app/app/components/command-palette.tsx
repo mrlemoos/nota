@@ -1,10 +1,16 @@
-import { useEffect, useEffectEvent, useState, type JSX } from 'react';
+import {
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type JSX,
+} from 'react';
 import { useFetcher, useMatches, useNavigate, useParams } from 'react-router';
 import type { UIMatch } from 'react-router';
 import { Dialog } from '@base-ui/react/dialog';
 import { Command } from 'cmdk';
 import { cn } from '@/lib/utils';
-import { isEditableTarget } from '../lib/is-editable-target';
 import { useTheme } from './theme-provider';
 import type { Note } from '~/types/database.types';
 
@@ -13,6 +19,9 @@ const LOGOUT_ACTION = '/logout';
 
 const groupHeadingClassName =
   'px-1 py-1 text-muted-foreground text-xs [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5';
+
+const commandKbdHintClass =
+  'ml-auto shrink-0 text-muted-foreground text-xs tabular-nums';
 
 function notesFromMatches(matches: UIMatch[]): Note[] {
   for (const m of matches) {
@@ -40,33 +49,70 @@ export function CommandPalette(): JSX.Element {
   const busy = fetcher.state === 'submitting' || fetcher.state === 'loading';
   const pendingAction = fetcher.formAction ?? '';
   const { theme, setTheme } = useTheme();
+  const commandInputRef = useRef<HTMLInputElement | null>(null);
+  const [newNoteHotkeyLabel, setNewNoteHotkeyLabel] = useState('⌘N');
+
+  useLayoutEffect(() => {
+    const isApple =
+      /Mac|iPhone|iPad|iPod/i.test(navigator.platform || '') ||
+      /\bMac OS X\b/i.test(navigator.userAgent);
+    setNewNoteHotkeyLabel(isApple ? '⌘N' : 'Ctrl+N');
+  }, []);
 
   const onKeyDown = useEffectEvent((e: KeyboardEvent): void => {
-    if (e.key !== 'k' && e.key !== 'K') {
-      return;
-    }
-    if (!(e.metaKey || e.ctrlKey)) {
-      return;
-    }
+    const mod = e.metaKey || e.ctrlKey;
+    if (mod && (e.key === 'k' || e.key === 'K')) {
+      if (open) {
+        e.preventDefault();
+        setOpen(false);
+        return;
+      }
 
-    if (open) {
       e.preventDefault();
-      setOpen(false);
+      setOpen(true);
       return;
     }
 
-    if (isEditableTarget(e.target)) {
+    if (!open) {
       return;
     }
 
-    e.preventDefault();
-    setOpen(true);
+    if (
+      mod &&
+      (e.key === 'n' || e.key === 'N') &&
+      !e.shiftKey &&
+      !e.altKey
+    ) {
+      e.preventDefault();
+      if (!busy) {
+        fetcher.submit(null, {
+          method: 'post',
+          action: NOTES_ACTION,
+        });
+        setOpen(false);
+      }
+      return;
+    }
+
+    if (e.key === ' ') {
+      const input = commandInputRef.current;
+      const t = e.target;
+      if (
+        input &&
+        t instanceof Node &&
+        (input === t || input.contains(t))
+      ) {
+        return;
+      }
+      e.preventDefault();
+      input?.focus();
+    }
   });
 
   useEffect(() => {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [open]);
+  }, [onKeyDown]);
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -97,6 +143,7 @@ export function CommandPalette(): JSX.Element {
             vimBindings={false}
           >
             <Command.Input
+              ref={commandInputRef}
               placeholder="Type a command…"
               className={cn(
                 'w-full bg-transparent px-3 py-3 text-sm',
@@ -114,22 +161,31 @@ export function CommandPalette(): JSX.Element {
                       method: 'post',
                       action: NOTES_ACTION,
                     });
+                    setOpen(false);
                   }}
                   className={cn(
-                    'flex cursor-pointer items-center rounded-md px-2 py-2 text-sm',
+                    'flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm',
                     'text-foreground outline-none select-none',
                     'aria-selected:bg-accent aria-selected:text-accent-foreground',
                     'aria-disabled:pointer-events-none aria-disabled:opacity-50',
                   )}
                 >
-                  {busy && pendingAction === NOTES_ACTION
-                    ? 'Creating note...'
-                    : 'Create new note'}
+                  <span className="min-w-0 flex-1">
+                    {busy && pendingAction === NOTES_ACTION
+                      ? 'Creating note...'
+                      : 'Create new note'}
+                  </span>
+                  <span className={commandKbdHintClass}>{newNoteHotkeyLabel}</span>
                 </Command.Item>
               </Command.Group>
               {notes.length > 0 ? (
                 <Command.Group
-                  heading="Open note"
+                  heading={
+                    <span className="flex w-full items-center gap-2 pr-1 font-normal">
+                      <span className="min-w-0 flex-1">Open note</span>
+                      <span className={commandKbdHintClass}>Space</span>
+                    </span>
+                  }
                   className={groupHeadingClassName}
                 >
                   {notes.map((note) => (
@@ -291,6 +347,7 @@ export function CommandPalette(): JSX.Element {
                       method: 'post',
                       action: LOGOUT_ACTION,
                     });
+                    setOpen(false);
                   }}
                   className={cn(
                     'flex cursor-pointer items-center rounded-md px-2 py-2 text-sm',

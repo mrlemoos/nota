@@ -215,7 +215,7 @@ export function NoteEditor({
           autoComplete="off"
           aria-label="Note title"
           rows={1}
-          className="min-h-0 min-w-0 flex-1 resize-none overflow-hidden break-words border-0 bg-transparent p-0 font-sans text-4xl font-black leading-tight tracking-tight text-pretty text-foreground placeholder:text-muted-foreground/70 focus:outline-none md:text-5xl"
+          className="min-h-0 min-w-0 flex-1 resize-none overflow-hidden break-words border-0 bg-transparent p-0 font-sans text-4xl font-extrabold leading-tight tracking-tight text-pretty text-foreground placeholder:text-muted-foreground/70 focus:outline-none md:text-5xl"
         />
         <div
           className="flex shrink-0 items-start justify-end gap-2 pt-3 md:pt-4"

@@ -27,7 +27,7 @@
 - Note editor is a centered document column (no bordered card around TipTap); the inline title is a debounced, wrapping textarea with auto height (saved to DB `title`); empty display label matches `persistedDisplayTitle` in `app/lib/note-title.ts` (“Untitled Note”). Body autosave must update `content` only and must not overwrite `title` from the first paragraph of the editor.
 - After successful client-side saves from `NoteEditor`, the note detail route should call React Router `revalidate()` (e.g. `useRevalidator`) so the parent `notes` layout loader refreshes sidebar titles and dates.
 - Delete note: POST `/notes/:noteId` from the trash control on each sidebar row (with confirm) and from the Command Palette when that route is active—not from a control beside the document title.
-- Command palette (`app/components/command-palette.tsx`) mounts from `app/signed-in-command-palette.tsx` in the root layout when a user session exists. Cmd/Ctrl+K opens it except when focus is in TipTap or other editable fields; it lists notes from the `/notes` layout loader to open one (navigate to `/notes/:noteId`), POSTs to `/notes` to create a note, to `/notes/:noteId` to delete the open note, and to `/logout` for sign out.
+- Command palette (`app/components/command-palette.tsx`) mounts from `app/signed-in-command-palette.tsx` in the root layout when a user session exists. Cmd/Ctrl+K toggles it from anywhere (including the TipTap body and title field); it lists notes from the `/notes` layout loader to open one (navigate to `/notes/:noteId`), POSTs to `/notes` to create a note, to `/notes/:noteId` to delete the open note, and to `/logout` for sign out.
 </think>
 
 
