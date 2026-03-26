@@ -1,5 +1,6 @@
 import { textblockTypeInputRule } from '@tiptap/core';
-import CodeBlock from '@tiptap/extension-code-block';
+import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { notaLowlight } from '@/lib/nota-lowlight';
 import {
   NodeViewContent,
   NodeViewWrapper,
@@ -139,7 +140,7 @@ function NotaCodeBlockView(props: NodeViewProps): JSX.Element {
       >
         <NodeViewContent
           as="code"
-          className={cn('block min-w-0 bg-transparent p-0', codeClass)}
+          className={cn('hljs block min-w-0 bg-transparent p-0', codeClass)}
         />
       </pre>
       {isMermaid ? (
@@ -151,7 +152,14 @@ function NotaCodeBlockView(props: NodeViewProps): JSX.Element {
   );
 }
 
-export const NotaCodeBlock = CodeBlock.extend({
+export const NotaCodeBlock = CodeBlockLowlight.extend({
+  addOptions() {
+    return {
+      ...this.parent?.(),
+      lowlight: notaLowlight,
+    };
+  },
+
   addInputRules() {
     return [
       textblockTypeInputRule({

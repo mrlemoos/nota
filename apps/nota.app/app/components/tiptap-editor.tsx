@@ -10,11 +10,9 @@ import {
   useMemo,
   useRef,
   useState,
-  type ChangeEvent,
   type JSX,
 } from 'react';
-import { useRevalidator } from 'react-router';
-import { Button } from '@/components/ui/button';
+import { useMatches, useNavigate, useRevalidator } from 'react-router';
 import { LinkPreview } from './tiptap/link-preview-extension';
 import { NotaLink } from './tiptap/nota-link';
 import { convertLinkOnlyParagraphs } from './tiptap/link-preview-scan';
@@ -27,8 +25,32 @@ import {
   classifyNoteAttachmentFile,
   uploadNoteAttachmentFile,
 } from '../lib/pdf-attachment-client';
-import type { NoteAttachment } from '~/types/database.types';
+import type { Note, NoteAttachment } from '~/types/database.types';
 import { useRegisterNoteEditorMermaidInserter } from '../context/note-editor-commands';
+import { hrefForNote, parseNoteLinkPath } from '../lib/internal-note-link';
+import { notesFromMatches } from '../lib/notes-from-matches';
+import { persistedDisplayTitle } from '../lib/note-title';
+import { findNoteMentionTrigger } from '../lib/tiptap-note-mention';
+import { NoteLinkMentionMenu } from './tiptap/note-link-mention-menu';
+
+function noteLinkInsertPayload(label: string, href: string) {
+  return {
+    type: 'text' as const,
+    text: label,
+    marks: [
+      {
+        type: 'link' as const,
+        attrs: {
+          href,
+          target: null,
+          rel: null,
+          class: 'tiptap-link',
+          skipLinkPreview: true,
+        },
+      },
+    ],
+  };
+}
 
 function isDocContentEqual(editor: Editor, content: unknown): boolean {
   if (content === null || content === undefined) {
@@ -71,7 +93,6 @@ export function TipTapEditor({
 
   const [isMounted, setIsMounted] = useState(false);
   const { revalidate } = useRevalidator();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [pendingAttachments, setPendingAttachments] = useState<
@@ -79,6 +100,34 @@ export function TipTapEditor({
   >([]);
   const [isFileDragOver, setIsFileDragOver] = useState(false);
   const prevNoteIdRef = useRef<string | undefined>(undefined);
+  const navigate = useNavigate();
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
+  const matches = useMatches();
+  const sidebarNotes = useMemo(() => notesFromMatches(matches), [matches]);
+
+  const filterNoteCandidates = useCallback(
+    (query: string) => {
+      const q = query.trim().toLowerCase();
+      const c = sidebarNotes.filter((n) => n.id !== noteId);
+      if (!q) return c;
+      return c.filter((n) =>
+        persistedDisplayTitle(n.title || '').toLowerCase().includes(q),
+      );
+    },
+    [sidebarNotes, noteId],
+  );
+
+  const filterNoteCandidatesRef = useRef(filterNoteCandidates);
+  filterNoteCandidatesRef.current = filterNoteCandidates;
+
+  const [mention, setMention] = useState<{
+    from: number;
+    query: string;
+    selectedIndex: number;
+  } | null>(null);
+  const mentionRef = useRef(mention);
+  mentionRef.current = mention;
 
   canInsertAttachmentsRef.current = canInsertAttachments;
   uploadingRef.current = uploading;
@@ -100,6 +149,8 @@ export function TipTapEditor({
     return m;
   }, [attachments, pendingAttachments]);
 
+  const editorRef = useRef<Editor | null>(null);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -109,7 +160,7 @@ export function TipTapEditor({
       NotaLink.configure({
         autolink: true,
         linkOnPaste: true,
-        openOnClick: true,
+        openOnClick: false,
         defaultProtocol: 'https',
         HTMLAttributes: {
           class: 'tiptap-link',
@@ -129,7 +180,117 @@ export function TipTapEditor({
       onUpdate(ed.getJSON());
     },
     editorProps: {
+      handleKeyDown: (_view, event) => {
+        if (!canInsertAttachmentsRef.current) return false;
+        const trigger = findNoteMentionTrigger(_view.state);
+        if (!trigger) return false;
+        const m = mentionRef.current;
+        if (
+          !m ||
+          m.from !== trigger.from ||
+          m.query !== trigger.query
+        ) {
+          return false;
+        }
+        const filtered = filterNoteCandidatesRef.current(trigger.query);
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          const to = _view.state.selection.from;
+          _view.dispatch(_view.state.tr.delete(trigger.from, to));
+          setMention(null);
+          return true;
+        }
+        if (event.key === 'ArrowDown') {
+          event.preventDefault();
+          if (filtered.length === 0) return true;
+          setMention((s) =>
+            s
+              ? {
+                  ...s,
+                  selectedIndex: (s.selectedIndex + 1) % filtered.length,
+                }
+              : s,
+          );
+          return true;
+        }
+        if (event.key === 'ArrowUp') {
+          event.preventDefault();
+          if (filtered.length === 0) return true;
+          setMention((s) =>
+            s
+              ? {
+                  ...s,
+                  selectedIndex:
+                    (s.selectedIndex - 1 + filtered.length) % filtered.length,
+                }
+              : s,
+          );
+          return true;
+        }
+        if (event.key === 'Enter' && !event.shiftKey) {
+          if (filtered.length === 0) return false;
+          event.preventDefault();
+          const ed = editorRef.current;
+          if (!ed) return true;
+          const idx = Math.min(m.selectedIndex, filtered.length - 1);
+          const target = filtered[idx]!;
+          const to = _view.state.selection.from;
+          const href = hrefForNote(target.id);
+          const label = persistedDisplayTitle(target.title || '');
+          ed
+            .chain()
+            .focus()
+            .deleteRange({ from: trigger.from, to })
+            .insertContent(noteLinkInsertPayload(label, href))
+            .setParagraph()
+            .command(({ tr, dispatch }) => {
+              if (dispatch) {
+                tr.setStoredMarks([]);
+              }
+              return true;
+            })
+            .run();
+          setMention(null);
+          return true;
+        }
+        return false;
+      },
       handleDOMEvents: {
+        click: (_view, event) => {
+          if (event.button !== 0) return false;
+          const el = event.target as HTMLElement | null;
+          const anchor = el?.closest?.('a.tiptap-link');
+          if (!anchor) return false;
+          const raw = anchor.getAttribute('href');
+          if (!raw) return false;
+          let path = raw;
+          if (raw.startsWith('http://') || raw.startsWith('https://')) {
+            try {
+              path = new URL(raw).pathname;
+            } catch {
+              return false;
+            }
+          }
+          const linkedNoteId = parseNoteLinkPath(path);
+          if (linkedNoteId) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.metaKey || event.ctrlKey) {
+              window.open(
+                `${window.location.origin}${hrefForNote(linkedNoteId)}`,
+                '_blank',
+                'noopener,noreferrer',
+              );
+            } else {
+              navigateRef.current(hrefForNote(linkedNoteId));
+            }
+            return true;
+          }
+          event.preventDefault();
+          event.stopPropagation();
+          window.open(anchor.href, '_blank', 'noopener,noreferrer');
+          return true;
+        },
         dragover: (_view, event) => {
           if (
             !canInsertAttachmentsRef.current ||
@@ -171,6 +332,8 @@ export function TipTapEditor({
     },
   });
 
+  editorRef.current = editor ?? null;
+
   useRegisterNoteEditorMermaidInserter(editor);
 
   useEffect(() => {
@@ -189,6 +352,43 @@ export function TipTapEditor({
 
   useEffect(() => {
     if (!editor) return;
+    const syncMention = () => {
+      if (!canInsertAttachmentsRef.current) {
+        setMention(null);
+        return;
+      }
+      const trigger = findNoteMentionTrigger(editor.state);
+      if (!trigger) {
+        setMention(null);
+        return;
+      }
+      setMention((prev) => {
+        const list = filterNoteCandidatesRef.current(trigger.query);
+        const same =
+          prev !== null &&
+          prev.from === trigger.from &&
+          prev.query === trigger.query;
+        const selectedIndex = same
+          ? Math.min(prev.selectedIndex, Math.max(0, list.length - 1))
+          : 0;
+        return {
+          from: trigger.from,
+          query: trigger.query,
+          selectedIndex,
+        };
+      });
+    };
+    editor.on('selectionUpdate', syncMention);
+    editor.on('update', syncMention);
+    syncMention();
+    return () => {
+      editor.off('selectionUpdate', syncMention);
+      editor.off('update', syncMention);
+    };
+  }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const schedule = () => {
       if (timer !== undefined) clearTimeout(timer);
@@ -202,11 +402,6 @@ export function TipTapEditor({
       if (timer !== undefined) clearTimeout(timer);
     };
   }, [editor]);
-
-  const handlePickFile = useCallback(() => {
-    setUploadError(null);
-    fileInputRef.current?.click();
-  }, []);
 
   const insertAttachmentNode = useCallback(
     (record: NoteAttachment) => {
@@ -267,13 +462,46 @@ export function TipTapEditor({
 
   processFilesRef.current = processFiles;
 
-  const handleFileChange = useCallback(
-    async (e: ChangeEvent<HTMLInputElement>) => {
-      const fl = e.target.files;
-      e.target.value = '';
-      await processFiles(fl);
+  const mentionFiltered = mention
+    ? filterNoteCandidates(mention.query)
+    : [];
+
+  const mentionAnchor =
+    mention && editor
+      ? (() => {
+          try {
+            const c = editor.view.coordsAtPos(mention.from);
+            return { left: c.left, top: c.bottom };
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+
+  const handleMentionSelectNote = useCallback(
+    (target: Note) => {
+      const ed = editorRef.current;
+      const s = mentionRef.current;
+      if (!ed || !s) return;
+      const to = ed.state.selection.from;
+      const href = hrefForNote(target.id);
+      const label = persistedDisplayTitle(target.title || '');
+      ed
+        .chain()
+        .focus()
+        .deleteRange({ from: s.from, to })
+        .insertContent(noteLinkInsertPayload(label, href))
+        .setParagraph()
+        .command(({ tr, dispatch }) => {
+          if (dispatch) {
+            tr.setStoredMarks([]);
+          }
+          return true;
+        })
+        .run();
+      setMention(null);
     },
-    [processFiles],
+    [],
   );
 
   if (!isMounted || !editor) {
@@ -297,36 +525,10 @@ export function TipTapEditor({
       }}
     >
       <div className="tiptap-editor">
-        {canInsertAttachments ? (
-          <div className="mb-3 flex flex-wrap items-center gap-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/pdf,.pdf,image/jpeg,image/png,image/gif,image/webp,.jpg,.jpeg,.png,.gif,.webp"
-              className="sr-only"
-              aria-hidden
-              tabIndex={-1}
-              multiple
-              onChange={handleFileChange}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={uploading}
-              onClick={handlePickFile}
-            >
-              {uploading ? 'Uploading…' : 'Insert PDF or image'}
-            </Button>
-            <span className="text-xs text-muted-foreground">
-              Inserts at the cursor, or drag files into the editor
-            </span>
-            {uploadError ? (
-              <p className="w-full text-sm text-destructive" role="alert">
-                {uploadError}
-              </p>
-            ) : null}
-          </div>
+        {canInsertAttachments && uploadError ? (
+          <p className="mb-2 text-sm text-destructive" role="alert">
+            {uploadError}
+          </p>
         ) : null}
         <div
           className={
@@ -337,6 +539,21 @@ export function TipTapEditor({
         >
           <EditorContent editor={editor} />
         </div>
+        <NoteLinkMentionMenu
+          open={Boolean(mention && canInsertAttachments)}
+          anchor={mentionAnchor}
+          notes={mentionFiltered}
+          selectedIndex={mention?.selectedIndex ?? 0}
+          onHighlightIndex={(i) =>
+            setMention((s) => (s ? { ...s, selectedIndex: i } : s))
+          }
+          onSelect={handleMentionSelectNote}
+          emptyMessage={
+            sidebarNotes.filter((n) => n.id !== noteId).length === 0
+              ? 'No other notes yet'
+              : 'No matching notes'
+          }
+        />
       </div>
     </NotePdfDocProvider>
   );

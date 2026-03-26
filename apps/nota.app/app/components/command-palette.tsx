@@ -7,13 +7,13 @@ import {
   type JSX,
 } from 'react';
 import { useFetcher, useMatches, useNavigate, useParams } from 'react-router';
-import type { UIMatch } from 'react-router';
 import { Dialog } from '@base-ui/react/dialog';
 import { Command } from 'cmdk';
 import { cn } from '@/lib/utils';
 import { useNoteEditorCommands } from '../context/note-editor-commands';
 import { useTheme } from './theme-provider';
 import type { Note } from '~/types/database.types';
+import { notesFromMatches } from '../lib/notes-from-matches';
 
 const NOTES_ACTION = '/notes';
 const LOGOUT_ACTION = '/logout';
@@ -23,21 +23,6 @@ const groupHeadingClassName =
 
 const commandKbdHintClass =
   'ml-auto shrink-0 text-muted-foreground text-xs tabular-nums';
-
-function notesFromMatches(matches: UIMatch[]): Note[] {
-  for (const m of matches) {
-    const d = m.data;
-    if (
-      d &&
-      typeof d === 'object' &&
-      'notes' in d &&
-      Array.isArray((d as { notes: unknown }).notes)
-    ) {
-      return (d as { notes: Note[] }).notes;
-    }
-  }
-  return [];
-}
 
 export function CommandPalette(): JSX.Element {
   const [open, setOpen] = useState(false);

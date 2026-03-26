@@ -1,4 +1,5 @@
 import type { Editor } from '@tiptap/core';
+import { parseNoteLinkPath } from '../../lib/internal-note-link';
 
 /**
  * Paragraph whose trimmed content is a single hyperlink (no other text),
@@ -42,6 +43,7 @@ export function convertLinkOnlyParagraphs(editor: Editor): void {
     if (!markOnText || markOnText.attrs['skipLinkPreview'] === true) return true;
     const href = (markOnText.attrs['href'] as string) || '';
     if (!href) return true;
+    if (parseNoteLinkPath(href)) return true;
 
     const linkText = text.slice(lead, text.length - trail);
 

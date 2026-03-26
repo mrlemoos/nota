@@ -37,6 +37,146 @@
   font-size: inherit;
 }
 
+/* lowlight / highlight.js tokens — light */
+.tiptap-editor .tiptap-code-block pre code.hljs {
+  color: var(--foreground);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-comment,
+.tiptap-editor .tiptap-code-block .hljs-quote,
+.tiptap-editor .tiptap-code-block .hljs-doctag {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.tiptap-editor .tiptap-code-block .hljs-keyword,
+.tiptap-editor .tiptap-code-block .hljs-selector-tag,
+.tiptap-editor .tiptap-code-block .hljs-literal {
+  color: oklch(0.42 0.13 264);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-string,
+.tiptap-editor .tiptap-code-block .hljs-regexp,
+.tiptap-editor .tiptap-code-block .hljs-meta .hljs-string {
+  color: oklch(0.38 0.1 155);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-number,
+.tiptap-editor .tiptap-code-block .hljs-bullet {
+  color: oklch(0.46 0.11 55);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-title,
+.tiptap-editor .tiptap-code-block .hljs-section,
+.tiptap-editor .tiptap-code-block .hljs-function .hljs-keyword {
+  color: oklch(0.36 0.09 264);
+  font-weight: 600;
+}
+
+.tiptap-editor .tiptap-code-block .hljs-type,
+.tiptap-editor .tiptap-code-block .hljs-class .hljs-title,
+.tiptap-editor .tiptap-code-block .hljs-built_in {
+  color: oklch(0.4 0.11 305);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-attr,
+.tiptap-editor .tiptap-code-block .hljs-attribute,
+.tiptap-editor .tiptap-code-block .hljs-variable,
+.tiptap-editor .tiptap-code-block .hljs-template-variable {
+  color: oklch(0.4 0.09 200);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-meta,
+.tiptap-editor .tiptap-code-block .hljs-meta-keyword,
+.tiptap-editor .tiptap-code-block .hljs-template-tag,
+.tiptap-editor .tiptap-code-block .hljs-selector-id,
+.tiptap-editor .tiptap-code-block .hljs-selector-class,
+.tiptap-editor .tiptap-code-block .hljs-selector-attr,
+.tiptap-editor .tiptap-code-block .hljs-selector-pseudo {
+  color: color-mix(in oklch, var(--muted-foreground) 92%, oklch(0.42 0.1 264));
+}
+
+.tiptap-editor .tiptap-code-block .hljs-symbol,
+.tiptap-editor .tiptap-code-block .hljs-link,
+.tiptap-editor .tiptap-code-block .hljs-deletion {
+  color: oklch(0.48 0.14 25);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-addition {
+  color: oklch(0.38 0.1 155);
+}
+
+.tiptap-editor .tiptap-code-block .hljs-emphasis {
+  font-style: italic;
+}
+
+.tiptap-editor .tiptap-code-block .hljs-strong {
+  font-weight: 600;
+}
+
+/* lowlight / highlight.js tokens — dark */
+.dark .tiptap-editor .tiptap-code-block .hljs-comment,
+.dark .tiptap-editor .tiptap-code-block .hljs-quote,
+.dark .tiptap-editor .tiptap-code-block .hljs-doctag {
+  color: var(--muted-foreground);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-keyword,
+.dark .tiptap-editor .tiptap-code-block .hljs-selector-tag,
+.dark .tiptap-editor .tiptap-code-block .hljs-literal {
+  color: oklch(0.76 0.12 264);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-string,
+.dark .tiptap-editor .tiptap-code-block .hljs-regexp,
+.dark .tiptap-editor .tiptap-code-block .hljs-meta .hljs-string {
+  color: oklch(0.72 0.09 155);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-number,
+.dark .tiptap-editor .tiptap-code-block .hljs-bullet {
+  color: oklch(0.78 0.1 75);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-title,
+.dark .tiptap-editor .tiptap-code-block .hljs-section,
+.dark .tiptap-editor .tiptap-code-block .hljs-function .hljs-keyword {
+  color: oklch(0.82 0.08 264);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-type,
+.dark .tiptap-editor .tiptap-code-block .hljs-class .hljs-title,
+.dark .tiptap-editor .tiptap-code-block .hljs-built_in {
+  color: oklch(0.76 0.1 305);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-attr,
+.dark .tiptap-editor .tiptap-code-block .hljs-attribute,
+.dark .tiptap-editor .tiptap-code-block .hljs-variable,
+.dark .tiptap-editor .tiptap-code-block .hljs-template-variable {
+  color: oklch(0.74 0.08 200);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-meta,
+.dark .tiptap-editor .tiptap-code-block .hljs-meta-keyword,
+.dark .tiptap-editor .tiptap-code-block .hljs-template-tag,
+.dark .tiptap-editor .tiptap-code-block .hljs-selector-id,
+.dark .tiptap-editor .tiptap-code-block .hljs-selector-class,
+.dark .tiptap-editor .tiptap-code-block .hljs-selector-attr,
+.dark .tiptap-editor .tiptap-code-block .hljs-selector-pseudo {
+  color: color-mix(in oklch, var(--muted-foreground) 88%, oklch(0.72 0.1 264));
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-symbol,
+.dark .tiptap-editor .tiptap-code-block .hljs-link,
+.dark .tiptap-editor .tiptap-code-block .hljs-deletion {
+  color: oklch(0.76 0.12 25);
+}
+
+.dark .tiptap-editor .tiptap-code-block .hljs-addition {
+  color: oklch(0.72 0.09 155);
+}
+
 .tiptap-editor .nota-mermaid-preview-inner svg {
   height: auto;
 }

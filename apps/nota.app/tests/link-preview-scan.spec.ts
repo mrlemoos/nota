@@ -91,6 +91,43 @@ describe('convertLinkOnlyParagraphs', () => {
     editor.destroy();
   });
 
+  it('does not promote a link-only paragraph when href is an internal note path', () => {
+    const noteId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+    const href = `/notes/${noteId}`;
+    const editor = createTestEditor({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            {
+              type: 'text',
+              text: 'Other note',
+              marks: [
+                {
+                  type: 'link',
+                  attrs: {
+                    href,
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                    class: 'tiptap-link',
+                    skipLinkPreview: false,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+    const before = editor.getJSON();
+
+    convertLinkOnlyParagraphs(editor);
+
+    expect(editor.getJSON()).toEqual(before);
+    editor.destroy();
+  });
+
   it('promotes a normal link-only paragraph to linkPreview with linkText', () => {
     // Arrange
     const editor = createTestEditor('<p></p>');
