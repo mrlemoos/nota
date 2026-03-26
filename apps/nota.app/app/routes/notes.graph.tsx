@@ -11,7 +11,7 @@ export default function NotesGraph(): JSX.Element {
       <div className="mx-auto flex w-full max-w-6xl min-h-0 flex-1 flex-col gap-4">
         <div>
           <h1 className="font-serif text-xl font-semibold tracking-normal text-foreground">
-            Note graph
+            Note Graph
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             How your notes link together. Click a note to open it. Pan and zoom

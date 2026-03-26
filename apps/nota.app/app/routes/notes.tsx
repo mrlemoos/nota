@@ -292,7 +292,7 @@ export default function NotesLayout() {
                 Notes
               </h2>
               <div className="flex items-center gap-3">
-                <Form method="post">
+                <Form method="post" action="/notes">
                   <Button
                     type="submit"
                     size="icon-lg"
@@ -335,7 +335,7 @@ export default function NotesLayout() {
                   <p className="mb-3 text-sm text-muted-foreground">
                     No notes yet.
                   </p>
-                  <Form method="post">
+                  <Form method="post" action="/notes">
                     <Button type="submit" variant="default">
                       Create your first note
                     </Button>
@@ -452,7 +452,7 @@ export default function NotesLayout() {
                       )
                     }
                   >
-                    Note graph
+                    Note Graph
                   </NavLink>
                   <div className="flex items-center px-1">
                     <ModeToggle />

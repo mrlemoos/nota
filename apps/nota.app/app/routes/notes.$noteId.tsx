@@ -112,10 +112,18 @@ export async function noteDetailClientLoader({
     const note = mergeNoteWithLocal(data.note, local);
     return { ...data, note };
   } catch (e) {
+    const local = await getStoredNote(userId, noteId);
+    if (local && !local.pending_delete && local.pending_create) {
+      const note = storedNoteToListRow(local);
+      return {
+        note,
+        attachments: [] as NoteAttachment[],
+        headers: new Headers(),
+      };
+    }
     if (isLikelyOnline()) {
       throw e;
     }
-    const local = await getStoredNote(userId, noteId);
     if (!local || local.pending_delete) {
       throw new Response('Note not found', { status: 404 });
     }
