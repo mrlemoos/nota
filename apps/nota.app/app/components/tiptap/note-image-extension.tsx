@@ -33,6 +33,9 @@ function NoteImageNodeView(props: NodeViewProps) {
     ? ctx?.attachmentsById.get(attachmentId)
     : undefined;
 
+  /** Stable for effect deps: loader revalidation replaces row objects with the same path. */
+  const storagePath = attachment?.storage_path ?? null;
+
   const displayName = attachment?.filename ?? filenameAttr;
 
   const clearRefreshTimer = useCallback(() => {
@@ -47,11 +50,10 @@ function NoteImageNodeView(props: NodeViewProps) {
     setSignedUrl(null);
     setLoadError(null);
 
-    if (!attachment) {
+    if (!storagePath) {
       return;
     }
 
-    const storagePath = attachment.storage_path;
     let cancelled = false;
 
     const scheduleNextRefresh = () => {
@@ -90,7 +92,7 @@ function NoteImageNodeView(props: NodeViewProps) {
       cancelled = true;
       clearRefreshTimer();
     };
-  }, [attachment, clearRefreshTimer]);
+  }, [storagePath, clearRefreshTimer]);
 
   const handleOpenTab = useCallback(() => {
     if (!signedUrl) return;
