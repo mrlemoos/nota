@@ -441,6 +441,19 @@ export default function NotesLayout() {
                   >
                     My Notes
                   </NavLink>
+                  <NavLink
+                    to="/notes/graph"
+                    className={({ isActive }) =>
+                      cn(
+                        'rounded-md px-3 py-2 text-sm transition-colors',
+                        isActive
+                          ? 'bg-muted font-medium text-foreground'
+                          : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                      )
+                    }
+                  >
+                    Note graph
+                  </NavLink>
                   <div className="flex items-center px-1">
                     <ModeToggle />
                   </div>

@@ -208,6 +208,32 @@ export function CommandPalette(): JSX.Element {
                   </span>
                   <span className={commandKbdHintClass}>{newNoteHotkeyLabel}</span>
                 </Command.Item>
+                <Command.Item
+                  value="open-note-graph"
+                  keywords={[
+                    'graph',
+                    'map',
+                    'visual',
+                    'links',
+                    'connections',
+                    'network',
+                  ]}
+                  onSelect={() => {
+                    navigate('/notes/graph');
+                    setOpen(false);
+                  }}
+                  className={cn(
+                    commandItemRowClass,
+                    'group text-foreground',
+                    'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                  )}
+                >
+                  <PaletteItemIcon
+                    icon={Flowchart01Icon}
+                    className="text-muted-foreground group-aria-selected:text-accent-foreground"
+                  />
+                  <span className="min-w-0 flex-1">Open note graph</span>
+                </Command.Item>
               </Command.Group>
               {notes.length > 0 ? (
                 <Command.Group

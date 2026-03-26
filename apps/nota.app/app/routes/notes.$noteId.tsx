@@ -6,12 +6,14 @@ import {
   type LoaderFunctionArgs,
   type ClientLoaderFunctionArgs,
   type ClientActionFunctionArgs,
+  useParams,
 } from 'react-router';
 import { useState, useCallback, useEffect } from 'react';
 import { requireAuth } from '../lib/supabase/auth';
 import { getNote, deleteNote } from '../models/notes';
 import { listNoteAttachments } from '../models/note-attachments';
 import { NoteEditor } from '../components/note-editor';
+import { NoteBacklinksPanel } from '../components/note-backlinks-panel';
 import type { Note, NoteAttachment } from '~/types/database.types';
 import { getBrowserClient } from '../lib/supabase/browser';
 import {
@@ -173,6 +175,7 @@ async function noteDetailClientAction({
 export const clientAction = noteDetailClientAction;
 
 export default function NoteDetail() {
+  const { noteId } = useParams();
   const { note: initialNote, attachments } =
     useLoaderData() as NoteDetailLoaderData;
   const { revalidate } = useRevalidator();
@@ -198,6 +201,7 @@ export default function NoteDetail() {
           attachments={attachments}
           onNoteUpdated={handleNoteUpdated}
         />
+        {noteId ? <NoteBacklinksPanel noteId={noteId} /> : null}
       </div>
     </div>
   );

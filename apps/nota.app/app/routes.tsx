@@ -12,6 +12,7 @@ export default [
   route('og-preview', './routes/og-preview.tsx'),
   route('notes', './routes/notes.tsx', [
     index('./routes/notes._index.tsx'),
+    route('graph', './routes/notes.graph.tsx'),
     route(':noteId', './routes/notes.$noteId.tsx'),
   ]),
 ] satisfies RouteConfig;
