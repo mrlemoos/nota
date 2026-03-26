@@ -6,9 +6,11 @@
 
 ## Philosophy
 
-The web is noisier than it used to be. AI is in every tab, notifications compete for your attention, and sitting down to think can feel harder than it should.
+You know the feeling: you open something to think, and the software starts performing—offering, suggesting, nudging—until the room for your own pace shrinks. Useful automation has its place elsewhere; in a notes app, that itch to always *do something next* can mistake motion for thinking.
 
-nota.app is meant to be a **calm place for your thoughts**: a quiet surface for writing and organising notes, without the product trying to “optimise” your time on screen. There is **no AI-generated writing** baked into the experience—what you write stays unmistakably yours. There are **no dark patterns** and no nudges whose only job is to make you click; the interface is deliberately still, so you can concentrate.
+nota.app treats your attention as something to protect, not to harvest. It gives you a steady place to write and arrange ideas, and it steps back when you pause so your mind can do the unglamorous part—wandering, revising, waiting for the right phrase—without the product trying to entertain the lull.
+
+We leave silence alone on purpose. Boredom at the cursor is not a bug to patch; it is sometimes the sound of a thought catching up.
 
 ## What it is
 
