@@ -1,7 +1,7 @@
 {
   "name": "@nota.app/source",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "electron:dev": "nx electron:dev nota-electron",
     "electron:pack": "nx electron:pack nota-electron",
@@ -61,5 +61,6 @@
   },
   "workspaces": [
     "apps/*"
-  ]
+  ],
+  "author": "Leonardo Lemos <leo.lemos.ds@icloud.com>"
 }

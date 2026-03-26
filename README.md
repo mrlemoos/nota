@@ -77,4 +77,4 @@ More detail: [`apps/nota-electron/README.md`](apps/nota-electron/README.md).
 
 ## Licence
 
-MIT — see [`package.json`](package.json).
+Apache License 2.0 — see [`LICENSE`](LICENSE) and [`package.json`](package.json).
