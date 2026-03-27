@@ -51,6 +51,12 @@ export function NoteEditor({
   const lastSavedTitle = useRef(persistedDisplayTitle(note.title || ''));
   const titleRef = useRef(note.title || '');
   const pendingContentRef = useRef<unknown | null>(null);
+  const noteRef = useRef(note);
+  const onNoteUpdatedRef = useRef(onNoteUpdated);
+  const userIdRef = useRef(user?.id);
+  noteRef.current = note;
+  onNoteUpdatedRef.current = onNoteUpdated;
+  userIdRef.current = user?.id;
 
   useEffect(() => {
     resetSticky();
@@ -266,62 +272,61 @@ export function NoteEditor({
     [scheduleContentSave],
   );
 
-  const persistDueDate = useCallback(
-    async (dueAt: string | null, isDeadline: boolean) => {
-      if (!user?.id) {
-        return;
-      }
-      const titleForRow = persistedDisplayTitle(titleRef.current);
-      const contentForRow = (pendingContentRef.current ??
-        lastSavedContent.current) as Json;
-      setSaveStatus('saving');
-      try {
-        await saveLocalNoteDraft(user.id, {
-          id: note.id,
-          title: titleForRow,
-          content: contentForRow,
-          user_id: note.user_id,
-          created_at: note.created_at,
+  const persistDueDate = useCallback(async (dueAt: string | null, isDeadline: boolean) => {
+    const userId = userIdRef.current;
+    if (!userId) {
+      return;
+    }
+    const n = noteRef.current;
+    const titleForRow = persistedDisplayTitle(titleRef.current);
+    const contentForRow = (pendingContentRef.current ??
+      lastSavedContent.current) as Json;
+    setSaveStatus('saving');
+    try {
+      await saveLocalNoteDraft(userId, {
+        id: n.id,
+        title: titleForRow,
+        content: contentForRow,
+        user_id: n.user_id,
+        created_at: n.created_at,
+        due_at: dueAt,
+        is_deadline: isDeadline,
+      });
+      if (isLikelyOnline()) {
+        const client = getBrowserClient();
+        const updatedNote = await updateNote(client, n.id, {
           due_at: dueAt,
           is_deadline: isDeadline,
         });
-        if (isLikelyOnline()) {
-          const client = getBrowserClient();
-          const updatedNote = await updateNote(client, note.id, {
-            due_at: dueAt,
-            is_deadline: isDeadline,
-          });
-          await markNoteSyncedFromServer(user.id, updatedNote);
-          onNoteUpdated?.(
-            mergeUpdatedNoteLocalContent(
-              updatedNote,
-              pendingContentRef.current,
-              lastSavedContent.current as Json,
-            ),
-          );
-        } else {
-          onNoteUpdated?.(
-            mergeUpdatedNoteLocalContent(
-              {
-                ...note,
-                due_at: dueAt,
-                is_deadline: isDeadline,
-                updated_at: new Date().toISOString(),
-              },
-              pendingContentRef.current,
-              lastSavedContent.current as Json,
-            ),
-          );
-        }
-        setSaveStatus('saved');
-      } catch (error) {
-        console.error('Failed to save due date:', error);
-        setSaveStatus('error');
-        void drainNotesOutbox(user.id);
+        await markNoteSyncedFromServer(userId, updatedNote);
+        onNoteUpdatedRef.current?.(
+          mergeUpdatedNoteLocalContent(
+            updatedNote,
+            pendingContentRef.current,
+            lastSavedContent.current as Json,
+          ),
+        );
+      } else {
+        onNoteUpdatedRef.current?.(
+          mergeUpdatedNoteLocalContent(
+            {
+              ...n,
+              due_at: dueAt,
+              is_deadline: isDeadline,
+              updated_at: new Date().toISOString(),
+            },
+            pendingContentRef.current,
+            lastSavedContent.current as Json,
+          ),
+        );
       }
-    },
-    [note, onNoteUpdated, user?.id],
-  );
+      setSaveStatus('saved');
+    } catch (error) {
+      console.error('Failed to save due date:', error);
+      setSaveStatus('error');
+      void drainNotesOutbox(userId);
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
