@@ -8,6 +8,7 @@ import Table from '@tiptap/extension-table';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
+import Emoji from '@tiptap/extension-emoji';
 import { NotaCodeBlock } from './tiptap/nota-code-block';
 import {
   useCallback,
@@ -264,6 +265,12 @@ export function TipTapEditor({
           class: 'tiptap-link',
           target: '_blank',
           rel: 'noopener noreferrer',
+        },
+      }),
+      Emoji.configure({
+        enableEmoticons: false,
+        suggestion: {
+          allow: () => false,
         },
       }),
       Placeholder.configure({

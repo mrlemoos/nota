@@ -17,6 +17,7 @@
     "@supabase/supabase-js": "^2.48.1",
     "@tiptap/extension-code-block": "^2.11.5",
     "@tiptap/extension-code-block-lowlight": "2.11.5",
+    "@tiptap/extension-emoji": "^2.27.2",
     "@tiptap/extension-link": "^2.27.2",
     "@tiptap/extension-placeholder": "^2.11.5",
     "@tiptap/extension-table": "^2.27.2",

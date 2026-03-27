@@ -1,0 +1,58 @@
+import { Editor } from '@tiptap/core';
+import Emoji from '@tiptap/extension-emoji';
+import StarterKit from '@tiptap/starter-kit';
+import { describe, expect, it } from 'vitest';
+import { NotaCodeBlock } from './tiptap/nota-code-block';
+
+function collectTypes(node: unknown): string[] {
+  if (!node || typeof node !== 'object') {
+    return [];
+  }
+  const n = node as { type?: string; content?: unknown[] };
+  const self = n.type ? [n.type] : [];
+  const children = (n.content ?? []).flatMap(collectTypes);
+  return [...self, ...children];
+}
+
+function createEditorWithEmoji() {
+  return new Editor({
+    extensions: [
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      NotaCodeBlock,
+      Emoji.configure({
+        enableEmoticons: false,
+        suggestion: {
+          allow: () => false,
+        },
+      }),
+    ],
+    content: { type: 'doc', content: [{ type: 'paragraph' }] },
+  });
+}
+
+describe('TipTap emoji', () => {
+  it('setEmoji inserts an emoji node in JSON', () => {
+    const editor = createEditorWithEmoji();
+    editor.chain().focus().setEmoji('smile').run();
+
+    const types = collectTypes(editor.getJSON());
+    expect(types).toContain('emoji');
+
+    editor.destroy();
+  });
+
+  it('round-trips a document containing an emoji node through setContent', () => {
+    const editor = createEditorWithEmoji();
+    editor.chain().focus().setEmoji('smile').run();
+
+    const snapshot = editor.getJSON();
+    editor.commands.setContent(snapshot, false);
+    const after = collectTypes(editor.getJSON());
+
+    expect(after).toContain('emoji');
+
+    editor.destroy();
+  });
+});

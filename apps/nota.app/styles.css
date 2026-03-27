@@ -260,6 +260,16 @@
   font-style: italic;
 }
 
+.tiptap-editor .ProseMirror span[data-type='emoji'] {
+  display: inline;
+}
+
+.tiptap-editor .ProseMirror span[data-type='emoji'] img {
+  height: 1.15em;
+  width: auto;
+  vertical-align: -0.15em;
+}
+
 .tiptap-editor .ProseMirror a,
 .tiptap-editor .ProseMirror a.tiptap-link {
   color: var(--primary);
