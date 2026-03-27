@@ -40,6 +40,7 @@ import {
   storedNoteToListRow,
 } from '../lib/notes-offline';
 import { useNotesOfflineSync } from '../lib/use-notes-offline-sync';
+import { useNotesHistoryShortcut } from '../lib/use-notes-history-shortcut';
 import { useNotesSidebarShortcut } from '../lib/use-notes-sidebar-shortcut';
 import { useTodaysNoteShortcut } from '../lib/use-todays-note-shortcut';
 import { useSyncUserPreferences } from '../lib/use-sync-user-preferences';
@@ -289,6 +290,7 @@ export default function NotesLayout() {
   );
 
   useSyncUserPreferences(userPreferences);
+  useNotesHistoryShortcut(user?.id);
   useNotesSidebarShortcut(user?.id);
   useTodaysNoteShortcut(notes, user?.id, openTodaysNoteShortcut);
 
