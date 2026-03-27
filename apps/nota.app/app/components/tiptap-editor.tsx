@@ -1,5 +1,6 @@
 import type { Editor } from '@tiptap/core';
 import { Node } from '@tiptap/pm/model';
+import type { EditorState } from '@tiptap/pm/state';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -15,7 +16,10 @@ import {
   useMemo,
   useRef,
   useState,
+  type Dispatch,
   type JSX,
+  type MutableRefObject,
+  type SetStateAction,
 } from 'react';
 import { useMatches, useNavigate, useRevalidator } from 'react-router';
 import { LinkPreview } from './tiptap/link-preview-extension';
@@ -84,6 +88,51 @@ function insertNoteLinkAtMentionRange(
       return true;
     })
     .run();
+}
+
+type NoteMentionConfirmRefs = {
+  canInsertAttachmentsRef: MutableRefObject<boolean>;
+  filterNoteCandidatesRef: MutableRefObject<(query: string) => Note[]>;
+  mentionTriggerKeyRef: MutableRefObject<string | null>;
+  mentionSelectedIndexRef: MutableRefObject<number>;
+  editorRef: MutableRefObject<Editor | null>;
+};
+
+/**
+ * Inserts the note link for the active `@` mention if the trigger and a
+ * non-empty candidate list are present. Shared by `handleKeyDown` (desktop
+ * Enter/Tab) and `beforeinput` (mobile Return where keydown is unreliable).
+ */
+function tryConfirmNoteMention(
+  state: EditorState,
+  setMention: Dispatch<
+    SetStateAction<{ from: number; query: string; selectedIndex: number } | null>
+  >,
+  refs: NoteMentionConfirmRefs,
+): boolean {
+  if (!refs.canInsertAttachmentsRef.current) return false;
+  const trigger = findNoteMentionTrigger(state);
+  if (!trigger) return false;
+  const filtered = refs.filterNoteCandidatesRef.current(trigger.query);
+  if (filtered.length === 0) return false;
+
+  const triggerKey = `${trigger.from}:${trigger.query}`;
+  if (refs.mentionTriggerKeyRef.current !== triggerKey) {
+    refs.mentionSelectedIndexRef.current = 0;
+    refs.mentionTriggerKeyRef.current = triggerKey;
+  }
+
+  const ed = refs.editorRef.current;
+  if (!ed) return false;
+  const idx = Math.min(
+    refs.mentionSelectedIndexRef.current,
+    filtered.length - 1,
+  );
+  const target = filtered[idx]!;
+  const to = state.selection.from;
+  insertNoteLinkAtMentionRange(ed, trigger.from, to, target);
+  setMention(null);
+  return true;
 }
 
 function isDocContentEqual(editor: Editor, content: unknown): boolean {
@@ -192,6 +241,14 @@ export function TipTapEditor({
 
   const editorRef = useRef<Editor | null>(null);
 
+  const mentionConfirmRefs: NoteMentionConfirmRefs = {
+    canInsertAttachmentsRef,
+    filterNoteCandidatesRef,
+    mentionTriggerKeyRef,
+    mentionSelectedIndexRef,
+    editorRef,
+  };
+
   const extensions = useMemo(
     () => [
       StarterKit.configure({
@@ -290,24 +347,48 @@ export function TipTapEditor({
           (event.key === 'Enter' && !event.shiftKey) ||
           (event.key === 'Tab' && !event.shiftKey);
         if (confirmByKey) {
-          if (filtered.length === 0) return false;
-          event.preventDefault();
-          const ed = editorRef.current;
-          if (!ed) return true;
-          alignMentionNavToTrigger();
-          const idx = Math.min(
-            mentionSelectedIndexRef.current,
-            filtered.length - 1,
+          const t = findNoteMentionTrigger(_view.state);
+          const list = t
+            ? filterNoteCandidatesRef.current(t.query)
+            : [];
+          if (list.length > 0 && !editorRef.current) {
+            event.preventDefault();
+            return true;
+          }
+          const handled = tryConfirmNoteMention(
+            _view.state,
+            setMention,
+            mentionConfirmRefs,
           );
-          const target = filtered[idx]!;
-          const to = _view.state.selection.from;
-          insertNoteLinkAtMentionRange(ed, trigger.from, to, target);
-          setMention(null);
-          return true;
+          if (handled) {
+            event.preventDefault();
+            return true;
+          }
+          return false;
         }
         return false;
       },
       handleDOMEvents: {
+        beforeinput: (_view, event) => {
+          if (!(event instanceof InputEvent)) return false;
+          if (event.isComposing) return false;
+          if (
+            event.inputType !== 'insertLineBreak' &&
+            event.inputType !== 'insertParagraph'
+          ) {
+            return false;
+          }
+          const handled = tryConfirmNoteMention(
+            _view.state,
+            setMention,
+            mentionConfirmRefs,
+          );
+          if (handled) {
+            event.preventDefault();
+            return true;
+          }
+          return false;
+        },
         click: (_view, event) => {
           if (event.button !== 0) return false;
           const el = event.target as HTMLElement | null;
