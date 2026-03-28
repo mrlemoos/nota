@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron';
-import { autoUpdater } from 'electron-updater';
+import electronUpdater from 'electron-updater';
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { spawn, ChildProcess } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -18,6 +18,8 @@ let serverProcess: ChildProcess | null = null;
 
 const isDev = !app.isPackaged;
 const isDarwin = process.platform === 'darwin';
+
+const { autoUpdater } = electronUpdater;
 
 function createWindow(): void {
   const preloadPath = path.join(__dirname, 'preload.js');
