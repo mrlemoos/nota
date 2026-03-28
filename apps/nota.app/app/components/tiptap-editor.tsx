@@ -1,6 +1,7 @@
 import type { Editor } from '@tiptap/core';
 import { Node } from '@tiptap/pm/model';
-import type { EditorState } from '@tiptap/pm/state';
+import { TextSelection, type EditorState } from '@tiptap/pm/state';
+import type { EditorView } from '@tiptap/pm/view';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -49,23 +50,56 @@ import { persistedDisplayTitle } from '../lib/note-title';
 import { findNoteMentionTrigger } from '../lib/tiptap-note-mention';
 import { NoteLinkMentionMenu } from './tiptap/note-link-mention-menu';
 
-function noteLinkInsertPayload(label: string, href: string) {
-  return {
-    type: 'text' as const,
-    text: label,
-    marks: [
-      {
-        type: 'link' as const,
-        attrs: {
-          href,
-          target: null,
-          rel: null,
-          class: 'tiptap-link',
-          skipLinkPreview: true,
-        },
-      },
-    ],
-  };
+/**
+ * Inserts the internal note link using the same `EditorView` that receives
+ * `handleKeyDown`, so Enter confirmation does not depend on TipTap `Editor`
+ * refs or `dom.editor` (which can disagree with the active view).
+ */
+function insertNoteLinkAtMentionRangeView(
+  view: EditorView,
+  from: number,
+  to: number,
+  target: Note,
+): boolean {
+  const { state } = view;
+  const linkMark = state.schema.marks.link;
+  if (!linkMark) return false;
+
+  const href = hrefForNote(target.id);
+  const label = persistedDisplayTitle(target.title || '');
+  const mark = linkMark.create({
+    href,
+    target: null,
+    rel: null,
+    class: 'tiptap-link',
+    skipLinkPreview: true,
+  });
+
+  const tr = state.tr;
+  tr.delete(from, to);
+  tr.insert(from, state.schema.text(label, [mark]));
+  tr.setSelection(TextSelection.create(tr.doc, from + label.length));
+  tr.setStoredMarks([]);
+  view.dispatch(tr.scrollIntoView());
+
+  const dom = view.dom as HTMLElement & { editor?: Editor };
+  const ed = dom.editor;
+  if (ed && !ed.isDestroyed) {
+    ed
+      .chain()
+      .focus()
+      .setParagraph()
+      .command(({ tr: innerTr, dispatch }) => {
+        if (dispatch) {
+          innerTr.setStoredMarks([]);
+        }
+        return true;
+      })
+      .run();
+  } else {
+    view.focus();
+  }
+  return true;
 }
 
 function insertNoteLinkAtMentionRange(
@@ -74,21 +108,7 @@ function insertNoteLinkAtMentionRange(
   to: number,
   target: Note,
 ): void {
-  const href = hrefForNote(target.id);
-  const label = persistedDisplayTitle(target.title || '');
-  ed
-    .chain()
-    .focus()
-    .deleteRange({ from, to })
-    .insertContent(noteLinkInsertPayload(label, href))
-    .setParagraph()
-    .command(({ tr, dispatch }) => {
-      if (dispatch) {
-        tr.setStoredMarks([]);
-      }
-      return true;
-    })
-    .run();
+  insertNoteLinkAtMentionRangeView(ed.view, from, to, target);
 }
 
 type NoteMentionConfirmRefs = {
@@ -96,7 +116,6 @@ type NoteMentionConfirmRefs = {
   filterNoteCandidatesRef: MutableRefObject<(query: string) => Note[]>;
   mentionTriggerKeyRef: MutableRefObject<string | null>;
   mentionSelectedIndexRef: MutableRefObject<number>;
-  editorRef: MutableRefObject<Editor | null>;
 };
 
 /**
@@ -105,17 +124,25 @@ type NoteMentionConfirmRefs = {
  * Enter/Tab) and `beforeinput` (mobile Return where keydown is unreliable).
  */
 function tryConfirmNoteMention(
-  state: EditorState,
+  view: EditorView,
   setMention: Dispatch<
     SetStateAction<{ from: number; query: string; selectedIndex: number } | null>
   >,
   refs: NoteMentionConfirmRefs,
 ): boolean {
-  if (!refs.canInsertAttachmentsRef.current) return false;
+  const state = view.state;
+
+  if (!refs.canInsertAttachmentsRef.current) {
+    return false;
+  }
   const trigger = findNoteMentionTrigger(state);
-  if (!trigger) return false;
+  if (!trigger) {
+    return false;
+  }
   const filtered = refs.filterNoteCandidatesRef.current(trigger.query);
-  if (filtered.length === 0) return false;
+  if (filtered.length === 0) {
+    return false;
+  }
 
   const triggerKey = `${trigger.from}:${trigger.query}`;
   if (refs.mentionTriggerKeyRef.current !== triggerKey) {
@@ -123,15 +150,21 @@ function tryConfirmNoteMention(
     refs.mentionTriggerKeyRef.current = triggerKey;
   }
 
-  const ed = refs.editorRef.current;
-  if (!ed) return false;
   const idx = Math.min(
     refs.mentionSelectedIndexRef.current,
     filtered.length - 1,
   );
   const target = filtered[idx]!;
   const to = state.selection.from;
-  insertNoteLinkAtMentionRange(ed, trigger.from, to, target);
+  const inserted = insertNoteLinkAtMentionRangeView(
+    view,
+    trigger.from,
+    to,
+    target,
+  );
+  if (!inserted) {
+    return false;
+  }
   setMention(null);
   return true;
 }
@@ -247,7 +280,6 @@ export function TipTapEditor({
     filterNoteCandidatesRef,
     mentionTriggerKeyRef,
     mentionSelectedIndexRef,
-    editorRef,
   };
 
   const extensions = useMemo(
@@ -351,19 +383,12 @@ export function TipTapEditor({
           return true;
         }
         const confirmByKey =
-          (event.key === 'Enter' && !event.shiftKey) ||
+          ((event.key === 'Enter' || event.key === 'NumpadEnter') &&
+            !event.shiftKey) ||
           (event.key === 'Tab' && !event.shiftKey);
         if (confirmByKey) {
-          const t = findNoteMentionTrigger(_view.state);
-          const list = t
-            ? filterNoteCandidatesRef.current(t.query)
-            : [];
-          if (list.length > 0 && !editorRef.current) {
-            event.preventDefault();
-            return true;
-          }
           const handled = tryConfirmNoteMention(
-            _view.state,
+            _view,
             setMention,
             mentionConfirmRefs,
           );
@@ -386,7 +411,7 @@ export function TipTapEditor({
             return false;
           }
           const handled = tryConfirmNoteMention(
-            _view.state,
+            _view,
             setMention,
             mentionConfirmRefs,
           );
