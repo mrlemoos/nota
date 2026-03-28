@@ -47,7 +47,6 @@ jobs:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
           if [ -z "$APPLE_CERTIFICATE_BASE64" ]; then
-            echo "csc_link=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           echo "$APPLE_CERTIFICATE_BASE64" | base64 --decode > "$RUNNER_TEMP/nota-certificate.p12"
@@ -61,8 +60,6 @@ jobs:
 
       - name: Build web app and publish Electron release
         env:
-          CSC_LINK: ${{ steps.signing.outputs.csc_link }}
-          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -70,4 +67,9 @@ jobs:
           npx nx build @nota.app/nota.app
           cd apps/nota-electron
           npm run build
+          CSC_LINK_VALUE='${{ steps.signing.outputs.csc_link }}'
+          if [ -n "$CSC_LINK_VALUE" ]; then
+            export CSC_LINK="$CSC_LINK_VALUE"
+            export CSC_KEY_PASSWORD='${{ secrets.APPLE_CERTIFICATE_PASSWORD }}'
+          fi
           npx electron-builder --publish always
