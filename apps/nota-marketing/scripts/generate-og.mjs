@@ -57,21 +57,23 @@ async function main() {
   const homeInner = `
   ${decor()}
   <text x="72" y="118" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#a3a3a3" letter-spacing="0.04em">NOTA</text>
-  <text x="72" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="52" fill="#fafafa">A quiet corner for your</text>
-  <text x="72" y="372" font-family="Georgia, 'Times New Roman', serif" font-size="52" fill="#fafafa">thoughts</text>
-  <text x="72" y="456" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" fill="#a3a3a3">Minimal notes for Mac — without feeds or noise.</text>
+  <text x="72" y="268" font-family="Georgia, 'Times New Roman', serif" font-size="44" fill="#fafafa">Mac note-taking for</text>
+  <text x="72" y="334" font-family="Georgia, 'Times New Roman', serif" font-size="44" fill="#fafafa">focused writing</text>
+  <text x="72" y="420" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" fill="#a3a3a3">Native app · calm, minimal, offline-first.</text>
 `;
 
   const pricingInner = `
   ${decor()}
   <text x="72" y="118" font-family="Georgia, 'Times New Roman', serif" font-size="22" fill="#a3a3a3" letter-spacing="0.04em">NOTA</text>
-  <text x="72" y="320" font-family="Georgia, 'Times New Roman', serif" font-size="72" fill="#fafafa">Pricing</text>
-  <text x="72" y="408" font-family="ui-sans-serif, system-ui, sans-serif" font-size="28" fill="#a3a3a3">Nota and Nota Pro — simple plans for the Mac app.</text>
+  <text x="72" y="300" font-family="Georgia, 'Times New Roman', serif" font-size="72" fill="#fafafa">Pricing</text>
+  <text x="72" y="388" font-family="ui-sans-serif, system-ui, sans-serif" font-size="26" fill="#a3a3a3">Free download · Pro adds sync — upgrade in the app.</text>
 `;
 
   await writePng('home.png', homeInner);
   await writePng('pricing.png', pricingInner);
-  console.log('Wrote', path.join(outDir, 'home.png'), 'and pricing.png');
+  const publicRoot = path.join(__dirname, '../public');
+  await fs.promises.copyFile(path.join(outDir, 'home.png'), path.join(publicRoot, 'og-default.png'));
+  console.log('Wrote', path.join(outDir, 'home.png'), ', pricing.png, and', path.join(publicRoot, 'og-default.png'));
 }
 
 main().catch((err) => {

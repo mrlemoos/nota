@@ -4,8 +4,8 @@ import '../styles/global.css';
 interface Props {
   title?: string;
   description?: string;
-  /** Path from site root, e.g. `/og/home.png` */
-  image: string;
+  /** Path from site root, e.g. `/og/home.png`; defaults to `/og-default.png` */
+  image?: string;
   ogTitle?: string;
   ogDescription?: string;
   /** Defaults to `Astro.url.pathname` */
@@ -16,9 +16,10 @@ const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
 
 const {
-  title = 'Nota — a quiet corner for your thoughts',
-  description = 'A minimal notes app for Mac. Download Nota and work without feeds, noise, or nudges.',
-  image,
+  title = 'Nota — Mac Note-Taking App for Focused Writing',
+  description =
+    'Nota is a native Mac app for writing and linking notes — calm, minimal, offline-first. No feeds, no nudges. Just your thoughts.',
+  image = '/og-default.png',
   ogTitle,
   ogDescription,
   canonicalPath,
@@ -42,6 +43,7 @@ const socialDescription = ogDescription ?? description;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0a0a" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
@@ -60,7 +62,10 @@ const socialDescription = ogDescription ?? description;
     <meta name="twitter:description" content={socialDescription} />
     <meta name="twitter:image" content={imageUrl} />
 
+    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <slot name="head-extras" />
     <title>{title}</title>
   </head>
   <body>

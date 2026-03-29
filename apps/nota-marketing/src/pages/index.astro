@@ -9,9 +9,72 @@ import signInShot from '@/assets/marketing/sign-in.png';
 import editorOverview from '@/assets/marketing/editor-overview.png';
 import editorCode from '@/assets/marketing/editor-code.png';
 import philosophyNote from '@/assets/marketing/philosophy-note.png';
+
+const site = Astro.site;
+if (!site) {
+  throw new Error('Marketing site requires `site` in astro.config.');
+}
+const siteRoot = new URL('/', site).href;
+const screenshotUrl = new URL('/og/home.png', site).href;
+const downloadUrl = NOTA_GITHUB_LATEST;
+
+const homeTitle = 'Nota — Mac Note-Taking App for Focused Writing';
+const homeDescription =
+  'Nota is a native Mac app for writing and linking notes — calm, minimal, offline-first. No feeds, no nudges. Just your thoughts.';
+
+const softwareApplicationLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Nota',
+  operatingSystem: 'macOS',
+  applicationCategory: 'ProductivityApplication',
+  offers: [
+    {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      name: 'Nota Free',
+    },
+    {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        priceType: 'https://schema.org/SubscriptionPrice',
+      },
+      name: 'Nota Pro',
+    },
+  ],
+  description:
+    'A native Mac app for writing and linking notes. Calm, minimal, offline-first.',
+  url: siteRoot,
+  downloadUrl,
+  screenshot: screenshotUrl,
+  author: {
+    '@type': 'Person',
+    name: 'Leo Lemos',
+    url: 'https://mrlemoos.dev',
+  },
+};
+
+const webSiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  url: siteRoot,
+  name: 'Nota',
+  description: 'Mac note-taking app for focused writing',
+};
 ---
 
-<BaseLayout image="/og/home.png">
+<BaseLayout title={homeTitle} description={homeDescription} image="/og/home.png">
+  <script
+    type="application/ld+json"
+    slot="head-extras"
+    is:inline
+    set:html={JSON.stringify(softwareApplicationLd)}
+  />
+  <script type="application/ld+json" slot="head-extras" is:inline set:html={JSON.stringify(webSiteLd)} />
   <div class="mkt-dark overflow-hidden">
     <HeroLandscape />
     <SiteHeader />
@@ -20,9 +83,12 @@ import philosophyNote from '@/assets/marketing/philosophy-note.png';
     >
       <div class="mkt-hero-animate flex flex-col items-center gap-8 text-center lg:items-start lg:text-left">
         <div class="max-w-xl space-y-5">
-          <p
+          <h1
             class="font-serif text-4xl font-normal leading-tight text-balance text-foreground md:text-5xl lg:text-[2.75rem] lg:leading-[1.12]"
           >
+            A Mac note-taking app for focused writing
+          </h1>
+          <p class="font-serif text-2xl font-normal leading-snug text-muted-foreground md:text-3xl">
             Stillness is a practice.
           </p>
           <p class="text-base leading-relaxed text-muted-foreground md:text-lg">

@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://nota.mrlemoos.dev/sitemap-index.xml
