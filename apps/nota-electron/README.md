@@ -78,4 +78,6 @@ With `APPLE_CERTIFICATE_BASE64` unset, CI still produces **unsigned** artefacts.
 ## Architecture
 
 - **Dev mode**: Loads from `http://localhost:4200` (Vite dev server).
-- **Prod mode**: Serves the embedded **`nota.app/dist`** static build from inside the app bundle via a small Node **`http`** server on **`http://127.0.0.1:4378`** (SPA fallback). `/api/*` is not implemented in the desktop bundle.
+- **Prod mode**: Serves the embedded **`nota.app/dist`** static build from inside the app bundle via a small Node **`http`** server on **`http://127.0.0.1:4378`** (SPA fallback).
+- **Link preview**: **`GET /api/og-preview`** is handled locally via **`electron-og-api.mjs`** and **`nota-public-env.json`** from the nota.app build (Supabase session cookies + OG fetch; no RevenueCat secret in the shell).
+- **Nota Pro entitlement**: Build **`nota.app`** with **`VITE_NOTA_SERVER_API_URL`** pointing at **[`nota-server`](../nota-server)** so entitlement and invalidate use Bearer auth against that service. Other **`/api/*`** paths still return **502** in the desktop static server.

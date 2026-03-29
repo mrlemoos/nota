@@ -18,6 +18,7 @@ import {
 } from '../lib/notes-offline';
 import { listNotes } from '../models/notes';
 import { getUserPreferences } from '../models/user-preferences';
+import { fetchNotaProEntitled } from '../lib/nota-server-client';
 import {
   readNotaServerEntitledSession,
   syncNotaServerEntitledSession,
@@ -88,9 +89,7 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
     try {
       let entRes: Response;
       try {
-        entRes = await fetch('/api/nota-pro-entitled', {
-          credentials: 'same-origin',
-        });
+        entRes = await fetchNotaProEntitled();
       } catch {
         if (isLikelyOnline()) {
           setLoadError('Failed to load notes');

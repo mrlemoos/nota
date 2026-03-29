@@ -10,6 +10,7 @@ import {
 import type { CustomerInfo } from '@revenuecat/purchases-js';
 import { useRootLoaderData } from './spa-session-context';
 import { useOptionalNotesData } from './notes-data-context';
+import { postNotaProInvalidate } from '../lib/nota-server-client';
 import {
   getCustomerInfoSafe,
   getRevenueCatApiKey,
@@ -174,10 +175,7 @@ export function RevenueCatSubscriptionProvider({
         });
         setCustomerSlice(customerInfoToState(result.customerInfo));
         try {
-          await fetch('/api/nota-pro-invalidate', {
-            method: 'POST',
-            credentials: 'same-origin',
-          });
+          await postNotaProInvalidate();
         } catch {
           /* ignore */
         }

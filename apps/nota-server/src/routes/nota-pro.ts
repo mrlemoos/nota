@@ -1,33 +1,33 @@
-import { getAuthUser } from './supabase/auth';
 import {
   invalidateNotaProCacheForUser,
   jsonResponseNotaProEntitledForUser,
   jsonResponseNotaProInvalidateOk,
-} from './nota-pro-api-logic';
+} from '../../../nota.app/app/lib/nota-pro-api-logic.ts';
+import { getUserIdFromBearer } from '../auth.ts';
 
-export async function spaApiNotaProEntitled(
+export async function notaProEntitledHandler(
   request: Request,
 ): Promise<Response> {
-  const user = await getAuthUser(request);
-  if (!user) {
+  const userId = await getUserIdFromBearer(request);
+  if (!userId) {
     return Response.json(
       { error: 'Unauthorized', entitled: false },
       { status: 401 },
     );
   }
-  return jsonResponseNotaProEntitledForUser(user.id);
+  return jsonResponseNotaProEntitledForUser(userId);
 }
 
-export async function spaApiNotaProInvalidate(
+export async function notaProInvalidateHandler(
   request: Request,
 ): Promise<Response> {
   if (request.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }
-  const user = await getAuthUser(request);
-  if (!user) {
+  const userId = await getUserIdFromBearer(request);
+  if (!userId) {
     return Response.json({ ok: false }, { status: 401 });
   }
-  invalidateNotaProCacheForUser(user.id);
+  invalidateNotaProCacheForUser(userId);
   return jsonResponseNotaProInvalidateOk();
 }

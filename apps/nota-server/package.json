@@ -1,0 +1,25 @@
+{
+  "name": "@nota.app/nota-server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "test": "bun test src/"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.48.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.19.9",
+    "bun-types": "^1.2.5"
+  },
+  "nx": {
+    "sourceRoot": "apps/nota-server/src",
+    "projectType": "application",
+    "tags": []
+  }
+}

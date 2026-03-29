@@ -2,8 +2,12 @@ import { app, BrowserWindow } from 'electron';
 import { existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { createConnection } from 'node:net';
-import { createServer, type Server } from 'node:http';
-import { fileURLToPath } from 'node:url';
+import {
+  createServer,
+  type IncomingHttpHeaders,
+  type Server,
+} from 'node:http';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -15,6 +19,73 @@ const PROD_URL = `http://127.0.0.1:${PROD_PORT}`;
 
 let mainWindow: BrowserWindow | null = null;
 let staticServer: Server | null = null;
+
+type OgPreviewHandler = (request: Request) => Promise<Response>;
+let ogPreviewHandler: OgPreviewHandler | null = null;
+let desktopSupabaseEnvLoaded = false;
+
+async function ensureDesktopSupabaseEnv(staticRoot: string): Promise<void> {
+  if (desktopSupabaseEnvLoaded) {
+    return;
+  }
+  if (
+    process.env.VITE_SUPABASE_URL &&
+    process.env.VITE_SUPABASE_ANON_KEY
+  ) {
+    desktopSupabaseEnvLoaded = true;
+    return;
+  }
+  try {
+    const raw = await readFile(
+      path.join(staticRoot, 'nota-public-env.json'),
+      'utf8',
+    );
+    const j = JSON.parse(raw) as {
+      VITE_SUPABASE_URL?: string;
+      VITE_SUPABASE_ANON_KEY?: string;
+    };
+    if (j.VITE_SUPABASE_URL) {
+      process.env.VITE_SUPABASE_URL = j.VITE_SUPABASE_URL;
+    }
+    if (j.VITE_SUPABASE_ANON_KEY) {
+      process.env.VITE_SUPABASE_ANON_KEY = j.VITE_SUPABASE_ANON_KEY;
+    }
+  } catch {
+    /* OG handler will fail until env is present */
+  }
+  desktopSupabaseEnvLoaded = true;
+}
+
+async function loadOgPreviewHandler(staticRoot: string): Promise<OgPreviewHandler> {
+  if (ogPreviewHandler) {
+    return ogPreviewHandler;
+  }
+  const modPath = path.join(staticRoot, 'electron-og-api.mjs');
+  const mod = (await import(pathToFileURL(modPath).href)) as {
+    default: OgPreviewHandler;
+  };
+  ogPreviewHandler = mod.default;
+  return ogPreviewHandler;
+}
+
+function webHeadersFromNode(headers: IncomingHttpHeaders): Headers {
+  const h = new Headers();
+  for (const [k, v] of Object.entries(headers)) {
+    if (v === undefined) {
+      continue;
+    }
+    if (Array.isArray(v)) {
+      for (const x of v) {
+        if (x !== undefined) {
+          h.append(k, x);
+        }
+      }
+    } else if (typeof v === 'string') {
+      h.set(k, v);
+    }
+  }
+  return h;
+}
 
 const isDev = !app.isPackaged;
 const isDarwin = process.platform === 'darwin';
@@ -155,11 +226,41 @@ async function startServer(): Promise<void> {
 
   staticServer = createServer(async (req, res) => {
     const urlPath = req.url?.split('?')[0] ?? '/';
+    if (urlPath === '/api/og-preview') {
+      if (req.method !== 'GET' && req.method !== 'HEAD') {
+        res.statusCode = 405;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('Method Not Allowed');
+        return;
+      }
+      try {
+        await ensureDesktopSupabaseEnv(staticRoot);
+        const handler = await loadOgPreviewHandler(staticRoot);
+        const host = req.headers.host ?? `127.0.0.1:${PROD_PORT}`;
+        const fullUrl = new URL(req.url ?? '/', `http://${host}`);
+        const request = new Request(fullUrl.toString(), {
+          method: req.method,
+          headers: webHeadersFromNode(req.headers),
+        });
+        const r = await handler(request);
+        res.statusCode = r.status;
+        r.headers.forEach((value, key) => {
+          res.setHeader(key, value);
+        });
+        res.end(Buffer.from(await r.arrayBuffer()));
+      } catch (e) {
+        console.error('[nota-electron] /api/og-preview', e);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end('OG preview failed');
+      }
+      return;
+    }
     if (urlPath.startsWith('/api/')) {
       res.statusCode = 502;
       res.setHeader('Content-Type', 'text/plain; charset=utf-8');
       res.end(
-        'Server-only API routes are not bundled in the desktop app. Use the web build for link previews.',
+        'This API route is not bundled in the desktop app. Set VITE_NOTA_SERVER_API_URL for Nota Pro entitlement, or use the web app for other server routes.',
       );
       return;
     }
