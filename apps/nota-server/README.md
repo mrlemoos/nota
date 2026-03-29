@@ -41,11 +41,11 @@ Clients send `Authorization: Bearer <Supabase access_token>`. The server validat
 
 Use the **repository root** as the Railway service root (not `apps/nota-server` alone): the bundle step resolves `apps/nota.app/app/lib/nota-pro-api-logic.ts` from the monorepo.
 
-[`railway.json`](../../railway.json) at the repo root sets:
+[`railway.json`](../../railway.json) at the repo root uses **`Dockerfile.nota-server`** (Docker builder, not Railpack). The image runs **`npm ci`** on a clean tree: [`.dockerignore`](../../.dockerignore) excludes all `node_modules`, so Railpack-style **EBUSY** mounts on `node_modules/.cache` or `apps/nota-marketing/node_modules/.astro` are avoided.
 
-- **Build:** [`tools/railway-nota-server-build.sh`](../../tools/railway-nota-server-build.sh) — runs `rm -rf node_modules apps/*/node_modules` before `npm ci` to avoid **EBUSY** when npm replaces nested `node_modules` (e.g. Astro’s `.astro` under `apps/nota-marketing`), then `npm run build` in `apps/nota-server`.
-- **Start:** `node apps/nota-server/dist/index.js`
+- **Build:** `docker build -f Dockerfile.nota-server .` (Railway runs this via config-as-code).
+- **Start:** `node apps/nota-server/dist/index.js` (also the image **CMD**).
 
-Railpack picks **Node 22** from the root `package.json` `engines.node` and `apps/nota-server` `engines.node`. Set the same environment variables as in `.env.example`. Point `VITE_NOTA_SERVER_API_URL` in the SPA build to this service’s public URL (no trailing slash). Railway injects **`PORT`**; the server reads it automatically.
+The base image is **Node 22** (`node:22-bookworm-slim`). Set the same environment variables as in `.env.example`. Point `VITE_NOTA_SERVER_API_URL` in the SPA build to this service’s public URL (no trailing slash). Railway injects **`PORT`**; the server reads it automatically.
 
-For any other host, run **Node 22+**, install production dependencies from the monorepo lockfile, run the build command above from the repo root, then start with `node apps/nota-server/dist/index.js`.
+For hosts without Docker, from the repo root run **`npm ci`**, then **`npm run build`** in `apps/nota-server`, then **`node apps/nota-server/dist/index.js`**. Optional helper: [`tools/railway-nota-server-build.sh`](../../tools/railway-nota-server-build.sh) (same steps, no `rm`).

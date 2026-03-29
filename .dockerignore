@@ -1,0 +1,16 @@
+# Fresh install inside the image — never copy host/workspace node trees (Railpack
+# and local installs can leave .cache / .astro paths that break rm and npm ci).
+node_modules
+**/node_modules
+
+.git
+.github
+.cursor
+.nx
+coverage
+**/.env
+!**/.env.example
+dist
+**/dist
+*.log
+.DS_Store
