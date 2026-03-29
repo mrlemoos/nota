@@ -1,0 +1,46 @@
+{
+  "name": "@nota.app/nota-marketing",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/source-serif-4": "^5.2.9",
+    "@fontsource/instrument-serif": "^5.2.8",
+    "astro": "^6.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "~5.9.2"
+  },
+  "nx": {
+    "targets": {
+      "dev": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "apps/nota-marketing",
+          "command": "astro dev"
+        }
+      },
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "apps/nota-marketing",
+          "command": "astro build"
+        }
+      },
+      "preview": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "apps/nota-marketing",
+          "command": "astro preview"
+        }
+      }
+    }
+  }
+}

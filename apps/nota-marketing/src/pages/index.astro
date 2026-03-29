@@ -1,0 +1,185 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import HeroLandscape from '@/components/HeroLandscape.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import { NOTA_GITHUB_LATEST, NOTA_GITHUB_RELEASES } from '@/lib/site';
+import heroWelcomeCode from '@/assets/marketing/hero-welcome-code.png';
+import signInShot from '@/assets/marketing/sign-in.png';
+import editorOverview from '@/assets/marketing/editor-overview.png';
+import editorCode from '@/assets/marketing/editor-code.png';
+import philosophyNote from '@/assets/marketing/philosophy-note.png';
+---
+
+<BaseLayout>
+  <div class="mkt-dark overflow-hidden">
+    <HeroLandscape />
+    <SiteHeader />
+    <section
+      class="relative z-10 mx-auto grid min-h-[calc(100vh-4.5rem)] max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-16 lg:py-20"
+    >
+      <div class="mkt-hero-animate flex flex-col items-center gap-8 text-center lg:items-start lg:text-left">
+        <div class="max-w-xl space-y-5">
+          <p
+            class="font-serif text-4xl font-normal leading-tight text-balance text-foreground md:text-5xl lg:text-[2.75rem] lg:leading-[1.12]"
+          >
+            Stillness is a practice.
+          </p>
+          <p class="text-base leading-relaxed text-muted-foreground md:text-lg">
+            A quiet corner for your thoughts. Away from feeds, noise, and instant answers. Nota is a native Mac
+            app for writing and linking notes—nothing performing for your attention while you think.
+          </p>
+        </div>
+        <div class="flex w-full max-w-xl flex-col items-center gap-4 sm:max-w-none lg:items-start" id="download">
+          <div
+            class="mkt-hero-animate mkt-hero-animate-delay-1 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4"
+          >
+            <a
+              href={NOTA_GITHUB_LATEST}
+              class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
+            >
+              Download for macOS
+            </a>
+            <a
+              href={NOTA_GITHUB_RELEASES}
+              class="mkt-focus text-sm font-medium text-muted-foreground underline decoration-muted-foreground/50 underline-offset-4 transition hover:text-foreground"
+            >
+              All releases
+            </a>
+          </div>
+          <p class="mkt-hero-animate mkt-hero-animate-delay-2 max-w-md text-xs leading-relaxed text-muted-foreground">
+            Apple silicon and Intel builds are published on GitHub Releases when a version is tagged.
+          </p>
+          <p class="mkt-hero-animate mkt-hero-animate-delay-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+            <a href="/pricing" class="mkt-focus font-medium text-foreground underline decoration-border underline-offset-4">
+              Nota Pro pricing
+            </a>
+            <span class="text-muted-foreground"> — subscription is offered inside the app after you install.</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="mkt-hero-animate mkt-hero-animate-delay-1 relative mx-auto w-full max-w-lg lg:mx-0 lg:max-w-none">
+        <div
+          class="rounded-xl border border-border bg-card/30 p-2 shadow-[0_28px_80px_-16px_rgba(0,0,0,0.55)] ring-1 ring-white/15"
+        >
+          <Image
+            src={heroWelcomeCode}
+            alt="Nota for Mac showing the Welcome note with a C++ code block, syntax highlighting, and Mermaid diagram instructions in a dark window"
+            loading="eager"
+            fetchpriority="high"
+            decoding="async"
+            class="w-full rounded-lg border border-border/80"
+          />
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section id="writing" class="border-t border-border bg-background px-6 py-16 md:px-10 md:py-20">
+    <div class="mx-auto max-w-6xl">
+      <h2 class="mb-3 font-serif text-3xl font-normal text-foreground md:text-4xl">The product</h2>
+      <p class="mb-12 max-w-2xl text-muted-foreground md:mb-14">
+        Rich text, code blocks, tables, internal links, backlinks, and a note graph—held in a calm, minimal
+        surface that stays out of your way.
+      </p>
+      <div class="grid gap-10 md:grid-cols-2 md:gap-12">
+        <figure class="space-y-3">
+          <Image
+            src={signInShot}
+            alt="Nota sign-in screen with a dark, minimal aesthetic"
+            loading="lazy"
+            decoding="async"
+            class="w-full rounded-[var(--radius)] border border-border shadow-sm"
+          />
+          <figcaption class="text-sm text-muted-foreground">A restrained, focused shell—no clutter around your words.</figcaption>
+        </figure>
+        <figure class="space-y-3">
+          <Image
+            src={editorOverview}
+            alt="Nota notes list and editor with welcome content"
+            loading="lazy"
+            decoding="async"
+            class="w-full rounded-[var(--radius)] border border-border shadow-sm"
+          />
+          <figcaption class="text-sm text-muted-foreground">Sidebar, document, and typography aligned for long sessions.</figcaption>
+        </figure>
+        <figure class="space-y-3">
+          <Image
+            src={editorCode}
+            alt="Nota editor showing a code block with syntax highlighting"
+            loading="lazy"
+            decoding="async"
+            class="w-full rounded-[var(--radius)] border border-border shadow-sm"
+          />
+          <figcaption class="text-sm text-muted-foreground">Code fences, diagrams, and structured content when you need them.</figcaption>
+        </figure>
+        <figure class="space-y-3 md:col-span-2">
+          <Image
+            src={philosophyNote}
+            alt="Nota editor displaying a philosophy note about attention and writing"
+            loading="lazy"
+            decoding="async"
+            class="mx-auto w-full max-w-4xl rounded-[var(--radius)] border border-border shadow-sm"
+          />
+          <figcaption class="text-center text-sm text-muted-foreground">
+            Your vault stays yours—offline-friendly, sync when you are ready.
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-border bg-sidebar px-6 py-16 md:px-10 md:py-20">
+    <div class="mx-auto max-w-2xl text-center">
+      <h2 class="mb-8 font-serif text-2xl font-normal text-foreground md:text-3xl">Philosophy</h2>
+      <blockquote
+        class="font-note-body text-left text-lg leading-relaxed text-foreground md:text-xl [&_strong]:font-semibold"
+      >
+        <p>
+          You know the feeling: you open something to think, and the software starts performing (offering,
+          suggesting, nudging) until the room for your own pace shrinks. Useful automation has its place
+          elsewhere; in a notes app, that itch to always <em>do something next</em> can mistake motion for
+          thinking.
+          <strong> Nota treats your attention as something to protect, not to harvest.</strong>
+          It gives you a steady place to write and arrange ideas, and it steps back when you pause so your mind
+          can do the unglamorous part: wandering, revising, waiting for the right phrase without the product
+          trying to entertain the lull. We leave silence alone on purpose. Boredom at the cursor is the sound of
+          a thought catching up.
+        </p>
+      </blockquote>
+    </div>
+  </section>
+
+  <section class="border-t border-border bg-background px-6 py-14 text-center md:px-10 md:py-16">
+    <h2 class="mb-3 font-serif text-2xl text-foreground">Ready when you are</h2>
+    <p class="mb-8 text-muted-foreground">No web app—download Nota for Mac, then choose whether Nota Pro fits your workflow.</p>
+    <div class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+      <a
+        href={NOTA_GITHUB_LATEST}
+        class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+      >
+        Download for macOS
+      </a>
+      <a
+        href="/pricing"
+        class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] border border-border bg-card px-6 py-3 text-sm font-medium text-card-foreground transition hover:bg-muted"
+      >
+        View pricing
+      </a>
+    </div>
+  </section>
+
+  <footer class="border-t border-border bg-background px-6 py-10 text-center text-sm text-muted-foreground">
+    <p>
+      <a
+        href={NOTA_GITHUB_RELEASES}
+        class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">GitHub</a
+      >
+      ·
+      <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+        >Pricing</a
+      >
+    </p>
+  </footer>
+</BaseLayout>

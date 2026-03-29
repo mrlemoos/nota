@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
       - run: npm ci
       - name: ESLint (informational until the backlog is cleared)
@@ -31,13 +31,18 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Test and build web app
-        run: npx nx run-many --targets=test,build --projects=@nota.app/nota.app --outputStyle=static
+      - name: Test web app
+        run: npx nx run @nota.app/nota.app:test --outputStyle=static
+        env:
+          CI: 'true'
+
+      - name: Build web app and marketing site
+        run: npx nx run-many -t build --projects=@nota.app/nota.app,@nota.app/nota-marketing --outputStyle=static
         env:
           CI: 'true'

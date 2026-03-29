@@ -1,0 +1,57 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SiteHeader from '@/components/SiteHeader.astro';
+import { NOTA_GITHUB_LATEST } from '@/lib/site';
+---
+
+<BaseLayout
+  title="Pricing — Nota"
+  description="Nota and Nota Pro: simple pricing for the Mac app. Subscribe from the app after you download."
+>
+  <SiteHeader />
+  <main class="mx-auto max-w-4xl px-6 py-16 md:px-10 md:py-24">
+    <h1 class="mb-4 font-serif text-4xl font-normal text-foreground md:text-5xl">Pricing</h1>
+    <p class="mb-14 max-w-2xl text-lg text-muted-foreground">
+      Nota is a downloadable Mac app. You can write and organise notes for free; Nota Pro unlocks sync, cloud
+      backup, and the full offline-first workflow across your devices when you are signed in. Prices may vary by
+      region—offered purchase flows run inside the app after installation.
+    </p>
+
+    <div class="grid gap-8 md:grid-cols-2">
+      <article class="rounded-[var(--radius)] border border-border bg-card p-8 shadow-sm">
+        <h2 class="mb-2 font-serif text-2xl text-card-foreground">Nota</h2>
+        <p class="mb-6 text-3xl font-medium tracking-tight text-card-foreground">Free</p>
+        <ul class="space-y-3 text-sm text-muted-foreground">
+          <li>Local writing and organising on your Mac</li>
+          <li>Rich text, code blocks, tables, and internal links</li>
+          <li>Note graph and backlinks</li>
+        </ul>
+        <a
+          href={NOTA_GITHUB_LATEST}
+          class="mkt-focus mt-8 inline-flex w-full min-h-11 items-center justify-center rounded-[var(--radius)] border border-border bg-background px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-muted"
+        >
+          Download
+        </a>
+      </article>
+
+      <article class="rounded-[var(--radius)] border border-border bg-sidebar p-8 shadow-sm">
+        <h2 class="mb-2 font-serif text-2xl text-sidebar-foreground">Nota Pro</h2>
+        <p class="mb-2 text-3xl font-medium tracking-tight text-sidebar-foreground">Subscription</p>
+        <p class="mb-6 text-sm text-muted-foreground">Billed in the app · cancel anytime</p>
+        <ul class="space-y-3 text-sm text-muted-foreground">
+          <li>Cloud sync and secure backup for your vault</li>
+          <li>Access across the devices where you use Nota while signed in</li>
+          <li>Supports ongoing development without ads or attention tricks</li>
+        </ul>
+        <p class="mt-8 text-sm text-muted-foreground">
+          Install Nota from GitHub Releases, open the app, and upgrade to Pro from settings when you are ready.
+          No separate checkout on this site.
+        </p>
+      </article>
+    </div>
+
+    <p class="mt-14 text-center text-sm text-muted-foreground">
+      <a href="/" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">← Back home</a>
+    </p>
+  </main>
+</BaseLayout>

@@ -1,0 +1,18 @@
+---
+import { NOTA_GITHUB_LATEST } from '@/lib/site';
+---
+
+<header
+  class="sticky top-0 z-50 border-b border-border bg-background/85 px-5 py-4 text-foreground backdrop-blur-md md:px-8"
+>
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-6">
+    <a href="/" class="mkt-focus font-serif text-xl tracking-tight text-foreground"> Nota </a>
+    <nav class="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm font-medium">
+      <a href={NOTA_GITHUB_LATEST} class="mkt-focus text-muted-foreground transition hover:text-foreground">
+        Download
+      </a>
+      <a href="/pricing" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Pricing </a>
+      <a href="/#writing" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Product </a>
+    </nav>
+  </div>
+</header>

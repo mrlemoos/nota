@@ -48,3 +48,6 @@ vitest.config.*.timestamp*
 
 # Supabase CLI local metadata (may contain connection strings)
 supabase/.temp/
+
+# Astro generated types (marketing site)
+apps/nota-marketing/.astro/
