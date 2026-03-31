@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { spaCreateNote } from './spa-create-note';
 
+import { createLocalOnlyNote, isLikelyOnline } from './notes-offline';
+import { createNote } from '../models/notes';
+
 const getSession = vi.fn();
 const insertNoteAtFront = vi.fn();
 const refreshNotesList = vi.fn();
@@ -36,9 +39,6 @@ vi.mock('../models/notes', () => ({
 vi.mock('./app-navigation', () => ({
   setAppHash: vi.fn(),
 }));
-
-import { createLocalOnlyNote, isLikelyOnline } from './notes-offline';
-import { createNote } from '../models/notes';
 
 describe('spaCreateNote', () => {
   beforeEach(() => {

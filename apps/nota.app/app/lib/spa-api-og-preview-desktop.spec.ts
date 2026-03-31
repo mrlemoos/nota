@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { spaApiOgPreviewDesktop } from './spa-api-og-preview-desktop';
 
+import { getAuthUser } from './supabase/auth';
+
 vi.mock('./supabase/auth', () => ({
   getAuthUser: vi.fn(),
 }));
@@ -13,8 +15,6 @@ vi.mock('./og-preview.server', () => ({
     image: null,
   })),
 }));
-
-import { getAuthUser } from './supabase/auth';
 
 describe('spaApiOgPreviewDesktop', () => {
   beforeEach(() => {

@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { spaDeleteNoteById } from './spa-delete-note';
 
+import {
+  drainNotesOutbox,
+  isLikelyOnline,
+  markPendingDelete,
+} from './notes-offline';
+import { deleteNote } from '../models/notes';
+
 const getSession = vi.fn();
 const removeNoteFromList = vi.fn();
 const refreshNotesList = vi.fn();
@@ -29,13 +36,6 @@ vi.mock('../models/notes', () => ({
 vi.mock('./app-navigation', () => ({
   setAppHash: vi.fn(),
 }));
-
-import {
-  drainNotesOutbox,
-  isLikelyOnline,
-  markPendingDelete,
-} from './notes-offline';
-import { deleteNote } from '../models/notes';
 
 describe('spaDeleteNoteById', () => {
   beforeEach(() => {

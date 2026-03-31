@@ -47,7 +47,7 @@ export async function getNote(client: TypedSupabaseClient, id: string) {
 export async function createNote(
   client: TypedSupabaseClient,
   userId: string,
-  title: string = 'Untitled Note',
+  title = 'Untitled Note',
   content: unknown = { type: 'doc', content: [{ type: 'paragraph' }] },
   options?: {
     id?: string;

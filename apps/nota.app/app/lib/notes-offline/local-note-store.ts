@@ -180,7 +180,7 @@ export async function markPendingDelete(
 
 export async function createLocalOnlyNote(
   userId: string,
-  title: string = 'Untitled Note',
+  title = 'Untitled Note',
 ): Promise<string> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
