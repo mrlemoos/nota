@@ -63,9 +63,11 @@ If you omit `--version`, the version already in `apps/nota-electron/package.json
 - **`main.ts`** calls **`checkForUpdatesAndNotify()`** only when **`app.isPackaged`**. Updates use the **ZIP** assets attached to each release (DMG is for first install).
 - **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver input). It syncs `apps/nota-electron/package.json` version, then runs **`npx nx run @nota.app/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
 
-### Required repository secrets (embedded SPA)
+### Required secrets (embedded SPA, CI)
 
-The release job injects these into the **`nota.app`** Vite build. Add them under **GitHub → Settings → Secrets and variables → Actions** as **Secrets** (mirror Vercel / [`apps/nota.app/.env.example`](../nota.app/.env.example)). **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** are required: the workflow **fails** if either is unset so the app cannot ship with a broken login. Other `VITE_*` secrets may still be empty (features degrade until you add them).
+The **`macos` job** in [`.github/workflows/release-electron.yml`](../../.github/workflows/release-electron.yml) uses **`environment: Production`**, so **`${{ secrets.* }}`** resolves **Production environment secrets** first (and repository secrets where you do not override by name). Define the `VITE_*` keys there (or duplicate them as **repository** secrets if you prefer not to use an environment). Mirror Vercel / [`apps/nota.app/.env.example`](../nota.app/.env.example). **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** are required: the workflow **fails** if either is unset so the app cannot ship with a broken login. Other `VITE_*` secrets may still be empty (features degrade until you add them).
+
+If **Production** has protection rules (required reviewers, wait timers), each release run waits for them before the build starts.
 
 | Secret | Purpose |
 |--------|---------|
@@ -87,11 +89,13 @@ After fixing secrets, **push a new `v*` tag** or run **Release Electron (macOS)*
 
 That message comes from [`apps/nota.app/app/lib/supabase/browser.ts`](../nota.app/app/lib/supabase/browser.ts): the **Vite build** inlined empty `VITE_SUPABASE_*` strings. GitHub Actions does not inject secrets at runtime on the user’s machine.
 
-1. Add **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** under **Secrets** (not **Variables**), with those exact names — this workflow reads `${{ secrets.* }}` only.
+1. Add **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** under **Production** environment secrets (or **repository** secrets), with those exact names — this workflow reads `${{ secrets.* }}` only.
 2. If the URL lives under **Variables**, either duplicate it into **Secrets** or change the workflow to use `${{ vars.VITE_SUPABASE_URL }}` for that key.
 3. Trigger a **new** release build (tag or manual workflow); re-download the app.
 
-### Optional repository secrets (macOS signing / notarisation)
+### Optional secrets (macOS signing / notarisation)
+
+Store these as **repository** secrets or under the same **Production** environment, matching the names below.
 
 | Secret | Purpose |
 |--------|---------|

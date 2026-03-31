@@ -17,6 +17,7 @@ permissions:
 jobs:
   macos:
     runs-on: macos-latest
+    environment: Production
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -64,7 +65,7 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
           if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
-            echo '::error::VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set as repository Actions *secrets* (exact names). Values under Variables are not used unless the workflow references vars.* — see apps/nota-electron/README.md.'
+            echo '::error::VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set for the Production environment (or as repository secrets). Exact names; Variables need vars.* in the workflow — see apps/nota-electron/README.md.'
             exit 1
           fi
 
