@@ -65,7 +65,7 @@ If you omit `--version`, the version already in `apps/nota-electron/package.json
 
 ### Required repository secrets (embedded SPA)
 
-The release job injects these into the **`nota.app`** Vite build. Add them under **GitHub → Settings → Secrets and variables → Actions** (mirror Vercel / [`apps/nota.app/.env.example`](../nota.app/.env.example)). If a secret is missing, the build still runs but the desktop app may ship with empty client config.
+The release job injects these into the **`nota.app`** Vite build. Add them under **GitHub → Settings → Secrets and variables → Actions** as **Secrets** (mirror Vercel / [`apps/nota.app/.env.example`](../nota.app/.env.example)). **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** are required: the workflow **fails** if either is unset so the app cannot ship with a broken login. Other `VITE_*` secrets may still be empty (features degrade until you add them).
 
 | Secret | Purpose |
 |--------|---------|
@@ -80,6 +80,16 @@ The release job injects these into the **`nota.app`** Vite build. Add them under
 - **Manual:** **Actions → Release Electron (macOS) → Run workflow**, enter semver (e.g. `1.2.3`).
 
 Confirm the new **Release** lists DMG and ZIP assets per architecture plus **`latest-mac.yml`** (used by auto-update).
+
+After fixing secrets, **push a new `v*` tag** or run **Release Electron (macOS)** again via **workflow_dispatch** so a fresh build picks up the values.
+
+### Packaged app: “Missing Supabase environment variables”
+
+That message comes from [`apps/nota.app/app/lib/supabase/browser.ts`](../nota.app/app/lib/supabase/browser.ts): the **Vite build** inlined empty `VITE_SUPABASE_*` strings. GitHub Actions does not inject secrets at runtime on the user’s machine.
+
+1. Add **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** under **Secrets** (not **Variables**), with those exact names — this workflow reads `${{ secrets.* }}` only.
+2. If the URL lives under **Variables**, either duplicate it into **Secrets** or change the workflow to use `${{ vars.VITE_SUPABASE_URL }}` for that key.
+3. Trigger a **new** release build (tag or manual workflow); re-download the app.
 
 ### Optional repository secrets (macOS signing / notarisation)
 
