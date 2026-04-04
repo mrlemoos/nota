@@ -20,7 +20,7 @@ import { listNoteAttachments } from '../models/note-attachments';
 import { hashForScreen } from '../lib/app-navigation';
 import { useNotesData } from '../context/notes-data-context';
 export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode {
-  const { notes, refreshNotesList, notaProEntitled } = useNotesData();
+  const { notes, notaProEntitled, patchNoteInList } = useNotesData();
   const [note, setNote] = useState<Note | null>(null);
   const [attachments, setAttachments] = useState<NoteAttachment[]>([]);
   const notesRef = useRef(notes);
@@ -114,9 +114,9 @@ export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode
   const handleNoteUpdated = useCallback(
     (updatedNote: Note) => {
       setNote(updatedNote);
-      void refreshNotesList();
+      patchNoteInList(updatedNote.id, updatedNote);
     },
-    [refreshNotesList],
+    [patchNoteInList],
   );
 
   if (!displayNote) {

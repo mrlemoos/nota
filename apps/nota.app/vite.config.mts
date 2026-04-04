@@ -168,6 +168,29 @@ export default defineConfig(({ mode }) => {
       },
       rollupOptions: {
         input: path.resolve(import.meta.dirname, 'index.html'),
+        output: {
+          manualChunks(id: string) {
+            if (!id.includes('node_modules')) {
+              return;
+            }
+            const norm = id.replace(/\\/g, '/');
+            if (norm.includes('/node_modules/react-dom/')) {
+              return 'vendor-react';
+            }
+            if (norm.includes('/node_modules/scheduler/')) {
+              return 'vendor-react';
+            }
+            if (/\/node_modules\/react\//.test(norm)) {
+              return 'vendor-react';
+            }
+            if (norm.includes('/node_modules/@tiptap/')) {
+              return 'vendor-tiptap';
+            }
+            if (norm.includes('/node_modules/prosemirror-')) {
+              return 'vendor-tiptap';
+            }
+          },
+        },
       },
     },
     ssr: {

@@ -235,6 +235,7 @@ export function NoteEditor({
         setSaveStatus('saved');
         return;
       }
+      setSaveStatus('saving');
       try {
         const titleForRow = persistedDisplayTitle(titleRef.current);
         if (user?.id) {
@@ -294,13 +295,7 @@ export function NoteEditor({
 
   const handleUpdate = useCallback(
     (content: unknown) => {
-      if (
-        JSON.stringify(content) === JSON.stringify(lastSavedContent.current)
-      ) {
-        return;
-      }
       pendingContentRef.current = content;
-      setSaveStatus('saving');
       scheduleContentSave();
     },
     [scheduleContentSave],

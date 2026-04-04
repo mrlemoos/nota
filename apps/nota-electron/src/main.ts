@@ -1,12 +1,15 @@
 import { app, BrowserWindow } from 'electron';
-import { existsSync } from 'node:fs';
+import { createReadStream, existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { createConnection } from 'node:net';
 import {
   createServer,
   type IncomingHttpHeaders,
+  type IncomingMessage,
   type Server,
+  type ServerResponse,
 } from 'node:http';
+import { pipeline } from 'node:stream/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
@@ -222,6 +225,60 @@ async function startServer(): Promise<void> {
     }
   }
 
+  /** Long-lived cache for Vite content-hashed files; no-cache for HTML shell. */
+  function cacheControlForStaticFile(resolved: string): string {
+    const rel = path.relative(staticRoot, resolved).split(path.sep).join('/');
+    const base = path.basename(resolved).toLowerCase();
+    if (base === 'index.html') {
+      return 'no-cache';
+    }
+    const inAssets = rel.startsWith('assets/');
+    const ext = path.extname(resolved).toLowerCase();
+    const longCacheExt = new Set([
+      '.js',
+      '.css',
+      '.mjs',
+      '.woff2',
+      '.woff',
+      '.ttf',
+      '.map',
+    ]);
+    if (inAssets && longCacheExt.has(ext)) {
+      return 'public, max-age=31536000, immutable';
+    }
+    return 'public, max-age=86400';
+  }
+
+  async function sendStaticFile(
+    req: IncomingMessage,
+    res: ServerResponse,
+    resolved: string,
+  ): Promise<void> {
+    const st = await stat(resolved);
+    if (st.isDirectory()) {
+      throw new Error('directory');
+    }
+    res.statusCode = 200;
+    res.setHeader('Content-Type', contentType(resolved));
+    res.setHeader('Cache-Control', cacheControlForStaticFile(resolved));
+    res.setHeader('Content-Length', String(st.size));
+    if (req.method === 'HEAD') {
+      res.end();
+      return;
+    }
+    try {
+      await pipeline(createReadStream(resolved), res);
+    } catch {
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.end();
+      } else {
+        res.destroy();
+      }
+    }
+  }
+
   const rootResolved = path.resolve(staticRoot);
 
   staticServer = createServer(async (req, res) => {
@@ -265,6 +322,13 @@ async function startServer(): Promise<void> {
       return;
     }
 
+    if (req.method !== 'GET' && req.method !== 'HEAD') {
+      res.statusCode = 405;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.end('Method Not Allowed');
+      return;
+    }
+
     const rel = urlPath === '/' ? 'index.html' : urlPath.slice(1);
     const resolved = path.resolve(staticRoot, rel);
     if (
@@ -277,24 +341,17 @@ async function startServer(): Promise<void> {
     }
 
     try {
-      const st = await stat(resolved);
-      if (st.isDirectory()) {
-        throw new Error('directory');
-      }
-      const buf = await readFile(resolved);
-      res.setHeader('Content-Type', contentType(resolved));
-      res.statusCode = 200;
-      res.end(buf);
+      await sendStaticFile(req, res, resolved);
     } catch {
+      const indexPath = path.join(staticRoot, 'index.html');
       try {
-        const buf = await readFile(path.join(staticRoot, 'index.html'));
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.statusCode = 200;
-        res.end(buf);
+        await sendStaticFile(req, res, indexPath);
       } catch {
-        res.statusCode = 500;
-        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-        res.end('Missing index.html');
+        if (!res.headersSent) {
+          res.statusCode = 500;
+          res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+          res.end('Missing index.html');
+        }
       }
     }
   });

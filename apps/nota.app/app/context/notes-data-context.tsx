@@ -179,9 +179,17 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
   }, [userId, refreshNotesList]);
 
   const patchNoteInList = useCallback((id: string, patch: Partial<Note>) => {
-    setNotes((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, ...patch } : n)),
-    );
+    setNotes((prev) => {
+      const idx = prev.findIndex((n) => n.id === id);
+      if (idx === -1) {
+        return prev;
+      }
+      const merged = { ...prev[idx], ...patch };
+      const next = [...prev];
+      next[idx] = merged;
+      next.sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      return next;
+    });
   }, []);
 
   const removeNoteFromList = useCallback((id: string) => {
