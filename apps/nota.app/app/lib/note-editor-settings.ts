@@ -4,6 +4,7 @@ import type { Json, Note } from '~/types/database.types';
 const noteEditorSettingsSchema = z.object({
   font: z.enum(['sans', 'serif', 'mono']).optional(),
   measure: z.enum(['narrow', 'wide']).optional(),
+  showInNoteGraph: z.boolean().optional(),
 });
 
 export type NoteEditorSettings = z.infer<typeof noteEditorSettingsSchema>;
@@ -35,7 +36,21 @@ export function noteEditorSettingsToJson(settings: NoteEditorSettings): Json {
   if (settings.measure) {
     o.measure = settings.measure;
   }
+  if (settings.showInNoteGraph === false) {
+    o.showInNoteGraph = false;
+  }
   return o as Json;
+}
+
+/** Default: notes appear in the graph unless `editor_settings.showInNoteGraph === false`. */
+export function isNoteVisibleInNoteGraph(
+  note: Pick<Note, 'editor_settings'>,
+): boolean {
+  return parseNoteEditorSettings(note.editor_settings).showInNoteGraph !== false;
+}
+
+export function filterNotesForNoteGraph(notes: Note[]): Note[] {
+  return notes.filter(isNoteVisibleInNoteGraph);
 }
 
 export function noteSurfaceClassNames(settings: NoteEditorSettings): {

@@ -123,6 +123,22 @@ export function NoteLayoutMenu({
                 <option value="wide">Wide</option>
               </select>
             </div>
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={settings.showInNoteGraph !== false}
+                disabled={disabled}
+                onChange={(e) => {
+                  const visible = e.target.checked;
+                  onSettingsChange({
+                    ...settings,
+                    showInNoteGraph: visible ? undefined : false,
+                  });
+                }}
+                className="size-3.5 shrink-0 rounded border-input accent-primary"
+              />
+              <span>Show in note graph</span>
+            </label>
             <Button
               type="button"
               variant="outline"

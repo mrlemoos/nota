@@ -24,6 +24,7 @@ import '@xyflow/react/dist/style.css';
 import type { Note } from '~/types/database.types';
 import { useNotesData } from '../context/notes-data-context';
 import { navigateFromLegacyPath } from '../lib/app-navigation';
+import { filterNotesForNoteGraph } from '../lib/note-editor-settings';
 import { buildNoteLinkGraph } from '../lib/note-link-graph';
 import { cn } from '@/lib/utils';
 
@@ -92,9 +93,14 @@ function buildFlowModel(notes: Note[]): { nodes: Node[]; edges: Edge[] } {
 function NotesGraphFlowInner(): JSX.Element {
   const { notes } = useNotesData();
 
-  const { nodes: derivedNodes, edges: derivedEdges } = useMemo(
-    () => buildFlowModel(notes),
+  const visibleNotes = useMemo(
+    () => filterNotesForNoteGraph(notes),
     [notes],
+  );
+
+  const { nodes: derivedNodes, edges: derivedEdges } = useMemo(
+    () => buildFlowModel(visibleNotes),
+    [visibleNotes],
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(derivedNodes);
@@ -120,6 +126,16 @@ function NotesGraphFlowInner(): JSX.Element {
   if (notes.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">No notes to show.</p>
+    );
+  }
+
+  if (visibleNotes.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        Every note is hidden from the graph. Open a note and turn on{' '}
+        <span className="font-medium text-foreground">Show in note graph</span>{' '}
+        in the note layout menu (typography icon next to the title).
+      </p>
     );
   }
 
