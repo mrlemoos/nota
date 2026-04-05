@@ -1,13 +1,13 @@
 @import 'tailwindcss';
 
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/source-sans-3';
 @import '@fontsource/instrument-serif/400.css';
 @import '@fontsource-variable/source-serif-4';
 
 @source "../**/*.{astro,html,ts}";
 
 @theme inline {
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
   --font-note-body: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
 
@@ -50,6 +50,13 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
+}
+
+/* Radial lift behind hero content — barely perceptible, avoids flat void */
+.mkt-hero-shell {
+  background-image:
+    radial-gradient(120% 80% at 50% -20%, oklch(0.22 0.02 250 / 0.35), transparent 55%),
+    radial-gradient(90% 60% at 100% 50%, oklch(0.2 0.015 280 / 0.12), transparent 50%);
 }
 
 .mkt-dark {
@@ -121,6 +128,14 @@
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  [data-nota-hero-video] {
+    display: none !important;
+  }
+
+  [data-nota-hero-fallback] {
+    display: block !important;
   }
 }
 

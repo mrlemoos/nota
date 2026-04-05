@@ -1,0 +1,77 @@
+---
+interface Props {
+  /** Accessible description of the demo recording */
+  videoLabel?: string;
+}
+
+const {
+  videoLabel =
+    'Silent screen recording of Nota on macOS: writing in the editor, sidebar notes list, and internal links in a calm dark interface',
+} = Astro.props;
+
+const posterSrc = '/video/nota-hero-poster.jpg';
+---
+
+<section
+  class="relative z-10 mx-auto grid min-h-[calc(100vh-4.5rem)] max-w-6xl items-center gap-12 px-6 py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-16 lg:py-20"
+>
+  <slot />
+
+  <div class="mkt-hero-animate mkt-hero-animate-delay-1 relative mx-auto w-full max-w-lg lg:mx-0 lg:max-w-none">
+    <div
+      class="mkt-hero-video-frame rounded-xl border border-border bg-card/30 p-2 shadow-[0_28px_80px_-16px_rgba(0,0,0,0.55)] ring-1 ring-white/15"
+    >
+      <div class="relative aspect-[1698/1140] w-full overflow-hidden rounded-lg border border-border/80 bg-black/40">
+        <video
+          class="h-full w-full object-cover object-top"
+          data-nota-hero-video
+          width={1698}
+          height={1140}
+          muted
+          loop
+          playsinline
+          autoplay
+          preload="metadata"
+          poster={posterSrc}
+          aria-label={videoLabel}
+        >
+          <source src="/video/nota-hero.webm" type="video/webm" />
+          <source src="/video/nota-hero.mp4" type="video/mp4" />
+        </video>
+        <img
+          class="data-nota-hero-fallback hidden h-full w-full object-cover object-top"
+          data-nota-hero-fallback
+          src={posterSrc}
+          alt={videoLabel}
+          width={1698}
+          height={1140}
+          loading="eager"
+          decoding="async"
+          fetchpriority="high"
+        />
+      </div>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    function sync() {
+      const video = document.querySelector('[data-nota-hero-video]');
+      if (!video || !(video instanceof HTMLVideoElement)) return;
+      if (mq.matches) {
+        video.pause();
+      } else {
+        const p = video.play();
+        if (p !== undefined) p.catch(function () {});
+      }
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', sync);
+    } else {
+      sync();
+    }
+    mq.addEventListener('change', sync);
+  })();
+</script>

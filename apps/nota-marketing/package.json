@@ -4,14 +4,14 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/verify-marketing-hero.mjs",
     "preview": "astro preview",
     "generate:og": "node scripts/generate-og.mjs",
     "generate:favicons": "node scripts/generate-favicons.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
-    "@fontsource-variable/inter": "^5.2.8",
+    "@fontsource-variable/source-sans-3": "^5.2.9",
     "@fontsource-variable/source-serif-4": "^5.2.9",
     "@fontsource/instrument-serif": "^5.2.8",
     "@microsoft/clarity": "^1.0.2",
@@ -37,7 +37,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "apps/nota-marketing",
-          "command": "astro build"
+          "command": "npm run build"
         }
       },
       "preview": {
