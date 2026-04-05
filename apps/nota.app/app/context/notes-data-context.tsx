@@ -23,6 +23,8 @@ import {
   readNotaServerEntitledSession,
   syncNotaServerEntitledSession,
 } from '../lib/revenuecat/nota-notes-entitled-session';
+import { setAppHash } from '../lib/app-navigation';
+import { runWelcomeNoteSeedIfNeeded } from '../lib/welcome-note-seed';
 import { useSpaSession } from './spa-session-context';
 
 export type NotesDataContextValue = {
@@ -44,6 +46,7 @@ const NotesDataContext = createContext<NotesDataContextValue | null>(null);
 export function NotesDataProvider({ children }: { children: ReactNode }) {
   const { user } = useSpaSession();
   const userId = user?.id;
+  const welcomeSeeded = user?.user_metadata?.welcome_seeded === true;
 
   const [notaProEntitled, setNotaProEntitled] = useState(false);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -177,6 +180,43 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
       window.clearTimeout(id);
     };
   }, [userId, refreshNotesList]);
+
+  useEffect(() => {
+    if (!userId || !user || loading) {
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      const id = await runWelcomeNoteSeedIfNeeded({
+        user,
+        notesCount: notes.length,
+      });
+      if (cancelled) {
+        return;
+      }
+      if (id) {
+        await refreshNotesList();
+        if (cancelled) {
+          return;
+        }
+        setAppHash({ kind: 'notes', panel: 'note', noteId: id });
+        return;
+      }
+      if (welcomeSeeded && notes.length === 0) {
+        await refreshNotesList();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    userId,
+    user,
+    loading,
+    notes.length,
+    refreshNotesList,
+    welcomeSeeded,
+  ]);
 
   const patchNoteInList = useCallback((id: string, patch: Partial<Note>) => {
     setNotes((prev) => {

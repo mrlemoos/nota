@@ -181,6 +181,7 @@ export async function markPendingDelete(
 export async function createLocalOnlyNote(
   userId: string,
   title = 'Untitled Note',
+  content: Json = DEFAULT_NOTE_CONTENT,
 ): Promise<string> {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
@@ -190,10 +191,7 @@ export async function createLocalOnlyNote(
     id,
     user_id: userId,
     title,
-    content: {
-      type: 'doc',
-      content: [{ type: 'paragraph' }],
-    } as Json,
+    content,
     created_at: now,
     updated_at: now,
     due_at: null,
