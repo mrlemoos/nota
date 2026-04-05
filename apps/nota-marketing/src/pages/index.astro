@@ -4,7 +4,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import HeroLandscape from '@/components/HeroLandscape.astro';
 import HeroWithVideo from '@/components/HeroWithVideo.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
-import { NOTA_GITHUB_LATEST, NOTA_GITHUB_RELEASES } from '@/lib/site';
+import { NOTA_GITHUB_LATEST, NOTA_GITHUB_RELEASES, NOTA_GITHUB_REPO } from '@/lib/site';
 import signInShot from '@/assets/marketing/sign-in.png';
 import editorOverview from '@/assets/marketing/editor-overview.png';
 import editorCode from '@/assets/marketing/editor-code.png';
@@ -60,7 +60,7 @@ const structuredData = {
       '@id': `${siteRoot}#organization`,
       name: 'Nota',
       url: siteRoot,
-      sameAs: ['https://github.com/mrlemoos/nota.app'],
+      sameAs: [NOTA_GITHUB_REPO],
     },
     {
       '@type': 'WebSite',
@@ -143,7 +143,7 @@ const structuredData = {
           </div>
           <div class="flex w-full max-w-xl flex-col items-center gap-4 sm:max-w-none lg:items-start" id="download">
             <div
-              class="mkt-hero-animate mkt-hero-animate-delay-1 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-4"
+              class="mkt-hero-animate mkt-hero-animate-delay-1 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2"
             >
               <a
                 href={NOTA_GITHUB_LATEST}
@@ -156,6 +156,14 @@ const structuredData = {
                 class="mkt-focus text-sm font-medium text-muted-foreground underline decoration-muted-foreground/50 underline-offset-4 transition hover:text-foreground"
               >
                 All releases
+              </a>
+              <a
+                href={NOTA_GITHUB_REPO}
+                class="mkt-focus text-sm font-medium text-muted-foreground underline decoration-muted-foreground/50 underline-offset-4 transition hover:text-foreground"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Open-source repo
               </a>
             </div>
             <p class="mkt-hero-animate mkt-hero-animate-delay-2 max-w-md text-xs leading-relaxed text-muted-foreground">
@@ -312,8 +320,15 @@ const structuredData = {
     <footer class="border-t border-border bg-background px-6 py-10 text-center text-sm text-muted-foreground">
       <p>
         <a
+          href={NOTA_GITHUB_REPO}
+          class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+          rel="noopener noreferrer"
+          target="_blank">Open source</a
+        >
+        ·
+        <a
           href={NOTA_GITHUB_RELEASES}
-          class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">GitHub</a
+          class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">Releases</a
         >
         ·
         <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"

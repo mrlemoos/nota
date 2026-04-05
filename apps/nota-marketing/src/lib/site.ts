@@ -1,3 +1,6 @@
-/** Desktop builds and release assets (Electron). Mirrors [package.json](../../../../package.json) `repository`. */
-export const NOTA_GITHUB_RELEASES = 'https://github.com/mrlemoos/nota.app/releases';
-export const NOTA_GITHUB_LATEST = 'https://github.com/mrlemoos/nota.app/releases/latest';
+/** Monorepo root on GitHub. Mirrors [package.json](../../../../package.json) `repository`. */
+export const NOTA_GITHUB_REPO = 'https://github.com/mrlemoos/nota.app';
+
+/** Desktop builds and release assets (Electron). */
+export const NOTA_GITHUB_RELEASES = `${NOTA_GITHUB_REPO}/releases`;
+export const NOTA_GITHUB_LATEST = `${NOTA_GITHUB_REPO}/releases/latest`;
