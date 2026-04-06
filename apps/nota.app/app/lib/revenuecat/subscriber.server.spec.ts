@@ -99,6 +99,49 @@ describe('subscriberJsonHasActiveNotaPro', () => {
       }),
     ).toBe(false);
   });
+
+  it('returns true when entitlement id does not match but product_identifier is a Nota Pro web product', () => {
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    expect(
+      subscriberJsonHasActiveNotaPro({
+        subscriber: {
+          entitlements: {
+            custom_key: {
+              product_identifier: 'nota_pro_monthly',
+              expires_date: future,
+            },
+          },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('returns true when subscriptions lists an active Nota Pro web product', () => {
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    expect(
+      subscriberJsonHasActiveNotaPro({
+        subscriber: {
+          entitlements: {},
+          subscriptions: {
+            nota_pro_yearly: { expires_date: future },
+          },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('returns true when subscriptions key is a RevenueCat package alias with active expiry', () => {
+    const future = new Date(Date.now() + 86_400_000).toISOString();
+    expect(
+      subscriberJsonHasActiveNotaPro({
+        subscriber: {
+          subscriptions: {
+            $rc_monthly: { expires_date: future },
+          },
+        },
+      }),
+    ).toBe(true);
+  });
 });
 
 describe('getServerNotaProEntitled', () => {

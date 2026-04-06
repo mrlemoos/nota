@@ -1,6 +1,7 @@
 import {
   ENTITLEMENT_NOTA_PRO,
   ENTITLEMENT_NOTA_PRO_REST_ID,
+  NOTA_PRO_WEB_PRODUCT_IDS,
 } from './constants';
 
 const REVENUECAT_V1_BASE = 'https://api.revenuecat.com/v1';
@@ -20,13 +21,65 @@ export function getRevenueCatSecretApiKey(): string | undefined {
 
 type RcEntitlementEntry = {
   expires_date?: string | null;
+  product_identifier?: string | null;
+};
+
+type RcSubscriptionEntry = {
+  expires_date?: string | null;
 };
 
 type RcSubscriberJson = {
   subscriber?: {
     entitlements?: Record<string, RcEntitlementEntry>;
+    subscriptions?: Record<string, RcSubscriptionEntry>;
   };
 };
+
+const notaProProductIdSet = new Set(
+  NOTA_PRO_WEB_PRODUCT_IDS.map((id) => id.toLowerCase()),
+);
+
+function notaProProductMatch(id: string | null | undefined): boolean {
+  if (typeof id !== 'string' || !id.trim()) {
+    return false;
+  }
+  return notaProProductIdSet.has(id.trim().toLowerCase());
+}
+
+function subscriberHasActiveNotaProSubscription(
+  subscriptions: Record<string, RcSubscriptionEntry> | undefined,
+): boolean {
+  if (!subscriptions) {
+    return false;
+  }
+  for (const [productId, entry] of Object.entries(subscriptions)) {
+    if (!notaProProductMatch(productId)) {
+      continue;
+    }
+    if (isRcEntitlementEntryActive(entry)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/** Handles renamed entitlement identifiers if `product_identifier` still matches a Nota Pro web product. */
+function subscriberHasActiveNotaProEntitlementByProduct(
+  entitlements: Record<string, RcEntitlementEntry> | undefined,
+): boolean {
+  if (!entitlements) {
+    return false;
+  }
+  for (const entry of Object.values(entitlements)) {
+    if (!notaProProductMatch(entry?.product_identifier ?? undefined)) {
+      continue;
+    }
+    if (isRcEntitlementEntryActive(entry)) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function pickNotaProEntitlementEntry(
   entitlements: Record<string, RcEntitlementEntry> | undefined,
@@ -49,14 +102,23 @@ export function subscriberJsonHasActiveNotaPro(json: unknown): boolean {
     return false;
   }
   const subscriber = (json as RcSubscriberJson).subscriber;
-  const entry = pickNotaProEntitlementEntry(subscriber?.entitlements);
-  if (!entry) {
-    return false;
+  const entitlements = subscriber?.entitlements;
+  const entry = pickNotaProEntitlementEntry(entitlements);
+  if (entry && isRcEntitlementEntryActive(entry)) {
+    return true;
   }
-  return isRcEntitlementEntryActive(entry);
+  if (subscriberHasActiveNotaProEntitlementByProduct(entitlements)) {
+    return true;
+  }
+  if (subscriberHasActiveNotaProSubscription(subscriber?.subscriptions)) {
+    return true;
+  }
+  return false;
 }
 
-function isRcEntitlementEntryActive(entry: RcEntitlementEntry): boolean {
+function isRcEntitlementEntryActive(
+  entry: RcEntitlementEntry | RcSubscriptionEntry,
+): boolean {
   const raw = entry.expires_date;
   if (raw === null || raw === undefined) {
     return true;

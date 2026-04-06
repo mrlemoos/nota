@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { createReadStream, existsSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { createConnection } from 'node:net';
@@ -188,6 +188,21 @@ function createWindow(): void {
   });
 
   const win = mainWindow;
+
+  // RevenueCat Web Billing opens Stripe checkout via window.open; without this, Electron
+  // often blocks or mishandles the popup so the user sees no checkout.
+  win.webContents.setWindowOpenHandler((details) => {
+    try {
+      const parsed = new URL(details.url);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        void shell.openExternal(details.url);
+        return { action: 'deny' };
+      }
+    } catch {
+      /* ignore */
+    }
+    return { action: 'allow' };
+  });
 
   // Load the app
   if (isDev) {

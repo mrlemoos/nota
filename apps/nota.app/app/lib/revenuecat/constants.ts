@@ -13,3 +13,16 @@ export const ENTITLEMENT_NOTA_PRO_REST_ID = 'entld5de245523';
 /** sessionStorage: last known server entitlement for offline client loader behaviour (`1` = entitled). */
 export const NOTA_SERVER_NOTES_ENTITLED_SESSION_KEY =
   'nota-notes-server-entitled';
+
+/**
+ * Web Billing product identifiers (RevenueCat ↔ Stripe). REST `/v1/subscribers` may omit
+ * `entitlements` keys that match {@link ENTITLEMENT_NOTA_PRO} while still listing these under
+ * `subscriptions`.
+ */
+export const NOTA_PRO_WEB_PRODUCT_IDS: readonly string[] = [
+  'nota_pro_monthly',
+  'nota_pro_yearly',
+  // Offering `nota_offering` package identifiers (may appear as `subscriptions` keys in REST).
+  '$rc_monthly',
+  '$rc_annual',
+];
