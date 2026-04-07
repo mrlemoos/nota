@@ -1,9 +1,9 @@
-import { getClerkUserIdFromRequest } from './clerk-request-auth';
+import { getClerkUserIdFromRequest } from './clerk-request-auth.js';
 import {
   invalidateNotaProCacheForUser,
   jsonResponseNotaProEntitledForUser,
   jsonResponseNotaProInvalidateOk,
-} from './nota-pro-api-logic';
+} from './nota-pro-api-logic.js';
 
 export async function spaApiNotaProEntitled(
   request: Request,
