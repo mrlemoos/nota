@@ -82,3 +82,27 @@
 - Shortcut-related app preferences use the `user_preferences` table (RLS, migration under `supabase/migrations/`); when **`notaProEntitled`**, `NotesDataProvider` loads them and `useSyncUserPreferences` / `submitUserPreferencesToggle` flush to Supabase with **`cloudSyncEnabled`**. Otherwise toggles stay device-local via Zustand (`preferencesPendingSync` when offline or not entitled). `dailyNoteIdByLocalDate` (local calendar `YYYY-MM-DD` → note id) stays device-local only. **`openTodaysNoteClient`** (`open-todays-note.ts`) **no-ops when not entitled**; when entitled it uses **`createNote`** online or **`createLocalOnlyNote`** offline, passing **`dailyNoteDisplayTitle(at)`** from **`todays-note.ts`** (`en-GB` long local date, same **`Date`** instance as **`localDateKey`**). Notes history: Mod+[ / Mod+] use **`window.history.back()`** / **`forward()`** from `use-notes-history-shortcut.ts` (capture-phase `keydown` on `document` so shortcuts work inside TipTap; skip when focus is inside `data-nota-command-palette`, same as other global note shortcuts).
 - **Marketing site** (`apps/nota-marketing`): Astro static site with its own Vercel project root; Vercel Web Analytics uses **`@vercel/analytics/astro`** and **`<Analytics />`** in **`src/layouts/BaseLayout.astro`** so all routes inherit tracking. Optional **Microsoft Clarity**: **`@microsoft/clarity`** initialised in that layout when **`VITE_CLARITY_PROJECT_ID`** is set at build time; **`astro.config.mjs`** sets **`vite.envPrefix: ['VITE_', 'PUBLIC_']`** because Astro exposes only **`PUBLIC_*`** to client code by default. **`vite.resolve.alias`** maps **`@nota/note-doc-plain-text`** to **`apps/nota.app/app/lib/note-doc-plain-text.ts`** for the **`/tools/note-text-preview`** micro-tool. Root **`.gitignore`** includes **`apps/nota-marketing/.env`** and **`apps/nota-marketing/.env.local`** (document **`VITE_CLARITY_PROJECT_ID`** in **`apps/nota-marketing/.env.example`**). Public **refund policy** for web-billed subscriptions: **`/refunds`** ([`src/pages/refunds.astro`](apps/nota-marketing/src/pages/refunds.astro)); link the live URL from Stripe Dashboard policy fields where offered.
 - Electron desktop: **translucency** — `BrowserWindow` uses `transparent: true` and `backgroundColor: '#00000000'`; on macOS add `vibrancy: 'under-window'` and `visualEffectState: 'followWindow'` so the window is not a solid black composite. `index.html` runs an inline head script that adds `nota-electron` on `<html>` when `window.nota` exists. Use unlayered CSS (not only `@layer base`) for `html.nota-electron` / `body` transparency and for `html.nota-electron .nota-notes-root` so Tailwind utility backgrounds on the notes shell do not override transparency. In [`main.ts`](apps/nota-electron/src/main.ts), `webContents.setWindowOpenHandler` sends `http:`/`https:` `window.open` targets to **`shell.openExternal`** so hosted checkout and other external flows open in the system browser. **Releases** — [`.github/workflows/release-electron.yml`](.github/workflows/release-electron.yml) **`macos` job** uses **`environment: Production`** and injects **`VITE_SUPABASE_URL`**, **`VITE_SUPABASE_ANON_KEY`**, **`VITE_CLERK_PUBLISHABLE_KEY`**, and **`VITE_NOTA_SERVER_API_URL`** from **`secrets.*`** (Production environment and/or repository secrets). Repository **Variables** are not applied unless the workflow references **`vars.*`**. A **Verify Vite client env** step fails the job if required `VITE_*` secrets are empty so the bundle cannot ship with broken login. Packaged **Missing environment variables** means **`vite build`** inlined empty `VITE_*` values—fix secret names/placement and run a new release. Locally, **`npm run release:electron`** can reuse an Nx-cached **`@nota.app/nota.app:build`** with stale inlined **`VITE_*`**; run `npx nx run @nota.app/nota.app:build --skip-nx-cache` (or equivalent) before publishing when client env values changed.
+
+<!-- nx configuration start-->
+<!-- Leave the start & end comments to automatically receive updates. -->
+
+## General Guidelines for working with Nx
+
+- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
+- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
+- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
+- You have access to the Nx MCP server and its tools, use them to help the user
+- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
+- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
+
+## Scaffolding & Generators
+
+- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
+
+## When to use nx_docs
+
+- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
+- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
+- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
+
+<!-- nx configuration end-->
