@@ -7,34 +7,8 @@ import {
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { fetchOgPreviewForEditor } from '@/lib/og-preview-client';
 import { revertLinkPreviewToParagraph } from './link-preview-scan';
-
-type OgPreviewJson = {
-  url: string;
-  title: string | null;
-  description: string | null;
-  image: string | null;
-};
-
-type OgErrorJson = {
-  error: string;
-};
-
-async function fetchOgPreviewClient(href: string): Promise<OgPreviewJson> {
-  const res = await fetch(
-    `/api/og-preview?url=${encodeURIComponent(href)}`,
-    { credentials: 'same-origin' },
-  );
-  const data = (await res.json()) as OgPreviewJson | OgErrorJson;
-  if (!res.ok) {
-    const err = 'error' in data ? data.error : 'Request failed';
-    throw new Error(err);
-  }
-  if ('error' in data) {
-    throw new Error(data.error);
-  }
-  return data;
-}
 
 function linkPreviewHasPersistedMeta(node: {
   attrs: Record<string, unknown>;
@@ -71,7 +45,7 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
     setLoading(true);
     void (async () => {
       try {
-        const data = await fetchOgPreviewClient(href);
+        const data = await fetchOgPreviewForEditor(href);
         if (cancelled) return;
         const title = (data.title ?? '').trim();
         const desc = (data.description ?? '').trim();

@@ -1,6 +1,7 @@
 import cors from 'cors';
 import express from 'express';
 import { expressToWebRequest, sendWebResponse } from './http-utils.ts';
+import { ogPreviewHandler } from './routes/og-preview.ts';
 import {
   notaProEntitledHandler,
   notaProInvalidateHandler,
@@ -62,6 +63,17 @@ app.post('/api/nota-pro-invalidate', (req, res, next) => {
   void (async () => {
     try {
       const r = await notaProInvalidateHandler(expressToWebRequest(req));
+      await sendWebResponse(res, r);
+    } catch (e) {
+      next(e);
+    }
+  })();
+});
+
+app.get('/api/og-preview', (req, res, next) => {
+  void (async () => {
+    try {
+      const r = await ogPreviewHandler(expressToWebRequest(req));
       await sendWebResponse(res, r);
     } catch (e) {
       next(e);
