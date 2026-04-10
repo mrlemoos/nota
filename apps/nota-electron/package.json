@@ -13,12 +13,20 @@
   },
   "devDependencies": {
     "@types/wait-on": "^5.3.4",
-    "electron": "35.7.5"
+    "electron": "35.7.5",
+    "vitest": "~4.0.0"
   },
   "nx": {
     "sourceRoot": "apps/nota-electron/src",
     "projectType": "application",
     "targets": {
+      "test": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "apps/nota-electron",
+          "command": "npx vitest run"
+        }
+      },
       "build": {
         "executor": "nx:run-commands",
         "options": {

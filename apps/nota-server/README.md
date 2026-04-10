@@ -31,9 +31,9 @@ bun run dev
 
 `npm run start` expects `dist/index.js` from a prior `npm run build`.
 
-If **`NOTA_SERVER_CORS_ORIGINS` is unset**, the server allows `http://127.0.0.1:4378` (packaged Electron), `http://localhost:4200`, and `http://localhost:4300`. **If you set `NOTA_SERVER_CORS_ORIGINS` at all** (e.g. on Railway), that value **replaces** those defaults — include your production web origin **and** `http://127.0.0.1:4378` (and dev origins if needed), comma-separated.
+If **`NOTA_SERVER_CORS_ORIGINS` is unset**, the server allows `http://127.0.0.1:4378` (legacy packaged static preview), `http://localhost:4200`, and `http://localhost:4300`. **Packaged Electron** loads the hosted SPA at **`https://app.nota.mrlemoos.dev`**, so browser calls send **`Origin: https://app.nota.mrlemoos.dev`** — include that origin when you set **`NOTA_SERVER_CORS_ORIGINS`** on Railway (or rely on `*` / reflected origins only if you accept that trade-off). **If you set `NOTA_SERVER_CORS_ORIGINS` at all**, that value **replaces** the defaults — list your production web origin(s), **`https://app.nota.mrlemoos.dev`**, any **`http://127.0.0.1:4378`** / dev origins you still need, comma-separated.
 
-**Wildcard `*`:** Set **`NOTA_SERVER_CORS_ORIGINS=*`** to allow **any** browser `Origin` (implemented with `cors` **`origin: true`**, so the response echoes the request origin). A lone `*` is **not** treated as a string to match against the `Origin` header (that would never match real clients such as `http://127.0.0.1:4378`). For production, prefer an explicit comma-separated list so only your web app and Electron can call the API.
+**Wildcard `*`:** Set **`NOTA_SERVER_CORS_ORIGINS=*`** to allow **any** browser `Origin` (implemented with `cors` **`origin: true`**, so the response echoes the request origin). A lone `*` is **not** treated as a string to match against the `Origin` header (that would never match real clients such as `http://127.0.0.1:4378`). For production, prefer an explicit comma-separated list so only your web app and desktop shell can call the API.
 
 ## Auth
 

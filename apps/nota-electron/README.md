@@ -111,6 +111,6 @@ With `APPLE_CERTIFICATE_BASE64` unset, CI still produces **unsigned** artefacts.
 ## Architecture
 
 - **Dev mode**: Loads from `http://localhost:4200` (Vite dev server).
-- **Prod mode**: Serves the embedded **`nota.app/dist`** static build from inside the app bundle via a small Node **`http`** server on **`http://127.0.0.1:4378`** (SPA fallback).
-- **Link preview**: **`GET /api/og-preview`** is handled locally via **`electron-og-api.mjs`** and **`nota-public-env.json`** from the nota.app build. The OG bundle inlines **`CLERK_SECRET_KEY`** from the build environment (set **`CLERK_SECRET_KEY`** alongside the `VITE_*` secrets when running **`electron:release`**). The main process also loads **`VITE_CLERK_PUBLISHABLE_KEY`** from `nota-public-env.json` for cookie-based session resolution.
-- **Nota Pro entitlement**: Build **`nota.app`** with **`VITE_NOTA_SERVER_API_URL`** pointing at **[`nota-server`](../nota-server)** so entitlement and invalidate use Bearer auth against that service. Other **`/api/*`** paths still return **502** in the desktop static server.
+- **Prod mode (packaged)**: Loads **`https://app.nota.mrlemoos.dev`** — the same deployed **`nota.app`** SPA as the web client ([`src/app-load-url.ts`](src/app-load-url.ts)). Release builds still embed **`nota.app/dist`** via `electron-builder` until that dependency is removed.
+- **Link preview**: Uses the hosted **`GET /api/og-preview`** on Vercel (same as the browser app). Configure **`CLERK_SECRET_KEY`** and public **`VITE_*`** on the Vercel project that serves **`app.nota.mrlemoos.dev`**.
+- **Nota Pro entitlement**: The deployed app must be built with **`VITE_NOTA_SERVER_API_URL`** pointing at **[`nota-server`](../nota-server)**. Ensure **`NOTA_SERVER_CORS_ORIGINS`** on the server includes **`https://app.nota.mrlemoos.dev`** when you use an explicit allowlist.
