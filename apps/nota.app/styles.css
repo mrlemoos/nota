@@ -567,10 +567,19 @@
 /*
  * Electron shell: unlayered so these beat Tailwind utilities (e.g. notes root gradient).
  * Native vibrancy + transparent html/body are both required for macOS; see nota-electron main.
+ * Lock document height so `100dvh` layout cannot spill past the webview (spurious window scrollbar).
  */
 html.nota-electron,
 html.nota-electron body {
   background-color: transparent;
+  height: 100%;
+  overflow: hidden;
+}
+
+html.nota-electron #root {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 html.nota-electron .nota-notes-root {

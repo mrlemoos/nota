@@ -23,7 +23,10 @@ function SpaAuthPanel({
   return (
     <div
       id={panelId}
-      className={cn(!active && 'hidden')}
+      className={cn(
+        !active && 'hidden',
+        active && 'flex min-h-0 flex-1 flex-col',
+      )}
       aria-hidden={!active}
       inert={active ? undefined : true}
     >
@@ -91,17 +94,17 @@ export function SpaApp(): JSX.Element {
 
   if (loading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground text-sm">
+      <div className="flex h-full min-h-0 min-h-dvh items-center justify-center bg-background text-muted-foreground text-sm">
         Loading…
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
+    <div className="flex min-h-0 h-full min-h-dvh flex-col bg-background text-foreground">
       {!anyShellActive ? (
         <div
-          className="flex min-h-dvh flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground"
+          className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground"
           role="status"
         >
           <p>Reconnecting to this screen…</p>
@@ -130,7 +133,7 @@ export function SpaApp(): JSX.Element {
       </SpaAuthPanel>
       <SpaAuthPanel active={landingActive} panelId="spa-screen-landing">
         {user ? (
-          <div className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground text-sm">
+          <div className="flex h-full min-h-0 min-h-dvh flex-1 items-center justify-center bg-background text-muted-foreground text-sm">
             Loading…
           </div>
         ) : (
