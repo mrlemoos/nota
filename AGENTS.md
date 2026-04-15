@@ -22,9 +22,20 @@
 - `apps/nota.app/tsconfig.app.json` uses `rootDir` `app` and includes patterns under `app/**`; files outside `app/` (e.g. `apps/nota.app/types/`) are not part of that project and break imports.
 - Keep Supabase-generated `database.types.ts` at `apps/nota.app/app/types/database.types.ts` and aim `supabase gen types` output there.
 
-## Git commits
+## Git commits (enforced)
 
-- Use [Conventional Commits](https://www.conventionalcommits.org/): `<type>(optional scope): description` in the subject (imperative, ~72 characters). Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`. Use a body for rationale, subtasks, or migration notes; use `BREAKING CHANGE:` in the footer when relevant.
+Agents **must** record changes with [Conventional Commits](https://www.conventionalcommits.org/). Do not commit with a bare description, vague wording, or a subject that omits the type prefix.
+
+- **Subject (required):** `<type>(optional scope): description`
+  - **Type:** one of `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore` (or another well-known type from the spec if it clearly fits).
+  - **Scope:** optional; use a short, real scope from the repo when it helps (e.g. `nota.app`, `nota-server`, `marketing`, `electron`).
+  - **Description:** imperative mood, lowercase after the colon unless a proper noun, **~72 characters** for the subject line.
+- **Body (when useful):** rationale, subtasks, migration notes, or “what changed / why” for non-obvious diffs.
+- **Breaking changes:** include `BREAKING CHANGE:` in the footer when behaviour or APIs change incompatibly.
+
+**Reject / avoid:** subjects like `update`, `fixes`, `wip`, `misc`, `changes`, or only a ticket id with no type; mixing unrelated concerns in one commit without a clear primary type (prefer **split commits** or a `chore` scope per area).
+
+**When committing for the user:** use `git commit` with a message that already satisfies the above; if the working tree mixes unrelated changes, **stage by path** and **multiple commits** rather than one ambiguous subject.
 
 ## Clerk + Supabase client
 
