@@ -18,3 +18,14 @@ npx nx run @nota.app/nota-marketing:dev
 ```
 
 Or `npm run dev:marketing`.
+
+## Clerk Billing alignment (operators)
+
+Checkout and plan tiles in the app come from **Clerk Billing** (`PricingTable` in `apps/nota.app`). Marketing copy in `src/pages/pricing.astro` and `src/pages/index.astro` must stay in sync with what you configure in Clerk.
+
+1. In the [Clerk Dashboard](https://dashboard.clerk.com), open the Nota application (same project as production `VITE_CLERK_PUBLISHABLE_KEY`).
+2. Under **Billing** (or **Commerce** / **Monetization**), set every customer-facing price to **USD** in Stripe and remove or archive any **$0 / free** plan so only paid monthly, annual, and (if used) lifetime remain.
+3. Match amounts to the **USD guide figures** on `/pricing` (see `pricing.astro` constants). If you change Clerk prices, update the Astro pages and JSON-LD in the same commit.
+4. **Verify:** compare the plan list in Clerk → **Settings → Subscription** (or the paywall) in a dev/staging build → page source JSON-LD on `/pricing`. Optional: Stripe Dashboard → **Products** for the linked prices.
+
+There must be **no free plan**: nothing at $0 and no unpaid tier that unlocks the same vault as Nota Pro.

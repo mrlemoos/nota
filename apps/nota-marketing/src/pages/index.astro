@@ -18,6 +18,10 @@ const siteRoot = new URL('/', site).href;
 const screenshotUrl = new URL('/og/home.png', site).href;
 const downloadUrl = NOTA_GITHUB_LATEST;
 
+/** Guide amounts; keep in sync with `pricing.astro` and Clerk Billing (USD). */
+const priceMonthlyUsd = '2.99';
+const priceAnnualUsd = '24.99';
+
 const homeTitle = 'Nota — Calm Mac Notes, Subscription Included';
 const homeDescription =
   'Nota is a native Mac app for focused writing and linked notes. Subscribe after sign-in for cloud sync and backup—no separate web checkout, no hollowed-out free tier.';
@@ -29,7 +33,7 @@ const faqEntities = [
     acceptedAnswer: {
       '@type': 'Answer',
       text:
-        'No. Download the Mac app from GitHub Releases, create an account, then subscribe in Settings to use Nota. Pricing is shown on the site and in the in-app checkout.',
+        'No. Download the Mac app from GitHub Releases, create an account, then subscribe in Settings to use Nota. USD guide prices are on the pricing page; checkout in the app shows the final charge.',
     },
   },
   {
@@ -91,8 +95,8 @@ const structuredData = {
         {
           '@type': 'Offer',
           name: 'Nota — monthly',
-          price: '2.49',
-          priceCurrency: 'GBP',
+          price: priceMonthlyUsd,
+          priceCurrency: 'USD',
           description:
             'Full app access with cloud sync and backup. Billed monthly; subscribe from inside the macOS app after install.',
           availability: 'https://schema.org/OnlineOnly',
@@ -101,8 +105,8 @@ const structuredData = {
         {
           '@type': 'Offer',
           name: 'Nota — annual',
-          price: '19.99',
-          priceCurrency: 'GBP',
+          price: priceAnnualUsd,
+          priceCurrency: 'USD',
           description:
             'Full app access with cloud sync and backup. Billed annually; subscribe from inside the macOS app after install.',
           availability: 'https://schema.org/OnlineOnly',
@@ -275,7 +279,7 @@ const structuredData = {
               No. You can download the app for macOS from GitHub Releases, then sign in and subscribe in Settings to
               write and sync. See <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4"
                 >pricing</a
-              > for current UK guide prices.
+              > for current USD guide prices.
             </dd>
           </div>
           <div>

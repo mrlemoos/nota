@@ -10,9 +10,13 @@ if (!site) {
 const siteRoot = new URL('/', site).href;
 const pricingUrl = new URL('/pricing', site).href;
 
-const pricingTitle = 'Nota Pricing — From £2.49/month';
+/** Guide amounts; keep in sync with Clerk Billing / Stripe (USD). */
+const priceMonthlyUsd = '2.99';
+const priceAnnualUsd = '24.99';
+
+const pricingTitle = 'Nota Pricing — From $2.99/month';
 const pricingDescription =
-  'Nota is a paid Mac notes app: subscribe in-app for cloud sync and backup. Guide prices £19.99/year or £2.49/month; lifetime offered when available in checkout.';
+  'Nota is a paid Mac notes app: subscribe in-app for cloud sync and backup. Guide prices $24.99/year or $2.99/month (USD); lifetime offered when available in checkout.';
 
 const structuredData = {
   '@context': 'https://schema.org',
@@ -46,8 +50,8 @@ const structuredData = {
         {
           '@type': 'Offer',
           name: 'Nota — annual',
-          price: '19.99',
-          priceCurrency: 'GBP',
+          price: priceAnnualUsd,
+          priceCurrency: 'USD',
           description: 'Full app access; billed annually. Subscribe from Settings in the macOS app.',
           availability: 'https://schema.org/OnlineOnly',
           url: pricingUrl,
@@ -55,8 +59,8 @@ const structuredData = {
         {
           '@type': 'Offer',
           name: 'Nota — monthly',
-          price: '2.49',
-          priceCurrency: 'GBP',
+          price: priceMonthlyUsd,
+          priceCurrency: 'USD',
           description: 'Full app access; billed monthly. Subscribe from Settings in the macOS app.',
           availability: 'https://schema.org/OnlineOnly',
           url: pricingUrl,
@@ -76,14 +80,17 @@ const structuredData = {
       <p class="mb-14 max-w-2xl text-lg text-muted-foreground">
         Nota is <span class="text-foreground/90">not</span> free to use: download the Mac app, sign in, then subscribe
         in Settings. The app binary is a free download from GitHub Releases; writing, sync, and backup require an
-        active plan. Figures below are a UK guide in GBP—your storefront may show local currency at checkout.
+        active plan. Figures below are in <span class="text-foreground/90">USD</span>; taxes may apply by region, and
+        the in-app checkout shows the final charge.
       </p>
 
       <div class="grid gap-8 md:grid-cols-3">
         <article class="rounded-[var(--radius)] border border-primary/25 bg-sidebar p-8 shadow-sm ring-1 ring-primary/15 md:min-h-[22rem]">
           <h2 class="mb-2 font-serif text-2xl text-sidebar-foreground">Annual</h2>
-          <p class="text-3xl font-semibold tracking-tight text-sidebar-foreground">£19.99 / year</p>
-          <p class="mb-6 text-sm font-medium text-primary">Save about 33% vs monthly</p>
+          <p class="text-3xl font-semibold tracking-tight text-sidebar-foreground">
+            {'$' + priceAnnualUsd + ' / year'}
+          </p>
+          <p class="mb-6 text-sm font-medium text-primary">Save about 30% vs monthly</p>
           <ul class="space-y-3 text-sm text-muted-foreground">
             <li>Full app access</li>
             <li>Cloud sync and secure backup</li>
@@ -93,10 +100,8 @@ const structuredData = {
 
         <article class="rounded-[var(--radius)] border border-border bg-card p-8 shadow-sm md:min-h-[22rem]">
           <h2 class="mb-2 font-serif text-2xl text-card-foreground">Monthly</h2>
-          <p class="mb-6 text-3xl font-medium tracking-tight text-card-foreground">£2.49 / month</p>
-          <p class="mb-6 text-xs leading-relaxed text-muted-foreground">
-            Indicative: about <span class="text-card-foreground/90">$3.49 CAD</span> / month — actual charge depends on
-            region.
+          <p class="mb-6 text-3xl font-medium tracking-tight text-card-foreground">
+            {'$' + priceMonthlyUsd + ' / month'}
           </p>
           <ul class="space-y-3 text-sm text-muted-foreground">
             <li>Same features as annual</li>
