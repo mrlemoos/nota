@@ -283,7 +283,8 @@
 }
 
 .tiptap-editor .ProseMirror code {
-  background-color: #f3f4f6;
+  background-color: var(--muted);
+  color: var(--foreground);
   padding: 0.2em 0.4em;
   border-radius: 0.25em;
   font-family: ui-monospace, monospace;
