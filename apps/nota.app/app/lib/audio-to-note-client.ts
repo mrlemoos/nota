@@ -1,5 +1,9 @@
 import { getClerkAccessToken } from './clerk-token-ref';
 import type { AudioNoteStudyResult } from './audio-note-blocks-to-doc';
+import {
+  ensureBlobForXaiStt,
+  filenameForSttUpload,
+} from './audio-to-xai-stt-format';
 
 function notaServerBase(): string | undefined {
   const b = import.meta.env.VITE_NOTA_SERVER_API_URL;
@@ -39,8 +43,9 @@ export async function postAudioToNoteStream(
     throw new Error('Unauthorized');
   }
 
+  const payload = await ensureBlobForXaiStt(audio);
   const form = new FormData();
-  form.append('audio', audio, 'recording.webm');
+  form.append('audio', payload, filenameForSttUpload(payload));
   if (options.locale) {
     form.append('locale', options.locale);
   }

@@ -12,10 +12,13 @@ import { useAudioToNoteSession } from '../stores/audio-to-note-session';
 const QUEUED_TITLE = 'Study notes — queued for sync';
 
 function pickRecorderMime(): string | undefined {
+  /** Prefer containers xAI STT accepts natively (see POST /v1/stt docs); WebM is converted to WAV before upload. */
   const types = [
+    'audio/mp4',
+    'audio/ogg;codecs=opus',
+    'audio/ogg',
     'audio/webm;codecs=opus',
     'audio/webm',
-    'audio/mp4',
   ];
   for (const t of types) {
     if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported(t)) {
