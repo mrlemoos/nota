@@ -2,7 +2,6 @@ import * as Clerk from '@clerk/elements/common';
 import * as SignIn from '@clerk/elements/sign-in';
 import type { JSX, ReactNode } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ClerkOAuthConnection } from '@/components/clerk-oauth-connection';
 import { cn } from '@/lib/utils';
 
 const fieldClass = 'grid gap-2';
@@ -34,7 +33,7 @@ function VerificationChrome({
 }
 
 /**
- * Sign in with Google, email/password (plus Clerk verification strategies), MFA, and optional passkey.
+ * Email/password sign-in (plus Clerk verification strategies), MFA, and optional passkey.
  * Uses `routing="virtual"` with `path="/"` like other Elements auth surfaces.
  */
 export function ClerkElementsSignIn(): JSX.Element {
@@ -48,14 +47,8 @@ export function ClerkElementsSignIn(): JSX.Element {
     >
       <SignIn.Step name="start">
         <h1 className={stepTitleClass}>Sign in</h1>
-        <p className={stepSubtitleClass}>
-          Continue with Google or sign in with your email.
-        </p>
+        <p className={stepSubtitleClass}>Sign in with your email.</p>
         <Clerk.GlobalError className={cn('mb-3 text-center', errorTextClass)} />
-        <div className="flex flex-col gap-2">
-          <ClerkOAuthConnection label="Continue with Google" />
-        </div>
-        <p className="my-3 text-center text-xs text-muted-foreground">or</p>
         <Clerk.Field name="identifier" className={fieldClass}>
           <Clerk.Label className={labelClass}>Email</Clerk.Label>
           <Clerk.Input className={inputClass} type="email" autoComplete="username" />

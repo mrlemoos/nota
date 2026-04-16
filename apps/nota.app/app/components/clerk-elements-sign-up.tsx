@@ -2,7 +2,6 @@ import * as Clerk from '@clerk/elements/common';
 import * as SignUp from '@clerk/elements/sign-up';
 import type { JSX, ReactNode } from 'react';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { ClerkOAuthConnection } from '@/components/clerk-oauth-connection';
 import { cn } from '@/lib/utils';
 
 const fieldClass = 'grid gap-2';
@@ -34,8 +33,8 @@ function VerificationChrome({
 }
 
 /**
- * Sign up with Google or email/password (plus email verification when required by Clerk).
- * Optional `continue` step collects profile fields Clerk still requires after OAuth.
+ * Email/password sign-up (plus email verification when required by Clerk).
+ * Optional `continue` step collects profile fields Clerk still requires.
  */
 export function ClerkElementsSignUp(): JSX.Element {
   return (
@@ -48,14 +47,8 @@ export function ClerkElementsSignUp(): JSX.Element {
     >
       <SignUp.Step name="start">
         <h1 className={stepTitleClass}>Create an account</h1>
-        <p className={stepSubtitleClass}>
-          Continue with Google or create an account with your email.
-        </p>
+        <p className={stepSubtitleClass}>Create an account with your email.</p>
         <Clerk.GlobalError className={cn('mb-3 text-center', errorTextClass)} />
-        <div className="flex flex-col gap-2">
-          <ClerkOAuthConnection flow="sign-up" label="Continue with Google" />
-        </div>
-        <p className="my-3 text-center text-xs text-muted-foreground">or</p>
         <div className="flex flex-col gap-4">
           <Clerk.Field name="emailAddress" className={fieldClass}>
             <Clerk.Label className={labelClass}>Email</Clerk.Label>
