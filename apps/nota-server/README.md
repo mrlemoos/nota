@@ -35,6 +35,8 @@ If **`NOTA_SERVER_CORS_ORIGINS` is unset**, the server allows `http://127.0.0.1:
 
 **Wildcard `*`:** Set **`NOTA_SERVER_CORS_ORIGINS=*`** to allow **any** browser `Origin` (implemented with `cors` **`origin: true`**, so the response echoes the request origin). A lone `*` is **not** treated as a string to match against the `Origin` header (that would never match real clients such as `http://127.0.0.1:4378`). For production, prefer an explicit comma-separated list so only your web app and desktop shell can call the API.
 
+When **`NODE_ENV=production`**, the process logs a **warning** if `NOTA_SERVER_CORS_ORIGINS=*` is in effect, so operators notice permissive CORS in production.
+
 ## Auth
 
 Clients send `Authorization: Bearer <Clerk session JWT>`. The server validates it with **`@clerk/backend`** `verifyToken` using **`CLERK_SECRET_KEY`**.

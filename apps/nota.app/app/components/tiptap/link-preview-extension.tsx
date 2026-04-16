@@ -8,6 +8,7 @@ import { useEffect, useRef, useState, type JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { fetchOgPreviewForEditor } from '@/lib/og-preview-client';
+import { safeOgImageSrcForPreview } from '@/lib/og-image-url';
 import { revertLinkPreviewToParagraph } from './link-preview-scan';
 
 function linkPreviewHasPersistedMeta(node: {
@@ -26,6 +27,7 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   const titleAttr = (props.node.attrs['title'] as string) || '';
   const descriptionAttr = (props.node.attrs['description'] as string) || '';
   const imageAttr = (props.node.attrs['image'] as string) || '';
+  const safeImageSrc = safeOgImageSrcForPreview(imageAttr);
 
   const hasMeta = Boolean(titleAttr || descriptionAttr || imageAttr);
   const [loading, setLoading] = useState(() => Boolean(href) && !hasMeta);
@@ -131,7 +133,7 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
       data-drag-handle
     >
       <div className="flex flex-col gap-0 sm:flex-row">
-        {imageAttr ? (
+        {safeImageSrc ? (
           <a
             href={href}
             target="_blank"
@@ -139,7 +141,7 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
             className="relative shrink-0 border-b border-border/40 sm:w-36 sm:border-b-0 sm:border-r"
           >
             <img
-              src={imageAttr}
+              src={safeImageSrc}
               alt=""
               className="h-32 w-full object-cover sm:h-full sm:min-h-[7rem]"
               loading="lazy"

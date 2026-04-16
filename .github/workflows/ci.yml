@@ -37,6 +37,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: npm audit (informational)
+        continue-on-error: true
+        run: npm audit
+
       - name: Test web app
         run: npx nx run @nota.app/nota.app:test --outputStyle=static
         env:

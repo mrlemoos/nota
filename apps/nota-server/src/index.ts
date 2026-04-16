@@ -39,8 +39,15 @@ const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '32kb' }));
 
+const corsOriginOption = getCorsOriginOption();
+if (corsOriginOption === true && process.env.NODE_ENV === 'production') {
+  console.warn(
+    '[nota-server] NOTA_SERVER_CORS_ORIGINS=* reflects any browser Origin. Prefer an explicit comma-separated list in production.',
+  );
+}
+
 const corsMw = cors({
-  origin: getCorsOriginOption(),
+  origin: corsOriginOption,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Authorization', 'Content-Type'],
   maxAge: 86_400,
