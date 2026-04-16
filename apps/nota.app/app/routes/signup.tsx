@@ -1,7 +1,7 @@
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/react';
 import type { JSX } from 'react';
 import { AuthCardEpigraph } from '@/components/auth-card-epigraph';
-import { ClerkElementsSignUp } from '@/components/clerk-elements-sign-up';
+import { NotaClerkSignUp } from '@/components/nota-clerk-prefab-auth';
 import { CartoonLandscape } from '@/components/cartoon-landscape';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -37,7 +37,7 @@ export default function Signup(): JSX.Element {
           </p>
         ) : (
           <>
-            <ClerkElementsSignUp />
+            <NotaClerkSignUp />
             <p className="mt-4 text-center text-sm text-muted-foreground">
               Already have an account?{' '}
               <a

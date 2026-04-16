@@ -1,4 +1,4 @@
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@clerk/react';
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { setClerkAccessTokenGetter } from '../lib/clerk-token-ref';
 import { setSupabaseClerkGetToken } from '../lib/supabase/browser';

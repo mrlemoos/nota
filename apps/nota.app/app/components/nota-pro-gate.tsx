@@ -1,4 +1,4 @@
-import { PricingTable, useClerk } from '@clerk/clerk-react';
+import { PricingTable, useClerk } from '@clerk/react';
 import type { JSX } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';

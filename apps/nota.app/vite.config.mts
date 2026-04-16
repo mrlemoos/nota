@@ -1,5 +1,4 @@
 /// <reference types='vitest' />
-import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -8,20 +7,6 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const appDir = path.join(fileURLToPath(new URL('.', import.meta.url)), 'app');
-const monorepoRoot = path.resolve(fileURLToPath(new URL('.', import.meta.url)), '../..');
-/** `@clerk/clerk-react` pins `@clerk/shared@3.x`; the repo also hoists `@clerk/shared@4.x`. Always bundle the React-line copy so Clerk hooks match `<ClerkProvider>`. */
-const clerkSharedRoot = (() => {
-  const nextToReact = path.join(
-    monorepoRoot,
-    'node_modules/@clerk/clerk-react/node_modules/@clerk/shared',
-  );
-  if (fs.existsSync(nextToReact)) {
-    return nextToReact;
-  }
-  return path.join(monorepoRoot, 'node_modules/@clerk/shared');
-})();
-const clerkReactRoot = path.join(monorepoRoot, 'node_modules/@clerk/clerk-react');
-const clerkTypesRoot = path.join(monorepoRoot, 'node_modules/@clerk/types');
 
 function notaDesktopArtifactsPlugin(appRoot: string): Plugin {
   return {
@@ -61,25 +46,9 @@ export default defineConfig(({ mode }) => {
     publicDir: 'public',
     resolve: {
       alias: [
-        // Force a single Clerk runtime: `@clerk/elements` may install nested `@clerk/*` copies
-        // that break React context (`useClerk` vs `<ClerkProvider>`). Always resolve to the
-        // workspace-hoisted packages (same as `main.tsx` imports).
-        { find: /^@clerk\/shared$/, replacement: clerkSharedRoot },
-        { find: /^@clerk\/shared\//, replacement: `${clerkSharedRoot}/` },
-        { find: /^@clerk\/clerk-react$/, replacement: clerkReactRoot },
-        { find: /^@clerk\/clerk-react\//, replacement: `${clerkReactRoot}/` },
-        { find: /^@clerk\/types$/, replacement: clerkTypesRoot },
-        { find: /^@clerk\/types\//, replacement: `${clerkTypesRoot}/` },
+        // App imports use `@/` and `~/`; Clerk packages resolve via normal `node_modules` (single `@clerk/shared@4` tree).
         { find: '~', replacement: appDir },
         { find: '@', replacement: appDir },
-        {
-          find: 'next/navigation',
-          replacement: path.join(appDir, 'shims/next/navigation.ts'),
-        },
-        {
-          find: 'next/compat/router',
-          replacement: path.join(appDir, 'shims/next/compat-router.ts'),
-        },
       ],
     },
     cacheDir: '../../node_modules/.vite/apps/nota.app',

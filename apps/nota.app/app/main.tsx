@@ -1,4 +1,4 @@
-import { ClerkProvider } from '@clerk/clerk-react';
+import { ClerkProvider } from '@clerk/react';
 import { PostHogProvider } from '@posthog/react';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';

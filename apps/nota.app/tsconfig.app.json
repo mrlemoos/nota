@@ -24,12 +24,6 @@
       ],
       "@/*": [
         "./app/*"
-      ],
-      "next/navigation": [
-        "./app/shims/next/navigation.ts"
-      ],
-      "next/compat/router": [
-        "./app/shims/next/compat-router.ts"
       ]
     },
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"

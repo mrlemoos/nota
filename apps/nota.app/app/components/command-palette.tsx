@@ -33,7 +33,7 @@ import { useNotesData } from '../context/notes-data-context';
 import { useAppNavigationScreen } from '../hooks/use-app-navigation-screen';
 import { openTodaysNoteClient } from '../lib/open-todays-note';
 import { navigateFromLegacyPath, setAppHash } from '../lib/app-navigation';
-import { useClerk } from '@clerk/clerk-react';
+import { useClerk } from '@clerk/react';
 import { spaCreateNote } from '../lib/spa-create-note';
 import { spaDeleteNoteById } from '../lib/spa-delete-note';
 import { startStudyNotesFromRecording } from '../lib/audio-to-note-start';

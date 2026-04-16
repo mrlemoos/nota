@@ -1,4 +1,4 @@
-import { UserButton } from '@clerk/clerk-react';
+import { UserButton } from '@clerk/react';
 import { useLayoutEffect, useMemo, useState, type JSX } from 'react';
 import { cn } from '@/lib/utils';
 import { ThemeMenu } from '../components/theme-menu';
