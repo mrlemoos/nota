@@ -58,7 +58,7 @@
         ],
         "options": {
           "commands": [
-            "rm -rf apps/nota-electron/release && cd apps/nota-electron && npx electron-builder"
+            "npx rimraf apps/nota-electron/release && cd apps/nota-electron && npx electron-builder"
           ]
         }
       },
