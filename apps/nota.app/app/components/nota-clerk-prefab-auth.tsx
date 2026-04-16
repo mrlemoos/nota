@@ -1,11 +1,7 @@
 import { SignIn, SignUp } from '@clerk/react';
 import type { Theme } from '@clerk/ui/internal';
 import type { JSX } from 'react';
-import {
-  clerkFullNotesUrl,
-  clerkFullSignInUrl,
-  clerkFullSignUpUrl,
-} from '@/lib/clerk-hash-navigation';
+import { clerkFullSignInUrl, clerkFullSignUpUrl } from '@/lib/clerk-hash-navigation';
 
 /** Hide Clerk’s built-in “Don’t have an account? / Already have…” row; Nota renders its own below the card. */
 const NOTA_CLERK_HIDE_ACCOUNT_SWITCH: Pick<Theme, 'elements'> = {
@@ -24,8 +20,6 @@ export function NotaClerkSignIn(): JSX.Element {
       appearance={NOTA_CLERK_HIDE_ACCOUNT_SWITCH}
       signInUrl={clerkFullSignInUrl()}
       signUpUrl={clerkFullSignUpUrl()}
-      forceRedirectUrl={clerkFullNotesUrl()}
-      signUpForceRedirectUrl={clerkFullNotesUrl()}
       fallback={
         <p className="py-6 text-center text-sm text-muted-foreground">Loading…</p>
       }
@@ -40,8 +34,6 @@ export function NotaClerkSignUp(): JSX.Element {
       appearance={NOTA_CLERK_HIDE_ACCOUNT_SWITCH}
       signInUrl={clerkFullSignInUrl()}
       signUpUrl={clerkFullSignUpUrl()}
-      forceRedirectUrl={clerkFullNotesUrl()}
-      signInForceRedirectUrl={clerkFullNotesUrl()}
       fallback={
         <p className="py-6 text-center text-sm text-muted-foreground">Loading…</p>
       }

@@ -1,5 +1,31 @@
-import { describe, expect, it } from 'vitest';
-import { mapClerkToHashFragment } from './clerk-hash-navigation';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  mapClerkToHashFragment,
+  sanitizeClerkAuthHashFragment,
+} from './clerk-hash-navigation';
+
+function stubWindowLocation(opts: {
+  origin: string;
+  pathname: string;
+  hash?: string;
+}): void {
+  const { origin, pathname, hash = '' } = opts;
+  const prevWindow = globalThis.window;
+  vi.stubGlobal('window', {
+    ...prevWindow,
+    location: {
+      ...prevWindow.location,
+      origin,
+      pathname,
+      hash,
+      href: `${origin}${pathname}${hash}`,
+    },
+  });
+}
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('mapClerkToHashFragment', () => {
   const current = 'http://localhost:4200/#/notes';
@@ -66,5 +92,51 @@ describe('mapClerkToHashFragment', () => {
     expect(mapClerkToHashFragment('/sign-up/verify-email-address', current)).toEqual({
       fragment: '/sign-up/verify-email-address',
     });
+  });
+
+  it('maps auth targets whose path lives in the document hash (hash routing)', () => {
+    expect(
+      mapClerkToHashFragment(
+        'http://localhost:4200/#/sign-up?redirect_url=%2Fnotes',
+        current,
+      ),
+    ).toEqual({ fragment: '/sign-up?redirect_url=%2Fnotes' });
+  });
+
+  it('maps /sign-up relative to current when pathname is /', () => {
+    expect(mapClerkToHashFragment('#/sign-in', 'http://localhost:4200/')).toEqual({
+      fragment: '/sign-in',
+    });
+  });
+});
+
+describe('sanitizeClerkAuthHashFragment', () => {
+  it('leaves short, non-nested Clerk redirect params unchanged', () => {
+    stubWindowLocation({ origin: 'http://localhost:4200', pathname: '/' });
+    const fragment =
+      '/sign-up?sign_up_force_redirect_url=' +
+      encodeURIComponent('http://localhost:4200/#/notes');
+    expect(sanitizeClerkAuthHashFragment(fragment)).toBe(fragment);
+  });
+
+  it('replaces nested sign_* redirect chains with a single notes URL', () => {
+    stubWindowLocation({ origin: 'http://localhost:4200', pathname: '/' });
+    const inner =
+      'http://localhost:4200/#/sign-in?sign_up_force_redirect_url=' +
+      encodeURIComponent('http://localhost:4200/#/notes');
+    const fragment =
+      '/sign-up?sign_up_force_redirect_url=' +
+      encodeURIComponent('http://localhost:4200/#/notes') +
+      '&sign_in_force_redirect_url=' +
+      encodeURIComponent(inner);
+    const out = sanitizeClerkAuthHashFragment(fragment);
+    expect(out).toMatch(/^\/sign-up\?/);
+    const params = new URLSearchParams(out.slice('/sign-up?'.length));
+    expect(params.get('sign_up_force_redirect_url')).toBe(
+      'http://localhost:4200/#/notes',
+    );
+    expect(params.get('sign_in_force_redirect_url')).toBe(
+      'http://localhost:4200/#/notes',
+    );
   });
 });
