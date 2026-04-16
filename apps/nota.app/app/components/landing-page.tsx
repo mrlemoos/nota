@@ -2,7 +2,6 @@ import type { JSX } from 'react';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { ArrowRight01Icon } from '@hugeicons/core-free-icons';
 import { cn } from '@/lib/utils';
-import { buttonVariants } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -10,14 +9,11 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+import { AuthScreenHashLink } from '@/components/auth-screen-hash-link';
 import { CartoonLandscape } from '@/components/cartoon-landscape';
 import { NotaLogo } from '@/components/nota-logo';
-import { hashForScreen } from '../lib/app-navigation';
 
 export function LandingPage(): JSX.Element {
-  const loginHref = hashForScreen({ kind: 'login' });
-  const signupHref = hashForScreen({ kind: 'signup' });
-
   return (
     <main
       id="main-content"
@@ -50,10 +46,11 @@ export function LandingPage(): JSX.Element {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
-            <a
-              href={loginHref}
+            <AuthScreenHashLink
+              target="login"
+              variant="default"
+              size="lg"
               className={cn(
-                buttonVariants({ variant: 'default', size: 'lg' }),
                 'h-10 w-full touch-manipulation justify-center text-center',
               )}
             >
@@ -61,20 +58,17 @@ export function LandingPage(): JSX.Element {
               <span data-icon="inline-end" aria-hidden className="inline-flex">
                 <HugeiconsIcon icon={ArrowRight01Icon} size={16} />
               </span>
-            </a>
+            </AuthScreenHashLink>
           </CardContent>
           <CardFooter className="justify-center border-t border-border/40 pt-4">
             <p className="text-center text-muted-foreground text-xs/relaxed">
               New here?{' '}
-              <a
-                href={signupHref}
-                className={cn(
-                  buttonVariants({ variant: 'link', size: 'sm' }),
-                  'h-auto p-0 text-xs underline-offset-4',
-                )}
+              <AuthScreenHashLink
+                target="signup"
+                className="text-xs underline-offset-4"
               >
                 Create an account
-              </a>
+              </AuthScreenHashLink>
             </p>
           </CardFooter>
         </Card>
