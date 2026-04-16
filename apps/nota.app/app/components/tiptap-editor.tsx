@@ -31,6 +31,7 @@ import {
   NotePdfDocProvider,
 } from './tiptap/note-pdf-extension';
 import { NoteImage } from './tiptap/note-image-extension';
+import { NoteAudio } from './tiptap/note-audio-extension';
 import {
   classifyNoteAttachmentFile,
   uploadNoteAttachmentFile,
@@ -320,6 +321,7 @@ export function TipTapEditor({
       LinkPreview,
       NotePdf,
       NoteImage,
+      NoteAudio,
       Table.configure({
         resizable: true,
         HTMLAttributes: { class: 'nota-table' },

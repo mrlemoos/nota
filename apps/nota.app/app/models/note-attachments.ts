@@ -10,6 +10,12 @@ const NOTE_ATTACHMENT_STORAGE_EXTENSIONS = new Set([
   '.png',
   '.gif',
   '.webp',
+  '.webm',
+  '.mp4',
+  '.ogg',
+  '.wav',
+  '.mp3',
+  '.m4a',
 ]);
 
 /**

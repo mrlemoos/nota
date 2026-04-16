@@ -4,8 +4,7 @@ import { getBrowserClient } from './supabase/browser';
 import { createLocalOnlyNote, isLikelyOnline } from './notes-offline';
 import { createNote } from '../models/notes';
 import { useAudioToNoteSession } from '../stores/audio-to-note-session';
-
-const PLACEHOLDER_TITLE = 'Study notes — recording';
+import { studyNotePlaceholderRecordingTitle } from './study-note-title';
 
 /**
  * Creates a note and opens the assistive audio-to-note capture session (microphone + upload).
@@ -25,7 +24,10 @@ export async function startStudyNotesFromRecording(options: {
   };
 
   if (!isLikelyOnline()) {
-    const id = await createLocalOnlyNote(options.userId, PLACEHOLDER_TITLE);
+    const id = await createLocalOnlyNote(
+      options.userId,
+      studyNotePlaceholderRecordingTitle(),
+    );
     goToNote(id);
     await options.refreshNotesList({ silent: true });
     useAudioToNoteSession.getState().beginSession(id);
@@ -34,13 +36,16 @@ export async function startStudyNotesFromRecording(options: {
 
   const c = getBrowserClient();
   try {
-    const row = await createNote(c, options.userId, PLACEHOLDER_TITLE);
+    const row = await createNote(c, options.userId, studyNotePlaceholderRecordingTitle());
     options.insertNoteAtFront(row);
     goToNote(row.id);
     await options.refreshNotesList({ silent: true });
     useAudioToNoteSession.getState().beginSession(row.id);
   } catch {
-    const id = await createLocalOnlyNote(options.userId, PLACEHOLDER_TITLE);
+    const id = await createLocalOnlyNote(
+      options.userId,
+      studyNotePlaceholderRecordingTitle(),
+    );
     goToNote(id);
     await options.refreshNotesList({ silent: true });
     useAudioToNoteSession.getState().beginSession(id);

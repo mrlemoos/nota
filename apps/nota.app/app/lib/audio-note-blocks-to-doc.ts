@@ -15,11 +15,29 @@ function textNode(text: string): Record<string, unknown> {
   return { type: 'text', text };
 }
 
+export type StudyNotesDocOptions = {
+  /** Original recording block (prepended above generated study content). */
+  recording?: { attachmentId: string; filename: string };
+};
+
 /**
  * Converts assistive-capture study-note blocks to TipTap / StarterKit-compatible JSON.
  */
-export function studyNotesResultToTiptapDoc(result: AudioNoteStudyResult): Json {
+export function studyNotesResultToTiptapDoc(
+  result: AudioNoteStudyResult,
+  opts?: StudyNotesDocOptions,
+): Json {
   const content: Record<string, unknown>[] = [];
+
+  if (opts?.recording?.attachmentId) {
+    content.push({
+      type: 'noteAudio',
+      attrs: {
+        attachmentId: opts.recording.attachmentId,
+        filename: opts.recording.filename || 'Recording',
+      },
+    });
+  }
 
   for (const block of result.blocks) {
     if (block.type === 'heading') {

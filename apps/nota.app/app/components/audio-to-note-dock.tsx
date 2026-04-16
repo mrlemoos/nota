@@ -5,11 +5,11 @@ import { useRootLoaderData } from '../context/spa-session-context';
 import { useNotesData } from '../context/notes-data-context';
 import { postAudioToNoteStream } from '../lib/audio-to-note-client';
 import { applyAudioNoteStudyResult } from '../lib/audio-to-note-apply';
+import { uploadStudyRecordingAttachment } from '../lib/pdf-attachment-client';
 import { isLikelyOnline, saveLocalNoteDraft } from '../lib/notes-offline';
 import { enqueuePendingAudioNoteJob } from '../lib/audio-note-pending-idb';
 import { useAudioToNoteSession } from '../stores/audio-to-note-session';
-
-const QUEUED_TITLE = 'Study notes — queued for sync';
+import { studyNotePlaceholderQueuedTitle } from '../lib/study-note-title';
 
 function pickRecorderMime(): string | undefined {
   /** Prefer containers xAI STT accepts natively (see POST /v1/stt docs); WebM is converted to WAV before upload. */
@@ -64,11 +64,12 @@ export function AudioToNoteDock(): JSX.Element | null {
           audio: buf,
           mime: mime || blob.type || 'audio/webm',
         });
+        const queuedTitle = studyNotePlaceholderQueuedTitle();
         await saveLocalNoteDraft(uid, {
           id: targetNoteId,
-          title: QUEUED_TITLE,
+          title: queuedTitle,
         });
-        patchNoteInList(targetNoteId, { title: QUEUED_TITLE });
+        patchNoteInList(targetNoteId, { title: queuedTitle });
         await refreshNotesList({ silent: true });
         reset();
         return;
@@ -83,10 +84,26 @@ export function AudioToNoteDock(): JSX.Element | null {
             }
           },
         });
+        setProcessing('Saving recording…');
+        let recording:
+          | { attachmentId: string; filename: string }
+          | undefined;
+        try {
+          const att = await uploadStudyRecordingAttachment(
+            targetNoteId,
+            uid,
+            blob,
+            mime || blob.type || 'audio/webm',
+          );
+          recording = { attachmentId: att.id, filename: att.filename };
+        } catch {
+          // Study notes still save if storage upload fails.
+        }
         await applyAudioNoteStudyResult({
           noteId: targetNoteId,
           userId: uid,
           result,
+          recording,
           patchNoteInList,
           refreshNotesList,
         });

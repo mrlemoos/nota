@@ -8,6 +8,7 @@ import {
 } from '../lib/audio-note-pending-idb';
 import { postAudioToNoteStream } from '../lib/audio-to-note-client';
 import { applyAudioNoteStudyResult } from '../lib/audio-to-note-apply';
+import { uploadStudyRecordingAttachment } from '../lib/pdf-attachment-client';
 
 /**
  * When the device is back online, processes queued audio-to-note jobs from IndexedDB.
@@ -32,10 +33,25 @@ export function useAudioNotePendingDrain(enabled: boolean): void {
         try {
           const blob = new Blob([j.audio], { type: j.mime });
           const result = await postAudioToNoteStream(blob);
+          let recording:
+            | { attachmentId: string; filename: string }
+            | undefined;
+          try {
+            const att = await uploadStudyRecordingAttachment(
+              j.noteId,
+              userId,
+              blob,
+              j.mime,
+            );
+            recording = { attachmentId: att.id, filename: att.filename };
+          } catch {
+            // Continue without embedded recording.
+          }
           await applyAudioNoteStudyResult({
             noteId: j.noteId,
             userId,
             result,
+            recording,
             patchNoteInList,
             refreshNotesList,
           });

@@ -168,3 +168,87 @@ export async function uploadPdfAndCreateRecord(
   }
   return uploadNoteAttachmentFile(noteId, userId, file);
 }
+
+export const STUDY_RECORDING_MAX_BYTES = PDF_MAX_BYTES;
+
+/** Maps normalised audio/video MIME to storage extension and upload filename. */
+export function storageMetaForStudyRecording(mimeRaw: string): {
+  ext: string;
+  contentType: string;
+  filename: string;
+} {
+  const mime = mimeRaw.split(';')[0]!.trim().toLowerCase();
+  const table: Record<string, { ext: string; filename: string }> = {
+    'audio/webm': { ext: '.webm', filename: 'recording.webm' },
+    'video/webm': { ext: '.webm', filename: 'recording.webm' },
+    'audio/mp4': { ext: '.mp4', filename: 'recording.mp4' },
+    'audio/m4a': { ext: '.m4a', filename: 'recording.m4a' },
+    'audio/x-m4a': { ext: '.m4a', filename: 'recording.m4a' },
+    'audio/ogg': { ext: '.ogg', filename: 'recording.ogg' },
+    'audio/wav': { ext: '.wav', filename: 'recording.wav' },
+    'audio/wave': { ext: '.wav', filename: 'recording.wav' },
+    'audio/mpeg': { ext: '.mp3', filename: 'recording.mp3' },
+    'audio/mp3': { ext: '.mp3', filename: 'recording.mp3' },
+  };
+  const row = table[mime] ?? {
+    ext: '.webm',
+    filename: 'recording.webm',
+  };
+  return {
+    ext: row.ext,
+    contentType: mime || 'audio/webm',
+    filename: row.filename,
+  };
+}
+
+/**
+ * Uploads the original assistive recording (not the WAV used only for xAI STT).
+ */
+export async function uploadStudyRecordingAttachment(
+  noteId: string,
+  userId: string,
+  blob: Blob,
+  mimeHint: string,
+): Promise<NoteAttachment> {
+  const meta = storageMetaForStudyRecording(
+    mimeHint || blob.type || 'audio/webm',
+  );
+  const file = new File([blob], meta.filename, { type: meta.contentType });
+  if (file.size > STUDY_RECORDING_MAX_BYTES) {
+    throw new Error('Recording is too large (max 25 MB).');
+  }
+
+  const objectId = crypto.randomUUID();
+  const storagePath = noteAttachmentStoragePath(
+    userId,
+    noteId,
+    objectId,
+    meta.ext,
+  );
+  const client = getBrowserClient();
+
+  const { error: upErr } = await client.storage
+    .from(NOTE_PDFS_BUCKET)
+    .upload(storagePath, file, {
+      contentType: meta.contentType,
+      upsert: false,
+    });
+
+  if (upErr) {
+    throw new Error(upErr.message);
+  }
+
+  try {
+    return await createNoteAttachmentRecord(client, {
+      note_id: noteId,
+      user_id: userId,
+      storage_path: storagePath,
+      filename: meta.filename,
+      size_bytes: file.size,
+      content_type: meta.contentType,
+    });
+  } catch (rowErr) {
+    await client.storage.from(NOTE_PDFS_BUCKET).remove([storagePath]);
+    throw rowErr;
+  }
+}

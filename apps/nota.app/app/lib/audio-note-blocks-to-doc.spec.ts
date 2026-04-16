@@ -39,4 +39,27 @@ describe('studyNotesResultToTiptapDoc', () => {
     expect(doc.content).toHaveLength(1);
     expect(doc.content[0]).toMatchObject({ type: 'paragraph', content: [] });
   });
+
+  it('prepends noteAudio when recording attachment is provided', () => {
+    const doc = studyNotesResultToTiptapDoc(
+      {
+        title: 'T',
+        blocks: [{ type: 'paragraph', text: 'Body' }],
+      },
+      {
+        recording: {
+          attachmentId: '00000000-0000-4000-8000-000000000001',
+          filename: 'recording.webm',
+        },
+      },
+    ) as { content: Array<Record<string, unknown>> };
+    expect(doc.content[0]).toMatchObject({
+      type: 'noteAudio',
+      attrs: {
+        attachmentId: '00000000-0000-4000-8000-000000000001',
+        filename: 'recording.webm',
+      },
+    });
+    expect(doc.content[1]).toMatchObject({ type: 'paragraph' });
+  });
 });

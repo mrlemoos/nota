@@ -13,6 +13,9 @@ export function extractPlainTextFromDocJson(input: unknown): string {
       return;
     }
     const o = node as Record<string, unknown>;
+    if (o.type === 'noteAudio') {
+      parts.push('Recording');
+    }
     if (typeof o.text === 'string') {
       parts.push(o.text);
     }
