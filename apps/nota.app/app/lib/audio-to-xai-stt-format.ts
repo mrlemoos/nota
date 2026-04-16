@@ -1,7 +1,8 @@
 /**
- * xAI batch STT (`POST /v1/stt`) documents several containers, but in practice
- * `MediaRecorder` output for MP4/M4A/AAC is often rejected as corrupt; we decode
- * those in the browser and upload PCM WAV (same as WebM).
+ * xAI STT is picky about containers: WebM, MP4/M4A, and **Ogg/Opus** from
+ * `MediaRecorder` often fail sniffing ("Could not detect audio format…") if
+ * sent raw. We decode almost everything in the browser and upload **PCM WAV**.
+ * Only pre-encoded WAV/MP3 are sent through unchanged.
  */
 
 function writeString(view: DataView, offset: number, str: string): void {
@@ -53,17 +54,19 @@ export function audioBufferToWav(buffer: AudioBuffer): Blob {
   return new Blob([arrayBuffer], { type: 'audio/wav' });
 }
 
-/** Types we send as-is to STT; everything else (WebM, MP4, M4A, …) is decoded to WAV first. */
-function isPassThroughSttMime(mime: string): boolean {
-  const m = mime.toLowerCase();
+/**
+ * Only formats we trust xAI to accept from arbitrary bytes. Do **not** match
+ * `audio/ogg;codecs=opus` via broad `.includes('ogg')` — that was passing Ogg
+ * through and triggered STT header errors.
+ */
+export function shouldPassThroughToXaiStt(mime: string): boolean {
+  const base = mime.toLowerCase().split(';')[0]!.trim();
   return (
-    m.includes('wav') ||
-    m.includes('mpeg') ||
-    m.includes('mp3') ||
-    m.includes('ogg') ||
-    m.includes('opus') ||
-    m.includes('flac') ||
-    m.includes('mkv')
+    base === 'audio/wav' ||
+    base === 'audio/x-wav' ||
+    base === 'audio/wave' ||
+    base === 'audio/mpeg' ||
+    base === 'audio/mp3'
   );
 }
 
@@ -72,7 +75,7 @@ function isPassThroughSttMime(mime: string): boolean {
  */
 export async function ensureBlobForXaiStt(input: Blob): Promise<Blob> {
   const t = (input.type || '').toLowerCase();
-  if (isPassThroughSttMime(t)) {
+  if (shouldPassThroughToXaiStt(t)) {
     return input;
   }
 
@@ -88,17 +91,12 @@ export async function ensureBlobForXaiStt(input: Blob): Promise<Blob> {
 
 export function filenameForSttUpload(blob: Blob): string {
   const m = (blob.type || '').toLowerCase();
-  if (m.includes('wav')) {
+  const base = m.split(';')[0]!.trim();
+  if (base === 'audio/wav' || base === 'audio/x-wav' || base === 'audio/wave') {
     return 'recording.wav';
   }
-  if (m.includes('mp4') || m.includes('m4a')) {
-    return 'recording.m4a';
-  }
-  if (m.includes('mpeg') || m.includes('mp3')) {
+  if (base === 'audio/mpeg' || base === 'audio/mp3') {
     return 'recording.mp3';
   }
-  if (m.includes('ogg')) {
-    return 'recording.ogg';
-  }
-  return 'recording.bin';
+  return 'recording.wav';
 }

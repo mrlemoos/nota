@@ -31,6 +31,17 @@ export function chatModel(): string {
   return process.env.XAI_CHAT_MODEL?.trim() || 'grok-3';
 }
 
+function mimeForXaiSttFile(filename: string, reportedMime: string): string {
+  const name = filename.toLowerCase();
+  if (name.endsWith('.wav')) {
+    return 'audio/wav';
+  }
+  if (name.endsWith('.mp3')) {
+    return 'audio/mpeg';
+  }
+  return reportedMime;
+}
+
 export async function transcribeAudioWithXai(options: {
   audio: Buffer;
   filename: string;
@@ -38,10 +49,11 @@ export async function transcribeAudioWithXai(options: {
   language?: string;
 }): Promise<{ text: string; duration: number }> {
   const apiKey = requireXaiKey();
+  const mime = mimeForXaiSttFile(options.filename, options.mime);
   const form = new FormData();
   form.append(
     'file',
-    new Blob([new Uint8Array(options.audio)], { type: options.mime }),
+    new Blob([new Uint8Array(options.audio)], { type: mime }),
     options.filename,
   );
   if (options.language) {

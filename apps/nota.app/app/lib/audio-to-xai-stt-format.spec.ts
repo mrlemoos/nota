@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { audioBufferToWav } from './audio-to-xai-stt-format';
+import {
+  audioBufferToWav,
+  shouldPassThroughToXaiStt,
+} from './audio-to-xai-stt-format';
 
 function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
   if (typeof blob.arrayBuffer === 'function') {
@@ -12,6 +15,21 @@ function blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
     reader.readAsArrayBuffer(blob);
   });
 }
+
+describe('shouldPassThroughToXaiStt', () => {
+  it('allows only wav and mp3 family', () => {
+    expect(shouldPassThroughToXaiStt('audio/wav')).toBe(true);
+    expect(shouldPassThroughToXaiStt('audio/mpeg')).toBe(true);
+    expect(shouldPassThroughToXaiStt('audio/mp3')).toBe(true);
+  });
+
+  it('does not pass through Ogg/Opus from MediaRecorder (transcode to WAV)', () => {
+    expect(shouldPassThroughToXaiStt('audio/ogg;codecs=opus')).toBe(false);
+    expect(shouldPassThroughToXaiStt('audio/ogg')).toBe(false);
+    expect(shouldPassThroughToXaiStt('audio/webm;codecs=opus')).toBe(false);
+    expect(shouldPassThroughToXaiStt('audio/mp4')).toBe(false);
+  });
+});
 
 describe('audioBufferToWav', () => {
   it('produces audio/wav with RIFF header', async () => {
