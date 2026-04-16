@@ -44,6 +44,8 @@ import {
 import { noteHashHref, NoteDetailPanel } from './note-detail-panel';
 import { spaCreateNote } from '../lib/spa-create-note';
 import { spaDeleteNoteById } from '../lib/spa-delete-note';
+import { AudioToNoteDock } from './audio-to-note-dock';
+import { useAudioNotePendingDrain } from '../hooks/use-audio-note-pending-drain';
 
 const NotesGraphRoute = lazy(async () => import('../routes/notes.graph'));
 const NotesSettingsRoute = lazy(async () => import('../routes/notes.settings'));
@@ -221,6 +223,8 @@ export function NotesSpaShell(): JSX.Element {
   );
 
   useNotesOfflineSync(user?.id, notaProEntitled && shellReady);
+
+  useAudioNotePendingDrain(Boolean(user?.id && notaProEntitled && shellReady));
 
   useEffect(() => {
     void import('../routes/notes.settings');
@@ -611,6 +615,7 @@ export function NotesSpaShell(): JSX.Element {
           </ShellPanel>
         </main>
       </div>
+      {!paywalled ? <AudioToNoteDock /> : null}
     </>
   );
 }

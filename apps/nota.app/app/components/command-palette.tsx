@@ -12,6 +12,7 @@ import { Dialog } from '@base-ui/react/dialog';
 import type { DialogRoot } from '@base-ui/react/dialog';
 import { Command } from 'cmdk';
 import {
+  AiAudioIcon,
   ComputerIcon,
   Flowchart01Icon,
   Logout01Icon,
@@ -35,6 +36,7 @@ import { navigateFromLegacyPath, setAppHash } from '../lib/app-navigation';
 import { useClerk } from '@clerk/clerk-react';
 import { spaCreateNote } from '../lib/spa-create-note';
 import { spaDeleteNoteById } from '../lib/spa-delete-note';
+import { startStudyNotesFromRecording } from '../lib/audio-to-note-start';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { useTheme } from './theme-provider';
 import {
@@ -114,6 +116,7 @@ export function CommandPalette(): JSX.Element {
   const [historyForwardHotkeyLabel, setHistoryForwardHotkeyLabel] =
     useState('⌘]');
   const [openingTodaysNote, setOpeningTodaysNote] = useState(false);
+  const [startingAudioNote, setStartingAudioNote] = useState(false);
 
   const closePalette = useCallback((): void => {
     dialogActionsRef.current?.close();
@@ -434,6 +437,53 @@ export function CommandPalette(): JSX.Element {
                         className="text-muted-foreground group-aria-selected:text-accent-foreground"
                       />
                       <span className="min-w-0 flex-1">Open note graph</span>
+                    </Command.Item>
+                    <Command.Item
+                      value="study-notes-from-recording"
+                      disabled={busy || startingAudioNote}
+                      keywords={[
+                        'record',
+                        'audio',
+                        'lecture',
+                        'class',
+                        'transcript',
+                        'capture',
+                        'study',
+                        'assistive',
+                        'microphone',
+                      ]}
+                      onSelect={() => {
+                        setStartingAudioNote(true);
+                        void (async () => {
+                          try {
+                            await startStudyNotesFromRecording({
+                              userId: user?.id ?? '',
+                              notaProEntitled,
+                              insertNoteAtFront,
+                              refreshNotesList,
+                            });
+                            closePalette();
+                          } finally {
+                            setStartingAudioNote(false);
+                          }
+                        })();
+                      }}
+                      className={cn(
+                        commandItemRowClass,
+                        'group text-foreground',
+                        'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                        'aria-disabled:pointer-events-none aria-disabled:opacity-50',
+                      )}
+                    >
+                      <PaletteItemIcon
+                        icon={AiAudioIcon}
+                        className="text-muted-foreground group-aria-selected:text-accent-foreground"
+                      />
+                      <span className="min-w-0 flex-1">
+                        {startingAudioNote
+                          ? 'Starting capture…'
+                          : 'Generate study notes from recording'}
+                      </span>
                     </Command.Item>
                   </Command.Group>
                 ) : (

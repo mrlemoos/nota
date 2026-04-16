@@ -1,6 +1,8 @@
 import cors from 'cors';
 import express from 'express';
+import multer from 'multer';
 import { expressToWebRequest, sendWebResponse } from './http-utils.ts';
+import { audioToNoteHandler } from './routes/audio-to-note.ts';
 import { ogPreviewHandler } from './routes/og-preview.ts';
 import {
   notaProEntitledHandler,
@@ -38,6 +40,16 @@ function getCorsOriginOption(): boolean | string[] {
 const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '32kb' }));
+
+const audioUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 500 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const m = file.mimetype.toLowerCase();
+    const ok = m.startsWith('audio/') || m === 'video/webm';
+    cb(null, ok);
+  },
+});
 
 const corsOriginOption = getCorsOriginOption();
 if (corsOriginOption === true && process.env.NODE_ENV === 'production') {
@@ -86,6 +98,10 @@ app.get('/api/og-preview', (req, res, next) => {
       next(e);
     }
   })();
+});
+
+app.post('/api/audio-to-note', audioUpload.single('audio'), (req, res, next) => {
+  void audioToNoteHandler(req, res).catch(next);
 });
 
 app.use(

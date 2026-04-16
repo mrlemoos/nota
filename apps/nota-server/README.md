@@ -1,6 +1,6 @@
 # nota-server (Express)
 
-Small API for **server-only** operations: Nota Pro entitlement (Clerk Billing) and related routes. The web and desktop SPAs call this service via **`VITE_NOTA_SERVER_API_URL`** with `Authorization: Bearer <Clerk session JWT>` (there is no same-origin fallback on Vercel).
+Small API for **server-only** operations: Nota Pro entitlement (Clerk Billing), link previews, **assistive audio-to-note** (xAI speech-to-text + Grok study notes, streamed via SSE), and related routes. The web and desktop SPAs call this service via **`VITE_NOTA_SERVER_API_URL`** with `Authorization: Bearer <Clerk session JWT>` (there is no same-origin fallback on Vercel).
 
 Production builds bundle TypeScript with **esbuild** and run on **Node.js 22+** (shared Clerk billing logic is imported from `apps/nota.app` at build time). Local development can still use **Bun** for fast runs.
 
@@ -13,6 +13,7 @@ npm ci
 cd apps/nota-server
 cp .env.example .env
 # set CLERK_SECRET_KEY (same instance as the SPA)
+# set XAI_API_KEY for POST /api/audio-to-note (Nota Pro only)
 ```
 
 **Node (matches production):**
@@ -41,6 +42,12 @@ When **`NODE_ENV=production`**, the process logs a **warning** if `NOTA_SERVER_C
 
 Clients send `Authorization: Bearer <Clerk session JWT>`. The server validates it with **`@clerk/backend`** `verifyToken` using **`CLERK_SECRET_KEY`**.
 
+## Audio-to-note (xAI)
+
+- **Endpoint:** `POST /api/audio-to-note` — `multipart/form-data` with field **`audio`** (recorded audio; typical browser types include `audio/webm` or `video/webm`). Optional text fields: **`locale`** (language hint for STT), **`courseName`** (context for study-note generation).
+- **Response:** `text/event-stream` (SSE). Events include `transcript` (after xAI **`POST /v1/stt`**), `notes_delta` (streaming Grok tokens), and `notes_done` (parsed JSON blocks for the client to turn into TipTap). Requires **`XAI_API_KEY`** on the server and a **Nota Pro** subscription (same entitlement check as link previews).
+- **Model:** Grok chat model defaults to **`grok-3`**; override with **`XAI_CHAT_MODEL`** if needed.
+
 ## Deploy (Railway)
 
 Use the **repository root** as the Railway service root (not `apps/nota-server` alone): the bundle step compiles **`apps/nota-server/src`** only; Clerk Billing helpers and OG preview logic live under **`apps/nota-server/src/lib/`**.
@@ -50,4 +57,4 @@ Use the **repository root** as the Railway service root (not `apps/nota-server` 
 - **Build:** `docker build -f infra/Dockerfile.nota-server .` (Railway runs this via config-as-code).
 - **Start:** `node apps/nota-server/dist/index.js` (also the image **CMD**).
 
-Set **`CLERK_SECRET_KEY`** in the host environment. Optionally set **`NOTA_SERVER_CORS_ORIGINS`** as above.
+Set **`CLERK_SECRET_KEY`** and **`XAI_API_KEY`** (for audio-to-note) in the host environment. Optionally set **`NOTA_SERVER_CORS_ORIGINS`** as above.
