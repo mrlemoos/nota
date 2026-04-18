@@ -3,6 +3,10 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import {
+  NOTA_CLERK_SSO_CALLBACK_PATH,
+  NOTA_CUSTOM_SCHEME_URL_PREFIX,
+} from '@nota.app/clerk-oauth-protocol';
+import {
   DEV_PORT,
   resolveMainWindowLoadUrl,
   ssoCallbackBaseUrl,
@@ -12,9 +16,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isDev = !app.isPackaged;
 const isDarwin = process.platform === 'darwin';
-
-/** Keep in sync with `apps/nota.app/app/lib/nota-clerk-oauth-protocol.ts`. */
-const NOTA_OAUTH_PROTOCOL_PREFIX = 'nota://';
 
 let pendingSsoHttpUrl: string | null = null;
 
@@ -93,14 +94,14 @@ function wireOauthPopupChain(contents: WebContents): void {
 }
 
 function notaProtocolOAuthUrlToSsoHttpUrl(protocolUrl: string): string | null {
-  if (!protocolUrl.startsWith(NOTA_OAUTH_PROTOCOL_PREFIX)) {
+  if (!protocolUrl.startsWith(NOTA_CUSTOM_SCHEME_URL_PREFIX)) {
     return null;
   }
   try {
     const u = new URL(protocolUrl);
     const search = u.search;
     const base = ssoCallbackBaseUrl(isDev);
-    return `${base}/sso-callback${search}`;
+    return `${base}${NOTA_CLERK_SSO_CALLBACK_PATH}${search}`;
   } catch {
     return null;
   }
@@ -243,7 +244,7 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', (_event, argv) => {
     const protocolUrl = argv.find(
-      (a): a is string => typeof a === 'string' && a.startsWith(NOTA_OAUTH_PROTOCOL_PREFIX),
+      (a): a is string => typeof a === 'string' && a.startsWith(NOTA_CUSTOM_SCHEME_URL_PREFIX),
     );
     if (protocolUrl) {
       queueOrDeliverSsoFromNotaProtocol(protocolUrl);
@@ -272,7 +273,7 @@ if (!gotTheLock) {
       if (isDarwin) {
         app.on('open-url', (event, url) => {
           event.preventDefault();
-          if (url.startsWith(NOTA_OAUTH_PROTOCOL_PREFIX)) {
+          if (url.startsWith(NOTA_CUSTOM_SCHEME_URL_PREFIX)) {
             queueOrDeliverSsoFromNotaProtocol(url);
           }
         });

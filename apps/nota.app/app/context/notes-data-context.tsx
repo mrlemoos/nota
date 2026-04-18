@@ -11,14 +11,12 @@ import {
 import type { Note, UserPreferences } from '~/types/database.types';
 import { getBrowserClient } from '../lib/supabase/browser';
 import {
+  isLikelyOnline,
   listStoredNotes,
-  putServerNoteIfNotDirty,
-} from '../lib/notes-offline/local-note-store';
-import {
   mergeNoteLists,
+  putServerNoteIfNotDirty,
   storedNoteToListRow,
-} from '../lib/notes-offline/merge-note-with-local';
-import { isLikelyOnline } from '../lib/notes-offline/sync-notes';
+} from '@/lib/notes-offline';
 import { syncServerNotesToIdbInChunks } from '../lib/sync-server-notes-to-idb';
 import { listNotes } from '../models/notes';
 import { getUserPreferences } from '../models/user-preferences';

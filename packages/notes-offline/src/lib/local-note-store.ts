@@ -3,11 +3,11 @@ import {
   idbRequest,
   NOTES_OBJECT_STORE,
   transactionComplete,
-} from './db';
-import { enqueueOutbox, removeOutboxEntry } from './outbox';
-import type { StoredNote } from './types';
-import { DEFAULT_NOTE_CONTENT } from './types';
-import type { Json, Note } from '~/types/database.types';
+} from './db.js';
+import { enqueueOutbox, removeOutboxEntry } from './outbox.js';
+import type { StoredNote } from './types.js';
+import { DEFAULT_NOTE_CONTENT } from './types.js';
+import type { Json, Note } from '@nota.app/database-types';
 
 function toStoredFromServer(note: Note): StoredNote {
   return {

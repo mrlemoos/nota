@@ -1,4 +1,4 @@
-import { idbRequest, transactionComplete } from './notes-offline/db';
+import { idbRequest, transactionComplete } from '@nota.app/notes-offline';
 
 const DB_NAME = 'nota-audio-note-pending';
 const DB_VERSION = 2;

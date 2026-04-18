@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { drainNotesOutbox } from './notes-offline/sync-notes';
+import { drainNotesOutbox } from './notes-offline';
 import { useOptionalNotesDataActions } from '../context/notes-data-context';
 import { subscribeOnline } from './browser-connectivity';
 

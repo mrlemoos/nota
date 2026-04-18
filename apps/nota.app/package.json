@@ -7,6 +7,11 @@
     "./styles.css"
   ],
   "dependencies": {
+    "@nota.app/clerk-oauth-protocol": "*",
+    "@nota.app/database-types": "*",
+    "@nota.app/nota-server-client": "*",
+    "@nota.app/notes-offline": "*",
+    "@nota.app/validation": "*",
     "@base-ui/react": "^1.3.0",
     "@clerk/elements": "^0.24.15",
     "@clerk/react": "^6.1.2",

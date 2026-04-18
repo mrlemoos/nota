@@ -3,13 +3,17 @@ export type {
   OutboxEntry,
   OutboxKind,
   StoredNote,
-} from './types';
-export { DEFAULT_NOTE_CONTENT } from './types';
+} from './lib/types.js';
+export { DEFAULT_NOTE_CONTENT } from './lib/types.js';
 export {
   closeNotaNotesDb,
   deleteNotaNotesDb,
   getNotaNotesDb,
-} from './db';
+  idbRequest,
+  NOTES_OBJECT_STORE,
+  OUTBOX_OBJECT_STORE,
+  transactionComplete,
+} from './lib/db.js';
 export {
   createLocalOnlyNote,
   getStoredNote,
@@ -19,15 +23,14 @@ export {
   putServerNoteIfNotDirty,
   removeStoredNote,
   saveLocalNoteDraft,
-} from './local-note-store';
+} from './lib/local-note-store.js';
 export {
   listOutbox,
   removeOutboxEntry,
   sortOutboxForProcessing,
-} from './outbox';
+} from './lib/outbox.js';
 export {
   mergeNoteLists,
   mergeNoteWithLocal,
   storedNoteToListRow,
-} from './merge-note-with-local';
-export { drainNotesOutbox, isLikelyOnline } from './sync-notes';
+} from './lib/merge-note-with-local.js';

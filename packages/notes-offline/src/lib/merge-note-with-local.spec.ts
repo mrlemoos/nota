@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { mergeNoteLists, mergeNoteWithLocal } from './merge-note-with-local';
-import type { StoredNote } from './types';
-import type { Json, Note } from '~/types/database.types';
+import { mergeNoteLists, mergeNoteWithLocal } from './merge-note-with-local.js';
+import type { StoredNote } from './types.js';
+import type { Json, Note } from '@nota.app/database-types';
 
 function makeNote(overrides: Partial<Note> = {}): Note {
   return {
@@ -98,7 +98,7 @@ describe('mergeNoteLists', () => {
       }),
     ];
     const merged = mergeNoteLists(server, stored);
-    expect(merged.map((n) => n.id)).toEqual(['a']);
+    expect(merged.map((n: Note) => n.id)).toEqual(['a']);
   });
 
   it('keeps pending_create notes that are absent from the server list', () => {
@@ -130,6 +130,6 @@ describe('mergeNoteLists', () => {
       }),
     ];
     const merged = mergeNoteLists(server, stored);
-    expect(merged.map((n) => n.id)).toEqual(['x']);
+    expect(merged.map((n: Note) => n.id)).toEqual(['x']);
   });
 });

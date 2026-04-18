@@ -1,5 +1,5 @@
-import type { StoredNote } from './types';
-import type { Json, Note } from '~/types/database.types';
+import type { StoredNote } from './types.js';
+import type { Json, Note } from '@nota.app/database-types';
 
 function noteFromStored(stored: StoredNote): Note {
   const {

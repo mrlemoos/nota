@@ -4,7 +4,7 @@ import {
   clerkFullSignInUrl,
   clerkFullSignUpUrl,
 } from '@/lib/clerk-hash-navigation';
-import { isNotaClerkSsoCallbackPathname } from '@/lib/nota-clerk-oauth-protocol';
+import { isNotaClerkSsoCallbackPathname } from '@nota.app/clerk-oauth-protocol';
 
 /**
  * Clerk redirect / SSO handshake for pathname `/sso-callback` (query from OAuth).

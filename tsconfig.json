@@ -5,6 +5,21 @@
   "references": [
     {
       "path": "./apps/nota.app"
+    },
+    {
+      "path": "./packages/clerk-oauth-protocol"
+    },
+    {
+      "path": "./packages/validation"
+    },
+    {
+      "path": "./packages/nota-server-client"
+    },
+    {
+      "path": "./packages/database-types"
+    },
+    {
+      "path": "./packages/notes-offline"
     }
   ]
 }

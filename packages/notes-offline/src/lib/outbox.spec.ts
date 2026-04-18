@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { sortOutboxForProcessing } from './outbox';
-import type { OutboxEntry } from './types';
+import { sortOutboxForProcessing } from './outbox.js';
+import type { OutboxEntry } from './types.js';
 
 describe('sortOutboxForProcessing', () => {
   it('orders upsert before delete for the same note id', () => {
@@ -9,7 +9,10 @@ describe('sortOutboxForProcessing', () => {
       { noteId: 'a', kind: 'upsert' },
     ];
     const sorted = sortOutboxForProcessing(entries);
-    expect(sorted.map((e) => e.kind)).toEqual(['upsert', 'delete']);
+    expect(sorted.map((e: OutboxEntry) => e.kind)).toEqual([
+      'upsert',
+      'delete',
+    ]);
   });
 
   it('sorts by note id for stable processing', () => {
@@ -18,6 +21,6 @@ describe('sortOutboxForProcessing', () => {
       { noteId: 'm', kind: 'delete' },
     ];
     const sorted = sortOutboxForProcessing(entries);
-    expect(sorted.map((e) => e.noteId)).toEqual(['m', 'z']);
+    expect(sorted.map((e: OutboxEntry) => e.noteId)).toEqual(['m', 'z']);
   });
 });

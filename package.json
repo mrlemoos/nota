@@ -68,7 +68,8 @@
     "vitest": "~4.0.0"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ],
   "overrides": {
     "@clerk/elements": {

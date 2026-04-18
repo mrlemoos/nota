@@ -23,7 +23,7 @@ export function openNotaNotesDb(userId: string): Promise<IDBDatabase> {
       resolve(req.result);
     };
 
-    req.onupgradeneeded = (event): void => {
+    req.onupgradeneeded = (event: IDBVersionChangeEvent): void => {
       const db = (event.target as IDBOpenDBRequest).result;
 
       if (!db.objectStoreNames.contains(NOTES_STORE)) {

@@ -3,8 +3,8 @@ import {
   idbRequest,
   OUTBOX_OBJECT_STORE,
   transactionComplete,
-} from './db';
-import type { OutboxEntry, OutboxKind } from './types';
+} from './db.js';
+import type { OutboxEntry, OutboxKind } from './types.js';
 
 export async function enqueueOutbox(
   userId: string,

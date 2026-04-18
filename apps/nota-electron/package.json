@@ -8,6 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@nota.app/clerk-oauth-protocol": "*",
     "electron-updater": "^6.8.3",
     "wait-on": "^8.0.0"
   },
@@ -29,6 +30,12 @@
       },
       "build": {
         "executor": "nx:run-commands",
+        "dependsOn": [
+          {
+            "target": "build",
+            "projects": "@nota.app/clerk-oauth-protocol"
+          }
+        ],
         "options": {
           "commands": [
             "cd apps/nota-electron && npx tsc"

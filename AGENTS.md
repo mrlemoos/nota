@@ -2,6 +2,7 @@
 
 ## Workspace and stack
 
+- **Workspace packages** under [`packages/`](packages/) (npm `workspaces`: `apps/*`, `packages/*`): shared modules include `@nota.app/clerk-oauth-protocol` (desktop OAuth URL constants; dual export for Vite vs Node), `@nota.app/database-types`, `@nota.app/validation` (Zod), `@nota.app/nota-server-client` (Nota Pro fetch helpers; app wires env + Clerk), `@nota.app/notes-offline` (IndexedDB + merge/outbox; app [`app/lib/notes-offline.ts`](apps/nota.app/app/lib/notes-offline.ts) re-exports the package plus [`notes-offline-sync.ts`](apps/nota.app/app/lib/notes-offline-sync.ts) for Supabase drain). TipTap extensions and `@/components/ui` remain in **`apps/nota.app`** for now (tight coupling to shell, context, and Tailwind/shadcn).
 - Primary app is `apps/nota.app`: **Vite** client SPA (`index.html` → `app/main.tsx` → `SpaApp`), React 19, Nx monorepo; UI primitives from `@/components/ui/*` (Base UI–backed shadcn-style) and semantic theme tokens (`bg-background`, `muted`, `foreground`, etc.)—avoid hard-coded light neutrals on the notes surface. **`apps/nota.app` is client-only:** no Node route handlers, no `CLERK_SECRET_KEY`, no server-side OG fetch—those live in **`apps/nota-server`**.
 - Notes use Supabase Postgres with RLS; **identity is Clerk** (JWT to Supabase via third-party auth); the browser uses `@supabase/supabase-js` with `accessToken` from Clerk session tokens. Data access through typed helpers in `app/models/notes.ts` rather than ad hoc queries in UI.
 - TipTap edits run client-only; note body is stored as ProseMirror JSON in a `jsonb` column. The editor sync effect compares the `content` prop to the live document with ProseMirror `Node.fromJSON` + `doc.eq` (not `JSON.stringify`), since `jsonb` can reorder keys and a false diff would call `setContent` and move the caret. Also avoid pushing stale `content` into parent state after `updateNote`: the `.select()` row can lag local edits (typing during an in-flight body save, or a title save before the body debounce flushes), so merge the latest local body snapshot into the note passed to `onNoteUpdated` instead of trusting the returned row’s `content` alone.
@@ -20,7 +21,7 @@
 ## TypeScript and generated types
 
 - `apps/nota.app/tsconfig.app.json` uses `rootDir` `app` and includes patterns under `app/**`; files outside `app/` (e.g. `apps/nota.app/types/`) are not part of that project and break imports.
-- Keep Supabase-generated `database.types.ts` at `apps/nota.app/app/types/database.types.ts` and aim `supabase gen types` output there.
+- Supabase-generated types live in [`packages/database-types/src/lib/database.types.ts`](packages/database-types/src/lib/database.types.ts). [`apps/nota.app/app/types/database.types.ts`](apps/nota.app/app/types/database.types.ts) re-exports `@nota.app/database-types` so existing `~/types/database.types` imports keep working; run `supabase gen types` into the package file (then keep the app re-export if you still want the old path).
 
 ## Git commits (enforced)
 

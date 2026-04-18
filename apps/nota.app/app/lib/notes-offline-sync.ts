@@ -1,12 +1,14 @@
-import { getClerkAccessToken } from '../clerk-token-ref';
-import { getBrowserClient } from '../supabase/browser';
-import { createNote, deleteNote, updateNote } from '../../models/notes';
-import { listOutbox, removeOutboxEntry, sortOutboxForProcessing } from './outbox';
+import { createNote, deleteNote, updateNote } from '../models/notes';
+import { getClerkAccessToken } from './clerk-token-ref';
+import { getBrowserClient } from './supabase/browser';
 import {
   getStoredNote,
+  listOutbox,
   markNoteSyncedFromServer,
+  removeOutboxEntry,
   removeStoredNote,
-} from './local-note-store';
+  sortOutboxForProcessing,
+} from '@nota.app/notes-offline';
 
 let drainPromise: Promise<boolean> | null = null;
 

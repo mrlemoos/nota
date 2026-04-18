@@ -10,13 +10,11 @@ import {
 import { getBrowserClient } from '../lib/supabase/browser';
 import {
   getStoredNote,
-  putServerNoteIfNotDirty,
-} from '../lib/notes-offline/local-note-store';
-import {
+  isLikelyOnline,
   mergeNoteWithLocal,
+  putServerNoteIfNotDirty,
   storedNoteToListRow,
-} from '../lib/notes-offline/merge-note-with-local';
-import { isLikelyOnline } from '../lib/notes-offline/sync-notes';
+} from '@/lib/notes-offline';
 import { fetchNoteRowAndAttachmentsParallel } from '../lib/note-detail-fetch';
 import { getNote } from '../models/notes';
 import { listNoteAttachments } from '../models/note-attachments';

@@ -4,7 +4,7 @@ import {
   useNotesDataActions,
   useNotesDataMeta,
 } from '../context/notes-data-context';
-import { isLikelyOnline } from '../lib/notes-offline/sync-notes';
+import { isLikelyOnline } from '@/lib/notes-offline';
 import {
   listPendingAudioNoteJobs,
   removePendingAudioNoteJob,

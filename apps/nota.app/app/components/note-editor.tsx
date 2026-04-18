@@ -16,10 +16,11 @@ import { useRootLoaderData } from '../context/spa-session-context';
 import { useNotesDataMeta } from '../context/notes-data-context';
 import { mergeUpdatedNoteLocalContent } from '../lib/note-updated-content-merge';
 import {
+  drainNotesOutbox,
+  isLikelyOnline,
   markNoteSyncedFromServer,
   saveLocalNoteDraft,
-} from '../lib/notes-offline/local-note-store';
-import { drainNotesOutbox, isLikelyOnline } from '../lib/notes-offline/sync-notes';
+} from '@/lib/notes-offline';
 import { updateNote } from '../models/notes';
 import type { Json, Note, NoteAttachment } from '~/types/database.types';
 import {

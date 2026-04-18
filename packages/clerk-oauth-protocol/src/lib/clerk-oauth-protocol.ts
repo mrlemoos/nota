@@ -7,6 +7,9 @@
  */
 export const NOTA_CLERK_OAUTH_CALLBACK_URL = 'nota://oauth-callback' as const;
 
+/** Prefix for any `nota:` deep link handled by the desktop shell (see {@link NOTA_CLERK_OAUTH_CALLBACK_URL}). */
+export const NOTA_CUSTOM_SCHEME_URL_PREFIX = 'nota://' as const;
+
 /** Path served by the Vite/Electron shell for `AuthenticateWithRedirectCallback`. */
 export const NOTA_CLERK_SSO_CALLBACK_PATH = '/sso-callback' as const;
 
