@@ -2,7 +2,7 @@ import { useAuth } from '@clerk/react';
 import type { JSX } from 'react';
 import { AuthCardEpigraph } from '@/components/auth-card-epigraph';
 import { AuthScreenHashLink } from '@/components/auth-screen-hash-link';
-import { NotaClerkSignUp } from '@/components/nota-clerk-prefab-auth';
+import { NotaClerkSignUp } from '@/components/nota-clerk-elements-auth';
 import { CartoonLandscape } from '@/components/cartoon-landscape';
 import { cn } from '@/lib/utils';
 

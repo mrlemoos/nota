@@ -50,7 +50,28 @@ if (!clerkPublishableKey) {
   throw new Error('Missing VITE_CLERK_PUBLISHABLE_KEY');
 }
 
+/** Hash may not be visible on the first synchronous tick; re-run through the document lifecycle. */
 repairClerkAuthLocationHash();
+queueMicrotask(() => {
+  repairClerkAuthLocationHash();
+});
+if (document.readyState !== 'loading') {
+  repairClerkAuthLocationHash();
+}
+document.addEventListener(
+  'DOMContentLoaded',
+  () => {
+    repairClerkAuthLocationHash();
+  },
+  { once: true },
+);
+window.addEventListener(
+  'load',
+  () => {
+    repairClerkAuthLocationHash();
+  },
+  { once: true },
+);
 
 createRoot(rootEl).render(
   <ClerkProvider
