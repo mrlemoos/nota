@@ -96,11 +96,13 @@ describe('validateUserBillingPlansAgainstExpectations', () => {
   });
 });
 
-function makePlan(overrides: Partial<BillingPlanLike> & Pick<BillingPlanLike, 'slug'>): BillingPlanLike {
+function makePlan(
+  overrides: Partial<BillingPlanLike> & Pick<BillingPlanLike, 'slug'>,
+): BillingPlanLike {
+  const { slug, ...rest } = overrides;
   return {
     id: 'plan_test',
     name: 'Test',
-    slug: overrides.slug,
     forPayerType: 'user',
     publiclyVisible: true,
     isRecurring: true,
@@ -111,6 +113,7 @@ function makePlan(overrides: Partial<BillingPlanLike> & Pick<BillingPlanLike, 's
     fee: { amount: 249, currency: 'usd' },
     annualFee: { amount: 1949, currency: 'usd' },
     annualMonthlyFee: null,
-    ...overrides,
+    ...rest,
+    slug,
   };
 }
