@@ -2,6 +2,8 @@
   <h1>Nota</h1>
 </div>
 
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/mrlemoos/nota.app?utm_source=oss&utm_medium=github&utm_campaign=mrlemoos%2Fnota.app&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 ## Philosophy
 
 You know the feeling: you open something to think, and the software starts performing (offering, suggesting, nudging) until the room for your own pace shrinks. Useful automation has its place elsewhere; in a notes app, that itch to always *do something next* can mistake motion for thinking.
