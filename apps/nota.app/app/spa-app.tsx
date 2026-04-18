@@ -7,6 +7,7 @@ import { useSpaSession } from './context/spa-session-context';
 import { NotesDataProvider } from './context/notes-data-context';
 import { SignedInCommandPalette } from './signed-in-command-palette';
 import { useAppNavigationScreen } from './hooks/use-app-navigation-screen';
+import { ElectronWindowDragBand } from './components/electron-window-drag-band';
 import { SpaNotFound } from './components/spa-not-found';
 import { replaceAppHash, syncAppNavigation } from './lib/app-navigation';
 import { repairClerkAuthLocationHash } from './lib/clerk-hash-navigation';
@@ -39,12 +40,7 @@ function SpaAuthPanel({
 function redirectAuthShell(
   user: { id: string } | null,
   loading: boolean,
-  kind:
-    | 'landing'
-    | 'notFound'
-    | 'login'
-    | 'signup'
-    | 'notes',
+  kind: 'landing' | 'notFound' | 'login' | 'signup' | 'notes',
 ): void {
   if (loading) {
     return;
@@ -101,14 +97,16 @@ export function SpaApp(): JSX.Element {
 
   if (loading) {
     return (
-      <div className="flex h-dvh min-h-0 items-center justify-center bg-background text-muted-foreground text-sm">
+      <div className="relative flex h-dvh min-h-0 items-center justify-center bg-background text-muted-foreground text-sm">
+        <ElectronWindowDragBand />
         Loading…
       </div>
     );
   }
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col bg-background text-foreground">
+    <div className="relative flex h-dvh min-h-0 flex-col bg-background text-foreground">
+      <ElectronWindowDragBand />
       {!anyShellActive ? (
         <div
           className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground"

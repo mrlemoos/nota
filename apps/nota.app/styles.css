@@ -8,6 +8,15 @@
 @source "../../apps";
 @source "../../packages";
 
+/* Electron: `-webkit-app-region` lets the user drag frameless / hiddenInset windows */
+.electron-window-drag {
+  -webkit-app-region: drag;
+}
+
+.electron-window-no-drag {
+  -webkit-app-region: no-drag;
+}
+
 /* Due date popover calendar — semantic tokens (avoid hard-coded greys) */
 .nota-due-day-picker .rdp-root {
   --rdp-accent-color: var(--primary);
