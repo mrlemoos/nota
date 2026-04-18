@@ -9,7 +9,8 @@
     "build": "npx esbuild src/index.ts --bundle --platform=node --target=node22 --format=esm --packages=external --outfile=dist/index.js",
     "dev": "bun run src/index.ts",
     "start": "node dist/index.js",
-    "test": "bun test src/"
+    "test": "bun test src/",
+    "validate:billing": "bun run scripts/validate-clerk-billing-alignment.ts"
   },
   "dependencies": {
     "@clerk/backend": "^3.2.7",
@@ -42,6 +43,14 @@
         "options": {
           "cwd": "apps/nota-server",
           "command": "npm run dev"
+        }
+      },
+      "validate-billing": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "apps/nota-server",
+          "envFile": "apps/nota-server/.env",
+          "command": "bun run scripts/validate-clerk-billing-alignment.ts"
         }
       }
     }

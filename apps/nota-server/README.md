@@ -38,6 +38,23 @@ If **`NOTA_SERVER_CORS_ORIGINS` is unset**, the server allows `http://127.0.0.1:
 
 When **`NODE_ENV=production`**, the process logs a **warning** if `NOTA_SERVER_CORS_ORIGINS=*` is in effect, so operators notice permissive CORS in production.
 
+## Clerk Billing vs marketing
+
+With **`CLERK_SECRET_KEY`** set in **`apps/nota-server/.env`**, run from the **monorepo root** (recommended — Nx loads that file into the task environment):
+
+```bash
+npx nx run @nota.app/nota-server:validate-billing
+```
+
+Equivalent without Nx (loads **`.env`** inside the script):
+
+```bash
+cd apps/nota-server
+npm run validate:billing
+```
+
+This calls Clerk’s Billing API (`getPlanList` for `user` payers) and checks public plans against guide USD amounts in **`apps/nota-marketing`** and the no-trial / no-unpaid-vault policy described in **`AGENTS.md`**. If **`.env`** is missing, the script copies **`.env.example`** to **`.env`** once and exits until you add the secret.
+
 ## Auth
 
 Clients send `Authorization: Bearer <Clerk session JWT>`. The server validates it with **`@clerk/backend`** `verifyToken` using **`CLERK_SECRET_KEY`**.
