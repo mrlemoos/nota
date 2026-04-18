@@ -3,6 +3,9 @@
  * Grammar: #/ | #/sign-in | #/sign-up | #/login | #/signup (legacy) | #/notes | … | #/404 — unknown paths resolve to `notFound`.
  */
 
+/** Fired after `history.pushState` / `replaceState` (same tick as `scheduleNavigationSync`). */
+export const NOTA_SPA_HISTORY_EVENT = 'nota:spa-history' as const;
+
 export type NotesShellPanel =
   | 'list'
   | 'note'
@@ -272,6 +275,7 @@ if (typeof window !== 'undefined') {
       ) {
         original(data, unused, url);
         scheduleNavigationSync();
+        window.dispatchEvent(new Event(NOTA_SPA_HISTORY_EVENT));
       } as History[typeof key];
     };
     patchHistoryNavigation('pushState');

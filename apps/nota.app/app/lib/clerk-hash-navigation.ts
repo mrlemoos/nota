@@ -1,4 +1,4 @@
-import { replaceAppHash } from './app-navigation';
+import { NOTA_SPA_HISTORY_EVENT, replaceAppHash } from './app-navigation';
 
 /**
  * Clerk path/hash mode uses `/sign-in` and `/sign-up`. The SPA hash must stay on those
@@ -154,6 +154,22 @@ const SIGN_REDIRECT_PARAM =
 
 const REDIRECT_OR_RETURN_PARAM = /^(redirect_url|return_url)$/i;
 
+/**
+ * Known Clerk hash-auth query keys only. Anything else (e.g. `sign_0/#/sign-in` from a
+ * broken `key=value` parse) is stripped so `URLSearchParams` cannot leave garbage in the hash.
+ */
+const CLERK_AUTH_HASH_QUERY_KEY =
+  /^(?:sign_(?:in|up)_(?:force|fallback)_redirect_url|redirect_url|return_url|__clerk_[a-z0-9_]+)$/i;
+
+function isAllowedAuthHashQueryKey(key: string): boolean {
+  return CLERK_AUTH_HASH_QUERY_KEY.test(key);
+}
+
+/** Decoded key names should not contain URL/path characters — indicates a parse artefact. */
+function isPathologicalAuthHashQueryKey(key: string): boolean {
+  return /[#/?]/.test(key);
+}
+
 function fullyDecodeRedirectValue(encodedValue: string): string {
   let s = encodedValue;
   for (let i = 0; i < 10; i++) {
@@ -210,11 +226,13 @@ function authHashFragmentStillPoisoned(fragment: string): boolean {
   if (qIndex === -1) {
     return false;
   }
-  const pathPart = fragment.slice(0, qIndex);
   const params = new URLSearchParams(fragment.slice(qIndex + 1));
   for (const key of params.keys()) {
+    if (!isAllowedAuthHashQueryKey(key) || isPathologicalAuthHashQueryKey(key)) {
+      return true;
+    }
     const val = params.get(key);
-    if (!val) {
+    if (val == null || val === '') {
       continue;
     }
     if (SIGN_REDIRECT_PARAM.test(key) && redirectParamLooksNested(val)) {
@@ -256,10 +274,17 @@ export function sanitizeClerkAuthHashFragment(fragment: string): string {
   }
 
   const params = new URLSearchParams(fragment.slice(qIndex + 1));
+
+  for (const key of [...params.keys()]) {
+    if (!isAllowedAuthHashQueryKey(key) || isPathologicalAuthHashQueryKey(key)) {
+      params.delete(key);
+    }
+  }
+
   const notes = clerkFullNotesUrl();
   for (const key of [...params.keys()]) {
     const val = params.get(key);
-    if (!val) {
+    if (val == null || val === '') {
       continue;
     }
     if (SIGN_REDIRECT_PARAM.test(key)) {
@@ -371,4 +396,25 @@ export function repairClerkAuthLocationHash(): void {
         : { kind: 'login' },
     );
   }
+}
+
+if (typeof window !== 'undefined') {
+  window.addEventListener(NOTA_SPA_HISTORY_EVENT, () => {
+    queueMicrotask(() => {
+      repairClerkAuthLocationHash();
+    });
+  });
+  /**
+   * Clerk hash routing may assign `location.hash` directly; that fires `hashchange` but not
+   * `history.pushState` / `replaceState`, so `NOTA_SPA_HISTORY_EVENT` alone misses it.
+   */
+  window.addEventListener(
+    'hashchange',
+    () => {
+      queueMicrotask(() => {
+        repairClerkAuthLocationHash();
+      });
+    },
+    { passive: true },
+  );
 }

@@ -176,6 +176,16 @@ describe('sanitizeClerkAuthHashFragment', () => {
     const params = new URLSearchParams(out.slice('/sign-up?'.length));
     expect(params.get('return_url')).toBe('http://localhost:4200/#/sign-in');
   });
+
+  it('strips malformed query tokens parsed as a junk key (no equals sign)', () => {
+    stubWindowLocation({ origin: 'http://localhost:4200', pathname: '/' });
+    expect(sanitizeClerkAuthHashFragment('/sign-up?sign_0%2F%23%2Fsign-in')).toBe(
+      '/sign-up',
+    );
+    expect(
+      sanitizeClerkAuthHashFragment('/sign-up?sign_0%2F%23%2Fsign-in='),
+    ).toBe('/sign-up');
+  });
 });
 
 describe('repairClerkAuthLocationHash', () => {
