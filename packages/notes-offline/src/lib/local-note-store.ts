@@ -51,6 +51,7 @@ export async function saveLocalNoteDraft(
     due_at?: string | null;
     is_deadline?: boolean;
     editor_settings?: Json;
+    banner_attachment_id?: string | null;
   },
   options: { pendingCreate?: boolean } = {},
 ): Promise<void> {
@@ -83,6 +84,10 @@ export async function saveLocalNoteDraft(
       patch.editor_settings !== undefined
         ? patch.editor_settings
         : (existing?.editor_settings ?? ({} as Json)),
+    banner_attachment_id:
+      patch.banner_attachment_id !== undefined
+        ? patch.banner_attachment_id
+        : (existing?.banner_attachment_id ?? null),
     dirty: true,
     pending_create: options.pendingCreate ?? existing?.pending_create ?? false,
     pending_delete: false,

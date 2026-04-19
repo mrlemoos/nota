@@ -17,7 +17,7 @@ import {
 } from '@/lib/notes-offline';
 import { fetchNoteRowAndAttachmentsParallel } from '../lib/note-detail-fetch';
 import { getNote } from '../models/notes';
-import { listNoteAttachments } from '../models/note-attachments';
+import { listNoteAttachments, NOTE_PDFS_BUCKET } from '../models/note-attachments';
 import { hashForScreen, replaceAppHash } from '../lib/app-navigation';
 import { shouldRefetchOpenNoteFromVaultList } from '../lib/open-note-vault-list-sync';
 import {
@@ -26,12 +26,15 @@ import {
   useNotesDataVault,
 } from '../context/notes-data-context';
 import { useSpaSession } from '../context/spa-session-context';
+import { ATTACHMENT_SIGNED_URL_TTL_SEC } from '../lib/pdf-attachment-client';
+import { useStickyDocTitle } from '../context/sticky-doc-title';
 
 export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode {
   const { notes } = useNotesDataVault();
   const { notaProEntitled, loading: vaultLoading } = useNotesDataMeta();
   const { patchNoteInList } = useNotesDataActions();
   const { user } = useSpaSession();
+  const { scrollRootRef } = useStickyDocTitle();
   const [note, setNote] = useState<Note | null>(null);
   const [attachments, setAttachments] = useState<NoteAttachment[]>([]);
   const [fetchSettled, setFetchSettled] = useState(false);
@@ -236,6 +239,75 @@ export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode
     displayNote,
   ]);
 
+  // --- Banner signed URL ---
+  const bannerAttachmentId = displayNote?.banner_attachment_id ?? null;
+  const bannerAttachment = bannerAttachmentId
+    ? attachments.find((a) => a.id === bannerAttachmentId) ?? null
+    : null;
+  const [bannerSignedUrl, setBannerSignedUrl] = useState<string | null>(null);
+  const bannerRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setBannerSignedUrl(null);
+    if (bannerRefreshTimerRef.current) {
+      clearTimeout(bannerRefreshTimerRef.current);
+      bannerRefreshTimerRef.current = null;
+    }
+    if (!bannerAttachment) return;
+
+    const storagePath = bannerAttachment.storage_path;
+
+    const scheduleRefresh = () => {
+      if (bannerRefreshTimerRef.current) clearTimeout(bannerRefreshTimerRef.current);
+      const ms = Math.max(5_000, Math.floor(ATTACHMENT_SIGNED_URL_TTL_SEC * 0.85 * 1000));
+      bannerRefreshTimerRef.current = setTimeout(() => void fetchUrl(), ms);
+    };
+
+    async function fetchUrl() {
+      const client = getBrowserClient();
+      const { data, error } = await client.storage
+        .from(NOTE_PDFS_BUCKET)
+        .createSignedUrl(storagePath, ATTACHMENT_SIGNED_URL_TTL_SEC);
+      if (cancelled) return;
+      if (error || !data?.signedUrl) {
+        setBannerSignedUrl(null);
+        return;
+      }
+      setBannerSignedUrl(data.signedUrl);
+      scheduleRefresh();
+    }
+
+    void fetchUrl();
+
+    return () => {
+      cancelled = true;
+      if (bannerRefreshTimerRef.current) {
+        clearTimeout(bannerRefreshTimerRef.current);
+        bannerRefreshTimerRef.current = null;
+      }
+    };
+  }, [bannerAttachment?.id, bannerAttachment?.storage_path]);
+
+  // Paint the banner as a viewport-fixed background on <main>. Using
+  // background-attachment:fixed sidesteps the containing-block issue caused
+  // by main's backdrop-filter (which scopes `position:fixed` descendants).
+  useEffect(() => {
+    const main = scrollRootRef.current;
+    if (!main) return;
+    if (!bannerSignedUrl) return;
+    main.style.backgroundImage = `url("${bannerSignedUrl}")`;
+    main.style.backgroundSize = 'cover';
+    main.style.backgroundPosition = 'center';
+    main.style.backgroundAttachment = 'fixed';
+    return () => {
+      main.style.backgroundImage = '';
+      main.style.backgroundSize = '';
+      main.style.backgroundPosition = '';
+      main.style.backgroundAttachment = '';
+    };
+  }, [bannerSignedUrl, scrollRootRef]);
+
   const handleNoteUpdated = useCallback(
     (updatedNote: Note) => {
       setNote(updatedNote);
@@ -257,11 +329,18 @@ export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode
   );
 
   return (
-    <div className="px-4 py-8">
+    <div
+      className={cn(
+        'relative',
+        bannerSignedUrl ? 'px-4 py-10 md:px-8 md:py-16' : 'px-4 py-8',
+      )}
+    >
       <div
         className={cn(
           'mx-auto w-full transition-[max-width] duration-300 ease-in-out',
           layout.maxWidthClass,
+          bannerSignedUrl &&
+            'rounded-2xl bg-background/80 px-6 py-10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35),0_10px_30px_-12px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-2xl backdrop-saturate-150 md:px-14 md:py-16 dark:bg-background/70 dark:ring-white/10',
         )}
       >
         <NoteEditor
@@ -271,6 +350,7 @@ export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode
           titleFontClassName={layout.titleFontClass}
           bodyFontClassName={layout.bodyFontClass}
           onNoteUpdated={handleNoteUpdated}
+          bannerSignedUrl={bannerSignedUrl}
         />
         <div className={layout.bodyFontClass}>
           <NoteBacklinksPanel noteId={noteId} />

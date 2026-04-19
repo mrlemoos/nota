@@ -20,6 +20,7 @@ export interface Database {
           due_at: string | null;
           is_deadline: boolean;
           editor_settings: Json;
+          banner_attachment_id: string | null;
         };
         Insert: {
           id?: string;
@@ -31,6 +32,7 @@ export interface Database {
           due_at?: string | null;
           is_deadline?: boolean;
           editor_settings?: Json;
+          banner_attachment_id?: string | null;
         };
         Update: {
           id?: string;
@@ -42,6 +44,7 @@ export interface Database {
           due_at?: string | null;
           is_deadline?: boolean;
           editor_settings?: Json;
+          banner_attachment_id?: string | null;
         };
         Relationships: [];
       };

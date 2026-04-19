@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type JSX } from 'react';
+import { useCallback, useEffect, useRef, useState, type JSX } from 'react';
 import { TypeCursorIcon } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,10 @@ type NoteLayoutMenuProps = {
   settings: NoteEditorSettings;
   onSettingsChange: (next: NoteEditorSettings) => void;
   disabled?: boolean;
+  bannerAttachmentId?: string | null;
+  bannerSignedUrl?: string | null;
+  onBannerChange?: (attachmentId: string | null) => void;
+  onBannerUpload?: (file: File) => Promise<string>;
 };
 
 const panelClass =
@@ -23,8 +27,14 @@ export function NoteLayoutMenu({
   settings,
   onSettingsChange,
   disabled,
+  bannerAttachmentId,
+  bannerSignedUrl,
+  onBannerChange,
+  onBannerUpload,
 }: NoteLayoutMenuProps): JSX.Element {
   const [open, setOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const bannerInputRef = useRef<HTMLInputElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,6 +49,25 @@ export function NoteLayoutMenu({
     document.addEventListener('pointerdown', onPointer, true);
     return () => document.removeEventListener('pointerdown', onPointer, true);
   }, [open]);
+
+  const handleBannerFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file || !onBannerUpload || !onBannerChange) return;
+      // Reset input so the same file can be re-selected
+      e.target.value = '';
+      setUploading(true);
+      try {
+        const attachmentId = await onBannerUpload(file);
+        onBannerChange(attachmentId);
+      } catch (err) {
+        console.error('Failed to upload banner:', err);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onBannerUpload, onBannerChange],
+  );
 
   const selectClass = cn(
     'mt-1 w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm text-foreground',
@@ -148,12 +177,61 @@ export function NoteLayoutMenu({
               />
               <span>Show in note graph</span>
             </label>
+            {onBannerChange && (
+              <div>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Banner image
+                </span>
+                <input
+                  ref={bannerInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={handleBannerFileChange}
+                />
+                {bannerAttachmentId ? (
+                  <div className="mt-1 flex items-center gap-2">
+                    {bannerSignedUrl && (
+                      <img
+                        src={bannerSignedUrl}
+                        alt="Banner preview"
+                        className="h-8 w-14 rounded border border-border object-cover"
+                      />
+                    )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      disabled={disabled}
+                      onClick={() => onBannerChange(null)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-1 w-full"
+                    disabled={disabled || uploading}
+                    onClick={() => bannerInputRef.current?.click()}
+                  >
+                    {uploading ? 'Uploading…' : 'Add banner image'}
+                  </Button>
+                )}
+              </div>
+            )}
             <Button
               type="button"
               variant="outline"
               size="sm"
               className="w-full"
-              onClick={() => onSettingsChange({})}
+              onClick={() => {
+                onSettingsChange({});
+                onBannerChange?.(null);
+              }}
             >
               Reset to defaults
             </Button>

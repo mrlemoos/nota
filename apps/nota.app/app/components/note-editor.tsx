@@ -31,6 +31,7 @@ import {
 import { NoteLayoutMenu } from './note-layout-menu';
 import { cn } from '@/lib/utils';
 import type { Editor } from '@tiptap/core';
+import { isImageFile, uploadNoteAttachmentFile } from '../lib/pdf-attachment-client';
 
 interface NoteEditorProps {
   note: Note;
@@ -40,6 +41,7 @@ interface NoteEditorProps {
   titleFontClassName: string;
   bodyFontClassName: string;
   onNoteUpdated?: (note: Note) => void;
+  bannerSignedUrl?: string | null;
 }
 
 const SAVE_DEBOUNCE_MS = 800;
@@ -51,6 +53,7 @@ function NoteEditorImpl({
   titleFontClassName,
   bodyFontClassName,
   onNoteUpdated,
+  bannerSignedUrl,
 }: NoteEditorProps) {
   const { user } = useRootLoaderData() ?? { user: null };
   const { notaProEntitled } = useNotesDataMeta();
@@ -421,6 +424,74 @@ function NoteEditorImpl({
     }
   }, []);
 
+  const persistBanner = useCallback(async (attachmentId: string | null) => {
+    const userId = userIdRef.current;
+    if (!userId) return;
+    const n = noteRef.current;
+    const titleForRow = persistedDisplayTitle(titleRef.current);
+    const contentForRow = (pendingContentRef.current ??
+      lastSavedContent.current) as Json;
+    setSaveStatus('saving');
+    try {
+      await saveLocalNoteDraft(userId, {
+        id: n.id,
+        title: titleForRow,
+        content: contentForRow,
+        user_id: n.user_id,
+        created_at: n.created_at,
+        due_at: n.due_at,
+        is_deadline: n.is_deadline,
+        editor_settings: n.editor_settings,
+        banner_attachment_id: attachmentId,
+      });
+      if (isLikelyOnline() && notaProEntitledRef.current) {
+        const client = getBrowserClient();
+        const updatedNote = await updateNote(client, n.id, {
+          banner_attachment_id: attachmentId,
+        });
+        await markNoteSyncedFromServer(userId, updatedNote);
+        onNoteUpdatedRef.current?.(
+          mergeUpdatedNoteLocalContent(
+            updatedNote,
+            pendingContentRef.current,
+            lastSavedContent.current as Json,
+          ),
+        );
+      } else {
+        onNoteUpdatedRef.current?.(
+          mergeUpdatedNoteLocalContent(
+            {
+              ...n,
+              banner_attachment_id: attachmentId,
+              updated_at: new Date().toISOString(),
+            },
+            pendingContentRef.current,
+            lastSavedContent.current as Json,
+          ),
+        );
+      }
+      setSaveStatus('saved');
+    } catch (error) {
+      console.error('Failed to save banner:', error);
+      setSaveStatus('error');
+      if (notaProEntitledRef.current) {
+        void drainNotesOutbox(userId);
+      }
+    }
+  }, []);
+
+  const handleBannerUpload = useCallback(async (file: File): Promise<string> => {
+    const userId = userIdRef.current;
+    if (!userId) throw new Error('Not authenticated');
+    if (!isImageFile(file)) throw new Error('Please choose an image file.');
+    const attachment = await uploadNoteAttachmentFile(
+      noteRef.current.id,
+      userId,
+      file,
+    );
+    return attachment.id;
+  }, []);
+
   useEffect(() => {
     return () => {
       if (contentDebounceRef.current) {
@@ -458,6 +529,10 @@ function NoteEditorImpl({
             settings={parseNoteEditorSettings(note.editor_settings)}
             onSettingsChange={persistEditorSettings}
             disabled={!user?.id}
+            bannerAttachmentId={note.banner_attachment_id}
+            bannerSignedUrl={bannerSignedUrl}
+            onBannerChange={persistBanner}
+            onBannerUpload={handleBannerUpload}
           />
           {saveStatus === 'saving' && (
             <span
