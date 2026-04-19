@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/wait-on": "^5.3.4",
-    "electron": "35.7.5",
+    "electron": "^41.2.1",
     "vitest": "~4.0.0"
   },
   "nx": {
