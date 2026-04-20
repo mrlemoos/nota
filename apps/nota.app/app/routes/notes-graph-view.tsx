@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useState,
   type JSX,
   type MouseEvent,
 } from 'react';
@@ -25,6 +26,7 @@ import type { Note } from '~/types/database.types';
 import { useNotesDataVault } from '../context/notes-data-context';
 import { navigateFromLegacyPath } from '../lib/app-navigation';
 import { filterNotesForNoteGraph } from '../lib/note-editor-settings';
+import { applyNoteGraphHoverToEdges } from '../lib/note-graph-hover-edges';
 import { buildNoteLinkGraph } from '../lib/note-link-graph';
 import { notesToIdMap } from '../lib/notes-id-map';
 import { cn } from '@/lib/utils';
@@ -106,7 +108,13 @@ function NotesGraphFlowInner(): JSX.Element {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(derivedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(derivedEdges);
+  const [hoveredNoteId, setHoveredNoteId] = useState<string | null>(null);
   const { fitView } = useReactFlow();
+
+  const displayEdges = useMemo(
+    () => applyNoteGraphHoverToEdges(edges, hoveredNoteId),
+    [edges, hoveredNoteId],
+  );
 
   useEffect(() => {
     setNodes(derivedNodes);
@@ -122,6 +130,14 @@ function NotesGraphFlowInner(): JSX.Element {
 
   const onNodeClick = useCallback((_event: MouseEvent, node: Node) => {
     navigateFromLegacyPath(`/notes/${node.id}`);
+  }, []);
+
+  const onNodeMouseEnter = useCallback((_event: MouseEvent, node: Node) => {
+    setHoveredNoteId(node.id);
+  }, []);
+
+  const onNodeMouseLeave = useCallback(() => {
+    setHoveredNoteId(null);
   }, []);
 
   if (notes.length === 0) {
@@ -143,11 +159,13 @@ function NotesGraphFlowInner(): JSX.Element {
   return (
     <ReactFlow
       nodes={nodes}
-      edges={edges}
+      edges={displayEdges}
       nodeTypes={nodeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onNodeClick={onNodeClick}
+      onNodeMouseEnter={onNodeMouseEnter}
+      onNodeMouseLeave={onNodeMouseLeave}
       proOptions={{ hideAttribution: true }}
       className="rounded-lg bg-muted/20"
     >
