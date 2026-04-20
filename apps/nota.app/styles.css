@@ -232,14 +232,45 @@
 
 .tiptap-editor .ProseMirror h1 {
   font-size: 1.5em;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1.28;
   margin: 1em 0 0.5em;
 }
 
 .tiptap-editor .ProseMirror h2 {
   font-size: 1.25em;
-  font-weight: 600;
+  font-weight: 500;
+  line-height: 1.35;
   margin: 1em 0 0.5em;
+}
+
+.tiptap-editor .ProseMirror h3 {
+  font-size: 1.125em;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 0.9em 0 0.45em;
+}
+
+.tiptap-editor .ProseMirror h4 {
+  font-size: 1.0625em;
+  font-weight: 500;
+  line-height: 1.45;
+  margin: 0.85em 0 0.4em;
+}
+
+.tiptap-editor .ProseMirror h5 {
+  font-size: 1.03125em;
+  font-weight: 500;
+  line-height: 1.45;
+  margin: 0.8em 0 0.35em;
+}
+
+.tiptap-editor .ProseMirror h6 {
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0.75em 0 0.35em;
+  color: color-mix(in oklch, var(--foreground) 88%, var(--muted-foreground));
 }
 
 .tiptap-editor .ProseMirror ul {
