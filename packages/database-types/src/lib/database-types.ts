@@ -103,6 +103,40 @@ export interface Database {
         };
         Relationships: [];
       };
+      note_semantic_index: {
+        Row: {
+          note_id: string;
+          user_id: string;
+          embedding: string;
+          search_document: string;
+          content_hash: string;
+          updated_at: string;
+        };
+        Insert: {
+          note_id: string;
+          user_id: string;
+          embedding: string;
+          search_document?: string;
+          content_hash?: string;
+          updated_at?: string;
+        };
+        Update: {
+          note_id?: string;
+          user_id?: string;
+          embedding?: string;
+          search_document?: string;
+          content_hash?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'note_semantic_index_note_id_fkey';
+            columns: ['note_id'];
+            referencedRelation: 'notes';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       user_preferences: {
         Row: {
           user_id: string;

@@ -1,6 +1,9 @@
 import {
   fetchNotaProEntitled as fetchNotaProEntitledRequest,
   postNotaProInvalidate as postNotaProInvalidateRequest,
+  postSearchIndexNote as postSearchIndexNoteRequest,
+  postSemanticSearch as postSemanticSearchRequest,
+  postSearchReindexAll as postSearchReindexAllRequest,
 } from '@nota.app/nota-server-client';
 import { getClerkAccessToken } from './clerk-token-ref';
 
@@ -23,6 +26,36 @@ export async function fetchNotaProEntitled(): Promise<Response> {
 /** `POST` on nota-server; same Bearer auth as `fetchNotaProEntitled`. */
 export async function postNotaProInvalidate(): Promise<Response> {
   return postNotaProInvalidateRequest(
+    notaServerBase(),
+    await getClerkAccessToken(),
+  );
+}
+
+/** Semantic search (`POST /api/semantic-search`). Requires Nota Pro and `VITE_NOTA_SERVER_API_URL`. */
+export async function postSemanticSearch(body: {
+  query: string;
+}): Promise<Response> {
+  return postSemanticSearchRequest(
+    notaServerBase(),
+    await getClerkAccessToken(),
+    body,
+  );
+}
+
+/** Upsert semantic index row for one note (`POST /api/search/index-note`). */
+export async function postSearchIndexNote(body: {
+  noteId: string;
+}): Promise<Response> {
+  return postSearchIndexNoteRequest(
+    notaServerBase(),
+    await getClerkAccessToken(),
+    body,
+  );
+}
+
+/** Full vault semantic reindex (`POST /api/search/reindex-all`). */
+export async function postSearchReindexAll(): Promise<Response> {
+  return postSearchReindexAllRequest(
     notaServerBase(),
     await getClerkAccessToken(),
   );

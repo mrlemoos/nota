@@ -1,13 +1,22 @@
 import cors from 'cors';
 import express from 'express';
 import multer from 'multer';
-import { expressToWebRequest, sendWebResponse } from './http-utils.ts';
+import {
+  expressToWebRequest,
+  expressToWebRequestWithJsonBody,
+  sendWebResponse,
+} from './http-utils.ts';
 import { audioToNoteHandler } from './routes/audio-to-note.ts';
 import { ogPreviewHandler } from './routes/og-preview.ts';
 import {
   notaProEntitledHandler,
   notaProInvalidateHandler,
 } from './routes/nota-pro.ts';
+import {
+  indexNotePostHandler,
+  reindexAllPostHandler,
+  semanticSearchPostHandler,
+} from './routes/semantic-search.ts';
 
 const PORT = Number(process.env.PORT ?? '8787');
 
@@ -102,6 +111,39 @@ app.get('/api/og-preview', (req, res, next) => {
 
 app.post('/api/audio-to-note', audioUpload.single('audio'), (req, res, next) => {
   void audioToNoteHandler(req, res).catch(next);
+});
+
+app.post('/api/semantic-search', (req, res, next) => {
+  void (async () => {
+    try {
+      const r = await semanticSearchPostHandler(expressToWebRequestWithJsonBody(req));
+      await sendWebResponse(res, r);
+    } catch (e) {
+      next(e);
+    }
+  })();
+});
+
+app.post('/api/search/index-note', (req, res, next) => {
+  void (async () => {
+    try {
+      const r = await indexNotePostHandler(expressToWebRequestWithJsonBody(req));
+      await sendWebResponse(res, r);
+    } catch (e) {
+      next(e);
+    }
+  })();
+});
+
+app.post('/api/search/reindex-all', (req, res, next) => {
+  void (async () => {
+    try {
+      const r = await reindexAllPostHandler(expressToWebRequestWithJsonBody(req));
+      await sendWebResponse(res, r);
+    } catch (e) {
+      next(e);
+    }
+  })();
 });
 
 app.use(

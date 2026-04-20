@@ -29,6 +29,7 @@ import { useSpaSession } from '../context/spa-session-context';
 import { ATTACHMENT_SIGNED_URL_TTL_SEC } from '../lib/pdf-attachment-client';
 import { useStickyDocTitle } from '../context/sticky-doc-title';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
+import { postSearchIndexNote } from '../lib/nota-server-client';
 
 export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode {
   const { notes } = useNotesDataVault();
@@ -43,6 +44,10 @@ export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode
   const [hadAuthenticatedUser, setHadAuthenticatedUser] = useState(false);
   const notesRef = useRef(notes);
   notesRef.current = notes;
+
+  const semanticIndexTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   /** List row for the open id — avoids an empty state flash while the full fetch runs after a note switch. */
   const noteFromList = notes.find((n) => n.id === noteId) ?? null;
@@ -314,9 +319,39 @@ export function NoteDetailPanel({ noteId }: { noteId: string }): React.ReactNode
     (updatedNote: Note) => {
       setNote(updatedNote);
       patchNoteInList(updatedNote.id, updatedNote);
+
+      const apiUrl =
+        typeof import.meta.env.VITE_NOTA_SERVER_API_URL === 'string'
+          ? import.meta.env.VITE_NOTA_SERVER_API_URL.trim()
+          : '';
+      if (!notaProEntitled || !apiUrl) {
+        return;
+      }
+
+      if (semanticIndexTimerRef.current) {
+        clearTimeout(semanticIndexTimerRef.current);
+      }
+      semanticIndexTimerRef.current = setTimeout(() => {
+        semanticIndexTimerRef.current = null;
+        void (async () => {
+          const res = await postSearchIndexNote({ noteId: updatedNote.id });
+          if (!res.ok && import.meta.env.DEV) {
+            console.warn('[semantic-index]', res.status, await res.text());
+          }
+        })();
+      }, 45_000);
     },
-    [patchNoteInList],
+    [notaProEntitled, patchNoteInList],
   );
+
+  useEffect(() => {
+    return () => {
+      if (semanticIndexTimerRef.current) {
+        clearTimeout(semanticIndexTimerRef.current);
+        semanticIndexTimerRef.current = null;
+      }
+    };
+  }, [noteId]);
 
   if (!displayNote) {
     return (

@@ -61,3 +61,78 @@ export async function postNotaProInvalidate(
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 }
+
+function unauthorizedJsonResponse(body: Record<string, unknown>): Response {
+  return new Response(JSON.stringify(body), {
+    status: 401,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/** `POST` semantic search; Bearer Clerk session JWT. Missing base URL or token → 401 without calling the network. */
+export async function postSemanticSearch(
+  baseUrl: string | undefined,
+  accessToken: string | null | undefined,
+  body: { query: string },
+): Promise<Response> {
+  const base = normaliseBaseUrl(baseUrl);
+  if (!base) {
+    return unauthorizedJsonResponse({ error: 'Unauthorized' });
+  }
+  if (!accessToken) {
+    return unauthorizedJsonResponse({ error: 'Unauthorized' });
+  }
+  return fetch(`${base}/api/semantic-search`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+/** `POST` index one note for semantic search. */
+export async function postSearchIndexNote(
+  baseUrl: string | undefined,
+  accessToken: string | null | undefined,
+  body: { noteId: string },
+): Promise<Response> {
+  const base = normaliseBaseUrl(baseUrl);
+  if (!base) {
+    return unauthorizedJsonResponse({ error: 'Unauthorized' });
+  }
+  if (!accessToken) {
+    return unauthorizedJsonResponse({ error: 'Unauthorized' });
+  }
+  return fetch(`${base}/api/search/index-note`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+/** `POST` rebuild semantic index for all vault notes (Nota Pro). */
+export async function postSearchReindexAll(
+  baseUrl: string | undefined,
+  accessToken: string | null | undefined,
+): Promise<Response> {
+  const base = normaliseBaseUrl(baseUrl);
+  if (!base) {
+    return unauthorizedJsonResponse({ error: 'Unauthorized' });
+  }
+  if (!accessToken) {
+    return unauthorizedJsonResponse({ error: 'Unauthorized' });
+  }
+  return fetch(`${base}/api/search/reindex-all`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({}),
+  });
+}

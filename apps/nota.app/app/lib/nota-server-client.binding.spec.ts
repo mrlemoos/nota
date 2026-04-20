@@ -7,6 +7,9 @@ vi.mock('./clerk-token-ref', () => ({
 vi.mock('@nota.app/nota-server-client', () => ({
   fetchNotaProEntitled: vi.fn(),
   postNotaProInvalidate: vi.fn(),
+  postSemanticSearch: vi.fn(),
+  postSearchIndexNote: vi.fn(),
+  postSearchReindexAll: vi.fn(),
 }));
 
 describe('nota-server-client app binding', () => {

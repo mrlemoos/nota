@@ -19,6 +19,19 @@ export function expressToWebRequest(req: ExpressRequest): Request {
   return new Request(url.toString(), { method: req.method, headers });
 }
 
+/** Same as {@link expressToWebRequest}, but attaches `req.body` as JSON for handlers that call `request.json()`. */
+export function expressToWebRequestWithJsonBody(req: ExpressRequest): Request {
+  const base = expressToWebRequest(req);
+  const bodyPayload = (
+    req as ExpressRequest & { body?: Record<string, unknown> }
+  ).body;
+  return new Request(base.url, {
+    method: base.method,
+    headers: base.headers,
+    body: JSON.stringify(bodyPayload ?? {}),
+  });
+}
+
 export async function sendWebResponse(
   res: ExpressResponse,
   r: Response,

@@ -3,6 +3,7 @@ import {
   useEffect,
   useEffectEvent,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ComponentProps,
@@ -10,7 +11,7 @@ import {
 } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import type { DialogRoot } from '@base-ui/react/dialog';
-import { Command } from 'cmdk';
+import { Command, defaultFilter } from 'cmdk';
 import {
   AiAudioIcon,
   ComputerIcon,
@@ -43,6 +44,7 @@ import {
 } from '../lib/audio-to-note-start';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { useTheme } from './theme-provider';
+import { CommandPaletteSemanticSync } from './command-palette-semantic-sync';
 import {
   gsap,
   NOTA_MOTION_EASE_IN,
@@ -81,6 +83,10 @@ function PaletteItemIcon({
 
 export function CommandPalette(): JSX.Element {
   const [open, setOpen] = useState(false);
+  const [semanticOrderedIds, setSemanticOrderedIds] = useState<
+    string[] | null
+  >(null);
+  const [semanticSearchLoading, setSemanticSearchLoading] = useState(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const dialogActionsRef = useRef<DialogRoot.Actions | null>(null);
   const backdropRef = useRef<HTMLDivElement | null>(null);
@@ -123,6 +129,56 @@ export function CommandPalette(): JSX.Element {
     useState('⌘]');
   const [openingTodaysNote, setOpeningTodaysNote] = useState(false);
   const [startingAudioNote, setStartingAudioNote] = useState(false);
+
+  const notaServerUrl =
+    typeof import.meta.env.VITE_NOTA_SERVER_API_URL === 'string'
+      ? import.meta.env.VITE_NOTA_SERVER_API_URL.trim()
+      : '';
+  const semanticSearchEnabled = notaProEntitled && notaServerUrl.length > 0;
+
+  const handleSemanticOrderedIds = useCallback(
+    (ids: string[] | null) => {
+      setSemanticOrderedIds(ids);
+    },
+    [],
+  );
+
+  const handleSemanticLoading = useCallback((loading: boolean) => {
+    setSemanticSearchLoading(loading);
+  }, []);
+
+  useEffect(() => {
+    if (!open) {
+      setSemanticOrderedIds(null);
+      setSemanticSearchLoading(false);
+    }
+  }, [open]);
+
+  const notesForOpenPalette = useMemo(() => {
+    if (semanticOrderedIds === null) {
+      return notes;
+    }
+    return semanticOrderedIds
+      .map((id) => notes.find((n) => n.id === id))
+      .filter((n): n is (typeof notes)[number] => Boolean(n));
+  }, [notes, semanticOrderedIds]);
+
+  const commandFilter = useCallback(
+    (value: string, search: string, keywords?: string[]) => {
+      if (value.startsWith('note-open:')) {
+        const id = value.slice('note-open:'.length);
+        if (semanticOrderedIds === null) {
+          return defaultFilter(value, search, keywords);
+        }
+        if (semanticOrderedIds.length === 0) {
+          return 0;
+        }
+        return semanticOrderedIds.includes(id) ? 1 : 0;
+      }
+      return defaultFilter(value, search, keywords);
+    },
+    [semanticOrderedIds],
+  );
 
   const closePalette = useCallback((): void => {
     dialogActionsRef.current?.close();
@@ -306,16 +362,28 @@ export function CommandPalette(): JSX.Element {
           >
             <Dialog.Title className="sr-only">Command palette</Dialog.Title>
             <Dialog.Description className="sr-only">
-              Search for a command. Use arrow keys to move, Enter to run.
+              Search commands and notes. Use arrow keys to move, Enter to run.
+              Quoted phrases match note text literally; other text uses Semantic
+              Search when Nota Pro is active.
             </Dialog.Description>
             <Command
               className="overflow-hidden"
               label="Command palette"
               vimBindings={false}
+              filter={commandFilter}
             >
+              <CommandPaletteSemanticSync
+                enabled={semanticSearchEnabled && open}
+                onSemanticOrderedIds={handleSemanticOrderedIds}
+                onLoadingChange={handleSemanticLoading}
+              />
               <Command.Input
                 ref={commandInputRef}
-                placeholder="Type a command…"
+                placeholder={
+                  semanticSearchEnabled
+                    ? 'Commands and Semantic Search — use quotes for exact phrases…'
+                    : 'Type a command…'
+                }
                 className={cn(
                   'w-full bg-transparent px-3 py-3 text-sm',
                   'text-foreground outline-none placeholder:text-muted-foreground',
@@ -574,21 +642,26 @@ export function CommandPalette(): JSX.Element {
                   <Command.Group
                     heading={
                       <span className="flex w-full items-center gap-2 pr-1 font-normal">
-                        <span className="min-w-0 flex-1">Open note</span>
+                        <span className="min-w-0 flex-1">
+                          {semanticSearchLoading
+                            ? 'Semantic search…'
+                            : 'Open note'}
+                        </span>
                         <span className={notaKbdHintClass}>Space</span>
                       </span>
                     }
                     className={groupHeadingClassName}
                   >
-                    {notes.map((note) => (
+                    {notesForOpenPalette.map((note) => (
                       <Command.Item
                         key={note.id}
-                        value={`${note.title} ${note.id}`}
+                        value={`note-open:${note.id}`}
                         keywords={[
                           'go',
                           'open',
                           'switch',
                           note.title,
+                          note.id,
                           note.id.slice(0, 8),
                         ]}
                         onSelect={() => {
