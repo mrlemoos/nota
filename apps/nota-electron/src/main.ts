@@ -1,4 +1,14 @@
-import { app, BrowserWindow, shell, type WebContents } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  clipboard,
+  dialog,
+  Menu,
+  nativeImage,
+  shell,
+  Tray,
+  type WebContents,
+} from 'electron';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
@@ -17,9 +27,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isDev = !app.isPackaged;
 const isDarwin = process.platform === 'darwin';
 
+/** IPC channel; keep in sync with `apps/nota-electron/src/preload.ts`. */
+const NOTA_MENUBAR_ACTION_CHANNEL = 'nota-menubar-action';
+
+/** Same cap as `IMAGE_MAX_BYTES` in nota.app (`pdf-attachment-client`). */
+const CLIPBOARD_IMAGE_MAX_BYTES = 25 * 1024 * 1024;
+
 let pendingSsoHttpUrl: string | null = null;
 
 let mainWindow: BrowserWindow | null = null;
+
+let tray: Tray | null = null;
 
 /**
  * Clerk Billing / Stripe often uses `window.open` for checkout. Those URLs should open in
@@ -105,6 +123,136 @@ function notaProtocolOAuthUrlToSsoHttpUrl(protocolUrl: string): string | null {
   } catch {
     return null;
   }
+}
+
+function resolveTrayIconPath(): string | null {
+  const devPath = path.join(__dirname, '../buildResources/TrayTemplate.png');
+  if (existsSync(devPath)) {
+    return devPath;
+  }
+  const packagedPath = path.join(process.resourcesPath, 'TrayTemplate.png');
+  if (existsSync(packagedPath)) {
+    return packagedPath;
+  }
+  console.warn(
+    '[nota-electron] TrayTemplate.png not found; menu bar extra disabled.',
+  );
+  return null;
+}
+
+function ensureMainWindow(): BrowserWindow {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow();
+  }
+  const win = mainWindow!;
+  if (win.isMinimized()) {
+    win.restore();
+  }
+  win.show();
+  win.focus();
+  return win;
+}
+
+function sendMenubarAction(payload: object): void {
+  const win = ensureMainWindow();
+  win.webContents.send(NOTA_MENUBAR_ACTION_CHANNEL, payload);
+}
+
+type ClipboardReadResult =
+  | { ok: true; payload: object }
+  | { ok: false; reason: 'empty' | 'image_too_large' };
+
+function readClipboardForNote(): ClipboardReadResult {
+  const img = clipboard.readImage();
+  if (!img.isEmpty()) {
+    const png = img.toPNG();
+    if (png.length > CLIPBOARD_IMAGE_MAX_BYTES) {
+      return { ok: false, reason: 'image_too_large' };
+    }
+    return {
+      ok: true,
+      payload: {
+        kind: 'clipboard-note',
+        clipboard: {
+          kind: 'image',
+          base64: png.toString('base64'),
+          mimeType: 'image/png' as const,
+        },
+      },
+    };
+  }
+  const raw = clipboard.readText();
+  if (!raw.trim()) {
+    return { ok: false, reason: 'empty' };
+  }
+  return {
+    ok: true,
+    payload: {
+      kind: 'clipboard-note',
+      clipboard: { kind: 'text', text: raw },
+    },
+  };
+}
+
+function createTray(): void {
+  const iconPath = resolveTrayIconPath();
+  if (!iconPath) {
+    return;
+  }
+  let icon = nativeImage.createFromPath(iconPath);
+  if (icon.isEmpty()) {
+    console.warn(
+      '[nota-electron] Tray icon could not be loaded; menu bar extra disabled.',
+    );
+    return;
+  }
+  tray = new Tray(icon);
+  tray.setToolTip('Nota');
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      {
+        label: 'New note from clipboard',
+        click: () => {
+          const win = ensureMainWindow();
+          const result = readClipboardForNote();
+          if (!result.ok) {
+            if (result.reason === 'image_too_large') {
+              void dialog.showMessageBox(win, {
+                type: 'warning',
+                message: 'Clipboard image is too large (max 25 MB).',
+              });
+              return;
+            }
+            void dialog.showMessageBox(win, {
+              type: 'info',
+              message: 'Clipboard is empty.',
+            });
+            return;
+          }
+          sendMenubarAction(result.payload);
+        },
+      },
+      {
+        label: 'Study notes from recording…',
+        click: () => {
+          sendMenubarAction({ kind: 'study-recording' });
+        },
+      },
+      { type: 'separator' },
+      {
+        label: 'Open Nota',
+        click: () => {
+          ensureMainWindow();
+        },
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          app.quit();
+        },
+      },
+    ]),
+  );
 }
 
 function queueOrDeliverSsoFromNotaProtocol(protocolUrl: string): void {
@@ -289,6 +437,7 @@ if (!gotTheLock) {
 
       await startServer();
       createWindow();
+      createTray();
       await registerAutoUpdater();
     } catch (error) {
       console.error('Failed to start app:', error);

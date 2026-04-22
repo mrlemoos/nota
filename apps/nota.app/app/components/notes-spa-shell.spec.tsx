@@ -2,6 +2,10 @@ import { render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { NotesSpaShell } from './notes-spa-shell';
 
+vi.mock('./electron-menubar-bridge', () => ({
+  ElectronMenubarBridge: (): null => null,
+}));
+
 vi.mock('./audio-to-note-dock', () => ({
   AudioToNoteDock: (): null => null,
 }));

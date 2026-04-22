@@ -21,6 +21,9 @@ files:
     to: nota.app/dist
     filter:
       - "**/*"
+extraResources:
+  - from: buildResources/TrayTemplate.png
+    to: TrayTemplate.png
 mac:
   icon: buildResources/icon.icns
   entitlements: buildResources/entitlements.mac.plist

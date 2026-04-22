@@ -46,6 +46,7 @@ import { noteHashHref, NoteDetailPanel } from './note-detail-panel';
 import { spaCreateNote } from '../lib/spa-create-note';
 import { spaDeleteNoteById } from '../lib/spa-delete-note';
 import { AudioToNoteDock } from './audio-to-note-dock';
+import { ElectronMenubarBridge } from './electron-menubar-bridge';
 import { StudyRecordingUploadWarningBanner } from './study-recording-upload-warning-banner';
 import { useAudioNotePendingDrain } from '../hooks/use-audio-note-pending-drain';
 import {
@@ -202,6 +203,7 @@ export function NotesSpaShell(): JSX.Element {
   });
   return (
     <>
+      <ElectronMenubarBridge />
       {sticky.visible && sticky.label ? (
         <div
           className="pointer-events-none fixed inset-x-0 top-0 z-30 flex justify-center pt-[max(0.5rem,env(safe-area-inset-top))]"
