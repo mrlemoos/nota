@@ -413,8 +413,9 @@
 
 .tiptap-editor .ProseMirror li.nota-task-item > div p {
   margin: 0.35em 0;
+  width: fit-content;
   background-image: linear-gradient(currentColor, currentColor);
-  background-position: 0 calc(1em * 0.58);
+  background-position: 0 50%;
   background-repeat: no-repeat;
   background-size: 0% 1.5px;
   transition:
