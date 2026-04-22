@@ -41,6 +41,9 @@ import {
   useRegisterNoteEditorTableInserter,
   useRegisterNoteEditorTaskListInserter,
 } from '../context/note-editor-commands';
+import { setNotaSmilieReplacerEnabled } from '../lib/nota-smilie-replacer-gate';
+import { useNotaPreferencesStore } from '../stores/nota-preferences';
+import { NotaSmilieReplacer } from './tiptap/nota-smilie-replacer-extension';
 import { TableEditorMenu } from './tiptap/table-editor-menu';
 import { NoteDueDateBubbleMenu } from './note-due-date-bubble-menu';
 import { NotaDueDateInteraction } from './tiptap/nota-due-date-interaction';
@@ -112,6 +115,14 @@ export function TipTapEditor({
   onSaveDueDate,
   bodyEditorRef,
 }: TipTapEditorProps): JSX.Element {
+  const emojiReplacerEnabled = useNotaPreferencesStore(
+    (s) => s.emojiReplacerEnabled,
+  );
+
+  useLayoutEffect(() => {
+    setNotaSmilieReplacerEnabled(emojiReplacerEnabled);
+  }, [emojiReplacerEnabled]);
+
   const canInsertAttachments = Boolean(userId && noteId);
   const canInsertAttachmentsRef = useRef(false);
   const uploadingRef = useRef(false);
@@ -221,6 +232,7 @@ export function TipTapEditor({
           allow: () => false,
         },
       }),
+      NotaSmilieReplacer,
       Placeholder.configure({
         placeholder,
       }),

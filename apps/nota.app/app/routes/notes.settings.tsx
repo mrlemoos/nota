@@ -32,6 +32,12 @@ export default function NotesSettings(): JSX.Element {
   const setSemanticSearchEnabled = useNotaPreferencesStore(
     (s) => s.setSemanticSearchEnabled,
   );
+  const emojiReplacerEnabled = useNotaPreferencesStore(
+    (s) => s.emojiReplacerEnabled,
+  );
+  const setEmojiReplacerEnabled = useNotaPreferencesStore(
+    (s) => s.setEmojiReplacerEnabled,
+  );
   const [modDLabel, setModDLabel] = useState('⌘D');
   const [historyBackLabel, setHistoryBackLabel] = useState('⌘[');
   const [historyForwardLabel, setHistoryForwardLabel] = useState('⌘]');
@@ -150,6 +156,36 @@ export default function NotesSettings(): JSX.Element {
           </label>
           <p className="text-sm text-muted-foreground">
             Lists other notes that link to the note you have open.
+          </p>
+          <label
+            htmlFor="nota-emoji-replacer-enabled"
+            className={cn(
+              'mt-3 flex cursor-pointer select-none items-start gap-3 rounded-lg border border-border/60 bg-muted/20 px-4 py-3',
+            )}
+          >
+            <input
+              id="nota-emoji-replacer-enabled"
+              type="checkbox"
+              checked={emojiReplacerEnabled}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setEmojiReplacerEnabled(checked);
+                submitUserPreferencesPatch(
+                  { emoji_replacer_enabled: checked },
+                  user?.id,
+                  setUserPreferencesInState,
+                  notaProEntitled,
+                );
+              }}
+              className="mt-0.5 size-4 shrink-0 rounded border border-input accent-primary"
+            />
+            <span className="text-sm leading-snug text-muted-foreground">
+              Replace typed smileys with emoji
+            </span>
+          </label>
+          <p className="text-sm text-muted-foreground">
+            Turn off to keep text like <code className="text-foreground/90">:-)</code> as
+            plain characters.
           </p>
         </section>
 

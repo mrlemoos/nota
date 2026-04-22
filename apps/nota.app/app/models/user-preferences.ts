@@ -24,6 +24,7 @@ export async function getUserPreferences(
     open_todays_note_shortcut: false,
     show_note_backlinks: true,
     semantic_search_enabled: true,
+    emoji_replacer_enabled: true,
     welcome_seeded: false,
     updated_at: new Date(0).toISOString(),
   };
@@ -36,6 +37,7 @@ export async function upsertUserPreferences(
     open_todays_note_shortcut?: boolean;
     show_note_backlinks?: boolean;
     semantic_search_enabled?: boolean;
+    emoji_replacer_enabled?: boolean;
     welcome_seeded?: boolean;
   },
 ): Promise<UserPreferences> {
@@ -54,6 +56,10 @@ export async function upsertUserPreferences(
       patch.semantic_search_enabled !== undefined
         ? patch.semantic_search_enabled
         : current.semantic_search_enabled,
+    emoji_replacer_enabled:
+      patch.emoji_replacer_enabled !== undefined
+        ? patch.emoji_replacer_enabled
+        : current.emoji_replacer_enabled,
     welcome_seeded:
       patch.welcome_seeded !== undefined
         ? patch.welcome_seeded

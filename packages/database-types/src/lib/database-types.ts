@@ -143,6 +143,7 @@ export interface Database {
           open_todays_note_shortcut: boolean;
           show_note_backlinks: boolean;
           semantic_search_enabled: boolean;
+          emoji_replacer_enabled: boolean;
           updated_at: string;
           welcome_seeded: boolean;
         };
@@ -151,6 +152,7 @@ export interface Database {
           open_todays_note_shortcut?: boolean;
           show_note_backlinks?: boolean;
           semantic_search_enabled?: boolean;
+          emoji_replacer_enabled?: boolean;
           updated_at?: string;
           welcome_seeded?: boolean;
         };
@@ -159,6 +161,7 @@ export interface Database {
           open_todays_note_shortcut?: boolean;
           show_note_backlinks?: boolean;
           semantic_search_enabled?: boolean;
+          emoji_replacer_enabled?: boolean;
           updated_at?: string;
           welcome_seeded?: boolean;
         };

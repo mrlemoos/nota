@@ -37,7 +37,9 @@ export function useSyncUserPreferences(
       hydratedLoaderRef.current.show_note_backlinks ===
         userPreferencesFromServer.show_note_backlinks &&
       hydratedLoaderRef.current.semantic_search_enabled ===
-        userPreferencesFromServer.semantic_search_enabled
+        userPreferencesFromServer.semantic_search_enabled &&
+      hydratedLoaderRef.current.emoji_replacer_enabled ===
+        userPreferencesFromServer.emoji_replacer_enabled
     ) {
       return;
     }
@@ -55,6 +57,7 @@ export function useSyncUserPreferences(
         openTodaysNoteShortcut,
         showNoteBacklinks,
         semanticSearchEnabled,
+        emojiReplacerEnabled,
       } = useNotaPreferencesStore.getState();
       if (!preferencesPendingSync) {
         return;
@@ -66,6 +69,7 @@ export function useSyncUserPreferences(
             open_todays_note_shortcut: openTodaysNoteShortcut,
             show_note_backlinks: showNoteBacklinks,
             semantic_search_enabled: semanticSearchEnabled,
+            emoji_replacer_enabled: emojiReplacerEnabled,
           });
           markPreferencesSynced(row);
           onServerRowCommitted?.(row);
@@ -88,7 +92,10 @@ export function useSyncUserPreferences(
 
 export type UserPreferencesSyncPatch = Pick<
   UserPreferences,
-  'open_todays_note_shortcut' | 'show_note_backlinks' | 'semantic_search_enabled'
+  | 'open_todays_note_shortcut'
+  | 'show_note_backlinks'
+  | 'semantic_search_enabled'
+  | 'emoji_replacer_enabled'
 >;
 
 /**

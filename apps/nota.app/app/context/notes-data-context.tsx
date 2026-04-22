@@ -172,6 +172,7 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
       open_todays_note_shortcut: false,
       show_note_backlinks: true,
       semantic_search_enabled: true,
+      emoji_replacer_enabled: true,
       welcome_seeded: false,
       updated_at: new Date(0).toISOString(),
     });
