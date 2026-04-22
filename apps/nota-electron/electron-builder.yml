@@ -7,6 +7,8 @@ publish:
   provider: github
   owner: mrlemoos
   repo: nota.app
+  # Published (non-draft) releases; CI and local RC builds set EP_DRAFT=true to override.
+  releaseType: release
 directories:
   output: release
   buildResources: buildResources

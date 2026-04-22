@@ -35,6 +35,11 @@ function run(cmd, args, options) {
 
 const argv = process.argv.slice(2);
 const version = parseVersion(argv);
+const draftRelease = argv.includes('--draft');
+
+if (draftRelease) {
+  process.env.EP_DRAFT = 'true';
+}
 
 if (!process.env.GH_TOKEN && !process.env.GITHUB_TOKEN) {
   console.error(

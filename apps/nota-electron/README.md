@@ -61,7 +61,7 @@ If you omit `--version`, the version already in `apps/nota-electron/package.json
 
 - **`electron-builder`** is configured with **`publish.provider: github`** (`owner` / `repo` in `electron-builder.yml`). Packaged apps embed **`app-update.yml`** for **`electron-updater`**.
 - **`main.ts`** calls **`checkForUpdatesAndNotify()`** only when **`app.isPackaged`**. Updates use the **ZIP** assets attached to each release (DMG is for first install).
-- **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver input). It syncs `apps/nota-electron/package.json` version, then runs **`npx nx run @nota.app/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
+- **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver + **release kind**: production vs release candidate / draft). It syncs `apps/nota-electron/package.json` version, then runs **`npx nx run @nota.app/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
 
 ### Required secrets (embedded SPA, CI)
 
@@ -78,10 +78,13 @@ If **Production** has protection rules (required reviewers, wait timers), each r
 
 ### Triggering CI release
 
-- **Tag:** `git tag v1.2.3 && git push origin v1.2.3`
-- **Manual:** **Actions → Release Electron (macOS) → Run workflow**, enter semver (e.g. `1.2.3`).
+- **Tag (published release):** `git tag v1.2.3 && git push origin v1.2.3`
+- **Tag (release candidate → GitHub draft):** use a semver **prerelease** after the patch, e.g. `git tag v1.2.3-rc.1 && git push origin v1.2.3-rc.1` (any `vMAJOR.MINOR.PATCH-<prerelease>` form). CI sets **`EP_DRAFT=true`** for **electron-builder** so the GitHub release is a **draft**.
+- **Manual:** **Actions → Release Electron (macOS) → Run workflow**, enter semver (e.g. `1.2.3` or `1.2.3-rc.1`), then choose **release kind**: **production** (published) or **release candidate** (draft).
 
-Confirm the new **Release** lists DMG and ZIP assets per architecture plus **`latest-mac.yml`** (used by auto-update).
+**Local draft publish:** `npx nx run @nota.app/nota-electron:electron:release -- --draft` (forwards **`--draft`** to [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)).
+
+Confirm the new **Release** lists DMG and ZIP assets per architecture plus **`latest-mac.yml`** (used by auto-update). Draft releases stay off the default “latest” path until you publish them on GitHub.
 
 After fixing secrets, **push a new `v*` tag** or run **Release Electron (macOS)** again via **workflow_dispatch** so a fresh build picks up the values.
 

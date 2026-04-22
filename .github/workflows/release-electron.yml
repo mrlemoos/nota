@@ -10,6 +10,14 @@ on:
         description: 'Semver for this build (e.g. 1.2.3), written to apps/nota-electron/package.json'
         required: true
         type: string
+      release_kind:
+        description: 'Production = published GitHub release; release candidate = draft (not offered as latest to electron-updater until published)'
+        required: true
+        type: choice
+        default: production
+        options:
+          - production
+          - release_candidate
 
 permissions:
   contents: write
@@ -70,6 +78,22 @@ jobs:
             exit 1
           fi
 
+      - name: Decide GitHub release draft (release candidates)
+        id: release_draft
+        run: |
+          DRAFT=false
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "${{ inputs.release_kind }}" = "release_candidate" ]; then
+              DRAFT=true
+            fi
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+            if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+- ]]; then
+              DRAFT=true
+            fi
+          fi
+          echo "draft=$DRAFT" >> "$GITHUB_OUTPUT"
+
       - name: Build web app and publish Electron release
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -80,6 +104,9 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          if [ "${{ steps.release_draft.outputs.draft }}" = "true" ]; then
+            export EP_DRAFT=true
+          fi
           CSC_LINK_VALUE='${{ steps.signing.outputs.csc_link }}'
           if [ -n "$CSC_LINK_VALUE" ]; then
             export CSC_LINK="$CSC_LINK_VALUE"
