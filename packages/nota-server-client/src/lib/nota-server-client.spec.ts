@@ -13,10 +13,15 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('fetchNotaProEntitled returns 401 and does not fetch when base URL is missing', async () => {
+    // Arrange
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const baseUrl = '';
+    const token = null;
 
-    const res = await fetchNotaProEntitled('', null);
+    // Act
+    const res = await fetchNotaProEntitled(baseUrl, token);
 
+    // Assert
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({
@@ -27,10 +32,15 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('postNotaProInvalidate returns 401 and does not fetch when base URL is missing', async () => {
+    // Arrange
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const baseUrl = undefined;
+    const token = 't';
 
-    const res = await postNotaProInvalidate(undefined, 't');
+    // Act
+    const res = await postNotaProInvalidate(baseUrl, token);
 
+    // Assert
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({ ok: false });
@@ -38,12 +48,17 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('fetchNotaProEntitled calls nota-server with Bearer when base and token are set', async () => {
+    // Arrange
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(JSON.stringify({ entitled: true })));
+    const baseUrl = 'https://ns.example';
+    const token = 'session-jwt';
 
-    await fetchNotaProEntitled('https://ns.example', 'session-jwt');
+    // Act
+    await fetchNotaProEntitled(baseUrl, token);
 
+    // Assert
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://ns.example/api/nota-pro-entitled',
       expect.objectContaining({
@@ -54,12 +69,17 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('postNotaProInvalidate POSTs to nota-server with Bearer and strips trailing slash on base', async () => {
+    // Arrange
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+    const baseUrl = 'https://ns.example/';
+    const token = 't';
 
-    await postNotaProInvalidate('https://ns.example/', 't');
+    // Act
+    await postNotaProInvalidate(baseUrl, token);
 
+    // Assert
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://ns.example/api/nota-pro-invalidate',
       expect.objectContaining({
@@ -71,10 +91,15 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('fetchNotaProEntitled returns 401 without fetch when token is null', async () => {
+    // Arrange
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const baseUrl = 'https://ns.example';
+    const token = null;
 
-    const res = await fetchNotaProEntitled('https://ns.example', null);
+    // Act
+    const res = await fetchNotaProEntitled(baseUrl, token);
 
+    // Assert
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(res.status).toBe(401);
     expect(await res.json()).toEqual({
@@ -85,22 +110,34 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('postSemanticSearch returns 401 without fetch when base URL is missing', async () => {
+    // Arrange
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
+    const baseUrl = undefined;
+    const token = 't';
+    const body = { query: 'hello' };
 
-    const res = await postSemanticSearch(undefined, 't', { query: 'hello' });
+    // Act
+    const res = await postSemanticSearch(baseUrl, token, body);
 
+    // Assert
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(res.status).toBe(401);
     fetchSpy.mockRestore();
   });
 
   it('postSemanticSearch POSTs to /api/semantic-search when configured', async () => {
+    // Arrange
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(JSON.stringify({ results: [] })));
+    const baseUrl = 'https://ns.example/';
+    const token = 'jwt';
+    const body = { query: 'foo' };
 
-    await postSemanticSearch('https://ns.example/', 'jwt', { query: 'foo' });
+    // Act
+    await postSemanticSearch(baseUrl, token, body);
 
+    // Assert
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://ns.example/api/semantic-search',
       expect.objectContaining({
@@ -115,14 +152,18 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('postSearchIndexNote POSTs note id to index endpoint', async () => {
+    // Arrange
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(JSON.stringify({ ok: true })));
+    const baseUrl = 'https://ns.example';
+    const token = 'jwt';
+    const body = { noteId: '00000000-0000-4000-8000-000000000001' };
 
-    await postSearchIndexNote('https://ns.example', 'jwt', {
-      noteId: '00000000-0000-4000-8000-000000000001',
-    });
+    // Act
+    await postSearchIndexNote(baseUrl, token, body);
 
+    // Assert
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://ns.example/api/search/index-note',
       expect.objectContaining({
@@ -136,12 +177,17 @@ describe('@nota.app/nota-server-client', () => {
   });
 
   it('postSearchReindexAll POSTs empty JSON body', async () => {
+    // Arrange
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValue(new Response(JSON.stringify({ ok: true, indexed: 0 })));
+    const baseUrl = 'https://ns.example';
+    const token = 'jwt';
 
-    await postSearchReindexAll('https://ns.example', 'jwt');
+    // Act
+    await postSearchReindexAll(baseUrl, token);
 
+    // Assert
     expect(fetchSpy).toHaveBeenCalledWith(
       'https://ns.example/api/search/reindex-all',
       expect.objectContaining({

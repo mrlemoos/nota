@@ -1,11 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { spaDeleteNoteById } from './spa-delete-note';
 
-import {
-  drainNotesOutbox,
-  isLikelyOnline,
-  markPendingDelete,
-} from './notes-offline';
+import { isLikelyOnline, markPendingDelete } from './notes-offline';
 import { deleteNote } from '../models/notes';
 
 const removeNoteFromList = vi.fn();
@@ -40,45 +36,60 @@ describe('spaDeleteNoteById', () => {
   });
 
   it('does nothing when not entitled', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(true);
-
-    await spaDeleteNoteById('n1', {
+    const noteId = 'n1';
+    const args = {
       userId: 'u1',
       removeNoteFromList,
       refreshNotesList,
       notaProEntitled: false,
-    });
+    };
 
+    // Act
+    await spaDeleteNoteById(noteId, args);
+
+    // Assert
     expect(deleteNote).not.toHaveBeenCalled();
     expect(markPendingDelete).not.toHaveBeenCalled();
     expect(removeNoteFromList).not.toHaveBeenCalled();
   });
 
   it('deletes locally when offline and entitled', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(false);
-
-    await spaDeleteNoteById('n1', {
+    const noteId = 'n1';
+    const args = {
       userId: 'u1',
       removeNoteFromList,
       refreshNotesList,
       notaProEntitled: true,
-    });
+    };
 
+    // Act
+    await spaDeleteNoteById(noteId, args);
+
+    // Assert
     expect(deleteNote).not.toHaveBeenCalled();
     expect(markPendingDelete).toHaveBeenCalled();
     expect(removeNoteFromList).toHaveBeenCalledWith('n1');
   });
 
   it('calls Supabase delete when online and Nota Pro', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(true);
-
-    await spaDeleteNoteById('n1', {
+    const noteId = 'n1';
+    const args = {
       userId: 'u1',
       removeNoteFromList,
       refreshNotesList,
       notaProEntitled: true,
-    });
+    };
 
+    // Act
+    await spaDeleteNoteById(noteId, args);
+
+    // Assert
     expect(deleteNote).toHaveBeenCalled();
     expect(markPendingDelete).not.toHaveBeenCalled();
     expect(refreshNotesList).toHaveBeenCalled();

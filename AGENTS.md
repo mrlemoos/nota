@@ -64,7 +64,7 @@ Agents **must** record changes with [Conventional Commits](https://www.conventio
 ## Testing
 
 - Vitest for `nota.app` uses `apps/nota.app/vitest.setup.ts` for mock Supabase env; colocate `*.spec.ts` / `*.spec.tsx` next to modules under `app/`.
-- Unit tests in `**/*.{spec,test}.{ts,tsx}` follow AAA pattern in `.cursor/rules/aaa-testing-pattern.mdc`.
+- Unit tests in `**/*.{spec,test}.{ts,tsx}` use **AAA (Arrange–Act–Assert)**: each case uses explicit `// Arrange`, `// Act`, and `// Assert` comments; when the behaviour under test is a function with parameters, binding those arguments (and related options objects) counts as Arrange even if there is no heavier setup. Full convention: [`.cursor/rules/aaa-testing-pattern.mdc`](.cursor/rules/aaa-testing-pattern.mdc).
 - [`apps/nota-server/src/lib/og-preview.server.spec.ts`](apps/nota-server/src/lib/og-preview.server.spec.ts) (Bun) covers OG HTML parsing + URL allowlisting for link-preview endpoint.
 
 ## Learned User Preferences

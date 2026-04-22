@@ -8,19 +8,41 @@ import {
 
 describe('parseNaturalDueDate', () => {
   it('returns null for empty or whitespace input', () => {
+    // Arrange
     const ref = new Date('2025-06-15T12:00:00.000Z');
-    expect(parseNaturalDueDate('', ref)).toBeNull();
-    expect(parseNaturalDueDate('   ', ref)).toBeNull();
+    const empty = '';
+    const whitespace = '   ';
+
+    // Act
+    const emptyResult = parseNaturalDueDate(empty, ref);
+    const wsResult = parseNaturalDueDate(whitespace, ref);
+
+    // Assert
+    expect(emptyResult).toBeNull();
+    expect(wsResult).toBeNull();
   });
 
   it('returns null when no date can be parsed', () => {
+    // Arrange
     const ref = new Date('2025-06-15T12:00:00.000Z');
-    expect(parseNaturalDueDate('not a date at all', ref)).toBeNull();
+    const text = 'not a date at all';
+
+    // Act
+    const result = parseNaturalDueDate(text, ref);
+
+    // Assert
+    expect(result).toBeNull();
   });
 
   it('parses an explicit calendar date', () => {
+    // Arrange
     const ref = new Date('2025-06-15T12:00:00.000Z');
-    const result = parseNaturalDueDate('4 July 2025 at 3pm', ref);
+    const text = '4 July 2025 at 3pm';
+
+    // Act
+    const result = parseNaturalDueDate(text, ref);
+
+    // Assert
     expect(result).not.toBeNull();
     expect(result!.getFullYear()).toBe(2025);
     expect(result!.getMonth()).toBe(6);
@@ -31,8 +53,14 @@ describe('parseNaturalDueDate', () => {
 
 describe('firstDateFromText', () => {
   it('extracts a date embedded in a longer phrase', () => {
+    // Arrange
     const ref = new Date('2025-06-15T12:00:00.000Z');
-    const result = firstDateFromText('My birthday is 20 May 2003', ref);
+    const text = 'My birthday is 20 May 2003';
+
+    // Act
+    const result = firstDateFromText(text, ref);
+
+    // Assert
     expect(result).not.toBeNull();
     expect(result!.getFullYear()).toBe(2003);
     expect(result!.getMonth()).toBe(4);
@@ -44,32 +72,60 @@ describe('dateSpanContainingOffset', () => {
   const ref = new Date('2025-06-15T12:00:00.000Z');
 
   it('returns the embedded date span when offset is inside it', () => {
+    // Arrange
     const text = 'My birthday is 20 May 2003';
     const inner = '20 May 2003';
     const start = text.indexOf(inner);
-    expect(dateSpanContainingOffset(text, start + 3, ref)).toEqual({
+    const offset = start + 3;
+
+    // Act
+    const span = dateSpanContainingOffset(text, offset, ref);
+
+    // Assert
+    expect(span).toEqual({
       start,
       end: start + inner.length,
     });
   });
 
   it('returns the full trimmed span when whole-string parse applies', () => {
+    // Arrange
     const text = '  4 July 2025 at 3pm  ';
     const trimmed = '4 July 2025 at 3pm';
     const lead = text.indexOf(trimmed);
-    expect(dateSpanContainingOffset(text, lead + 2, ref)).toEqual({
+    const offset = lead + 2;
+
+    // Act
+    const span = dateSpanContainingOffset(text, offset, ref);
+
+    // Assert
+    expect(span).toEqual({
       start: lead,
       end: lead + trimmed.length,
     });
   });
 
   it('returns null when offset is outside any date span', () => {
-    expect(dateSpanContainingOffset('My birthday is 20 May 2003', 2, ref)).toBeNull();
+    // Arrange
+    const text = 'My birthday is 20 May 2003';
+    const offset = 2;
+
+    // Act
+    const span = dateSpanContainingOffset(text, offset, ref);
+
+    // Assert
+    expect(span).toBeNull();
   });
 
   it('includes the gap position after the last character of the match', () => {
+    // Arrange
     const text = 'due next Friday';
-    const span = dateSpanContainingOffset(text, text.length, ref);
+    const offset = text.length;
+
+    // Act
+    const span = dateSpanContainingOffset(text, offset, ref);
+
+    // Assert
     expect(span).not.toBeNull();
     expect(text.slice(span!.start, span!.end)).toMatch(/Friday/i);
   });
@@ -77,12 +133,17 @@ describe('dateSpanContainingOffset', () => {
 
 describe('allDateSpansInText', () => {
   it('returns merged spans for parsed phrases', () => {
+    // Arrange
     const ref = new Date('2025-06-15T12:00:00.000Z');
     const text = 'My birthday is 20 May 2003';
-    const spans = allDateSpansInText(text, ref);
-    expect(spans.length).toBeGreaterThanOrEqual(1);
     const inner = '20 May 2003';
     const start = text.indexOf(inner);
+
+    // Act
+    const spans = allDateSpansInText(text, ref);
+
+    // Assert
+    expect(spans.length).toBeGreaterThanOrEqual(1);
     expect(spans.some((s) => s.start === start && s.end === start + inner.length)).toBe(true);
   });
 });

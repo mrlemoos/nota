@@ -9,17 +9,43 @@ import {
 
 describe('app-load-url', () => {
   it('normalises packaged remote origin without trailing slash', () => {
-    expect(PACKAGED_REMOTE_APP_ORIGIN.endsWith('/')).toBe(false);
-    expect(normalisedPackagedAppOrigin()).toBe('https://app.nota.mrlemoos.dev');
+    // Arrange
+    // (module exports DEV_PORT, PACKAGED_REMOTE_APP_ORIGIN, normalisedPackagedAppOrigin)
+
+    // Act
+    const originEndsWithSlash = PACKAGED_REMOTE_APP_ORIGIN.endsWith('/');
+    const normalised = normalisedPackagedAppOrigin();
+
+    // Assert
+    expect(originEndsWithSlash).toBe(false);
+    expect(normalised).toBe('https://app.nota.mrlemoos.dev');
   });
 
   it('resolveMainWindowLoadUrl uses local Vite port in dev and hosted URL when packaged', () => {
-    expect(resolveMainWindowLoadUrl(true)).toBe(`http://localhost:${DEV_PORT}`);
-    expect(resolveMainWindowLoadUrl(false)).toBe('https://app.nota.mrlemoos.dev/');
+    // Arrange
+    const isDevTrue = true;
+    const isDevFalse = false;
+
+    // Act
+    const devUrl = resolveMainWindowLoadUrl(isDevTrue);
+    const prodUrl = resolveMainWindowLoadUrl(isDevFalse);
+
+    // Assert
+    expect(devUrl).toBe(`http://localhost:${DEV_PORT}`);
+    expect(prodUrl).toBe('https://app.nota.mrlemoos.dev/');
   });
 
   it('ssoCallbackBaseUrl matches load URL host without trailing slash for packaged', () => {
-    expect(ssoCallbackBaseUrl(true)).toBe(`http://localhost:${DEV_PORT}`);
-    expect(ssoCallbackBaseUrl(false)).toBe('https://app.nota.mrlemoos.dev');
+    // Arrange
+    const isDevTrue = true;
+    const isDevFalse = false;
+
+    // Act
+    const devBase = ssoCallbackBaseUrl(isDevTrue);
+    const prodBase = ssoCallbackBaseUrl(isDevFalse);
+
+    // Assert
+    expect(devBase).toBe(`http://localhost:${DEV_PORT}`);
+    expect(prodBase).toBe('https://app.nota.mrlemoos.dev');
   });
 });

@@ -24,6 +24,7 @@ function minimalNote(overrides: Partial<Note> & Pick<Note, 'id'>): Note {
 
 describe('extractOutgoingNoteIdsFromContent', () => {
   it('collects targets from link marks on text', () => {
+    // Arrange
     const content = {
       type: 'doc',
       content: [
@@ -49,10 +50,15 @@ describe('extractOutgoingNoteIdsFromContent', () => {
       ],
     };
 
-    expect(extractOutgoingNoteIdsFromContent(content).sort()).toEqual([NOTE_B]);
+    // Act
+    const ids = extractOutgoingNoteIdsFromContent(content);
+
+    // Assert
+    expect(ids.sort()).toEqual([NOTE_B]);
   });
 
   it('dedupes repeated links to the same note', () => {
+    // Arrange
     const content = {
       type: 'doc',
       content: [
@@ -78,10 +84,15 @@ describe('extractOutgoingNoteIdsFromContent', () => {
       ],
     };
 
-    expect(extractOutgoingNoteIdsFromContent(content)).toEqual([NOTE_B]);
+    // Act
+    const ids = extractOutgoingNoteIdsFromContent(content);
+
+    // Assert
+    expect(ids).toEqual([NOTE_B]);
   });
 
   it('reads internal hrefs on linkPreview attrs', () => {
+    // Arrange
     const content = {
       type: 'doc',
       content: [
@@ -98,10 +109,15 @@ describe('extractOutgoingNoteIdsFromContent', () => {
       ],
     };
 
-    expect(extractOutgoingNoteIdsFromContent(content)).toEqual([NOTE_B]);
+    // Act
+    const ids = extractOutgoingNoteIdsFromContent(content);
+
+    // Assert
+    expect(ids).toEqual([NOTE_B]);
   });
 
   it('ignores non-internal hrefs', () => {
+    // Arrange
     const content = {
       type: 'doc',
       content: [
@@ -120,12 +136,17 @@ describe('extractOutgoingNoteIdsFromContent', () => {
       ],
     };
 
-    expect(extractOutgoingNoteIdsFromContent(content)).toEqual([]);
+    // Act
+    const ids = extractOutgoingNoteIdsFromContent(content);
+
+    // Assert
+    expect(ids).toEqual([]);
   });
 });
 
 describe('buildNoteLinkGraph', () => {
   it('builds outgoing and backlinks for two notes', () => {
+    // Arrange
     const noteA = minimalNote({
       id: NOTE_A,
       title: 'Alpha',
@@ -153,8 +174,10 @@ describe('buildNoteLinkGraph', () => {
       content: { type: 'doc', content: [{ type: 'paragraph' }] },
     });
 
+    // Act
     const { outgoing, backlinks } = buildNoteLinkGraph([noteA, noteB]);
 
+    // Assert
     expect([...(outgoing.get(NOTE_A) ?? [])]).toEqual([NOTE_B]);
     expect([...(outgoing.get(NOTE_B) ?? [])]).toEqual([]);
     expect([...(backlinks.get(NOTE_B) ?? [])]).toEqual([NOTE_A]);
@@ -162,6 +185,7 @@ describe('buildNoteLinkGraph', () => {
   });
 
   it('omits self-links from outgoing', () => {
+    // Arrange
     const note = minimalNote({
       id: NOTE_A,
       content: {
@@ -183,7 +207,10 @@ describe('buildNoteLinkGraph', () => {
       },
     });
 
+    // Act
     const { outgoing } = buildNoteLinkGraph([note]);
+
+    // Assert
     expect([...(outgoing.get(NOTE_A) ?? [])]).toEqual([]);
   });
 });

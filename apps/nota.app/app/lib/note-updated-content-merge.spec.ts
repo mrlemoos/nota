@@ -19,6 +19,7 @@ function makeNote(overrides: Partial<Note> = {}): Note {
 
 describe('mergeUpdatedNoteLocalContent', () => {
   it('uses pending content when newer than the server row', () => {
+    // Arrange
     const serverRow = makeNote();
     const pending = {
       type: 'doc',
@@ -26,9 +27,12 @@ describe('mergeUpdatedNoteLocalContent', () => {
         { type: 'paragraph', content: [{ type: 'text', text: 'local' }] },
       ],
     };
+    const fallback = serverRow.content;
 
-    const merged = mergeUpdatedNoteLocalContent(serverRow, pending, serverRow.content);
+    // Act
+    const merged = mergeUpdatedNoteLocalContent(serverRow, pending, fallback);
 
+    // Assert
     expect(merged).toEqual({
       ...serverRow,
       content: pending,
@@ -36,27 +40,29 @@ describe('mergeUpdatedNoteLocalContent', () => {
   });
 
   it('uses fallback when pending is null or undefined', () => {
+    // Arrange
     const serverRow = makeNote();
     const fallback = { type: 'doc', content: [] } as Json;
 
-    expect(
-      mergeUpdatedNoteLocalContent(serverRow, null, fallback).content,
-    ).toBe(fallback);
-    expect(
-      mergeUpdatedNoteLocalContent(serverRow, undefined, fallback).content,
-    ).toBe(fallback);
+    // Act
+    const mergedNull = mergeUpdatedNoteLocalContent(serverRow, null, fallback);
+    const mergedUndef = mergeUpdatedNoteLocalContent(serverRow, undefined, fallback);
+
+    // Assert
+    expect(mergedNull.content).toBe(fallback);
+    expect(mergedUndef.content).toBe(fallback);
   });
 
   it('preserves other fields from the updated note', () => {
+    // Arrange
     const serverRow = makeNote({ title: 'From server', updated_at: '2026-03-24T12:00:00Z' });
     const pending = { type: 'doc', content: [] };
+    const fallback = serverRow.content;
 
-    const merged = mergeUpdatedNoteLocalContent(
-      serverRow,
-      pending,
-      serverRow.content,
-    );
+    // Act
+    const merged = mergeUpdatedNoteLocalContent(serverRow, pending, fallback);
 
+    // Assert
     expect(merged.title).toBe('From server');
     expect(merged.updated_at).toBe('2026-03-24T12:00:00Z');
     expect(merged.content).toBe(pending);

@@ -36,10 +36,14 @@ function createEditorWithTaskList() {
 
 describe('TipTap task list', () => {
   it('toggleTaskList produces taskList and taskItem nodes in JSON', () => {
+    // Arrange
     const editor = createEditorWithTaskList();
-    editor.chain().focus().toggleTaskList().run();
 
+    // Act
+    editor.chain().focus().toggleTaskList().run();
     const types = collectTypes(editor.getJSON());
+
+    // Assert
     expect(types).toContain('taskList');
     expect(types.filter((t) => t === 'taskItem').length).toBeGreaterThan(0);
 
@@ -47,13 +51,16 @@ describe('TipTap task list', () => {
   });
 
   it('round-trips task list document JSON through setContent', () => {
+    // Arrange
     const editor = createEditorWithTaskList();
     editor.chain().focus().toggleTaskList().run();
-
     const snapshot = editor.getJSON();
+
+    // Act
     editor.commands.setContent(snapshot, false);
     const after = collectTypes(editor.getJSON());
 
+    // Assert
     expect(after).toContain('taskList');
     expect(after.filter((t) => t === 'taskItem').length).toBeGreaterThan(0);
 

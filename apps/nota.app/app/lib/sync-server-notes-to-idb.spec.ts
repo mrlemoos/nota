@@ -32,20 +32,30 @@ describe('syncServerNotesToIdbInChunks', () => {
   });
 
   it('calls put once per note across multiple chunks', async () => {
+    // Arrange
     const count = NOTES_IDB_PUT_CHUNK_SIZE + 3;
     const notes = Array.from({ length: count }, (_, i) =>
       mockNote(`00000000-0000-4000-8000-${String(i).padStart(12, '0')}`),
     );
     const put = vi.fn(async () => undefined);
+    const userId = 'user-1';
 
-    await syncServerNotesToIdbInChunks('user-1', notes, put);
+    // Act
+    await syncServerNotesToIdbInChunks(userId, notes, put);
 
+    // Assert
     expect(put).toHaveBeenCalledTimes(count);
   });
 
   it('does nothing for an empty list', async () => {
+    // Arrange
     const put = vi.fn(async () => undefined);
-    await syncServerNotesToIdbInChunks('user-1', [], put);
+    const userId = 'user-1';
+
+    // Act
+    await syncServerNotesToIdbInChunks(userId, [], put);
+
+    // Assert
     expect(put).not.toHaveBeenCalled();
   });
 });

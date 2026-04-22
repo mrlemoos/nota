@@ -21,20 +21,24 @@ function directiveTokens(csp: string, directive: string): string[] {
 
 describe('nota.app vercel.json CSP', () => {
   it("includes script-src token for Clerk custom Frontend API (*.nota.mrlemoos.dev)", () => {
+    // Arrange
     const raw = readFileSync(vercelJsonPath, 'utf8');
     const vercel = JSON.parse(raw) as {
       headers: { headers: { key: string; value: string }[] }[];
     };
+
+    // Act
     const csp = vercel.headers[0].headers.find(
       (h) => h.key === 'Content-Security-Policy',
     )?.value;
+    const scriptTokens = csp ? directiveTokens(csp, 'script-src') : [];
+    const workerTokens = csp ? directiveTokens(csp, 'worker-src') : [];
+
+    // Assert
     expect(csp).toBeDefined();
-    const scriptTokens = directiveTokens(csp!, 'script-src');
     expect(scriptTokens).toContain('https://*.nota.mrlemoos.dev');
     expect(scriptTokens).toContain('https://clerk.nota.mrlemoos.dev');
     expect(scriptTokens).toContain('https://*.i.posthog.com');
-
-    const workerTokens = directiveTokens(csp!, 'worker-src');
     expect(workerTokens).toContain("'self'");
     expect(workerTokens).toContain('blob:');
   });

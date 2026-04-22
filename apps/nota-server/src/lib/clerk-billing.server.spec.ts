@@ -33,24 +33,45 @@ describe('getServerNotaProEntitled', () => {
   });
 
   it('returns false when the secret is missing', async () => {
+    // Arrange
     delete process.env.CLERK_SECRET_KEY;
-    expect(await getServerNotaProEntitled('user-1')).toBe(false);
+    const userId = 'user-1';
+
+    // Act
+    const entitled = await getServerNotaProEntitled(userId);
+
+    // Assert
+    expect(entitled).toBe(false);
   });
 
   it('returns true for an active subscription', async () => {
+    // Arrange
     getUserBillingSubscription.mockImplementation(() =>
       Promise.resolve({ status: 'active' }),
     );
-    expect(await getServerNotaProEntitled('user-1')).toBe(true);
+    const userId = 'user-1';
+
+    // Act
+    const entitled = await getServerNotaProEntitled(userId);
+
+    // Assert
+    expect(entitled).toBe(true);
   });
 
   it('returns false on 404 / missing subscription', async () => {
+    // Arrange
     getUserBillingSubscription.mockImplementation(() =>
       Promise.reject({
         status: 404,
         errors: [{ code: 'resource_not_found' }],
       }),
     );
-    expect(await getServerNotaProEntitled('user-1')).toBe(false);
+    const userId = 'user-1';
+
+    // Act
+    const entitled = await getServerNotaProEntitled(userId);
+
+    // Assert
+    expect(entitled).toBe(false);
   });
 });

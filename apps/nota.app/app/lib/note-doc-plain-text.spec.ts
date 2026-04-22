@@ -3,12 +3,24 @@ import { extractPlainTextFromDocJson } from './note-doc-plain-text';
 
 describe('extractPlainTextFromDocJson', () => {
   it('returns empty string for non-object input', () => {
-    expect(extractPlainTextFromDocJson(null)).toBe('');
-    expect(extractPlainTextFromDocJson(undefined)).toBe('');
-    expect(extractPlainTextFromDocJson('x')).toBe('');
+    // Arrange
+    const nullInput = null;
+    const undefinedInput = undefined;
+    const stringInput = 'x';
+
+    // Act
+    const nullResult = extractPlainTextFromDocJson(nullInput);
+    const undefinedResult = extractPlainTextFromDocJson(undefinedInput);
+    const stringResult = extractPlainTextFromDocJson(stringInput);
+
+    // Assert
+    expect(nullResult).toBe('');
+    expect(undefinedResult).toBe('');
+    expect(stringResult).toBe('');
   });
 
   it('extracts text from a simple doc', () => {
+    // Arrange
     const doc = {
       type: 'doc',
       content: [
@@ -18,10 +30,16 @@ describe('extractPlainTextFromDocJson', () => {
         },
       ],
     };
-    expect(extractPlainTextFromDocJson(doc)).toBe('Hello world');
+
+    // Act
+    const text = extractPlainTextFromDocJson(doc);
+
+    // Assert
+    expect(text).toBe('Hello world');
   });
 
   it('normalises whitespace', () => {
+    // Arrange
     const doc = {
       type: 'doc',
       content: [
@@ -31,6 +49,11 @@ describe('extractPlainTextFromDocJson', () => {
         },
       ],
     };
-    expect(extractPlainTextFromDocJson(doc)).toBe('a b');
+
+    // Act
+    const text = extractPlainTextFromDocJson(doc);
+
+    // Assert
+    expect(text).toBe('a b');
   });
 });

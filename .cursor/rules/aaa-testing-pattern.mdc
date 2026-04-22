@@ -89,17 +89,22 @@ test('should fetch data', async () => {
 });
 ```
 
-## Empty Sections
+## Param-only “pure” tests
 
-If a section has nothing to arrange (e.g., testing a pure function with inline values), omit the comment:
+When there is no heavier setup (no mocks, no DOM), you still use **all three section labels**. Bind inputs under **Arrange**—including literals you would otherwise inline into the call—then a single invocation under **Act**:
 
 ```typescript
-// ✅ GOOD - No arrange needed
+// ✅ GOOD - parameters are Arrange
 test('should return true for valid email', () => {
+  // Arrange
+  const email = 'user@example.com';
+
   // Act
-  const result = isValidEmail('user@example.com');
+  const result = isValidEmail(email);
 
   // Assert
   expect(result).toBe(true);
 });
 ```
+
+Default for this repo: **always** include `// Arrange`, `// Act`, and `// Assert` so structure stays consistent. Omit a section label only in exceptional cases (agreed with reviewers), not for “short” tests.

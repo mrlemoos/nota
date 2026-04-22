@@ -34,23 +34,30 @@ function createEditorWithEmoji() {
 
 describe('TipTap emoji', () => {
   it('setEmoji inserts an emoji node in JSON', () => {
+    // Arrange
     const editor = createEditorWithEmoji();
-    editor.chain().focus().setEmoji('smile').run();
 
+    // Act
+    editor.chain().focus().setEmoji('smile').run();
     const types = collectTypes(editor.getJSON());
+
+    // Assert
     expect(types).toContain('emoji');
 
     editor.destroy();
   });
 
   it('round-trips a document containing an emoji node through setContent', () => {
+    // Arrange
     const editor = createEditorWithEmoji();
     editor.chain().focus().setEmoji('smile').run();
-
     const snapshot = editor.getJSON();
+
+    // Act
     editor.commands.setContent(snapshot, false);
     const after = collectTypes(editor.getJSON());
 
+    // Assert
     expect(after).toContain('emoji');
 
     editor.destroy();

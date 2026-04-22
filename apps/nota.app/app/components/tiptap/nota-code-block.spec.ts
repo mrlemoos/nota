@@ -17,6 +17,7 @@ function createEditorWithNotaCodeBlock(content: JSONContent) {
 
 describe('NotaCodeBlock', () => {
   it('stores javascript block with text in JSON', () => {
+    // Arrange
     const editor = createEditorWithNotaCodeBlock({
       type: 'doc',
       content: [
@@ -28,6 +29,7 @@ describe('NotaCodeBlock', () => {
       ],
     });
 
+    // Act
     const doc = editor.getJSON() as {
       content?: Array<{
         type: string;
@@ -35,8 +37,9 @@ describe('NotaCodeBlock', () => {
         content?: Array<{ type: string; text?: string }>;
       }>;
     };
-
     const block = doc.content?.[0];
+
+    // Assert
     expect(block?.type).toBe('codeBlock');
     expect(block?.attrs?.language).toBe('javascript');
     expect(block?.content?.[0]?.text).toBe('const x = 1;\n');
@@ -44,6 +47,7 @@ describe('NotaCodeBlock', () => {
   });
 
   it('stores mermaid block with diagram source in JSON', () => {
+    // Arrange
     const source = 'graph TD\n  A --> B';
     const editor = createEditorWithNotaCodeBlock({
       type: 'doc',
@@ -56,6 +60,7 @@ describe('NotaCodeBlock', () => {
       ],
     });
 
+    // Act
     const doc = editor.getJSON() as {
       content?: Array<{
         type: string;
@@ -63,8 +68,9 @@ describe('NotaCodeBlock', () => {
         content?: Array<{ type: string; text?: string }>;
       }>;
     };
-
     const block = doc.content?.[0];
+
+    // Assert
     expect(block?.type).toBe('codeBlock');
     expect(block?.attrs?.language).toBe('mermaid');
     expect(block?.content?.[0]?.text).toBe(source);

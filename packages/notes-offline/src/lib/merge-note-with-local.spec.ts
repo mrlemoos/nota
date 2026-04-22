@@ -31,17 +31,31 @@ function makeStored(overrides: Partial<StoredNote> = {}): StoredNote {
 
 describe('mergeNoteWithLocal', () => {
   it('returns server row when there is no local copy', () => {
+    // Arrange
     const server = makeNote();
-    expect(mergeNoteWithLocal(server, null)).toBe(server);
+    const local = null;
+
+    // Act
+    const result = mergeNoteWithLocal(server, local);
+
+    // Assert
+    expect(result).toBe(server);
   });
 
   it('returns server row when local is not dirty', () => {
+    // Arrange
     const server = makeNote({ title: 'Fresh' });
     const local = makeStored({ dirty: false, title: 'Stale local title' });
-    expect(mergeNoteWithLocal(server, local)).toBe(server);
+
+    // Act
+    const result = mergeNoteWithLocal(server, local);
+
+    // Assert
+    expect(result).toBe(server);
   });
 
   it('prefers local title and content when local is dirty', () => {
+    // Arrange
     const server = makeNote({ title: 'Server' });
     const local = makeStored({
       dirty: true,
@@ -49,13 +63,18 @@ describe('mergeNoteWithLocal', () => {
       content: { type: 'doc', content: [{ type: 'paragraph' }] } as Json,
       updated_at: '2020-01-03T00:00:00Z',
     });
+
+    // Act
     const merged = mergeNoteWithLocal(server, local);
+
+    // Assert
     expect(merged.title).toBe('Local');
     expect(merged.content).toEqual(local.content);
     expect(merged.updated_at).toBe('2020-01-03T00:00:00Z');
   });
 
   it('prefers local editor_settings when local is dirty', () => {
+    // Arrange
     const server = makeNote({
       editor_settings: { font: 'sans' } as Json,
     });
@@ -64,11 +83,16 @@ describe('mergeNoteWithLocal', () => {
       editor_settings: { font: 'mono', measure: 'narrow' } as Json,
       updated_at: '2020-01-03T00:00:00Z',
     });
+
+    // Act
     const merged = mergeNoteWithLocal(server, local);
+
+    // Assert
     expect(merged.editor_settings).toEqual({ font: 'mono', measure: 'narrow' });
   });
 
   it('prefers local due_at and is_deadline when local is dirty', () => {
+    // Arrange
     const server = makeNote({
       due_at: '2025-01-01T12:00:00Z',
       is_deadline: false,
@@ -79,7 +103,11 @@ describe('mergeNoteWithLocal', () => {
       is_deadline: true,
       updated_at: '2020-01-03T00:00:00Z',
     });
+
+    // Act
     const merged = mergeNoteWithLocal(server, local);
+
+    // Assert
     expect(merged.due_at).toBe('2025-06-15T09:00:00Z');
     expect(merged.is_deadline).toBe(true);
   });
@@ -87,6 +115,7 @@ describe('mergeNoteWithLocal', () => {
 
 describe('mergeNoteLists', () => {
   it('drops cached rows that are no longer on the server unless dirty or pending_create', () => {
+    // Arrange
     const server = [makeNote({ id: 'a', updated_at: '2020-01-02T00:00:00Z' })];
     const stored: StoredNote[] = [
       makeStored({
@@ -97,11 +126,16 @@ describe('mergeNoteLists', () => {
         server_updated_at: '2019-01-01T00:00:00Z',
       }),
     ];
+
+    // Act
     const merged = mergeNoteLists(server, stored);
+
+    // Assert
     expect(merged.map((n: Note) => n.id)).toEqual(['a']);
   });
 
   it('keeps pending_create notes that are absent from the server list', () => {
+    // Arrange
     const server: Note[] = [];
     const stored: StoredNote[] = [
       makeStored({
@@ -111,17 +145,19 @@ describe('mergeNoteLists', () => {
         title: 'New',
       }),
     ];
+
+    // Act
     const merged = mergeNoteLists(server, stored);
+
+    // Assert
     expect(merged).toHaveLength(1);
     expect(merged[0].id).toBe('local-only');
     expect(merged[0].title).toBe('New');
   });
 
   it('removes ids that are pending_delete', () => {
-    const server = [
-      makeNote({ id: 'x' }),
-      makeNote({ id: 'y', title: 'Y' }),
-    ];
+    // Arrange
+    const server = [makeNote({ id: 'x' }), makeNote({ id: 'y', title: 'Y' })];
     const stored: StoredNote[] = [
       makeStored({
         id: 'y',
@@ -129,7 +165,11 @@ describe('mergeNoteLists', () => {
         dirty: true,
       }),
     ];
+
+    // Act
     const merged = mergeNoteLists(server, stored);
+
+    // Assert
     expect(merged.map((n: Note) => n.id)).toEqual(['x']);
   });
 });

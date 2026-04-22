@@ -5,6 +5,7 @@ import type { Note } from '~/types/database.types';
 
 describe('fetchNoteRowAndAttachmentsParallel', () => {
   it('starts listing attachments before getNote resolves', async () => {
+    // Arrange
     const client = {} as TypedSupabaseClient;
     const noteId = '00000000-0000-4000-8000-000000000001';
 
@@ -17,15 +18,18 @@ describe('fetchNoteRowAndAttachmentsParallel', () => {
 
     const getNote = vi.fn(() => getNoteDeferred);
 
+    // Act
     const resultPromise = fetchNoteRowAndAttachmentsParallel(client, noteId, {
       getNote,
       listNoteAttachments,
     });
 
+    // Assert
     expect(listNoteAttachments).toHaveBeenCalledWith(client, noteId);
     expect(getNote).toHaveBeenCalledWith(client, noteId);
 
-    resolveGet({
+    // Arrange
+    const row: Note = {
       id: noteId,
       user_id: 'u1',
       title: 'T',
@@ -35,8 +39,12 @@ describe('fetchNoteRowAndAttachmentsParallel', () => {
       due_at: null,
       is_deadline: false,
       editor_settings: {},
-    } as Note);
+    } as Note;
 
+    // Act
+    resolveGet(row);
+
+    // Assert
     await expect(resultPromise).resolves.toMatchObject({
       row: expect.objectContaining({ id: noteId }),
       attachments: [],

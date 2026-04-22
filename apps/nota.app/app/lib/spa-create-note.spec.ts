@@ -43,59 +43,75 @@ describe('spaCreateNote', () => {
   });
 
   it('does nothing when not entitled', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(true);
-
-    await spaCreateNote({
+    const args = {
       userId: 'u1',
       insertNoteAtFront,
       refreshNotesList,
       notaProEntitled: false,
-    });
+    };
 
+    // Act
+    await spaCreateNote(args);
+
+    // Assert
     expect(createNote).not.toHaveBeenCalled();
     expect(createLocalOnlyNote).not.toHaveBeenCalled();
     expect(refreshNotesList).not.toHaveBeenCalled();
   });
 
   it('creates on the server when online and Nota Pro', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(true);
-
-    await spaCreateNote({
+    const args = {
       userId: 'u1',
       insertNoteAtFront,
       refreshNotesList,
       notaProEntitled: true,
-    });
+    };
 
+    // Act
+    await spaCreateNote(args);
+
+    // Assert
     expect(createNote).toHaveBeenCalled();
     expect(createLocalOnlyNote).not.toHaveBeenCalled();
     expect(insertNoteAtFront).toHaveBeenCalled();
   });
 
   it('creates a local-only note when offline and entitled', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(false);
-
-    await spaCreateNote({
+    const args = {
       userId: 'u1',
       insertNoteAtFront,
       refreshNotesList,
       notaProEntitled: true,
-    });
+    };
 
+    // Act
+    await spaCreateNote(args);
+
+    // Assert
     expect(createNote).not.toHaveBeenCalled();
     expect(createLocalOnlyNote).toHaveBeenCalledWith('u1');
   });
 
   it('does nothing when offline and not entitled', async () => {
+    // Arrange
     vi.mocked(isLikelyOnline).mockReturnValue(false);
-
-    await spaCreateNote({
+    const args = {
       userId: 'u1',
       insertNoteAtFront,
       refreshNotesList,
       notaProEntitled: false,
-    });
+    };
 
+    // Act
+    await spaCreateNote(args);
+
+    // Assert
     expect(createNote).not.toHaveBeenCalled();
     expect(createLocalOnlyNote).not.toHaveBeenCalled();
   });

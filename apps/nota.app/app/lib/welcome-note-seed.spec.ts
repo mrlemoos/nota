@@ -42,37 +42,52 @@ describe('runWelcomeNoteSeedIfNeeded', () => {
   });
 
   it('returns null when welcome_seeded is already true', async () => {
-    await expect(
-      runWelcomeNoteSeedIfNeeded({
-        userId: 'user-1',
-        welcomeSeeded: true,
-        notesCount: 0,
-      }),
-    ).resolves.toBeNull();
+    // Arrange
+    const input = {
+      userId: 'user-1',
+      welcomeSeeded: true,
+      notesCount: 0,
+    };
+
+    // Act
+    const promise = runWelcomeNoteSeedIfNeeded(input);
+
+    // Assert
+    await expect(promise).resolves.toBeNull();
     expect(createLocalOnlyNote).not.toHaveBeenCalled();
     expect(userPreferences.upsertUserPreferences).not.toHaveBeenCalled();
   });
 
   it('returns null when the vault already has notes', async () => {
-    await expect(
-      runWelcomeNoteSeedIfNeeded({
-        userId: 'user-1',
-        welcomeSeeded: false,
-        notesCount: 3,
-      }),
-    ).resolves.toBeNull();
+    // Arrange
+    const input = {
+      userId: 'user-1',
+      welcomeSeeded: false,
+      notesCount: 3,
+    };
+
+    // Act
+    const promise = runWelcomeNoteSeedIfNeeded(input);
+
+    // Assert
+    await expect(promise).resolves.toBeNull();
     expect(createLocalOnlyNote).not.toHaveBeenCalled();
     expect(userPreferences.upsertUserPreferences).not.toHaveBeenCalled();
   });
 
   it('creates the welcome note and sets welcome_seeded when the vault is empty', async () => {
-    await expect(
-      runWelcomeNoteSeedIfNeeded({
-        userId: 'user-1',
-        welcomeSeeded: false,
-        notesCount: 0,
-      }),
-    ).resolves.toBe('welcome-note-id');
+    // Arrange
+    const input = {
+      userId: 'user-1',
+      welcomeSeeded: false,
+      notesCount: 0,
+    };
+
+    // Act
+    const promise = runWelcomeNoteSeedIfNeeded(input);
+
+    // Assert
+    await expect(promise).resolves.toBe('welcome-note-id');
 
     expect(createLocalOnlyNote).toHaveBeenCalledTimes(1);
     expect(createLocalOnlyNote).toHaveBeenCalledWith(
@@ -89,46 +104,45 @@ describe('runWelcomeNoteSeedIfNeeded', () => {
   });
 
   it('singleflights concurrent calls for the same user', async () => {
+    // Arrange
     vi.mocked(createLocalOnlyNote).mockImplementation(
       () =>
         new Promise((resolve) => {
           setTimeout(() => resolve('welcome-note-id'), 20);
         }),
     );
+    const input = {
+      userId: 'user-1',
+      welcomeSeeded: false,
+      notesCount: 0,
+    };
+    const a = runWelcomeNoteSeedIfNeeded(input);
+    const b = runWelcomeNoteSeedIfNeeded(input);
 
-    const a = runWelcomeNoteSeedIfNeeded({
-      userId: 'user-1',
-      welcomeSeeded: false,
-      notesCount: 0,
-    });
-    const b = runWelcomeNoteSeedIfNeeded({
-      userId: 'user-1',
-      welcomeSeeded: false,
-      notesCount: 0,
-    });
-    await expect(Promise.all([a, b])).resolves.toEqual([
-      'welcome-note-id',
-      'welcome-note-id',
-    ]);
+    // Act
+    const results = await Promise.all([a, b]);
+
+    // Assert
+    expect(results).toEqual(['welcome-note-id', 'welcome-note-id']);
     expect(createLocalOnlyNote).toHaveBeenCalledTimes(1);
     expect(userPreferences.upsertUserPreferences).toHaveBeenCalledTimes(1);
   });
 
   it('reuses the settled promise on a sequential second call', async () => {
-    await expect(
-      runWelcomeNoteSeedIfNeeded({
-        userId: 'user-1',
-        welcomeSeeded: false,
-        notesCount: 0,
-      }),
-    ).resolves.toBe('welcome-note-id');
-    await expect(
-      runWelcomeNoteSeedIfNeeded({
-        userId: 'user-1',
-        welcomeSeeded: false,
-        notesCount: 0,
-      }),
-    ).resolves.toBe('welcome-note-id');
+    // Arrange
+    const input = {
+      userId: 'user-1',
+      welcomeSeeded: false,
+      notesCount: 0,
+    };
+
+    // Act
+    const first = await runWelcomeNoteSeedIfNeeded(input);
+    const second = await runWelcomeNoteSeedIfNeeded(input);
+
+    // Assert
+    expect(first).toBe('welcome-note-id');
+    expect(second).toBe('welcome-note-id');
     expect(createLocalOnlyNote).toHaveBeenCalledTimes(1);
     expect(userPreferences.upsertUserPreferences).toHaveBeenCalledTimes(1);
   });

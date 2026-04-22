@@ -36,8 +36,11 @@ describe('formatRecordingDuration', () => {
   });
 
   it('clamps negative input to 00:00', () => {
+    // Arrange
+    const seconds = -10;
+
     // Act
-    const result = formatRecordingDuration(-10);
+    const result = formatRecordingDuration(seconds);
 
     // Assert
     expect(result).toBe('00:00');

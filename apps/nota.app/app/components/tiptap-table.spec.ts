@@ -38,14 +38,18 @@ function createEditorWithTable() {
 
 describe('TipTap table', () => {
   it('insertTable produces table and tableCell nodes in JSON', () => {
+    // Arrange
     const editor = createEditorWithTable();
+
+    // Act
     editor
       .chain()
       .focus()
       .insertTable({ rows: 2, cols: 2, withHeaderRow: true })
       .run();
-
     const types = collectTypes(editor.getJSON());
+
+    // Assert
     expect(types).toContain('table');
     expect(types.filter((t) => t === 'tableCell').length).toBeGreaterThan(0);
 
@@ -53,17 +57,20 @@ describe('TipTap table', () => {
   });
 
   it('round-trips table document JSON through setContent', () => {
+    // Arrange
     const editor = createEditorWithTable();
     editor
       .chain()
       .focus()
       .insertTable({ rows: 2, cols: 2, withHeaderRow: false })
       .run();
-
     const snapshot = editor.getJSON();
+
+    // Act
     editor.commands.setContent(snapshot, false);
     const after = collectTypes(editor.getJSON());
 
+    // Assert
     expect(after).toContain('table');
     expect(after.filter((t) => t === 'tableCell').length).toBeGreaterThan(0);
 

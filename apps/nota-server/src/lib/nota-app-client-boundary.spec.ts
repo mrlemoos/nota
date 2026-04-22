@@ -29,9 +29,10 @@ const FORBIDDEN: { label: string; re: RegExp }[] = [
 
 describe('nota.app client tree', () => {
   it('does not reference server-only Clerk or moved nota-server libs', () => {
+    // Arrange
     const files = collectSourceFiles(clientAppDir);
-    expect(files.length).toBeGreaterThan(0);
 
+    // Act
     const hits: string[] = [];
     for (const file of files) {
       const text = readFileSync(file, 'utf8');
@@ -41,6 +42,9 @@ describe('nota.app client tree', () => {
         }
       }
     }
+
+    // Assert
+    expect(files.length).toBeGreaterThan(0);
     expect(hits).toEqual([]);
   });
 });

@@ -12,32 +12,71 @@ import {
 
 describe('usdMinorUnitsToDecimal', () => {
   it('converts cents to dollars', () => {
-    expect(usdMinorUnitsToDecimal(249)).toBe(2.49);
-    expect(usdMinorUnitsToDecimal(1949)).toBe(19.49);
+    // Arrange
+    const twoFortyNineCents = 249;
+    const nineteenFortyNineCents = 1949;
+
+    // Act
+    const first = usdMinorUnitsToDecimal(twoFortyNineCents);
+    const second = usdMinorUnitsToDecimal(nineteenFortyNineCents);
+
+    // Assert
+    expect(first).toBe(2.49);
+    expect(second).toBe(19.49);
   });
 });
 
 describe('moneyToUsdDecimal', () => {
   it('maps USD minor units', () => {
-    expect(moneyToUsdDecimal({ amount: 249, currency: 'usd' })).toBe(2.49);
-    expect(moneyToUsdDecimal({ amount: 249, currency: 'USD' })).toBe(2.49);
+    // Arrange
+    const lower = { amount: 249, currency: 'usd' as const };
+    const upper = { amount: 249, currency: 'USD' as const };
+
+    // Act
+    const lowerUsd = moneyToUsdDecimal(lower);
+    const upperUsd = moneyToUsdDecimal(upper);
+
+    // Assert
+    expect(lowerUsd).toBe(2.49);
+    expect(upperUsd).toBe(2.49);
   });
 
   it('returns null for non-USD', () => {
-    expect(moneyToUsdDecimal({ amount: 249, currency: 'eur' })).toBeNull();
+    // Arrange
+    const eur = { amount: 249, currency: 'eur' as const };
+
+    // Act
+    const result = moneyToUsdDecimal(eur);
+
+    // Assert
+    expect(result).toBeNull();
   });
 });
 
 describe('withinUsdTolerance', () => {
   it('accepts small drift', () => {
-    expect(withinUsdTolerance(2.5, 2.49, 0.02)).toBe(true);
-    expect(withinUsdTolerance(2.52, 2.49, 0.02)).toBe(false);
+    // Arrange
+    const tolerance = 0.02;
+
+    // Act
+    const within = withinUsdTolerance(2.5, 2.49, tolerance);
+    const outside = withinUsdTolerance(2.52, 2.49, tolerance);
+
+    // Assert
+    expect(within).toBe(true);
+    expect(outside).toBe(false);
   });
 });
 
 describe('readMarketingGuidePrices', () => {
   it('reads marketing Astro and matches home vs pricing', () => {
-    const g = readMarketingGuidePrices(repoRootFromThisFile());
+    // Arrange
+    const root = repoRootFromThisFile();
+
+    // Act
+    const g = readMarketingGuidePrices(root);
+
+    // Assert
     expect(g.monthlyUsd).toBe(2.49);
     expect(g.annualUsd).toBe(19.49);
   });
@@ -52,11 +91,18 @@ describe('validateUserBillingPlansAgainstExpectations', () => {
   const guide = { monthlyUsd: 2.49, annualUsd: 19.49 };
 
   it('errors when no public user plans', () => {
-    const issues = validateUserBillingPlansAgainstExpectations([], guide);
+    // Arrange
+    const plans: BillingPlanLike[] = [];
+
+    // Act
+    const issues = validateUserBillingPlansAgainstExpectations(plans, guide);
+
+    // Assert
     expect(issues.some((i) => i.code === 'no_public_user_plans')).toBe(true);
   });
 
   it('passes for a minimal valid catalogue', () => {
+    // Arrange
     const plans: BillingPlanLike[] = [
       makePlan({
         slug: 'nota-pro',
@@ -76,12 +122,17 @@ describe('validateUserBillingPlansAgainstExpectations', () => {
         isDefault: false,
       }),
     ];
+
+    // Act
     const issues = validateUserBillingPlansAgainstExpectations(plans, guide);
     const errors = issues.filter((i) => i.level === 'error');
+
+    // Assert
     expect(errors).toEqual([]);
   });
 
   it('errors on free trial days', () => {
+    // Arrange
     const plans: BillingPlanLike[] = [
       makePlan({
         slug: 'bad',
@@ -91,7 +142,11 @@ describe('validateUserBillingPlansAgainstExpectations', () => {
         annualFee: { amount: 1949, currency: 'usd' },
       }),
     ];
+
+    // Act
     const issues = validateUserBillingPlansAgainstExpectations(plans, guide);
+
+    // Assert
     expect(issues.some((i) => i.code === 'free_trial_on_plan')).toBe(true);
   });
 });

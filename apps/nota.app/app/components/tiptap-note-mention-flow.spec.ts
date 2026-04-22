@@ -86,18 +86,26 @@ describe('tiptap-note-mention-flow', () => {
 
   describe('insertNoteLinkAtMentionRangeView', () => {
     it('returns false when the schema has no link mark', () => {
+      // Arrange
       const view = {
         state: {
           schema: { marks: {} },
         },
       } as unknown as EditorView;
+      const from = 0;
+      const to = 1;
 
-      expect(insertNoteLinkAtMentionRangeView(view, 0, 1, sampleNote)).toBe(false);
+      // Act
+      const ok = insertNoteLinkAtMentionRangeView(view, from, to, sampleNote);
+
+      // Assert
+      expect(ok).toBe(false);
     });
   });
 
   describe('insertNoteLinkAtMentionRange', () => {
     it('inserts an internal note link for the given range', () => {
+      // Arrange
       const editor = createEditorWithNotaLink({
         type: 'doc',
         content: [
@@ -109,16 +117,20 @@ describe('tiptap-note-mention-flow', () => {
       });
       try {
         editor.commands.setTextSelection(editor.state.doc.content.size - 1);
-        const trigger = findNoteMentionTrigger(editor.state);
-        expect(trigger).not.toBeNull();
 
+        // Act
+        const trigger = findNoteMentionTrigger(editor.state);
+        if (!trigger) {
+          throw new Error('expected @ mention trigger');
+        }
         insertNoteLinkAtMentionRange(
           editor,
-          trigger!.from,
+          trigger.from,
           editor.state.selection.from,
           sampleNote,
         );
 
+        // Assert
         expect(editor.getHTML()).toContain(`/notes/${sampleNote.id}`);
         expect(editor.getHTML()).toContain('Hello');
       } finally {
@@ -129,12 +141,17 @@ describe('tiptap-note-mention-flow', () => {
 
   describe('tryConfirmNoteMention', () => {
     it('returns false when attachments are disabled', () => {
+      // Arrange
       const editor = createEditorWithNotaLink('<p>x</p>');
       try {
         const setMention = vi.fn();
         const refs = buildRefs({ canInsert: false });
 
-        expect(tryConfirmNoteMention(editor.view, setMention, refs)).toBe(false);
+        // Act
+        const ok = tryConfirmNoteMention(editor.view, setMention, refs);
+
+        // Assert
+        expect(ok).toBe(false);
         expect(findNoteMentionTrigger).not.toHaveBeenCalled();
         expect(setMention).not.toHaveBeenCalled();
       } finally {
@@ -143,13 +160,18 @@ describe('tiptap-note-mention-flow', () => {
     });
 
     it('returns false when there is no @ mention trigger', () => {
+      // Arrange
       const editor = createEditorWithNotaLink('<p>no mention here</p>');
       try {
         editor.commands.setTextSelection(editor.state.doc.content.size - 1);
         const setMention = vi.fn();
         const refs = buildRefs();
 
-        expect(tryConfirmNoteMention(editor.view, setMention, refs)).toBe(false);
+        // Act
+        const ok = tryConfirmNoteMention(editor.view, setMention, refs);
+
+        // Assert
+        expect(ok).toBe(false);
         expect(setMention).not.toHaveBeenCalled();
       } finally {
         editor.destroy();
@@ -157,13 +179,18 @@ describe('tiptap-note-mention-flow', () => {
     });
 
     it('returns false when the filtered candidate list is empty', () => {
+      // Arrange
       const editor = createEditorWithNotaLink('<p>Hello @me</p>');
       try {
         editor.commands.setTextSelection(editor.state.doc.content.size - 1);
         const setMention = vi.fn();
         const refs = buildRefs({ filter: () => [] });
 
-        expect(tryConfirmNoteMention(editor.view, setMention, refs)).toBe(false);
+        // Act
+        const ok = tryConfirmNoteMention(editor.view, setMention, refs);
+
+        // Assert
+        expect(ok).toBe(false);
         expect(setMention).not.toHaveBeenCalled();
       } finally {
         editor.destroy();
@@ -171,13 +198,18 @@ describe('tiptap-note-mention-flow', () => {
     });
 
     it('returns false and does not clear mention when insert fails (no link mark)', () => {
+      // Arrange
       const editor = createEditorStarterKitOnly('<p>Hello @me</p>');
       try {
         editor.commands.setTextSelection(editor.state.doc.content.size - 1);
         const setMention = vi.fn();
         const refs = buildRefs();
 
-        expect(tryConfirmNoteMention(editor.view, setMention, refs)).toBe(false);
+        // Act
+        const ok = tryConfirmNoteMention(editor.view, setMention, refs);
+
+        // Assert
+        expect(ok).toBe(false);
         expect(setMention).not.toHaveBeenCalled();
       } finally {
         editor.destroy();
@@ -185,13 +217,18 @@ describe('tiptap-note-mention-flow', () => {
     });
 
     it('clears mention state when insert succeeds', () => {
+      // Arrange
       const editor = createEditorWithNotaLink('<p>Hello @me</p>');
       try {
         editor.commands.setTextSelection(editor.state.doc.content.size - 1);
         const setMention = vi.fn();
         const refs = buildRefs();
 
-        expect(tryConfirmNoteMention(editor.view, setMention, refs)).toBe(true);
+        // Act
+        const ok = tryConfirmNoteMention(editor.view, setMention, refs);
+
+        // Assert
+        expect(ok).toBe(true);
         expect(setMention).toHaveBeenCalledWith(null);
         expect(editor.getHTML()).toContain(`/notes/${sampleNote.id}`);
       } finally {

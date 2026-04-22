@@ -4,6 +4,7 @@ import { getUserPreferences } from './user-preferences';
 
 describe('getUserPreferences', () => {
   it('defaults show_note_backlinks to true when no row exists', async () => {
+    // Arrange
     const client = {
       from: () => ({
         select: () => ({
@@ -14,8 +15,12 @@ describe('getUserPreferences', () => {
         }),
       }),
     } as unknown as TypedSupabaseClient;
+    const userId = 'user-1';
 
-    const prefs = await getUserPreferences(client, 'user-1');
+    // Act
+    const prefs = await getUserPreferences(client, userId);
+
+    // Assert
     expect(prefs.show_note_backlinks).toBe(true);
   });
 });
