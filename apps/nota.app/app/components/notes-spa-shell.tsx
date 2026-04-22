@@ -21,6 +21,7 @@ import { useIsElectron } from '../lib/use-is-electron';
 import { useNotesOfflineSync } from '../lib/use-notes-offline-sync';
 import { useNotesHistoryShortcut } from '../lib/use-notes-history-shortcut';
 import { useNotesSidebarShortcut } from '../lib/use-notes-sidebar-shortcut';
+import { useSettingsShortcut } from '../lib/use-settings-shortcut';
 import { useTodaysNoteShortcut } from '../lib/use-todays-note-shortcut';
 import { useSyncUserPreferences } from '../lib/use-sync-user-preferences';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
@@ -102,6 +103,7 @@ export function NotesSpaShell(): JSX.Element {
 
   useNotesHistoryShortcut(user?.id, shellReady);
   useNotesSidebarShortcut(user?.id, shellReady);
+  useSettingsShortcut(user?.id, shellReady);
   useTodaysNoteShortcut(
     notes,
     user?.id,

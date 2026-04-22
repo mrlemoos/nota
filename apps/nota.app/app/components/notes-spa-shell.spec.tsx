@@ -95,6 +95,10 @@ vi.mock('../lib/use-notes-sidebar-shortcut', () => ({
   useNotesSidebarShortcut: (): void => {},
 }));
 
+vi.mock('../lib/use-settings-shortcut', () => ({
+  useSettingsShortcut: (): void => {},
+}));
+
 vi.mock('../lib/use-todays-note-shortcut', () => ({
   useTodaysNoteShortcut: (): void => {},
 }));

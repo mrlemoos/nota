@@ -25,6 +25,11 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
         keysOther: 'Ctrl+K',
       },
       {
+        description: 'Open Settings',
+        keysApple: '⌘,',
+        keysOther: 'Ctrl+,',
+      },
+      {
         description: 'Show or hide note list sidebar',
         detail:
           'Does not run while the command palette is focused (same for other global shortcuts below).',
