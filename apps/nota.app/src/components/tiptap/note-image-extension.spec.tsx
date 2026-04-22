@@ -95,10 +95,68 @@ describe('NoteImageNodeView', () => {
     expect(img.classList.contains('w-auto')).toBe(true);
     expect(img.classList.contains('max-w-full')).toBe(true);
     expect(img.classList.contains('object-left')).toBe(true);
+    const alignRow = screen.getByTestId('note-image-align-row');
+    expect(alignRow.className).toContain('justify-start');
     const wrapper = container.querySelector('.note-image-block');
     expect(wrapper).toBeTruthy();
     expect(wrapper?.className).not.toContain('bg-muted/20');
     expect(wrapper?.className).not.toContain('overflow-hidden');
+  });
+
+  it('centre-aligns the image row when align is centre', async () => {
+    // Arrange
+    const attId = 'att-centre';
+    const att = baseAttachment(attId, 'pic.png');
+    const ctx: NotePdfDocContextValue = {
+      noteId: 'note-1',
+      userId: 'user-1',
+      attachmentsById: new Map([[attId, att]]),
+      revalidate: () => {},
+    };
+    const props = {
+      node: {
+        attrs: { attachmentId: attId, filename: 'pic.png', align: 'center' },
+      },
+      selected: false,
+      deleteNode: vi.fn(),
+    } as unknown as NodeViewProps;
+
+    // Act
+    renderWithTipTap(<NoteImageNodeView {...props} />, ctx);
+
+    // Assert
+    await waitFor(() => screen.getByTestId('note-image-asset'));
+    expect(screen.getByTestId('note-image-align-row').className).toContain(
+      'justify-center',
+    );
+  });
+
+  it('right-aligns the image row when align is right', async () => {
+    // Arrange
+    const attId = 'att-right';
+    const att = baseAttachment(attId, 'pic.png');
+    const ctx: NotePdfDocContextValue = {
+      noteId: 'note-1',
+      userId: 'user-1',
+      attachmentsById: new Map([[attId, att]]),
+      revalidate: () => {},
+    };
+    const props = {
+      node: {
+        attrs: { attachmentId: attId, filename: 'pic.png', align: 'right' },
+      },
+      selected: false,
+      deleteNode: vi.fn(),
+    } as unknown as NodeViewProps;
+
+    // Act
+    renderWithTipTap(<NoteImageNodeView {...props} />, ctx);
+
+    // Assert
+    await waitFor(() => screen.getByTestId('note-image-asset'));
+    expect(screen.getByTestId('note-image-align-row').className).toContain(
+      'justify-end',
+    );
   });
 
   it('always shows missing-file controls (not hover-gated)', () => {

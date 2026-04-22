@@ -1,11 +1,19 @@
+import { Menu } from '@base-ui/react/menu';
 import { Node, mergeAttributes } from '@tiptap/core';
+import {
+  AlignHorizontalCenterIcon,
+  AlignHorizontalJustifyEndIcon,
+  AlignHorizontalJustifyStartIcon,
+  Tick01Icon,
+} from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import {
   NodeViewWrapper,
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from '@tiptap/react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { SimpleTooltip, TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { getBrowserClient } from '../../lib/supabase/browser';
@@ -21,6 +29,34 @@ import {
 } from '../../models/note-attachments';
 import { useNotePdfDocContext } from './note-pdf-extension';
 
+export type NoteImageAlign = 'left' | 'center' | 'right';
+
+function isNoteImageAlign(v: unknown): v is NoteImageAlign {
+  return (
+    v === 'left' ||
+    v === 'center' ||
+    v === 'right'
+  );
+}
+
+function noteImageAlignFromAttrs(raw: unknown): NoteImageAlign {
+  return isNoteImageAlign(raw) ? raw : 'left';
+}
+
+const ALIGN_MENU_ITEM_CLASS = cn(
+  'flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground outline-none',
+  'data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground',
+);
+
+const ALIGN_TRIGGER_ICON: Record<
+  NoteImageAlign,
+  typeof AlignHorizontalJustifyStartIcon
+> = {
+  left: AlignHorizontalJustifyStartIcon,
+  center: AlignHorizontalCenterIcon,
+  right: AlignHorizontalJustifyEndIcon,
+};
+
 export function NoteImageNodeView(props: NodeViewProps) {
   const ctx = useNotePdfDocContext();
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
@@ -30,6 +66,25 @@ export function NoteImageNodeView(props: NodeViewProps) {
 
   const attachmentId = props.node.attrs.attachmentId as string | null;
   const filenameAttr = (props.node.attrs.filename as string) || 'Image';
+  const align = noteImageAlignFromAttrs(props.node.attrs.align);
+
+  const alignRowClass = useMemo(
+    () =>
+      cn(
+        'flex w-full',
+        align === 'left' && 'justify-start',
+        align === 'center' && 'justify-center',
+        align === 'right' && 'justify-end',
+      ),
+    [align],
+  );
+
+  const imageObjectClass =
+    align === 'center'
+      ? 'object-center'
+      : align === 'right'
+        ? 'object-right'
+        : 'object-left';
 
   const attachment = attachmentId
     ? ctx?.attachmentsById.get(attachmentId)
@@ -208,6 +263,97 @@ export function NoteImageNodeView(props: NodeViewProps) {
                   {displayName}
                 </span>
                 <div className="flex shrink-0 flex-wrap items-center gap-1">
+                  <Menu.Root modal={false}>
+                    <Menu.Trigger
+                      type="button"
+                      aria-label="Image alignment"
+                      className={cn(
+                        buttonVariants({
+                          variant: 'ghost',
+                          size: 'icon',
+                        }),
+                        'h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground',
+                      )}
+                    >
+                      <HugeiconsIcon
+                        icon={ALIGN_TRIGGER_ICON[align]}
+                        size={16}
+                        className="shrink-0"
+                      />
+                    </Menu.Trigger>
+                    <Menu.Portal>
+                      <Menu.Positioner
+                        side="bottom"
+                        align="start"
+                        sideOffset={4}
+                      >
+                        <Menu.Popup
+                          className={cn(
+                            'z-50 min-w-[10.5rem] overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-md',
+                            'origin-[var(--transform-origin)] transition-[transform,scale,opacity]',
+                            'data-[ending-style]:scale-95 data-[ending-style]:opacity-0',
+                            'data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
+                          )}
+                        >
+                          <Menu.Viewport>
+                            <Menu.RadioGroup
+                              value={align}
+                              onValueChange={(value) => {
+                                if (!isNoteImageAlign(value)) return;
+                                props.updateAttributes({ align: value });
+                              }}
+                            >
+                              <Menu.RadioItem
+                                value="left"
+                                closeOnClick
+                                className={ALIGN_MENU_ITEM_CLASS}
+                              >
+                                <HugeiconsIcon
+                                  icon={AlignHorizontalJustifyStartIcon}
+                                  size={16}
+                                  className="shrink-0 text-muted-foreground"
+                                />
+                                <span className="min-w-0 flex-1">Left</span>
+                                <Menu.RadioItemIndicator className="flex size-4 shrink-0 items-center justify-center">
+                                  <HugeiconsIcon icon={Tick01Icon} size={14} />
+                                </Menu.RadioItemIndicator>
+                              </Menu.RadioItem>
+                              <Menu.RadioItem
+                                value="center"
+                                closeOnClick
+                                className={ALIGN_MENU_ITEM_CLASS}
+                              >
+                                <HugeiconsIcon
+                                  icon={AlignHorizontalCenterIcon}
+                                  size={16}
+                                  className="shrink-0 text-muted-foreground"
+                                />
+                                <span className="min-w-0 flex-1">Centre</span>
+                                <Menu.RadioItemIndicator className="flex size-4 shrink-0 items-center justify-center">
+                                  <HugeiconsIcon icon={Tick01Icon} size={14} />
+                                </Menu.RadioItemIndicator>
+                              </Menu.RadioItem>
+                              <Menu.RadioItem
+                                value="right"
+                                closeOnClick
+                                className={ALIGN_MENU_ITEM_CLASS}
+                              >
+                                <HugeiconsIcon
+                                  icon={AlignHorizontalJustifyEndIcon}
+                                  size={16}
+                                  className="shrink-0 text-muted-foreground"
+                                />
+                                <span className="min-w-0 flex-1">Right</span>
+                                <Menu.RadioItemIndicator className="flex size-4 shrink-0 items-center justify-center">
+                                  <HugeiconsIcon icon={Tick01Icon} size={14} />
+                                </Menu.RadioItemIndicator>
+                              </Menu.RadioItem>
+                            </Menu.RadioGroup>
+                          </Menu.Viewport>
+                        </Menu.Popup>
+                      </Menu.Positioner>
+                    </Menu.Portal>
+                  </Menu.Root>
                   <Button
                     type="button"
                     variant="ghost"
@@ -257,7 +403,10 @@ export function NoteImageNodeView(props: NodeViewProps) {
                 </div>
               </div>
 
-              <div className="flex w-full justify-start">
+              <div
+                className={alignRowClass}
+                data-testid="note-image-align-row"
+              >
                 {loadError ? (
                   <p className="p-1 text-sm text-destructive" role="alert">
                     {loadError}
@@ -266,7 +415,10 @@ export function NoteImageNodeView(props: NodeViewProps) {
                   <img
                     src={signedUrl}
                     alt={displayName}
-                    className="max-h-[min(70vh,32rem)] w-auto max-w-full border-0 object-left object-contain ring-0 outline-none"
+                    className={cn(
+                      'max-h-[min(70vh,32rem)] w-auto max-w-full border-0 object-contain ring-0 outline-none',
+                      imageObjectClass,
+                    )}
                     data-testid="note-image-asset"
                     loading="lazy"
                     onError={() => {
@@ -320,6 +472,17 @@ export const NoteImage = Node.create({
             return {};
           }
           return { 'data-filename': attrs.filename };
+        },
+      },
+      align: {
+        default: 'left',
+        parseHTML: (el) => {
+          const v = el.getAttribute('data-align');
+          return isNoteImageAlign(v) ? v : 'left';
+        },
+        renderHTML: (attrs) => {
+          const a = noteImageAlignFromAttrs(attrs.align);
+          return { 'data-align': a };
         },
       },
     };
