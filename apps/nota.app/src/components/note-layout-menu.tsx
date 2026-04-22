@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import {
   NOTE_THEME_LABEL,
   NOTE_THEME_OPTIONS,
+  noteEditorFontFromThemeSelectValue,
   noteThemeSelectValue,
   type NoteEditorSettings,
 } from '../lib/note-editor-settings';
@@ -115,15 +116,9 @@ export function NoteLayoutMenu({
                 className={selectClass}
                 value={noteThemeSelectValue(settings)}
                 onChange={(e) => {
-                  const v = e.target.value;
                   onSettingsChange({
                     ...settings,
-                    font:
-                      v === ''
-                        ? undefined
-                        : v === 'sans'
-                          ? 'sans'
-                          : 'mono',
+                    font: noteEditorFontFromThemeSelectValue(e.target.value),
                   });
                 }}
               >

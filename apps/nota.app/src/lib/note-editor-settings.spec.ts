@@ -4,6 +4,7 @@ import {
   isNoteVisibleInNoteGraph,
   NOTE_THEME_LABEL,
   NOTE_THEME_OPTIONS,
+  noteEditorFontFromThemeSelectValue,
   noteEditorSettingsToJson,
   noteSurfaceClassNames,
   noteThemeSelectValue,
@@ -83,6 +84,17 @@ describe('parseNoteEditorSettings', () => {
     expect(result).toEqual({ font: 'sans', measure: 'wide' });
   });
 
+  it('preserves York theme font', () => {
+    // Arrange
+    const raw = { font: 'york' } as Json;
+
+    // Act
+    const result = parseNoteEditorSettings(raw);
+
+    // Assert
+    expect(result).toEqual({ font: 'york' });
+  });
+
   it('returns empty object when validation fails', () => {
     // Arrange
     const raw = {
@@ -110,12 +122,15 @@ describe('noteEditorSettingsToJson', () => {
     expect(result).toEqual({});
   });
 
-  it('serialises Ottawa and mono fonts and omits London (serif)', () => {
+  it('serialises Ottawa, York, and mono fonts and omits London (serif)', () => {
     expect(
       noteEditorSettingsToJson({ font: 'sans', measure: 'wide' as const }),
     ).toEqual({ font: 'sans', measure: 'wide' });
     expect(noteEditorSettingsToJson({ font: 'mono' })).toEqual({
       font: 'mono',
+    });
+    expect(noteEditorSettingsToJson({ font: 'york' })).toEqual({
+      font: 'york',
     });
     expect(noteEditorSettingsToJson({ font: 'serif' })).toEqual({});
   });
@@ -234,6 +249,24 @@ describe('noteSurfaceClassNames', () => {
       bodyFontClass: 'font-mono',
     });
   });
+
+  it('maps York to serif title and Source Serif body with standard width', () => {
+    const settings = { font: 'york' as const };
+    expect(noteSurfaceClassNames(settings)).toEqual({
+      maxWidthClass: 'max-w-3xl',
+      titleFontClass: 'font-serif',
+      bodyFontClass: 'font-note-body',
+    });
+  });
+
+  it('maps York with narrow measure', () => {
+    const settings = { font: 'york' as const, measure: 'narrow' as const };
+    expect(noteSurfaceClassNames(settings)).toEqual({
+      maxWidthClass: 'max-w-prose',
+      titleFontClass: 'font-serif',
+      bodyFontClass: 'font-note-body',
+    });
+  });
 });
 
 describe('note theme copy', () => {
@@ -241,6 +274,7 @@ describe('note theme copy', () => {
     expect(NOTE_THEME_LABEL).toBe('Note theme');
     expect(NOTE_THEME_OPTIONS.map((o) => o.label)).toEqual([
       'London',
+      'York',
       'Ottawa',
       'San Francisco',
     ]);
@@ -251,5 +285,19 @@ describe('note theme copy', () => {
     expect(noteThemeSelectValue({ font: 'serif' })).toBe('');
     expect(noteThemeSelectValue({ font: 'sans' })).toBe('sans');
     expect(noteThemeSelectValue({ font: 'mono' })).toBe('mono');
+    expect(noteThemeSelectValue({ font: 'york' })).toBe('york');
+  });
+});
+
+describe('noteEditorFontFromThemeSelectValue', () => {
+  it('maps each option value to the persisted font field', () => {
+    expect(noteEditorFontFromThemeSelectValue('')).toBeUndefined();
+    expect(noteEditorFontFromThemeSelectValue('sans')).toBe('sans');
+    expect(noteEditorFontFromThemeSelectValue('mono')).toBe('mono');
+    expect(noteEditorFontFromThemeSelectValue('york')).toBe('york');
+  });
+
+  it('returns undefined for unexpected select values', () => {
+    expect(noteEditorFontFromThemeSelectValue('comic')).toBeUndefined();
   });
 });

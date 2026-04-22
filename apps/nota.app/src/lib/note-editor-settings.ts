@@ -2,7 +2,7 @@ import { z } from 'zod';
 import type { Json, Note } from '~/types/database.types';
 
 const noteEditorSettingsSchema = z.object({
-  font: z.enum(['sans', 'serif', 'mono']).optional(),
+  font: z.enum(['sans', 'serif', 'mono', 'york']).optional(),
   measure: z.enum(['narrow', 'wide']).optional(),
   showInNoteGraph: z.boolean().optional(),
 });
@@ -13,6 +13,7 @@ export const NOTE_THEME_LABEL = 'Note theme' as const;
 
 export const NOTE_THEME_OPTIONS = [
   { value: '' as const, label: 'London' },
+  { value: 'york' as const, label: 'York' },
   { value: 'sans' as const, label: 'Ottawa' },
   { value: 'mono' as const, label: 'San Francisco' },
 ] as const;
@@ -27,7 +28,31 @@ export function noteThemeSelectValue(
   if (settings.font === 'mono') {
     return 'mono';
   }
+  if (settings.font === 'york') {
+    return 'york';
+  }
   return '';
+}
+
+/**
+ * Maps the note theme `<select>` value (`<option value>`) to `editor_settings.font`.
+ * London is stored as omitted `font` (`undefined`); unknown strings yield `undefined`.
+ */
+export function noteEditorFontFromThemeSelectValue(
+  selectValue: string,
+): NoteEditorSettings['font'] | undefined {
+  switch (selectValue) {
+    case '':
+      return undefined;
+    case 'sans':
+      return 'sans';
+    case 'mono':
+      return 'mono';
+    case 'york':
+      return 'york';
+    default:
+      return undefined;
+  }
 }
 
 /** Parse `notes.editor_settings` JSON; invalid or non-objects yield `{}`. */
@@ -47,7 +72,11 @@ export function parseNoteEditorSettings(
 /** Minimal JSON for Supabase; omit keys that match app defaults. */
 export function noteEditorSettingsToJson(settings: NoteEditorSettings): Json {
   const o: Record<string, unknown> = {};
-  if (settings.font === 'sans' || settings.font === 'mono') {
+  if (
+    settings.font === 'sans' ||
+    settings.font === 'mono' ||
+    settings.font === 'york'
+  ) {
     o.font = settings.font;
   }
   if (settings.measure) {
@@ -86,7 +115,9 @@ export function noteSurfaceClassNames(settings: NoteEditorSettings): {
       ? 'font-mono'
       : settings.font === 'sans'
         ? 'font-sans'
-        : 'font-london-body';
+        : settings.font === 'york'
+          ? 'font-note-body'
+          : 'font-london-body';
   const maxWidthClass =
     settings.measure === 'narrow'
       ? 'max-w-prose'
