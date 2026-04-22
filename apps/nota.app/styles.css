@@ -478,7 +478,7 @@
 }
 
 .tiptap-editor .ProseMirror mark.nota-text-highlight {
-  background-color: color-mix(in oklch, var(--primary) 22%, var(--muted));
+  background-color: color-mix(in oklch, var(--primary) 10%, var(--muted));
   color: inherit;
   border-radius: 0.125rem;
   padding: 0 0.05em;
@@ -487,7 +487,7 @@
 }
 
 .dark .tiptap-editor .ProseMirror mark.nota-text-highlight {
-  background-color: color-mix(in oklch, var(--primary) 28%, transparent);
+  background-color: color-mix(in oklch, var(--primary) 12%, var(--muted));
 }
 
 .tiptap-editor .ProseMirror span[data-type='emoji'] {
