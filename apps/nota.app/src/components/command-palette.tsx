@@ -525,7 +525,7 @@ export function CommandPalette(): JSX.Element {
                             'aria-selected:bg-accent aria-selected:text-accent-foreground',
                           )}
                         >
-                          <span className="min-w-0 flex-1">Default (not in a folder)</span>
+                          <span className="min-w-0 flex-1">No folder</span>
                         </Command.Item>
                         {folders.map((f) => (
                           <Command.Item
@@ -750,7 +750,7 @@ export function CommandPalette(): JSX.Element {
                             'aria-selected:bg-accent aria-selected:text-accent-foreground',
                           )}
                         >
-                          <span className="min-w-0 flex-1">Default (today)</span>
+                          <span className="min-w-0 flex-1">Today</span>
                         </Command.Item>
                         {folders.map((f) => (
                           <Command.Item

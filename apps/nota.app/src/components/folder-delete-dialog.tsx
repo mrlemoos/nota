@@ -131,7 +131,9 @@ export function FolderDeleteDialog({
               }}
               disabled={Boolean(busy)}
             >
-              <option value="">Default (not in a folder)</option>
+              <option value="" aria-label="No folder">
+                {'\u200B'}
+              </option>
               {otherFolders.map((f) => (
                 <option key={f.id} value={f.id}>
                   {f.name}

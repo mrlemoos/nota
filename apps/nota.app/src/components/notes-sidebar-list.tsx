@@ -1,4 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
+import { Folder01Icon } from '@hugeicons/core-free-icons';
+import { HugeiconsIcon } from '@hugeicons/react';
 import { Button } from '@/components/ui/button';
 import { SimpleTooltip } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -29,6 +31,8 @@ type NotesSidebarListProps = {
 function NoteRow(options: {
   note: Note;
   isActive: boolean;
+  /** Nested under a folder row in the tree. */
+  nested?: boolean;
   folders: Folder[];
   userId: string;
   notaProEntitled: boolean;
@@ -41,6 +45,7 @@ function NoteRow(options: {
   const {
     note,
     isActive,
+    nested = false,
     folders,
     userId,
     notaProEntitled,
@@ -54,7 +59,7 @@ function NoteRow(options: {
   const selectValue = note.folder_id ?? '';
 
   return (
-    <li>
+    <li className="list-none">
       <div
         className={cn(
           'flex items-center gap-0 rounded-md transition-colors',
@@ -64,7 +69,8 @@ function NoteRow(options: {
         <a
           href={noteHashHref(note.id)}
           className={cn(
-            'min-w-0 flex-1 px-3 py-2 text-sm transition-colors',
+            'min-w-0 flex-1 py-2 text-sm transition-colors',
+            nested ? 'pl-2 pr-1' : 'px-3',
             isActive ? 'font-medium text-foreground' : 'text-foreground',
           )}
           aria-current={isActive ? 'page' : undefined}
@@ -108,7 +114,9 @@ function NoteRow(options: {
               });
             }}
           >
-            <option value="">Default</option>
+            <option value="" aria-label="No folder">
+              {'\u200B'}
+            </option>
             {folders.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name}
@@ -216,11 +224,14 @@ export function NotesSidebarList({
 
   return (
     <>
-      <div className="space-y-4">
+      <ul className="m-0 list-none space-y-1 p-0">
         {sections.map(({ folder, notes: fn }) => (
-          <div key={folder.id}>
-            <div className="flex items-center gap-1 px-2 py-1">
-              <span className="min-w-0 flex-1 truncate font-medium text-muted-foreground text-xs tracking-wide">
+          <li key={folder.id} className="list-none">
+            <div className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-muted-foreground">
+              <span className="inline-flex shrink-0 text-muted-foreground/80" aria-hidden>
+                <HugeiconsIcon icon={Folder01Icon} size={14} strokeWidth={1.5} />
+              </span>
+              <span className="min-w-0 flex-1 truncate font-medium text-foreground text-xs tracking-wide">
                 {folder.name}
               </span>
               <Button
@@ -252,15 +263,16 @@ export function NotesSidebarList({
               </Button>
             </div>
             {fn.length === 0 ? (
-              <p className="px-2 py-1 text-muted-foreground text-xs">
+              <p className="ml-5 border-border/35 border-l py-1 pl-2.5 text-muted-foreground text-xs">
                 No notes in this folder.
               </p>
             ) : (
-              <ul className="space-y-1">
+              <ul className="m-0 ml-2.5 list-none space-y-0.5 border-border/35 border-l py-0.5 pl-2">
                 {fn.map((note) => (
                   <NoteRow
                     key={note.id}
                     note={note}
+                    nested
                     isActive={panel === 'note' && routeNoteId === note.id}
                     folders={folders}
                     userId={uid}
@@ -274,12 +286,11 @@ export function NotesSidebarList({
                 ))}
               </ul>
             )}
-          </div>
+          </li>
         ))}
 
-        {rootNotes.length > 0 ? (
-          <ul className="space-y-1">
-            {rootNotes.map((note) => (
+        {rootNotes.length > 0
+          ? rootNotes.map((note) => (
               <NoteRow
                 key={note.id}
                 note={note}
@@ -293,10 +304,9 @@ export function NotesSidebarList({
                 removeFolderFromList={removeFolderFromList}
                 refreshNotesList={refreshNotesList}
               />
-            ))}
-          </ul>
-        ) : null}
-      </div>
+            ))
+          : null}
+      </ul>
 
       <FolderDeleteDialog
         folder={folderDeleteTarget}
