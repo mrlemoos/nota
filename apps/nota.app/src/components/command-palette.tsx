@@ -42,6 +42,7 @@ import { clientDeleteNoteById } from '../lib/delete-note-client';
 import { clientMoveNoteToFolder } from '../lib/move-note-folder-client';
 import {
   parseMovePickNoteId,
+  readMovePickNoteIdFromHighlightedItem,
   toggleIdInSet,
 } from '../lib/move-pick-helpers';
 import type { Folder } from '~/types/database.types';
@@ -435,14 +436,19 @@ export function CommandPalette(): JSX.Element {
     if (e.key === ' ') {
       const input = commandInputRef.current;
       const t = e.target;
-      if (input && t instanceof Node && (input === t || input.contains(t))) {
-        return;
-      }
+      // cmdk keeps focus on the search input while arrowing through items, so we must
+      // handle move-pick Space *before* the "target is input → bail" branch.
       if (
         moveFlowRef.current === 'pickNote' &&
         !commandInputRef.current?.value.trim()
       ) {
-        const noteId = parseMovePickNoteId(paletteValueRef.current);
+        const paletteRoot =
+          commandInputRef.current?.closest(
+            '[data-nota-command-palette]',
+          ) ?? null;
+        const noteId =
+          parseMovePickNoteId(paletteValueRef.current) ??
+          readMovePickNoteIdFromHighlightedItem(paletteRoot);
         if (noteId) {
           e.preventDefault();
           e.stopPropagation();
@@ -452,6 +458,9 @@ export function CommandPalette(): JSX.Element {
           setMoveSelectedNoteIds((prev) => toggleIdInSet(prev, noteId));
           return;
         }
+      }
+      if (input && t instanceof Node && (input === t || input.contains(t))) {
+        return;
       }
       e.preventDefault();
       input?.focus();

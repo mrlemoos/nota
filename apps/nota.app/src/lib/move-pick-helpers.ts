@@ -26,3 +26,27 @@ export function toggleIdInSet(
   }
   return next;
 }
+
+/**
+ * cmdk can leave the controlled `value` state briefly out of sync with the
+ * highlighted row while focus stays on the search input. Read the DOM
+ * highlight as a fallback (see `data-selected` on cmdk items).
+ */
+export function readMovePickNoteIdFromHighlightedItem(
+  paletteRoot: Element | null,
+): string | null {
+  if (!paletteRoot) {
+    return null;
+  }
+  const el = paletteRoot.querySelector(
+    '[cmdk-item][data-selected="true"]',
+  );
+  if (!(el instanceof HTMLElement)) {
+    return null;
+  }
+  const raw = el.getAttribute('data-value');
+  if (raw == null || raw === '') {
+    return null;
+  }
+  return parseMovePickNoteId(raw);
+}

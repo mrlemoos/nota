@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MOVE_PICK_VALUE_PREFIX,
   parseMovePickNoteId,
+  readMovePickNoteIdFromHighlightedItem,
   toggleIdInSet,
 } from './move-pick-helpers';
 
@@ -22,6 +23,35 @@ describe('parseMovePickNoteId', () => {
     expect(parseMovePickNoteId('create-note')).toBeNull();
     expect(parseMovePickNoteId('move-pick:')).toBeNull();
     expect(parseMovePickNoteId('')).toBeNull();
+  });
+});
+
+describe('readMovePickNoteIdFromHighlightedItem', () => {
+  it('returns the move-pick id from the highlighted cmdk item', () => {
+    // Arrange
+    const root = document.createElement('div');
+    const item = document.createElement('div');
+    item.setAttribute('cmdk-item', '');
+    item.setAttribute('data-value', `${MOVE_PICK_VALUE_PREFIX}note-1`);
+    item.setAttribute('data-selected', 'true');
+    root.appendChild(item);
+
+    // Act
+    const out = readMovePickNoteIdFromHighlightedItem(root);
+
+    // Assert
+    expect(out).toBe('note-1');
+  });
+
+  it('returns null when no highlighted item', () => {
+    // Arrange
+    const root = document.createElement('div');
+
+    // Act
+    const out = readMovePickNoteIdFromHighlightedItem(root);
+
+    // Assert
+    expect(out).toBeNull();
   });
 });
 
