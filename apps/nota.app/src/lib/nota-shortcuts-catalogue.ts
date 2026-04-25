@@ -86,7 +86,7 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
       {
         description: 'Move note: multi-select on the pick-note step',
         detail:
-          'When the search field is empty, highlight a note and press Space to show checkboxes; Space toggles each note. Then choose “Choose folder for N notes…” and pick a destination.',
+          'When the search field is empty, highlight a note and press Space to show checkboxes; Space toggles each note. Press Enter to go to “Choose folder for N notes…” (when at least one note is ticked), then pick a destination. You can also tick notes with the mouse using the checkbox.',
         keysApple: 'Space, Enter',
         keysOther: 'Space, Enter',
       },

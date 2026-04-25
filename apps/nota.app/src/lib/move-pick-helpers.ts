@@ -50,3 +50,23 @@ export function readMovePickNoteIdFromHighlightedItem(
   }
   return parseMovePickNoteId(raw);
 }
+
+/** `data-value` of the highlighted cmdk item (any command row). */
+export function readHighlightedCmdkItemValue(
+  paletteRoot: Element | null,
+): string | null {
+  if (!paletteRoot) {
+    return null;
+  }
+  const el = paletteRoot.querySelector(
+    '[cmdk-item][data-selected="true"]',
+  );
+  if (!(el instanceof HTMLElement)) {
+    return null;
+  }
+  const raw = el.getAttribute('data-value');
+  if (raw == null || raw === '') {
+    return null;
+  }
+  return raw;
+}

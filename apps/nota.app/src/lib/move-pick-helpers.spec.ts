@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   MOVE_PICK_VALUE_PREFIX,
   parseMovePickNoteId,
+  readHighlightedCmdkItemValue,
   readMovePickNoteIdFromHighlightedItem,
   toggleIdInSet,
 } from './move-pick-helpers';
@@ -49,6 +50,35 @@ describe('readMovePickNoteIdFromHighlightedItem', () => {
 
     // Act
     const out = readMovePickNoteIdFromHighlightedItem(root);
+
+    // Assert
+    expect(out).toBeNull();
+  });
+});
+
+describe('readHighlightedCmdkItemValue', () => {
+  it('returns data-value for the highlighted item', () => {
+    // Arrange
+    const root = document.createElement('div');
+    const item = document.createElement('div');
+    item.setAttribute('cmdk-item', '');
+    item.setAttribute('data-value', 'move-pick-continue');
+    item.setAttribute('data-selected', 'true');
+    root.appendChild(item);
+
+    // Act
+    const out = readHighlightedCmdkItemValue(root);
+
+    // Assert
+    expect(out).toBe('move-pick-continue');
+  });
+
+  it('returns null when no highlighted item', () => {
+    // Arrange
+    const root = document.createElement('div');
+
+    // Act
+    const out = readHighlightedCmdkItemValue(root);
 
     // Assert
     expect(out).toBeNull();
