@@ -18,6 +18,9 @@
     },
     "./package.json": "./package.json"
   },
+  "devDependencies": {
+    "vitest": "catalog:"
+  },
   "nx": {
     "tags": [
       "scope:nota",

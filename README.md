@@ -29,14 +29,15 @@ An **Electron** desktop shell wraps the same build—see [apps/nota-electron/REA
 ## Requirements
 
 - **Node.js** 22 or newer (see root `package.json` `engines`)
-- **npm** (workspaces are defined at the repository root)
+- **pnpm** 10.x (see root **`packageManager`** in [`package.json`](package.json); [`pnpm-workspace.yaml`](pnpm-workspace.yaml) lists workspace packages)
 
 ## Install
 
 From the repository root:
 
 ```sh
-npm install
+corepack enable pnpm
+pnpm install
 ```
 
 ## Environment
@@ -55,17 +56,17 @@ SQL migrations live under [supabase/migrations/](supabase/migrations/) at the re
 ## Run the web app
 
 ```sh
-npx nx dev @nota.app/nota.app
+pnpm exec nx dev @nota.app/nota.app
 ```
 
-(`npx nx dev nota.app` resolves to the same project.)
+(`pnpm exec nx dev nota.app` resolves to the same project.)
 
 The Vite dev server listens on **[http://localhost:4200](http://localhost:4200)**.
 
 ## Marketing site (local)
 
 ```sh
-npm run dev:marketing
+pnpm exec nx run @nota.app/nota-marketing:dev
 ```
 
 ## Optional API server
@@ -75,8 +76,8 @@ For Nota Pro entitlement and related routes outside Vercel serverless, run [nota
 ## Build and test
 
 ```sh
-npx nx build @nota.app/nota.app
-npx nx test @nota.app/nota.app
+pnpm exec nx build @nota.app/nota.app
+pnpm exec nx test @nota.app/nota.app
 ```
 
 Tests use **Vitest** via the Nx Vitest plugin.
@@ -85,8 +86,7 @@ Tests use **Vitest** via the Nx Vitest plugin.
 
 The desktop app expects the web dev server at `http://localhost:4200`. From the repository root you can run:
 
-- `npm run electron:dev` — Electron only (start the web app in another terminal with `npx nx dev @nota.app/nota.app`, or run `npx nx run-many -t dev` to start Vite and Electron together)
-- `npm run dev:all` — web app and Electron together (uses `concurrently`)
+- `pnpm run electron:dev` — Electron only (start the web app in another terminal with `pnpm exec nx dev @nota.app/nota.app`, or run `pnpm exec nx run-many -t dev` to start Vite and Electron together)
 
 More detail: [apps/nota-electron/README.md](apps/nota-electron/README.md).
 

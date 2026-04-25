@@ -49,11 +49,13 @@ if (!process.env.GH_TOKEN && !process.env.GITHUB_TOKEN) {
 }
 
 if (version) {
-  const code = run('npm', ['version', version, '--no-git-tag-version', '--allow-same-version'], {
+  const code = run('pnpm', ['pkg', 'set', `version=${version}`], {
     cwd: electronDir,
   });
   if (code !== 0) process.exit(code);
 }
 
-const code = run('npx', ['electron-builder', '--publish', 'always'], { cwd: electronDir });
+const code = run('pnpm', ['exec', 'electron-builder', '--publish', 'always'], {
+  cwd: electronDir,
+});
 process.exit(code);

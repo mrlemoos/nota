@@ -2,7 +2,7 @@
  * Regenerates raster brand assets from the stacked-sheet SVG geometry
  * (keep in sync with `app/components/nota-logo.tsx` and `public/favicon.svg`).
  *
- * Usage (repo root): `npm run generate:nota-icons`
+ * Usage (repo root): `pnpm run generate:nota-icons`
  *
  * Outputs:
  * - `public/apple-touch-icon.png` (180×180, light background)

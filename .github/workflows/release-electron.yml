@@ -31,13 +31,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/cache@v4
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: corepack enable pnpm && pnpm install --frozen-lockfile
 
       - name: Set Electron package version from tag or input
         working-directory: apps/nota-electron
@@ -47,7 +53,7 @@ jobs:
           else
             VERSION="${GITHUB_REF#refs/tags/v}"
           fi
-          npm version "$VERSION" --no-git-tag-version --allow-same-version
+          pnpm pkg set "version=$VERSION"
 
       - name: Prepare Apple code signing (optional)
         id: signing
@@ -112,4 +118,4 @@ jobs:
             export CSC_LINK="$CSC_LINK_VALUE"
             export CSC_KEY_PASSWORD='${{ secrets.APPLE_CERTIFICATE_PASSWORD }}'
           fi
-          npx nx run @nota.app/nota-electron:electron:release
+          pnpm exec nx run @nota.app/nota-electron:electron:release

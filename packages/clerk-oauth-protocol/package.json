@@ -21,6 +21,9 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json"
   },
+  "devDependencies": {
+    "typescript": "catalog:"
+  },
   "nx": {
     "tags": [
       "scope:nota",
@@ -31,7 +34,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "packages/clerk-oauth-protocol",
-          "command": "npm run build"
+          "command": "pnpm run build"
         }
       }
     }

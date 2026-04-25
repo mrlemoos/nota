@@ -15,7 +15,19 @@
     }
   },
   "peerDependencies": {
-    "react": "^19.0.0"
+    "react": "^19.0.3"
+  },
+  "devDependencies": {
+    "@testing-library/react": "16.3.0",
+    "@vitejs/plugin-react": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vitest": "catalog:"
   },
   "nx": {
     "tags": [

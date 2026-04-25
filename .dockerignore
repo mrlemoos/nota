@@ -2,6 +2,7 @@
 # and local installs can leave .cache / .astro paths that break rm and npm ci).
 node_modules
 **/node_modules
+.pnpm-store
 
 .git
 .github

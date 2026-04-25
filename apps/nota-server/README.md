@@ -9,7 +9,7 @@ Production builds bundle TypeScript with **esbuild** and run on **Node.js 22+** 
 From the monorepo root (recommended so workspaces resolve):
 
 ```bash
-npm ci
+pnpm install --frozen-lockfile
 cd apps/nota-server
 cp .env.example .env
 # set CLERK_SECRET_KEY (same instance as the SPA)
@@ -19,8 +19,8 @@ cp .env.example .env
 **Node (matches production):**
 
 ```bash
-npm run build
-npm run start
+pnpm run build
+pnpm run start
 ```
 
 **Bun (optional dev loop):**
@@ -30,7 +30,7 @@ bun install
 bun run dev
 ```
 
-`npm run start` expects `dist/index.js` from a prior `npm run build`.
+`pnpm run start` expects `dist/index.js` from a prior `pnpm run build`.
 
 If **`NOTA_SERVER_CORS_ORIGINS` is unset**, the server allows `http://127.0.0.1:4378` (legacy packaged static preview), `http://localhost:4200`, and `http://localhost:4300`. **Packaged Electron** loads the hosted SPA at **`https://app.nota.mrlemoos.dev`**, so browser calls send **`Origin: https://app.nota.mrlemoos.dev`** — include that origin when you set **`NOTA_SERVER_CORS_ORIGINS`** on Railway (or rely on `*` / reflected origins only if you accept that trade-off). **If you set `NOTA_SERVER_CORS_ORIGINS` at all**, that value **replaces** the defaults — list your production web origin(s), **`https://app.nota.mrlemoos.dev`**, any **`http://127.0.0.1:4378`** / dev origins you still need, comma-separated.
 
@@ -43,14 +43,14 @@ When **`NODE_ENV=production`**, the process **refuses to start** if `NOTA_SERVER
 With **`CLERK_SECRET_KEY`** set in **`apps/nota-server/.env`**, run from the **monorepo root** (recommended — Nx loads that file into the task environment):
 
 ```bash
-npx nx run @nota.app/nota-server:validate-billing
+pnpm exec nx run @nota.app/nota-server:validate-billing
 ```
 
 Equivalent without Nx (loads **`.env`** inside the script):
 
 ```bash
 cd apps/nota-server
-npm run validate:billing
+pnpm run validate:billing
 ```
 
 This calls Clerk’s Billing API (`getPlanList` for `user` payers) and checks public plans against guide USD amounts in **`apps/nota-marketing`** and the no-trial / no-unpaid-vault policy described in **`AGENTS.md`**. If **`.env`** is missing, the script copies **`.env.example`** to **`.env`** once and exits until you add the secret.
@@ -61,8 +61,8 @@ Clients send `Authorization: Bearer <Clerk session JWT>`. The server validates i
 
 ## Operations and dependency hygiene
 
-- Run **`npm audit`** at the monorepo root after dependency bumps; triage **high** / **critical** advisories before release.
-- [`.github/dependabot.yml`](../../.github/dependabot.yml) already schedules weekly npm updates — review those PRs for security fixes.
+- Run **`pnpm audit`** at the monorepo root after dependency bumps; triage **high** / **critical** advisories before release.
+- [`.github/dependabot.yml`](../../.github/dependabot.yml) already schedules weekly dependency updates — review those PRs for security fixes.
 
 ## Error responses (semantic search)
 
@@ -80,7 +80,7 @@ By default, **5xx** JSON from semantic search routes omits internal **`detail`**
 
 Use the **repository root** as the Railway service root (not `apps/nota-server` alone): the bundle step compiles **`apps/nota-server/src`** only; Clerk Billing helpers and OG preview logic live under **`apps/nota-server/src/lib/`**.
 
-[`railway.json`](../../railway.json) at the repo root uses **[`infra/Dockerfile.nota-server`](../../infra/Dockerfile.nota-server)** (Docker builder, not Railpack). The image runs **`npm ci`** on a clean tree: [`.dockerignore`](../../.dockerignore) excludes all `node_modules`, so Railpack-style **EBUSY** mounts on `node_modules/.cache` or `apps/nota-marketing/node_modules/.astro` are avoided.
+[`railway.json`](../../railway.json) at the repo root uses **[`infra/Dockerfile.nota-server`](../../infra/Dockerfile.nota-server)** (Docker builder, not Railpack). The image runs **`pnpm install --frozen-lockfile`** on a clean tree: [`.dockerignore`](../../.dockerignore) excludes all `node_modules`, so Railpack-style **EBUSY** mounts on `node_modules/.cache` or `apps/nota-marketing/node_modules/.astro` are avoided.
 
 - **Build:** `docker build -f infra/Dockerfile.nota-server .` (Railway runs this via config-as-code).
 - **Start:** `node apps/nota-server/dist/index.js` (also the image **CMD**).

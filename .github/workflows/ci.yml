@@ -16,37 +16,49 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
-      - run: npm ci
+      - run: corepack enable pnpm
+      - run: pnpm install --frozen-lockfile
       - name: ESLint (informational until the backlog is cleared)
-        run: npx nx run @nota.app/nota.app:lint
+        run: pnpm exec nx run @nota.app/nota.app:lint
 
   web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/cache@v4
+        with:
+          path: .pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: corepack enable pnpm && pnpm install --frozen-lockfile
 
-      - name: npm audit (informational)
+      - name: pnpm audit (informational)
         continue-on-error: true
-        run: npm audit
+        run: pnpm audit
 
       - name: Test web app
-        run: npx nx run @nota.app/nota.app:test --outputStyle=static
+        run: pnpm exec nx run @nota.app/nota.app:test --outputStyle=static
         env:
           CI: 'true'
 
       - name: Build web app and marketing site
-        run: npx nx run-many -t build --projects=@nota.app/nota.app,@nota.app/nota-marketing --outputStyle=static
+        run: pnpm exec nx run-many -t build --projects=@nota.app/nota.app,@nota.app/nota-marketing --outputStyle=static
         env:
           CI: 'true'

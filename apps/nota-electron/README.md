@@ -6,17 +6,17 @@ Desktop wrapper for nota.app using Electron.
 
 1. Start the Vite dev server (in another terminal), from the monorepo root:
    ```bash
-   npx nx dev @nota.app/nota.app
+   pnpm exec nx dev @nota.app/nota.app
    ```
 
 2. Run Electron, from the monorepo root:
    ```bash
-   npx nx dev @nota.app/nota-electron
+   pnpm exec nx dev @nota.app/nota-electron
    ```
 
    Or start **Vite and Electron together** (both expose a `dev` target):
    ```bash
-   npx nx run-many -t dev
+   pnpm exec nx run-many -t dev
    ```
 
 ## Production build (local)
@@ -24,13 +24,13 @@ Desktop wrapper for nota.app using Electron.
 From the monorepo root, pack macOS artefacts without publishing (no GitHub token required):
 
 ```bash
-npx nx run @nota.app/nota-electron:electron:pack
+pnpm exec nx run @nota.app/nota-electron:electron:pack
 ```
 
 Or the equivalent shorthand:
 
 ```bash
-npm run electron:pack
+pnpm run electron:pack
 ```
 
 `electron-builder` copies `../nota.app/dist` into the app bundle. Output is under `apps/nota-electron/release/` (DMG and ZIP per architecture). **macOS** is required for the current `electron-builder.yml` targets.
@@ -40,19 +40,19 @@ npm run electron:pack
 Set **`GH_TOKEN`** or **`GITHUB_TOKEN`** to a token with **`repo`** scope (classic PAT or fine-grained with contents read/write for this repository). Then from the monorepo root:
 
 ```bash
-npm run release:electron
+pnpm run release:electron
 ```
 
 Same as:
 
 ```bash
-npx nx run @nota.app/nota-electron:electron:release
+pnpm exec nx run @nota.app/nota-electron:electron:release
 ```
 
-Optional: bump `apps/nota-electron/package.json` for this run only (same as CI’s `npm version`):
+Optional: bump `apps/nota-electron/package.json` for this run only (same as CI’s **`pnpm pkg set version=…`**):
 
 ```bash
-npx nx run @nota.app/nota-electron:electron:release -- --version 1.2.3
+pnpm exec nx run @nota.app/nota-electron:electron:release -- --version 1.2.3
 ```
 
 If you omit `--version`, the version already in `apps/nota-electron/package.json` is used.
@@ -61,7 +61,7 @@ If you omit `--version`, the version already in `apps/nota-electron/package.json
 
 - **`electron-builder`** is configured with **`publish.provider: github`** (`owner` / `repo` in `electron-builder.yml`). Packaged apps embed **`app-update.yml`** for **`electron-updater`**.
 - **`main.ts`** calls **`checkForUpdatesAndNotify()`** only when **`app.isPackaged`**. Updates use the **ZIP** assets attached to each release (DMG is for first install).
-- **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver + **release kind**: production vs release candidate / draft). It syncs `apps/nota-electron/package.json` version, then runs **`npx nx run @nota.app/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
+- **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver + **release kind**: production vs release candidate / draft). It syncs `apps/nota-electron/package.json` version, then runs **`pnpm exec nx run @nota.app/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
 
 ### Required secrets (embedded SPA, CI)
 
@@ -82,7 +82,7 @@ If **Production** has protection rules (required reviewers, wait timers), each r
 - **Tag (release candidate → GitHub draft):** use a semver **prerelease** after the patch, e.g. `git tag v1.2.3-rc.1 && git push origin v1.2.3-rc.1` (any `vMAJOR.MINOR.PATCH-<prerelease>` form). CI sets **`EP_DRAFT=true`** for **electron-builder** so the GitHub release is a **draft**.
 - **Manual:** **Actions → Release Electron (macOS) → Run workflow**, enter semver (e.g. `1.2.3` or `1.2.3-rc.1`), then choose **release kind**: **production** (published) or **release candidate** (draft).
 
-**Local draft publish:** `npx nx run @nota.app/nota-electron:electron:release -- --draft` (forwards **`--draft`** to [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)).
+**Local draft publish:** `pnpm exec nx run @nota.app/nota-electron:electron:release -- --draft` (forwards **`--draft`** to [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)).
 
 Confirm the new **Release** lists DMG and ZIP assets per architecture plus **`latest-mac.yml`** (used by auto-update). Draft releases stay off the default “latest” path until you publish them on GitHub.
 

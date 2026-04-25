@@ -1,6 +1,6 @@
 # Release
 
-Trigger **Release Electron (macOS)** in GitHub Actions (`.github/workflows/release-electron.yml`). That workflow builds the SPA, runs **`npx nx run @nota.app/nota-electron:electron:release`** (via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)), and publishes macOS assets to GitHub Releases.
+Trigger **Release Electron (macOS)** in GitHub Actions (`.github/workflows/release-electron.yml`). That workflow builds the SPA, runs **`pnpm exec nx run @nota.app/nota-electron:electron:release`** (via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)), and publishes macOS assets to GitHub Releases.
 
 ## Before anything else
 
@@ -17,7 +17,7 @@ If the user has not decided, stop and wait for their answer before suggesting ta
 
 | Trigger | What starts the job |
 |--------|----------------------|
-| **Tag push** | Any push of a git tag matching **`v*`** (e.g. `v1.2.3` or `v1.2.3-rc.1`). The workflow strips the leading **`v`** and runs **`npm version`** in `apps/nota-electron` with that semver. **Draft vs published** is inferred from the tag (see table above): a **prerelease** form `MAJOR.MINOR.PATCH-<anything>` (hyphen after the patch number) sets **`EP_DRAFT=true`** for **electron-builder** so the GitHub release is created as a **draft**. |
+| **Tag push** | Any push of a git tag matching **`v*`** (e.g. `v1.2.3` or `v1.2.3-rc.1`). The workflow strips the leading **`v`** and runs **`pnpm pkg set "version=…"`** in `apps/nota-electron` with that semver. **Draft vs published** is inferred from the tag (see table above): a **prerelease** form `MAJOR.MINOR.PATCH-<anything>` (hyphen after the patch number) sets **`EP_DRAFT=true`** for **electron-builder** so the GitHub release is created as a **draft**. |
 | **Manual** | **Actions → Release Electron (macOS) → Run workflow** (`workflow_dispatch`). Inputs: **version** (semver, no `v` prefix, e.g. `1.2.3` or `1.2.3-rc.1`) and **release kind** (**production** or **release candidate**). |
 
 The job uses **`environment: Production`**; **`secrets.*`** (and optional signing env) resolve from that environment first. See **`apps/nota-electron/README.md`** (required **`VITE_*`** keys, optional Apple signing).
@@ -58,8 +58,8 @@ Use when you want CI to build from the **selected branch** without adding a tag:
 
 From the repo root, with **`GH_TOKEN`** or **`GITHUB_TOKEN`** set (see **`apps/nota-electron/README.md`**):
 
-- **Production:** `npm run release:electron` (or `npx nx run @nota.app/nota-electron:electron:release`).
-- **Release candidate (draft):** `npx nx run @nota.app/nota-electron:electron:release -- --draft` (same as adding **`--draft`** after the script args forwarded to **`electron-github-release.mjs`**).
+- **Production:** `pnpm run release:electron` (or `pnpm exec nx run @nota.app/nota-electron:electron:release`).
+- **Release candidate (draft):** `pnpm exec nx run @nota.app/nota-electron:electron:release -- --draft` (same as adding **`--draft`** after the script args forwarded to **`electron-github-release.mjs`**).
 
 ## After the run
 

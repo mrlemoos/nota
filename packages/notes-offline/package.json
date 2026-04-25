@@ -25,6 +25,6 @@
     ]
   },
   "dependencies": {
-    "@nota.app/database-types": "*"
+    "@nota.app/database-types": "workspace:*"
   }
 }

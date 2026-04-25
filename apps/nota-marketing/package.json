@@ -12,23 +12,23 @@
   "dependencies": {
     "@astrojs/sitemap": "^3.7.2",
     "@fontsource-variable/source-sans-3": "^5.2.9",
-    "@fontsource-variable/source-serif-4": "^5.2.9",
-    "@fontsource/instrument-serif": "^5.2.8",
+    "@fontsource-variable/source-serif-4": "catalog:",
+    "@fontsource/instrument-serif": "catalog:",
     "@microsoft/clarity": "^1.0.2",
-    "@nx/eslint": "22.6.5",
-    "@nx/eslint-plugin": "22.6.5",
-    "@nx/react": "22.6.5",
-    "@nx/web": "22.6.5",
+    "@nx/eslint": "catalog:",
+    "@nx/eslint-plugin": "catalog:",
+    "@nx/react": "catalog:",
+    "@nx/web": "catalog:",
     "@vercel/analytics": "^1.5.0",
     "astro": "^6.1.0",
-    "electron": "41.2.1",
-    "jsdom": "29.0.2"
+    "electron": "catalog:",
+    "jsdom": "catalog:"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
-    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "catalog:",
+    "tailwindcss": "catalog:",
     "to-ico": "^1.0.1",
-    "typescript": "~5.9.2"
+    "typescript": "catalog:"
   },
   "nx": {
     "targets": {
@@ -43,7 +43,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "apps/nota-marketing",
-          "command": "npm run build"
+          "command": "pnpm run build"
         }
       },
       "preview": {

@@ -4,7 +4,7 @@ Static marketing pages: download links (GitHub Releases), pricing copy, and prod
 
 ## Vercel
 
-Create a **separate** project from the main app. Set **Root Directory** to `apps/nota-marketing`. The included `vercel.json` runs `npm ci` from the monorepo root and builds with Nx so workspace dependencies resolve. **Output directory:** `dist` (relative to the app root).
+Create a **separate** project from the main app. Set **Root Directory** to `apps/nota-marketing`. The included `vercel.json` runs `pnpm install --frozen-lockfile` from the monorepo root and builds with Nx so workspace dependencies resolve. **Output directory:** `dist` (relative to the app root).
 
 Requires **Node.js 22+** (see root `package.json` `engines`).
 
@@ -13,11 +13,9 @@ Requires **Node.js 22+** (see root `package.json` `engines`).
 From the repository root:
 
 ```bash
-npm install
-npx nx run @nota.app/nota-marketing:dev
+pnpm install
+pnpm exec nx run @nota.app/nota-marketing:dev
 ```
-
-Or `npm run dev:marketing`.
 
 ## Clerk Billing alignment (operators)
 

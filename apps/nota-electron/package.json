@@ -8,14 +8,16 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@nota.app/clerk-oauth-protocol": "*",
+    "@nota.app/clerk-oauth-protocol": "workspace:*",
     "electron-updater": "^6.8.3",
     "wait-on": "^8.0.0"
   },
   "devDependencies": {
     "@types/wait-on": "^5.3.4",
-    "electron": "^41.2.1",
-    "vitest": "~4.0.0"
+    "electron": "catalog:",
+    "electron-builder": "^26.0.12",
+    "rimraf": "^6.0.1",
+    "typescript": "catalog:"
   },
   "nx": {
     "sourceRoot": "apps/nota-electron/src",
@@ -25,7 +27,7 @@
         "executor": "nx:run-commands",
         "options": {
           "cwd": "apps/nota-electron",
-          "command": "npx vitest run"
+          "command": "pnpm exec vitest run"
         }
       },
       "build": {
@@ -38,7 +40,7 @@
         ],
         "options": {
           "commands": [
-            "cd apps/nota-electron && npx tsc"
+            "cd apps/nota-electron && tsc"
           ]
         }
       },
@@ -47,7 +49,7 @@
         "options": {
           "commands": [
             "echo 'Loads http://localhost:4200 — run `nx run-many -t dev` to start Vite and Electron together.'",
-            "cd apps/nota-electron && npm run build && npx electron ."
+            "cd apps/nota-electron && pnpm run build && pnpm exec electron ."
           ]
         }
       },
@@ -65,7 +67,7 @@
         ],
         "options": {
           "commands": [
-            "npx rimraf apps/nota-electron/release && cd apps/nota-electron && npx electron-builder"
+            "pnpm exec rimraf apps/nota-electron/release && cd apps/nota-electron && pnpm exec electron-builder"
           ]
         }
       },
