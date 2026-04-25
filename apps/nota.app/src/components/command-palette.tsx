@@ -166,6 +166,8 @@ export function CommandPalette(): JSX.Element {
   const [openingTodaysNote, setOpeningTodaysNote] = useState(false);
   const [startingAudioNote, setStartingAudioNote] = useState(false);
   const [paletteValue, setPaletteValue] = useState('');
+  /** cmdk search box; distinct from `paletteValue` (selected `Command.Item` value). */
+  const [paletteSearch, setPaletteSearch] = useState('');
   const [newNoteFolderPickerOpen, setNewNoteFolderPickerOpen] =
     useState(false);
   const [folderCreateDlgOpen, setFolderCreateDlgOpen] = useState(false);
@@ -211,6 +213,7 @@ export function CommandPalette(): JSX.Element {
       setSemanticSearchLoading(false);
       setNewNoteFolderPickerOpen(false);
       setPaletteValue('');
+      setPaletteSearch('');
       setMoveFlow('idle');
       setMoveTargetNoteIds([]);
       setMoveMultiSelectActive(false);
@@ -224,6 +227,10 @@ export function CommandPalette(): JSX.Element {
     if (moveFlow === 'pickFolder') {
       setMoveMultiSelectActive(false);
       setMoveSelectedNoteIds(new Set());
+    }
+    if (moveFlow === 'pickNote' || moveFlow === 'pickFolder') {
+      setPaletteValue('');
+      setPaletteSearch('');
     }
   }, [moveFlow]);
 
@@ -601,6 +608,8 @@ export function CommandPalette(): JSX.Element {
               />
               <Command.Input
                 ref={commandInputRef}
+                value={paletteSearch}
+                onValueChange={setPaletteSearch}
                 placeholder={
                   semanticSearchEnabled
                     ? 'Commands and Semantic Search — use quotes for exact phrases…'
