@@ -129,6 +129,11 @@ export function NotesShell(): JSX.Element {
   useAudioNotePendingDrain(Boolean(user?.id && notaProEntitled && shellReady));
 
   useEffect(() => {
+    // Vitest: prefetch completes after jsdom teardown and triggers EnvironmentTeardownError
+    // on nested imports (e.g. notes.shortcuts → nota-kbd-styles).
+    if (import.meta.env.MODE === 'test') {
+      return;
+    }
     void import('../routes/notes.settings');
     void import('../routes/notes.shortcuts');
     void import('../routes/notes.graph');
