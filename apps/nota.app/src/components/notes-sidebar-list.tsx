@@ -276,19 +276,27 @@ export function NotesSidebarList({
                     aria-hidden
                   />
                 </NotaButton>
-                <span
-                  className="inline-flex shrink-0 pl-0.5 text-muted-foreground/80"
-                  aria-hidden
+                <button
+                  type="button"
+                  className="flex items-center gap-0.5 flex-1 min-w-0 text-left"
+                  onClick={() => {
+                    toggleFolderCollapsed(folder.id);
+                  }}
                 >
-                  <HugeiconsIcon
-                    icon={Folder01Icon}
-                    size={14}
-                    strokeWidth={1.5}
-                  />
-                </span>
-                <span className="min-w-0 flex-1 truncate font-medium text-foreground text-xs tracking-wide">
-                  {folder.name}
-                </span>
+                  <span
+                    className="shrink-0 text-muted-foreground/80"
+                    aria-hidden
+                  >
+                    <HugeiconsIcon
+                      icon={Folder01Icon}
+                      size={14}
+                      strokeWidth={1.5}
+                    />
+                  </span>
+                  <span className="min-w-0 flex-1 truncate font-medium text-foreground text-xs tracking-wide">
+                    {folder.name}
+                  </span>
+                </button>
                 <NotaButton
                   type="button"
                   variant="ghost"
