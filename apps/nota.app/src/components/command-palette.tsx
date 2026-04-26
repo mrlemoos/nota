@@ -164,6 +164,7 @@ export function CommandPalette(): JSX.Element {
     useState('⌘]');
   const [createFolderHotkeyLabel, setCreateFolderHotkeyLabel] =
     useState('⇧⌘N');
+  const [moveNoteHotkeyLabel] = useState('⌘M');
   const [openingTodaysNote, setOpeningTodaysNote] = useState(false);
   const [startingAudioNote, setStartingAudioNote] = useState(false);
   const [paletteValue, setPaletteValue] = useState('');
@@ -467,6 +468,18 @@ export function CommandPalette(): JSX.Element {
           }
         })();
       }
+      return;
+    }
+
+    if (mod && (e.key === 'm' || e.key === 'M') && !e.shiftKey && !e.altKey) {
+      e.preventDefault();
+      if (!notaProEntitled || busy || moveFlow !== 'idle') {
+        return;
+      }
+      setMoveMultiSelectActive(false);
+      setMoveSelectedNoteIds(new Set());
+      setMoveTargetNoteIds([]);
+      setMoveFlow('pickNote');
       return;
     }
 
@@ -861,6 +874,9 @@ export function CommandPalette(): JSX.Element {
                       )}
                     >
                       <span className="min-w-0 flex-1">Move note…</span>
+                      <span className={notaKbdHintClass}>
+                        {moveNoteHotkeyLabel}
+                      </span>
                     </Command.Item>
                     <Command.Item
                       value="cmd-delete-folder"

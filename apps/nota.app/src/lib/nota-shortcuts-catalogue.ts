@@ -78,6 +78,12 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
         keysOther: 'Ctrl+N',
       },
       {
+        description: 'Move note to folder',
+        detail: 'When the palette is not busy.',
+        keysApple: '⌘M',
+        keysOther: 'Ctrl+M',
+      },
+      {
         description: 'Focus the search field',
         detail: 'When focus is not already in the search field.',
         keysApple: 'Space',
