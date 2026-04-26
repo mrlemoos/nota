@@ -312,7 +312,7 @@ function shouldOpenHttpsNavigationInSystemBrowser(url: string): boolean {
 }
 
 function createWindow(): void {
-  const preloadPath = path.join(__dirname, 'preload.js');
+  const preloadPath = path.join(__dirname, 'preload.cjs');
 
   if (!existsSync(preloadPath)) {
     console.error(
