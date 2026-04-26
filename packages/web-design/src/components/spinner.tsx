@@ -8,7 +8,7 @@ const spinnerSizeClass: Record<'sm' | 'md', string> = {
 };
 
 /**
- * Indeterminate progress ring. Pair with copy via {@link LoadingStatus} where possible.
+ * Indeterminate progress ring. Pair with copy via {@link NotaLoadingStatus} where possible.
  */
 export function NotaSpinner({
   className,
@@ -29,7 +29,7 @@ export function NotaSpinner({
   );
 }
 
-export function LoadingStatus({
+export function NotaLoadingStatus({
   label,
   className,
   spinnerSize = 'md',

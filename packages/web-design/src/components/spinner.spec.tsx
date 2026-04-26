@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
-import { LoadingStatus, NotaSpinner } from './spinner.js';
+import { NotaLoadingStatus, NotaSpinner } from './spinner.js';
 
 describe('NotaSpinner', () => {
   it('renders a decorative spinning ring (paired with copy elsewhere)', () => {
@@ -14,10 +14,10 @@ describe('NotaSpinner', () => {
   });
 });
 
-describe('LoadingStatus', () => {
+describe('NotaLoadingStatus', () => {
   it('exposes a polite status region with a visible label', () => {
     // Arrange|Act
-    render(<LoadingStatus label="Loading graph…" />);
+    render(<NotaLoadingStatus label="Loading graph…" />);
 
     // Assert
     const region = screen.getByRole('status');

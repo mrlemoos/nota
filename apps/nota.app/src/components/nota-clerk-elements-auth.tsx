@@ -4,7 +4,7 @@ import * as SignUp from '@clerk/elements/sign-up';
 import type { JSX } from 'react';
 
 import { buttonVariants } from '@/components/ui/button';
-import { LoadingStatus } from '@/components/ui/spinner';
+import { NotaLoadingStatus } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
 const fieldGroupClass = 'flex flex-col gap-2';
@@ -20,7 +20,7 @@ const rootStackClass = 'flex flex-col gap-6';
 
 const authFallback = (
   <div className="py-6">
-    <LoadingStatus label="Loading…" spinnerSize="sm" />
+    <NotaLoadingStatus label="Loading…" spinnerSize="sm" />
   </div>
 );
 

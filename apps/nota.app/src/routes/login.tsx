@@ -4,7 +4,7 @@ import { AuthCardEpigraph } from '@/components/auth-card-epigraph';
 import { AuthScreenHashLink } from '@/components/auth-screen-hash-link';
 import { NotaClerkSignIn } from '@/components/nota-clerk-elements-auth';
 import { CartoonLandscape } from '@/components/cartoon-landscape';
-import { LoadingStatus } from '@/components/ui/spinner';
+import { NotaLoadingStatus } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 
 export default function Login(): JSX.Element {
@@ -29,7 +29,7 @@ export default function Login(): JSX.Element {
         <AuthCardEpigraph />
         {!isLoaded ? (
           <div className="py-10">
-            <LoadingStatus label="Loading…" spinnerSize="sm" />
+            <NotaLoadingStatus label="Loading…" spinnerSize="sm" />
           </div>
         ) : userId ? (
           <p className="py-10 text-center text-sm text-muted-foreground">

@@ -1,4 +1,4 @@
-import { LoadingStatus } from '@/components/ui/spinner';
+import { NotaLoadingStatus } from '@/components/ui/spinner';
 import { lazy, Suspense, type JSX } from 'react';
 
 const NotesGraphView = lazy(async () => {
@@ -22,7 +22,7 @@ export default function NotesGraph(): JSX.Element {
         <Suspense
           fallback={
             <div className="flex min-h-[280px] flex-1 items-center justify-center rounded-lg border border-border bg-muted/30 text-sm text-muted-foreground">
-              <LoadingStatus label="Loading graph…" />
+              <NotaLoadingStatus label="Loading graph…" />
             </div>
           }
         >

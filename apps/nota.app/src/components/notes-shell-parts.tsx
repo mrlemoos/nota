@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { LoadingStatus } from '@/components/ui/spinner';
+import { NotaLoadingStatus } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
 import type { JSX, ReactNode } from 'react';
@@ -13,7 +13,7 @@ export function LazyNotesRouteFallback({ label }: { label: string }): JSX.Elemen
         'bg-background/80 text-sm text-muted-foreground',
       )}
     >
-      <LoadingStatus label={label} />
+      <NotaLoadingStatus label={label} />
     </div>
   );
 }

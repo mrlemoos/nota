@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { LoadingStatus } from '@/components/ui/spinner';
+import { NotaLoadingStatus } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -90,7 +90,7 @@ export function PdfJsModalPreview({
     >
       {phase === 'loading' ? (
         <div className="flex flex-1 items-center justify-center py-12 text-sm text-muted-foreground">
-          <LoadingStatus label="Loading preview…" />
+          <NotaLoadingStatus label="Loading preview…" />
         </div>
       ) : null}
       <div

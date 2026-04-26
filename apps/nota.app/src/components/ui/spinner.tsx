@@ -1,1 +1,1 @@
-export { LoadingStatus, NotaSpinner } from '@nota.app/web-design/spinner';
+export { NotaLoadingStatus, NotaSpinner } from '@nota.app/web-design/spinner';
