@@ -1,9 +1,35 @@
+/**
+ * Nota button primitives: Base UI `Button` with CVA styling and theme tokens.
+ *
+ * @remarks
+ * Import from the package subpath only: `import { NotaButton, notaButtonVariants } from '@nota.app/web-design/button'`.
+ * Styling uses semantic Tailwind tokens (`bg-primary`, `border-border`, `ring-ring`, …) so callers should set CSS variables / theme, not hard-coded neutrals.
+ *
+ * @packageDocumentation
+ */
+
 import * as React from 'react';
 import { Button as BaseButton } from '@base-ui/react/button';
 import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '../lib/utils.js';
 
+/**
+ * Class variance authority helper for Nota button appearance.
+ *
+ * @remarks
+ * Use for non-`button` elements that should match `NotaButton` (e.g. custom `as` patterns), or to merge variant classes with `cn`.
+ * Variants: `default`, `outline`, `secondary`, `ghost`, `destructive`, `link`. Sizes: `default`, `xs`, `sm`, `lg`, `icon`, `icon-xs`, `icon-sm`, `icon-lg`.
+ *
+ * @example
+ * ```tsx
+ * import { notaButtonVariants } from '@nota.app/web-design/button';
+ *
+ * const className = notaButtonVariants({ variant: 'outline', size: 'sm' });
+ * ```
+ *
+ * @see {@link https://base-ui.com/react/components/button | Base UI Button}
+ */
 export const notaButtonVariants = cva(
   "group/button inline-flex shrink-0 items-center justify-center rounded-md border border-transparent bg-clip-padding text-xs/relaxed font-medium whitespace-nowrap transition-all duration-300 ease-in-out outline-none select-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
@@ -39,10 +65,33 @@ export const notaButtonVariants = cva(
   },
 );
 
+/**
+ * Props for {@link NotaButton}: Base UI button props (except `ref` merged separately), CVA variant/size, and ref.
+ *
+ * @remarks
+ * Inherits behaviour and a11y from `@base-ui/react/button` (native `button` semantics unless overridden by the renderer).
+ */
 export type NotaButtonProps = Omit<BaseButton.Props, 'ref'> &
   VariantProps<typeof notaButtonVariants> &
   React.RefAttributes<HTMLElement>;
 
+/**
+ * Primary action control: Base UI `Button` with Nota variants and `data-slot="button"`.
+ *
+ * @remarks
+ * `className` is merged with {@link notaButtonVariants}; `variant` and `size` default to `'default'`.
+ *
+ * @example
+ * ```tsx
+ * import { NotaButton } from '@nota.app/web-design/button';
+ *
+ * export function Save() {
+ *   return <NotaButton type="submit">Save</NotaButton>;
+ * }
+ * ```
+ *
+ * @see {@link https://base-ui.com/react/components/button | Base UI Button}
+ */
 export function NotaButton({
   ref,
   className,
