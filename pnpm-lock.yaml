@@ -423,6 +423,9 @@ importers:
       '@nota.app/validation':
         specifier: workspace:*
         version: link:../../packages/validation
+      '@nota.app/web-design':
+        specifier: workspace:*
+        version: link:../../packages/web-design
       '@posthog/react':
         specifier: ^1.8.2
         version: 1.9.0(@types/react@19.2.14)(posthog-js@1.372.1)(react@19.2.5)
@@ -486,9 +489,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -618,6 +618,58 @@ importers:
       zod:
         specifier: 'catalog:'
         version: 3.25.76
+
+  packages/web-design:
+    dependencies:
+      '@base-ui/react':
+        specifier: ^1.3.0
+        version: 1.4.1(@date-fns/tz@1.4.1)(@types/react@19.2.14)(date-fns@4.1.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      class-variance-authority:
+        specifier: ^0.7.1
+        version: 0.7.1
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      tailwind-merge:
+        specifier: ^3.5.0
+        version: 3.5.0
+    devDependencies:
+      '@testing-library/react':
+        specifier: 16.3.0
+        version: 16.3.0(@testing-library/dom@10.4.0)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.14)
+      '@vitejs/plugin-react':
+        specifier: 'catalog:'
+        version: 4.7.0(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
+      '@vitest/coverage-v8':
+        specifier: 'catalog:'
+        version: 4.1.5(vitest@4.1.5)
+      jsdom:
+        specifier: 'catalog:'
+        version: 29.0.2(@noble/hashes@1.8.0)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.5
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.5(react@19.2.5)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vite:
+        specifier: 'catalog:'
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
+      vite-plugin-dts:
+        specifier: 'catalog:'
+        version: 4.5.4(@types/node@25.6.0)(rollup@4.60.2)(typescript@5.9.3)(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
 
 packages:
 

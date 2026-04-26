@@ -23,6 +23,9 @@
     },
     {
       "path": "./packages/helper-hooks"
+    },
+    {
+      "path": "./packages/web-design"
     }
   ]
 }

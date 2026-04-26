@@ -13,10 +13,10 @@
   "iconLibrary": "hugeicons",
   "rtl": false,
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils",
-    "ui": "@/components/ui",
-    "lib": "@/lib",
+    "components": "../../packages/web-design/src/components",
+    "utils": "../../packages/web-design/src/lib/utils",
+    "ui": "../../packages/web-design/src/components",
+    "lib": "../../packages/web-design/src/lib",
     "hooks": "@/hooks"
   },
   "menuColor": "default",

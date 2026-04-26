@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { LoadingStatus, NotaSpinner } from './spinner';
+
+import { LoadingStatus, NotaSpinner } from './spinner.js';
 
 describe('NotaSpinner', () => {
   it('renders a decorative spinning ring (paired with copy elsewhere)', () => {

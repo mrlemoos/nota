@@ -1,0 +1,63 @@
+/// <reference types='vitest' />
+import * as path from 'node:path';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import dts from 'vite-plugin-dts';
+
+const root = import.meta.dirname;
+
+const libEntries = {
+  button: path.join(root, 'src/components/button.tsx'),
+  card: path.join(root, 'src/components/card.tsx'),
+  tooltip: path.join(root, 'src/components/tooltip.tsx'),
+  spinner: path.join(root, 'src/components/spinner.tsx'),
+  utils: path.join(root, 'src/lib/utils.ts'),
+} as const;
+
+export default defineConfig(() => ({
+  root,
+  cacheDir: '../../node_modules/.vite/packages/web-design',
+  plugins: [
+    react(),
+    dts({
+      entryRoot: 'src',
+      tsconfigPath: path.join(root, 'tsconfig.lib.json'),
+    }),
+  ],
+  build: {
+    outDir: './dist',
+    emptyOutDir: true,
+    reportCompressedSize: true,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    lib: {
+      entry: libEntries,
+      formats: ['es' as const],
+      fileName: (format, entryName) => `${entryName}.js`,
+    },
+    rollupOptions: {
+      external: (id) =>
+        id === 'react' ||
+        id === 'react-dom' ||
+        id === 'react/jsx-runtime' ||
+        id === 'clsx' ||
+        id === 'tailwind-merge' ||
+        id === 'class-variance-authority' ||
+        id.startsWith('react/') ||
+        id.startsWith('@base-ui/'),
+    },
+  },
+  test: {
+    name: '@nota.app/web-design',
+    watch: false,
+    globals: true,
+    environment: 'jsdom',
+    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    reporters: ['default'],
+    coverage: {
+      reportsDirectory: './test-output/vitest/coverage',
+      provider: 'v8' as const,
+    },
+  },
+}));
