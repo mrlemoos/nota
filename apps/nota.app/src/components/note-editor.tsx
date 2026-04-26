@@ -71,6 +71,8 @@ function NoteEditorImpl({
   const bodyEditorRef = useRef<Editor | null>(null);
   const contentDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typewriterRafRef = useRef<number | null>(null);
+  const prefersReducedMotionRef = useRef(false);
   const lastSavedContent = useRef(note.content);
   const lastSavedTitle = useRef(persistedDisplayTitle(note.title || ''));
   const titleRef = useRef(note.title || '');
@@ -83,6 +85,21 @@ function NoteEditorImpl({
   onNoteUpdatedRef.current = onNoteUpdated;
   userIdRef.current = user?.id;
   notaProEntitledRef.current = notaProEntitled;
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => {
+      prefersReducedMotionRef.current = mediaQuery.matches;
+    };
+    sync();
+    mediaQuery.addEventListener('change', sync);
+    return () => {
+      mediaQuery.removeEventListener('change', sync);
+    };
+  }, []);
 
   useEffect(() => {
     resetSticky();
@@ -99,6 +116,10 @@ function NoteEditorImpl({
     if (titleDebounceRef.current) {
       clearTimeout(titleDebounceRef.current);
       titleDebounceRef.current = null;
+    }
+    if (typewriterRafRef.current !== null) {
+      cancelAnimationFrame(typewriterRafRef.current);
+      typewriterRafRef.current = null;
     }
   }, [note.id, resetSticky]);
 
@@ -231,6 +252,61 @@ function NoteEditorImpl({
     }
   }, []);
 
+  const alignTypewriterScroll = useCallback(() => {
+    const root = scrollRootRef.current;
+    const editor = bodyEditorRef.current;
+    if (!root || !editor || editor.isDestroyed || !editor.isFocused) {
+      return;
+    }
+
+    const { selection } = editor.state;
+    if (!selection.empty) {
+      return;
+    }
+
+    let caretTop = 0;
+    try {
+      caretTop = editor.view.coordsAtPos(selection.from).top;
+    } catch {
+      return;
+    }
+
+    const rootRectTop = root.getBoundingClientRect().top;
+    const currentScrollTop = root.scrollTop;
+    const caretYInScroll = caretTop - rootRectTop + currentScrollTop;
+    const targetYInScroll = currentScrollTop + root.clientHeight * 0.4;
+    const delta = caretYInScroll - targetYInScroll;
+    const deadzonePx = Math.max(18, root.clientHeight * 0.02);
+
+    if (delta <= deadzonePx) {
+      return;
+    }
+
+    const maxScrollTop = Math.max(0, root.scrollHeight - root.clientHeight);
+    const nextScrollTop = Math.min(maxScrollTop, currentScrollTop + delta);
+
+    if (Math.abs(nextScrollTop - currentScrollTop) < 1) {
+      return;
+    }
+
+    if (prefersReducedMotionRef.current) {
+      root.scrollTop = nextScrollTop;
+      return;
+    }
+
+    root.scrollTo({ top: nextScrollTop, behavior: 'auto' });
+  }, [scrollRootRef]);
+
+  const scheduleTypewriterScroll = useCallback(() => {
+    if (typewriterRafRef.current !== null) {
+      cancelAnimationFrame(typewriterRafRef.current);
+    }
+    typewriterRafRef.current = requestAnimationFrame(() => {
+      typewriterRafRef.current = null;
+      alignTypewriterScroll();
+    });
+  }, [alignTypewriterScroll]);
+
   const scheduleContentSave = useCallback(() => {
     if (contentDebounceRef.current) {
       clearTimeout(contentDebounceRef.current);
@@ -309,8 +385,9 @@ function NoteEditorImpl({
     (content: unknown) => {
       pendingContentRef.current = content;
       scheduleContentSave();
+      scheduleTypewriterScroll();
     },
-    [scheduleContentSave],
+    [scheduleContentSave, scheduleTypewriterScroll],
   );
 
   const persistDueDate = useCallback(async (dueAt: string | null, isDeadline: boolean) => {
@@ -505,6 +582,9 @@ function NoteEditorImpl({
       }
       if (titleDebounceRef.current) {
         clearTimeout(titleDebounceRef.current);
+      }
+      if (typewriterRafRef.current !== null) {
+        cancelAnimationFrame(typewriterRafRef.current);
       }
     };
   }, []);
