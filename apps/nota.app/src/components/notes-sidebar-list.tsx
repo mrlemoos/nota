@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from 'react';
 import {
   ArrowDown01Icon,
   ArrowRight01Icon,
-  Folder01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { NotaButton } from '@nota.app/web-design/button';
@@ -19,6 +18,11 @@ import type { NotesShellPanel } from '../lib/app-navigation';
 import { noteHashHref } from './note-detail-panel';
 import { clientCreateNote } from '../lib/create-note-client';
 import { clientDeleteNoteById } from '../lib/delete-note-client';
+import {
+  NOTA_RENAME_FOLDER_REQUEST_EVENT,
+  type RenameFolderRequestDetail,
+} from '../lib/folder-rename-request';
+import { clientRenameFolder } from '../lib/rename-folder-client';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
 import { buildSidebarFolderSections } from '../lib/note-sidebar-groups';
 import { FolderDeleteDialog } from './folder-delete-dialog';
@@ -32,6 +36,7 @@ type NotesSidebarListProps = {
   notaProEntitled: boolean;
   userPreferences: UserPreferences | null;
   insertNoteAtFront: (n: Note) => void;
+  patchFolderInList: (id: string, patch: Partial<Folder>) => void;
   removeNoteFromList: (id: string) => void;
   removeFolderFromList: (id: string) => void;
   refreshNotesList: (options?: { silent?: boolean }) => Promise<void>;
@@ -167,6 +172,7 @@ export function NotesSidebarList({
   notaProEntitled,
   userPreferences,
   insertNoteAtFront,
+  patchFolderInList,
   removeNoteFromList,
   removeFolderFromList,
   refreshNotesList,
@@ -191,6 +197,9 @@ export function NotesSidebarList({
   const [folderDeleteTarget, setFolderDeleteTarget] = useState<Folder | null>(
     null,
   );
+  const [renamingFolderId, setRenamingFolderId] = useState<string | null>(null);
+  const [folderRenameDraft, setFolderRenameDraft] = useState('');
+  const renameInputRef = useRef<HTMLInputElement | null>(null);
 
   const validFolderIdList = useMemo(
     () => folders.map((f) => f.id),
@@ -199,6 +208,16 @@ export function NotesSidebarList({
   useEffect(() => {
     pruneCollapsedFolderIds(validFolderIdList);
   }, [pruneCollapsedFolderIds, validFolderIdList]);
+
+  useEffect(() => {
+    if (!renamingFolderId || !renameInputRef.current) {
+      return;
+    }
+    const input = renameInputRef.current;
+    input.focus();
+    const end = input.value.length;
+    input.setSelectionRange(end, end);
+  }, [renamingFolderId]);
 
   // Expand the folder when the user opens a note inside a collapsed section (e.g. palette, graph),
   // not when they manually collapse with the same note open—deps omit collapsed state on purpose.
@@ -231,6 +250,57 @@ export function NotesSidebarList({
     });
   };
 
+  const startRenamingFolder = useCallback((folder: Folder): void => {
+    expandFolder(folder.id);
+    setRenamingFolderId(folder.id);
+    setFolderRenameDraft(folder.name);
+  }, [expandFolder]);
+
+  const stopRenamingFolder = useCallback((): void => {
+    setRenamingFolderId(null);
+    setFolderRenameDraft('');
+  }, []);
+
+  const commitFolderRename = useCallback((folder: Folder): void => {
+    const nextName = folderRenameDraft.trim();
+    const previousName = folder.name;
+    stopRenamingFolder();
+    if (!nextName || nextName === previousName) {
+      return;
+    }
+    void clientRenameFolder({
+      folderId: folder.id,
+      previousName,
+      nextName,
+      userId: uid,
+      notaProEntitled,
+      patchFolderInList,
+    });
+  }, [folderRenameDraft, notaProEntitled, patchFolderInList, stopRenamingFolder, uid]);
+
+  useEffect(() => {
+    const onRenameRequest = (event: Event): void => {
+      const customEvent = event as CustomEvent<RenameFolderRequestDetail>;
+      const folderId = customEvent.detail?.folderId;
+      if (!folderId) {
+        return;
+      }
+      const folder = folders.find((value) => value.id === folderId);
+      if (!folder) {
+        return;
+      }
+      startRenamingFolder(folder);
+    };
+
+    window.addEventListener(NOTA_RENAME_FOLDER_REQUEST_EVENT, onRenameRequest);
+    return () => {
+      window.removeEventListener(
+        NOTA_RENAME_FOLDER_REQUEST_EVENT,
+        onRenameRequest,
+      );
+    };
+  }, [folders, startRenamingFolder]);
+
   if (vaultEmpty) {
     return (
       <div className="p-4 text-center">
@@ -250,7 +320,7 @@ export function NotesSidebarList({
           const isCollapsed = collapsedFolderIds.includes(folder.id);
           return (
             <li key={folder.id} className="list-none">
-              <div className="flex items-center gap-0.5 rounded-md py-1 pr-1.5 pl-0.5 text-muted-foreground transition-colors duration-300 ease-in-out">
+              <div className="flex items-center gap-1 rounded-md py-1 pr-1.5 pl-0.5 text-muted-foreground transition-colors duration-300 ease-in-out">
                 <NotaButton
                   type="button"
                   variant="ghost"
@@ -282,20 +352,65 @@ export function NotesSidebarList({
                   onClick={() => {
                     toggleFolderCollapsed(folder.id);
                   }}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'F2') {
+                      return;
+                    }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    startRenamingFolder(folder);
+                  }}
                 >
-                  <span
-                    className="shrink-0 text-muted-foreground/80"
-                    aria-hidden
-                  >
-                    <HugeiconsIcon
-                      icon={Folder01Icon}
-                      size={14}
-                      strokeWidth={1.5}
+                  {renamingFolderId === folder.id ? (
+                    <input
+                      ref={renameInputRef}
+                      type="text"
+                      value={folderRenameDraft}
+                      onChange={(event) => {
+                        setFolderRenameDraft(event.target.value);
+                      }}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                      }}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          commitFolderRename(folder);
+                        }
+                        if (event.key === 'Escape') {
+                          event.preventDefault();
+                          stopRenamingFolder();
+                        }
+                      }}
+                      onBlur={() => {
+                        commitFolderRename(folder);
+                      }}
+                      className="min-w-0 flex-1 rounded border border-input bg-background px-1 text-xs font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                      aria-label={`Rename folder ${folder.name}`}
                     />
-                  </span>
-                  <span className="min-w-0 flex-1 truncate font-medium text-foreground text-xs tracking-wide">
-                    {folder.name}
-                  </span>
+                  ) : (
+                    <NotaTooltip>
+                      <NotaTooltipTrigger
+                        render={
+                          <span
+                            className="min-w-0 flex-1 cursor-text truncate font-medium text-foreground text-xs tracking-wide decoration-dotted underline-offset-2 hover:underline"
+                            onDoubleClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              startRenamingFolder(folder);
+                            }}
+                          >
+                            {folder.name}
+                          </span>
+                        }
+                      />
+                      <NotaTooltipPortal>
+                        <NotaTooltipPositioner side="top" sideOffset={6}>
+                          <NotaTooltipPopup>Double-click to rename</NotaTooltipPopup>
+                        </NotaTooltipPositioner>
+                      </NotaTooltipPortal>
+                    </NotaTooltip>
+                  )}
                 </button>
                 <NotaButton
                   type="button"

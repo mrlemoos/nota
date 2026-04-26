@@ -82,6 +82,7 @@ export function NotesShell(): JSX.Element {
     refreshNotesList,
     insertNoteAtFront,
     insertFolderSorted,
+    patchFolderInList,
     removeNoteFromList,
     removeFolderFromList,
     setUserPreferencesInState,
@@ -288,31 +289,6 @@ export function NotesShell(): JSX.Element {
                 <div className="flex items-center gap-2">
                   <NotaButton
                     type="button"
-                    size="icon"
-                    variant="outline"
-                    aria-label="Create new folder"
-                    onClick={() => {
-                      setFolderCreateOpen(true);
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="h-4 w-4"
-                      aria-hidden
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.25-3v8.25m0-8.25h-8.25m8.25 0h8.25"
-                      />
-                    </svg>
-                  </NotaButton>
-                  <NotaButton
-                    type="button"
                     size="icon-lg"
                     variant="default"
                     aria-label="Create new note"
@@ -356,6 +332,7 @@ export function NotesShell(): JSX.Element {
                   notaProEntitled={notaProEntitled}
                   userPreferences={userPreferences}
                   insertNoteAtFront={insertNoteAtFront}
+                  patchFolderInList={patchFolderInList}
                   removeNoteFromList={removeNoteFromList}
                   removeFolderFromList={removeFolderFromList}
                   refreshNotesList={refreshNotesList}

@@ -2,6 +2,11 @@ import { fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { CommandPalette } from './command-palette';
 import { ThemeProvider } from './theme-provider';
+import { dispatchRenameFolderRequest } from '../lib/folder-rename-request';
+
+vi.mock('../lib/folder-rename-request', () => ({
+  dispatchRenameFolderRequest: vi.fn(),
+}));
 
 vi.mock('../context/notes-data-context', () => ({
   useNotesData: () => ({
@@ -20,7 +25,15 @@ vi.mock('../context/notes-data-context', () => ({
         folder_id: null,
       },
     ],
-    folders: [],
+    folders: [
+      {
+        id: 'folder-1',
+        user_id: 'user-1',
+        name: 'Computer Science Study',
+        created_at: '2026-04-25T00:00:00.000Z',
+        updated_at: '2026-04-25T00:00:00.000Z',
+      },
+    ],
     notaProEntitled: true,
     userPreferences: null,
     refreshNotesList: vi.fn(),
@@ -96,5 +109,19 @@ describe('CommandPalette', () => {
     // Assert — search field must not keep the previous filter
     expect(input).toBeInstanceOf(HTMLInputElement);
     expect((input as HTMLInputElement).value).toBe('');
+  });
+
+  it('starts folder rename flow and dispatches rename request', async () => {
+    // Arrange
+    renderPalette();
+    fireEvent.keyDown(document, { key: 'k', metaKey: true, bubbles: true });
+    const dialog = await screen.findByRole('dialog');
+
+    // Act
+    fireEvent.click(within(dialog).getByText('Rename folder…'));
+    fireEvent.click(within(dialog).getByText('Computer Science Study'));
+
+    // Assert
+    expect(dispatchRenameFolderRequest).toHaveBeenCalledWith('folder-1');
   });
 });

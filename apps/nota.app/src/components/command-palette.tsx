@@ -40,6 +40,7 @@ import { useClerk } from '@clerk/react';
 import { clientCreateNote } from '../lib/create-note-client';
 import { clientDeleteNoteById } from '../lib/delete-note-client';
 import { clientMoveNoteToFolder } from '../lib/move-note-folder-client';
+import { dispatchRenameFolderRequest } from '../lib/folder-rename-request';
 import { navigatorLooksLikeApplePlatform } from '../lib/navigator-apple-platform';
 import { movePickEnterAction } from '../lib/move-pick-enter';
 import {
@@ -188,6 +189,7 @@ export function CommandPalette(): JSX.Element {
   const moveSelectedNoteIdsRef = useRef(moveSelectedNoteIds);
   moveSelectedNoteIdsRef.current = moveSelectedNoteIds;
   const [deleteFolderPickerOpen, setDeleteFolderPickerOpen] = useState(false);
+  const [renameFolderPickerOpen, setRenameFolderPickerOpen] = useState(false);
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
 
   const semanticSearchUserPref = useNotaPreferencesStore(
@@ -224,6 +226,7 @@ export function CommandPalette(): JSX.Element {
       setMoveSelectedNoteIds(new Set());
       setFolderDeleteTarget(null);
       setDeleteFolderPickerOpen(false);
+      setRenameFolderPickerOpen(false);
     }
   }, [open]);
 
@@ -832,9 +835,50 @@ export function CommandPalette(): JSX.Element {
                     </Command.Item>
                   </Command.Group>
                 ) : null}
+                {notaProEntitled && renameFolderPickerOpen ? (
+                  <Command.Group
+                    heading="Rename folder — pick folder"
+                    className={groupHeadingClassName}
+                  >
+                    {folders.map((f) => (
+                      <Command.Item
+                        key={`rename-pick-${f.id}`}
+                        value={`rename-pick:${f.id}`}
+                        keywords={['rename', 'folder', f.name]}
+                        onSelect={() => {
+                          setRenameFolderPickerOpen(false);
+                          closePalette();
+                          dispatchRenameFolderRequest(f.id);
+                        }}
+                        className={cn(
+                          commandItemRowClass,
+                          'group text-foreground',
+                          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                        )}
+                      >
+                        <span className="min-w-0 flex-1 truncate">{f.name}</span>
+                      </Command.Item>
+                    ))}
+                    <Command.Item
+                      value="rename-pick-cancel"
+                      keywords={['cancel']}
+                      onSelect={() => {
+                        setRenameFolderPickerOpen(false);
+                      }}
+                      className={cn(
+                        commandItemRowClass,
+                        'group text-muted-foreground',
+                        'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                      )}
+                    >
+                      Cancel
+                    </Command.Item>
+                  </Command.Group>
+                ) : null}
                 {notaProEntitled &&
                 folderDeleteTarget === null &&
                 moveFlow === 'idle' &&
+                !renameFolderPickerOpen &&
                 !deleteFolderPickerOpen ? (
                   <Command.Group
                     heading="Folders"
@@ -881,10 +925,32 @@ export function CommandPalette(): JSX.Element {
                       </span>
                     </Command.Item>
                     <Command.Item
+                      value="cmd-rename-folder"
+                      disabled={folders.length === 0}
+                      keywords={[
+                        'rename folder',
+                        'edit folder',
+                        'change folder name',
+                      ]}
+                      onSelect={() => {
+                        setDeleteFolderPickerOpen(false);
+                        setRenameFolderPickerOpen(true);
+                      }}
+                      className={cn(
+                        commandItemRowClass,
+                        'group text-foreground',
+                        'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                        'aria-disabled:pointer-events-none aria-disabled:opacity-50',
+                      )}
+                    >
+                      <span className="min-w-0 flex-1">Rename folder…</span>
+                    </Command.Item>
+                    <Command.Item
                       value="cmd-delete-folder"
                       disabled={folders.length === 0}
                       keywords={['delete folder', 'remove folder']}
                       onSelect={() => {
+                        setRenameFolderPickerOpen(false);
                         setDeleteFolderPickerOpen(true);
                       }}
                       className={cn(
