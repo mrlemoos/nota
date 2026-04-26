@@ -4,12 +4,15 @@
     "distributables",
     "EBUSY",
     "esnext",
+    "fontsource",
+    "GITHUB",
     "gsap",
     "hljs",
     "hugeicons",
     "Hugeicons",
     "isbot",
     "mousedown",
+    "mrlemoos",
     "nosniff",
     "partialize",
     "pdfs",
@@ -21,6 +24,7 @@
     "smilie",
     "subpaths",
     "supabase",
+    "tsconfigs",
     "unlayered"
   ],
   "tailwindcss.configPath": "./apps/nota.app/styles.css"
