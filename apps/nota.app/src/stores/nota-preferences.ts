@@ -2,11 +2,14 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserPreferences } from '~/types/database.types';
 
+export type CursorVisualStyle = 'line' | 'block';
+
 interface NotaPreferencesState {
   openTodaysNoteShortcut: boolean;
   showNoteBacklinks: boolean;
   semanticSearchEnabled: boolean;
   emojiReplacerEnabled: boolean;
+  cursorVisualStyle: CursorVisualStyle;
   /** Local toggle not yet persisted to Supabase (or last attempt failed while offline). */
   preferencesPendingSync: boolean;
   lastServerUpdatedAt: string | null;
@@ -17,6 +20,7 @@ interface NotaPreferencesState {
   setShowNoteBacklinks: (value: boolean, options?: { pendingSync?: boolean }) => void;
   setSemanticSearchEnabled: (value: boolean, options?: { pendingSync?: boolean }) => void;
   setEmojiReplacerEnabled: (value: boolean, options?: { pendingSync?: boolean }) => void;
+  setCursorVisualStyle: (value: CursorVisualStyle) => void;
   hydratePreferencesFromServer: (prefs: UserPreferences) => void;
   markPreferencesSynced: (prefs: UserPreferences) => void;
   setDailyNoteForLocalDate: (dateKey: string, noteId: string) => void;
@@ -30,6 +34,7 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
       showNoteBacklinks: true,
       semanticSearchEnabled: true,
       emojiReplacerEnabled: true,
+      cursorVisualStyle: 'line',
       preferencesPendingSync: false,
       lastServerUpdatedAt: null,
       dailyNoteIdByLocalDate: {},
@@ -60,6 +65,11 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
           emojiReplacerEnabled: value,
           preferencesPendingSync:
             options?.pendingSync !== undefined ? options.pendingSync : true,
+        }),
+
+      setCursorVisualStyle: (value) =>
+        set({
+          cursorVisualStyle: value,
         }),
 
       hydratePreferencesFromServer: (prefs) => {
@@ -104,6 +114,7 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
         showNoteBacklinks: state.showNoteBacklinks,
         semanticSearchEnabled: state.semanticSearchEnabled,
         emojiReplacerEnabled: state.emojiReplacerEnabled,
+        cursorVisualStyle: state.cursorVisualStyle,
         preferencesPendingSync: state.preferencesPendingSync,
         lastServerUpdatedAt: state.lastServerUpdatedAt,
         dailyNoteIdByLocalDate: state.dailyNoteIdByLocalDate,

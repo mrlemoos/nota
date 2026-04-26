@@ -32,6 +32,7 @@ import { NoteLayoutMenu } from './note-layout-menu';
 import { cn } from '@/lib/utils';
 import type { Editor } from '@tiptap/core';
 import { isImageFile, uploadNoteAttachmentFile } from '../lib/pdf-attachment-client';
+import { useNotaPreferencesStore } from '../stores/nota-preferences';
 
 interface NoteEditorProps {
   note: Note;
@@ -57,6 +58,7 @@ function NoteEditorImpl({
 }: NoteEditorProps) {
   const { user } = useRootLoaderData() ?? { user: null };
   const { notaProEntitled } = useNotesDataMeta();
+  const cursorVisualStyle = useNotaPreferencesStore((s) => s.cursorVisualStyle);
   const { scrollRootRef, scrollRootEpoch, setSticky, resetSticky } =
     useStickyDocTitle();
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>(
@@ -508,7 +510,12 @@ function NoteEditorImpl({
   }, []);
 
   return (
-    <div className="nota-calm-caret-surface space-y-6">
+    <div
+      className={cn(
+        'nota-caret-surface space-y-6',
+        cursorVisualStyle === 'block' ? 'nota-caret--block' : 'nota-caret--line',
+      )}
+    >
       <div ref={titleRowRef} className="flex items-start justify-between gap-4">
         <textarea
           ref={titleTextareaRef}

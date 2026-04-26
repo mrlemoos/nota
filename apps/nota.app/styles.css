@@ -54,7 +54,12 @@
   }
 }
 
-/* Calm caret: slower blink than the UA default (where supported) */
+/* Editor caret visuals */
+.nota-caret-surface textarea,
+.nota-caret-surface .tiptap-editor .ProseMirror {
+  caret-color: var(--foreground);
+}
+
 @supports (caret-animation: manual) {
   @keyframes nota-calm-caret-blink {
     0%,
@@ -68,8 +73,8 @@
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .nota-calm-caret-surface textarea,
-    .nota-calm-caret-surface .tiptap-editor .ProseMirror {
+    .nota-caret-surface textarea,
+    .nota-caret-surface .tiptap-editor .ProseMirror {
       caret-color: var(--foreground);
       caret-animation: manual;
       animation: nota-calm-caret-blink 1.35s ease-in-out infinite;
@@ -77,9 +82,21 @@
   }
 }
 
+.nota-caret--line textarea,
+.nota-caret--line .tiptap-editor .ProseMirror {
+  caret-color: var(--foreground);
+}
+
+@supports (caret-shape: block) {
+  .nota-caret--block textarea,
+  .nota-caret--block .tiptap-editor .ProseMirror {
+    caret-shape: block;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .nota-calm-caret-surface textarea,
-  .nota-calm-caret-surface .tiptap-editor .ProseMirror {
+  .nota-caret-surface textarea,
+  .nota-caret-surface .tiptap-editor .ProseMirror {
     animation: none;
     caret-animation: auto;
   }

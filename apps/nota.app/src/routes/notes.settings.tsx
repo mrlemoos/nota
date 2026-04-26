@@ -8,10 +8,30 @@ import {
   useNotesDataMeta,
 } from '../context/notes-data-context';
 import { submitUserPreferencesPatch } from '../lib/use-sync-user-preferences';
-import { useNotaPreferencesStore } from '../stores/nota-preferences';
+import {
+  useNotaPreferencesStore,
+  type CursorVisualStyle,
+} from '../stores/nota-preferences';
 import { NotaProSettingsSection } from '../components/nota-pro-settings-section';
 import { hashForScreen } from '../lib/app-navigation';
 import { navigatorLooksLikeApplePlatform } from '../lib/navigator-apple-platform';
+
+const CURSOR_STYLE_OPTIONS: ReadonlyArray<{
+  value: CursorVisualStyle;
+  label: string;
+  description: string;
+}> = [
+  {
+    value: 'line',
+    label: 'Line',
+    description: 'Classic text cursor',
+  },
+  {
+    value: 'block',
+    label: 'Block',
+    description: 'Solid cursor block',
+  },
+] as const;
 
 export default function NotesSettings(): JSX.Element {
   const { user } = useRootLoaderData();
@@ -38,6 +58,10 @@ export default function NotesSettings(): JSX.Element {
   );
   const setEmojiReplacerEnabled = useNotaPreferencesStore(
     (s) => s.setEmojiReplacerEnabled,
+  );
+  const cursorVisualStyle = useNotaPreferencesStore((s) => s.cursorVisualStyle);
+  const setCursorVisualStyle = useNotaPreferencesStore(
+    (s) => s.setCursorVisualStyle,
   );
   const [modDLabel, setModDLabel] = useState('⌘D');
   const [historyBackLabel, setHistoryBackLabel] = useState('⌘[');
@@ -76,6 +100,52 @@ export default function NotesSettings(): JSX.Element {
             <span className="text-sm text-muted-foreground">Theme</span>
             <ThemeMenu />
           </div>
+          <fieldset className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
+            <legend className="px-1 text-xs font-medium tracking-wide text-foreground/80 uppercase">
+              Editor cursor
+            </legend>
+            <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {CURSOR_STYLE_OPTIONS.map((option) => {
+                const checked = cursorVisualStyle === option.value;
+                return (
+                  <label
+                    key={option.value}
+                    htmlFor={`nota-cursor-style-${option.value}`}
+                    className={cn(
+                      'group relative flex cursor-pointer select-none flex-col gap-1 rounded-md border px-3 py-2 transition-colors',
+                      checked
+                        ? 'border-foreground/40 bg-background/80'
+                        : 'border-border/70 bg-background/40 hover:border-border',
+                    )}
+                  >
+                    <input
+                      id={`nota-cursor-style-${option.value}`}
+                      name="nota-cursor-style"
+                      type="radio"
+                      checked={checked}
+                      onChange={() => {
+                        setCursorVisualStyle(option.value);
+                      }}
+                      className="sr-only"
+                    />
+                    <span className="text-sm font-medium text-foreground">
+                      {option.label}
+                    </span>
+                    <span className="text-xs leading-snug text-muted-foreground">
+                      {option.description}
+                    </span>
+                    <span
+                      aria-hidden
+                      className={cn(
+                        'pointer-events-none absolute top-2 right-2 h-2 w-2 rounded-full transition-opacity',
+                        checked ? 'bg-foreground/70 opacity-100' : 'opacity-0',
+                      )}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </fieldset>
         </section>
 
         <section className="space-y-3">
