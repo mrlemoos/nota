@@ -1,6 +1,7 @@
 /* App binding re-exports server client with Clerk token; tests use `vi.mock` + dynamic `import()`. */
 /* eslint-disable @nx/enforce-module-boundaries -- intentional static wrapper over `@nota.app/nota-server-client` */
 import {
+  fetchReleases as fetchReleasesRequest,
   fetchNotaProEntitled as fetchNotaProEntitledRequest,
   postNotaProInvalidate as postNotaProInvalidateRequest,
   postSearchIndexNote as postSearchIndexNoteRequest,
@@ -60,5 +61,14 @@ export async function postSearchReindexAll(): Promise<Response> {
   return postSearchReindexAllRequest(
     notaServerBase(),
     await getClerkAccessToken(),
+  );
+}
+
+/** Recent release notes (`GET /api/releases`). */
+export async function fetchReleases(limit = 5): Promise<Response> {
+  return fetchReleasesRequest(
+    notaServerBase(),
+    await getClerkAccessToken(),
+    limit,
   );
 }

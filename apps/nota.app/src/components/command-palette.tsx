@@ -51,6 +51,7 @@ import {
 import type { Folder } from '~/types/database.types';
 import { FolderCreateDialog } from './folder-create-dialog';
 import { FolderDeleteDialog } from './folder-delete-dialog';
+import { ReleaseNotesDialog } from './release-notes-dialog';
 import {
   startStudyNotesAppendToOpenNote,
   startStudyNotesFromRecording,
@@ -187,6 +188,7 @@ export function CommandPalette(): JSX.Element {
   const moveSelectedNoteIdsRef = useRef(moveSelectedNoteIds);
   moveSelectedNoteIdsRef.current = moveSelectedNoteIds;
   const [deleteFolderPickerOpen, setDeleteFolderPickerOpen] = useState(false);
+  const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
 
   const semanticSearchUserPref = useNotaPreferencesStore(
     (s) => s.semanticSearchEnabled,
@@ -1497,6 +1499,25 @@ export function CommandPalette(): JSX.Element {
                   className={groupHeadingClassName}
                 >
                   <Command.Item
+                    value="view-release-notes"
+                    keywords={['changelog', 'release notes', 'whats new', 'updates']}
+                    onSelect={() => {
+                      closePalette();
+                      setReleaseNotesOpen(true);
+                    }}
+                    className={cn(
+                      commandItemRowClass,
+                      'group text-foreground',
+                      'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                    )}
+                  >
+                    <PaletteItemIcon
+                      icon={SparklesIcon}
+                      className="text-muted-foreground group-aria-selected:text-accent-foreground"
+                    />
+                    <span className="min-w-0 flex-1">What&apos;s new</span>
+                  </Command.Item>
+                  <Command.Item
                     value="sign-out"
                     disabled={busy}
                     keywords={['logout', 'log out', 'exit']}
@@ -1579,6 +1600,10 @@ export function CommandPalette(): JSX.Element {
       removeNoteFromList={removeNoteFromList}
       removeFolderFromList={removeFolderFromList}
       refreshNotesList={refreshNotesList}
+    />
+    <ReleaseNotesDialog
+      open={releaseNotesOpen}
+      onOpenChange={setReleaseNotesOpen}
     />
     </>
   );

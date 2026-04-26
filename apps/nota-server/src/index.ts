@@ -21,6 +21,7 @@ import {
   reindexAllPostHandler,
   semanticSearchPostHandler,
 } from './routes/semantic-search.ts';
+import { releasesHandler } from './routes/releases.ts';
 
 const PORT = Number(process.env.PORT ?? '8787');
 
@@ -121,6 +122,17 @@ app.get('/api/og-preview', (req, res, next) => {
   void (async () => {
     try {
       const r = await ogPreviewHandler(expressToWebRequest(req));
+      await sendWebResponse(res, r);
+    } catch (e) {
+      next(e);
+    }
+  })();
+});
+
+app.get('/api/releases', (req, res, next) => {
+  void (async () => {
+    try {
+      const r = await releasesHandler(expressToWebRequest(req));
       await sendWebResponse(res, r);
     } catch (e) {
       next(e);

@@ -22,6 +22,13 @@ function unauthorizedInvalidateResponse(): Response {
   });
 }
 
+function unauthorizedReleasesResponse(): Response {
+  return new Response(JSON.stringify({ error: 'Unauthorized', releases: [] }), {
+    status: 401,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 /**
  * `GET` on nota-server; Bearer Clerk session JWT.
  * Missing base URL or access token → 401 without calling the network.
@@ -134,5 +141,27 @@ export async function postSearchReindexAll(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({}),
+  });
+}
+
+/** `GET` recent release notes; Bearer Clerk session JWT. Missing base URL or token → 401 without calling the network. */
+export async function fetchReleases(
+  baseUrl: string | undefined,
+  accessToken: string | null | undefined,
+  limit = 5,
+): Promise<Response> {
+  const base = normaliseBaseUrl(baseUrl);
+  if (!base) {
+    return unauthorizedReleasesResponse();
+  }
+  if (!accessToken) {
+    return unauthorizedReleasesResponse();
+  }
+  const safeLimit = Number.isFinite(limit)
+    ? Math.max(1, Math.min(20, Math.trunc(limit)))
+    : 5;
+  const qs = new URLSearchParams({ limit: String(safeLimit) });
+  return fetch(`${base}/api/releases?${qs.toString()}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 }

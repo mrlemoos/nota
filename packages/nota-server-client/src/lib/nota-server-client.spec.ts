@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  fetchReleases,
   fetchNotaProEntitled,
   postNotaProInvalidate,
   postSemanticSearch,
@@ -194,6 +195,42 @@ describe('@nota.app/nota-server-client', () => {
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({}),
+      }),
+    );
+    fetchSpy.mockRestore();
+  });
+
+  it('fetchReleases returns 401 and does not fetch when token is missing', async () => {
+    // Arrange
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+
+    // Act
+    const res = await fetchReleases('https://ns.example', null, 5);
+
+    // Assert
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({
+      error: 'Unauthorized',
+      releases: [],
+    });
+    fetchSpy.mockRestore();
+  });
+
+  it('fetchReleases GETs /api/releases with Bearer and limit', async () => {
+    // Arrange
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(JSON.stringify({ releases: [] })));
+
+    // Act
+    await fetchReleases('https://ns.example/', 'jwt', 7);
+
+    // Assert
+    expect(fetchSpy).toHaveBeenCalledWith(
+      'https://ns.example/api/releases?limit=7',
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer jwt' },
       }),
     );
     fetchSpy.mockRestore();
