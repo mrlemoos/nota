@@ -20,6 +20,7 @@ import sharp from 'sharp';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const NOTA_APP_ROOT = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.join(NOTA_APP_ROOT, 'public');
+const FAVICON_SVG_PATH = path.join(PUBLIC_DIR, 'favicon.svg');
 const ELECTRON_BUILD_RESOURCES = path.resolve(
   NOTA_APP_ROOT,
   '..',
@@ -27,15 +28,8 @@ const ELECTRON_BUILD_RESOURCES = path.resolve(
   'buildResources',
 );
 
-/** Same geometry as favicon / NotaLogo; light-mode fills for raster export. */
-const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44">
-  <rect x="4" y="4" width="30" height="30" rx="5.5" fill="#171717" fill-opacity="0.35"/>
-  <rect x="7" y="7" width="30" height="30" rx="5.5" fill="#171717" fill-opacity="0.7"/>
-  <rect x="10" y="10" width="30" height="30" rx="5.5" fill="#171717" fill-opacity="1"/>
-</svg>`;
-
 function pngFromMark(size) {
-  return sharp(Buffer.from(MARK_SVG)).resize(size, size).png();
+  return sharp(FAVICON_SVG_PATH, { density: 1024 }).resize(size, size).png();
 }
 
 async function writeAppleTouchIcon() {
