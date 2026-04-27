@@ -5,10 +5,7 @@ import {
   type NodeViewProps,
 } from '@tiptap/react';
 import {
-  Component,
   createContext,
-  lazy,
-  Suspense,
   useCallback,
   useContext,
   useEffect,
@@ -42,34 +39,7 @@ import {
   updateNoteAttachmentFilename,
 } from '../../models/note-attachments';
 import type { NoteAttachment } from '~/types/database.types';
-
-const PdfJsModalPreviewLazy = lazy(() =>
-  import('../pdf-js-modal-preview').then((m) => ({
-    default: m.PdfJsModalPreview,
-  })),
-);
-
-class PdfJsModalPreviewBoundary extends Component<
-  { fallback: ReactNode; onError: () => void; children: ReactNode },
-  { hasError: boolean }
-> {
-  override state = { hasError: false };
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  override componentDidCatch() {
-    this.props.onError();
-  }
-
-  override render() {
-    if (this.state.hasError) {
-      return this.props.fallback;
-    }
-    return this.props.children;
-  }
-}
+import { PdfJsModalPreview } from '../pdf-js-modal-preview';
 
 export type NotePdfDocContextValue = {
   noteId: string;
@@ -281,14 +251,6 @@ export function NotePdfNodeView(props: NodeViewProps) {
   const onPdfJsRenderFailed = useCallback(() => {
     setPdfPreviewUseIframe(true);
   }, []);
-
-  const pdfPreviewFallback = preview ? (
-    <iframe
-      title={preview.filename}
-      src={pdfPreviewSrc(preview.url)}
-      className="h-[min(80vh,720px)] w-full border-0 bg-background"
-    />
-  ) : null;
 
   useEffect(() => {
     if (renaming && renameInputRef.current) {
@@ -767,28 +729,18 @@ export function NotePdfNodeView(props: NodeViewProps) {
                       </div>
                     ) : preview ? (
                       pdfPreviewUseIframe ? (
-                        pdfPreviewFallback
+                        <iframe
+                          title={preview.filename}
+                          src={pdfPreviewSrc(preview.url)}
+                          className="h-[min(80vh,720px)] w-full border-0 bg-background"
+                        />
                       ) : (
-                        <PdfJsModalPreviewBoundary
-                          key={preview.url}
-                          fallback={pdfPreviewFallback}
-                          onError={onPdfJsRenderFailed}
-                        >
-                          <Suspense
-                            fallback={
-                              <div className="flex h-[min(80vh,720px)] w-full items-center justify-center text-sm text-muted-foreground">
-                                <NotaLoadingStatus label="Loading preview…" />
-                              </div>
-                            }
-                          >
-                            <PdfJsModalPreviewLazy
-                              url={preview.url}
-                              documentTitle={preview.filename}
-                              onRenderFailed={onPdfJsRenderFailed}
-                              className="bg-muted/30"
-                            />
-                          </Suspense>
-                        </PdfJsModalPreviewBoundary>
+                        <PdfJsModalPreview
+                          url={preview.url}
+                          documentTitle={preview.filename}
+                          onRenderFailed={onPdfJsRenderFailed}
+                          className="bg-muted/30"
+                        />
                       )
                     ) : null}
                   </div>
