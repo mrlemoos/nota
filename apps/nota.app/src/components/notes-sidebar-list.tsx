@@ -737,11 +737,8 @@ export function NotesSidebarList({
 
   if (vaultEmpty) {
     return (
-      <div className="p-4 text-center">
-        <p className="mb-3 text-sm text-muted-foreground">No notes yet.</p>
-        <NotaButton type="button" variant="default" onClick={onCreateNote}>
-          Create your first note
-        </NotaButton>
+      <div className="p-4 text-center text-sm text-muted-foreground">
+        ⌘K to start
       </div>
     );
   }
