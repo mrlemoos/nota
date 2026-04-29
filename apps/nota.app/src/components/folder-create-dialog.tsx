@@ -91,11 +91,14 @@ export function FolderCreateDialog({
             'fixed top-[22%] left-1/2 z-[60] w-[min(100vw-2rem,22rem)] -translate-x-1/2 rounded-lg border border-border/60 bg-background p-4 text-foreground shadow-lg outline-none',
           )}
           aria-labelledby={titleId}
-          >
+        >
           <Dialog.Title id={titleId} className="font-medium text-foreground">
             {t('New folder')}
           </Dialog.Title>
-          <label className="mt-3 block text-xs text-muted-foreground" htmlFor="nota-new-folder-name">
+          <label
+            className="mt-3 block text-xs text-muted-foreground"
+            htmlFor="nota-new-folder-name"
+          >
             {t('Name')}
           </label>
           <input

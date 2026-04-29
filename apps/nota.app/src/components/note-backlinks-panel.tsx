@@ -6,7 +6,11 @@ import { useNotesDataVault } from '../context/notes-data-context';
 import { useAppNavigationScreen } from '../hooks/use-app-navigation-screen';
 import { noteHashHref } from './note-detail-panel';
 
-export function NoteBacklinksPanel({ noteId }: { noteId: string }): JSX.Element {
+export function NoteBacklinksPanel({
+  noteId,
+}: {
+  noteId: string;
+}): JSX.Element {
   const { notes } = useNotesDataVault();
   const deferredNotes = useDeferredValue(notes);
   const screen = useAppNavigationScreen();
@@ -27,7 +31,7 @@ export function NoteBacklinksPanel({ noteId }: { noteId: string }): JSX.Element 
         id="note-backlinks-heading"
         className="mb-3 text-sm font-medium text-foreground"
       >
-        Backlinks
+        (t('Backlinks'))
       </h2>
       {backlinkIds.length === 0 ? (
         <p className="text-sm text-muted-foreground">
