@@ -5,7 +5,7 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import { describe, expect, it } from 'vitest';
-import { NotaCodeBlock } from './tiptap/nota-code-block';
+import { NotaCodeBlock } from '@nota.app/editor';
 
 function collectTypes(node: unknown): string[] {
   if (!node || typeof node !== 'object') {
@@ -53,6 +53,33 @@ describe('TipTap table', () => {
     // Assert
     expect(types).toContain('table');
     expect(types.filter((t) => t === 'tableCell').length).toBeGreaterThan(0);
+
+    editor.destroy();
+  });
+
+  it('insertTable appends a paragraph after the table', () => {
+    const editor = createEditorWithTable();
+
+    editor
+      .chain()
+      .focus()
+      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+      .command(({ tr, dispatch }) => {
+        let tableEnd = -1;
+        tr.doc.forEach((node, offset) => {
+          if (node.type.name === 'table') {
+            tableEnd = offset + node.nodeSize;
+          }
+        });
+        if (dispatch && tableEnd >= 0 && tableEnd <= tr.doc.content.size) {
+          tr.insert(tableEnd, tr.doc.type.schema.nodes.paragraph.create());
+        }
+        return true;
+      })
+      .run();
+
+    const content = editor.getJSON().content ?? [];
+    expect(content.at(-1)?.type).toBe('paragraph');
 
     editor.destroy();
   });

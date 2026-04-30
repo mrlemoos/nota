@@ -159,6 +159,18 @@ export function useRegisterNoteEditorTableInserter(editor: Editor | null): void 
         .chain()
         .focus()
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+        .command(({ tr, dispatch }) => {
+          let tableEnd = -1;
+          tr.doc.forEach((node, offset) => {
+            if (node.type.name === 'table') {
+              tableEnd = offset + node.nodeSize;
+            }
+          });
+          if (dispatch && tableEnd >= 0 && tableEnd <= tr.doc.content.size) {
+            tr.insert(tableEnd, tr.doc.type.schema.nodes.paragraph.create());
+          }
+          return true;
+        })
         .run();
     };
     ctx.registerTableInserter(run);
