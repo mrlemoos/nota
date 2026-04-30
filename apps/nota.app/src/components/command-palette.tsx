@@ -1050,19 +1050,21 @@ export function CommandPalette(): JSX.Element {
                           value="new-note-f:root"
                           keywords={['root', 'default', 'folder']}
                           onSelect={() => {
-                            setBusyAction('create');
                             void (async () => {
+                              setOpeningTodaysNote(true);
                               try {
-                                await clientCreateNote({
-                                  userId: user?.id ?? '',
-                                  insertNoteAtFront,
-                                  refreshNotesList,
-                                  notaProEntitled,
+                                await openTodaysNoteClient({
                                   notes,
+                                  userId: user?.id ?? '',
+                                  navigate: navigateFromLegacyPath,
+                                  revalidate: () => {
+                                    void refreshNotesList({ silent: true });
+                                  },
+                                  notaProEntitled,
                                 });
                                 closePalette();
                               } finally {
-                                setBusyAction(null);
+                                setOpeningTodaysNote(false);
                               }
                             })();
                           }}
