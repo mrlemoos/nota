@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-deprecated -- `MutableRefObject` matches writable `.current` for TipTap refs */
+/* eslint-disable @typescript-eslint/no-deprecated `RefObject` matches writable `.current` for TipTap refs */
 import type { Editor } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
+import type { Dispatch, RefObject, SetStateAction } from 'react';
 import type { Note } from '@nota.app/database-types';
 import { hrefForNote } from './lib/internal-note-link';
 import { persistedDisplayTitle } from './lib/note-title';
@@ -38,8 +38,7 @@ export function insertNoteLinkAtMentionRangeView(
   const dom = view.dom as HTMLElement & { editor?: Editor };
   const ed = dom.editor;
   if (ed && !ed.isDestroyed) {
-    ed
-      .chain()
+    ed.chain()
       .focus()
       .setParagraph()
       .command(({ tr: innerTr, dispatch }) => {
@@ -65,16 +64,20 @@ export function insertNoteLinkAtMentionRange(
 }
 
 export type NoteMentionConfirmRefs = {
-  canInsertAttachmentsRef: MutableRefObject<boolean>;
-  filterNoteCandidatesRef: MutableRefObject<(query: string) => Note[]>;
-  mentionTriggerKeyRef: MutableRefObject<string | null>;
-  mentionSelectedIndexRef: MutableRefObject<number>;
+  canInsertAttachmentsRef: RefObject<boolean>;
+  filterNoteCandidatesRef: RefObject<(query: string) => Note[]>;
+  mentionTriggerKeyRef: RefObject<string | null>;
+  mentionSelectedIndexRef: RefObject<number>;
 };
 
 export function tryConfirmNoteMention(
   view: EditorView,
   setMention: Dispatch<
-    SetStateAction<{ from: number; query: string; selectedIndex: number } | null>
+    SetStateAction<{
+      from: number;
+      query: string;
+      selectedIndex: number;
+    } | null>
   >,
   refs: NoteMentionConfirmRefs,
 ): boolean {
