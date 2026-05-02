@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
+import type { Note } from '@nota.app/database-types';
 import {
   buildNoteLinkGraph,
   extractOutgoingNoteIdsFromContent,
 } from './note-link-graph';
-import type { Json, Note } from '~/types/database.types';
 
 const NOTE_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 const NOTE_B = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
@@ -18,6 +18,8 @@ function minimalNote(overrides: Partial<Note> & Pick<Note, 'id'>): Note {
     due_at: null,
     is_deadline: false,
     editor_settings: {},
+    banner_attachment_id: null,
+    folder_id: null,
     ...overrides,
   };
 }
@@ -68,16 +70,12 @@ describe('extractOutgoingNoteIdsFromContent', () => {
             {
               type: 'text',
               text: 'a',
-              marks: [
-                { type: 'link', attrs: { href: `/notes/${NOTE_B}` } },
-              ],
+              marks: [{ type: 'link', attrs: { href: `/notes/${NOTE_B}` } }],
             },
             {
               type: 'text',
               text: 'b',
-              marks: [
-                { type: 'link', attrs: { href: `/notes/${NOTE_B}` } },
-              ],
+              marks: [{ type: 'link', attrs: { href: `/notes/${NOTE_B}` } }],
             },
           ],
         },
@@ -127,9 +125,7 @@ describe('extractOutgoingNoteIdsFromContent', () => {
             {
               type: 'text',
               text: 'x',
-              marks: [
-                { type: 'link', attrs: { href: 'https://example.com' } },
-              ],
+              marks: [{ type: 'link', attrs: { href: 'https://example.com' } }],
             },
           ],
         },
@@ -159,9 +155,7 @@ describe('buildNoteLinkGraph', () => {
               {
                 type: 'text',
                 text: 'link',
-                marks: [
-                  { type: 'link', attrs: { href: `/notes/${NOTE_B}` } },
-                ],
+                marks: [{ type: 'link', attrs: { href: `/notes/${NOTE_B}` } }],
               },
             ],
           },
@@ -197,9 +191,7 @@ describe('buildNoteLinkGraph', () => {
               {
                 type: 'text',
                 text: 'self',
-                marks: [
-                  { type: 'link', attrs: { href: `/notes/${NOTE_A}` } },
-                ],
+                marks: [{ type: 'link', attrs: { href: `/notes/${NOTE_A}` } }],
               },
             ],
           },

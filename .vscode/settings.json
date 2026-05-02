@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "cmdk",
+    "cssmodule",
     "distributables",
     "EBUSY",
     "esnext",
@@ -9,6 +10,7 @@
     "GITHUB",
     "gsap",
     "hljs",
+    "hrefs",
     "hugeicons",
     "Hugeicons",
     "isbot",
@@ -30,6 +32,7 @@
     "supabase",
     "tsconfigs",
     "unlayered",
+    "vercel",
     "winstaller",
     "xyflow"
   ],

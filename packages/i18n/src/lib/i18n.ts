@@ -1,4 +1,8 @@
-import { CHROME_UI_ES, CHROME_UI_FR, CHROME_UI_PT } from './chrome-ui-translations.js';
+import {
+  CHROME_UI_ES,
+  CHROME_UI_FR,
+  CHROME_UI_PT,
+} from './chrome-ui-translations.js';
 import {
   SHORTCUT_TRANSLATIONS_ES,
   SHORTCUT_TRANSLATIONS_FR,
@@ -89,6 +93,64 @@ const FOLDER_CORE_FR: LocaleDictionary = {
   'This value is {totalCount}': 'Cette valeur est {totalCount}',
 };
 
+const NOTE_GRAPH_ES: LocaleDictionary = {
+  'Note Graph': 'Gráfico de notas',
+  'How your notes link together. Click a note to open it. Pan and zoom to explore.':
+    'Cómo se enlazan tus notas. Haz clic en una nota para abrirla. Arrastra y amplía para explorar.',
+  'Loading graph…': 'Cargando gráfico…',
+  'No notes to show.': 'No hay notas que mostrar.',
+  'Every note is hidden from the graph. Open a note and turn on ':
+    'Todas las notas están ocultas en el gráfico. Abre una nota y activa ',
+  'Show in note graph': 'Mostrar en el gráfico de notas',
+  ' in the note layout menu (typography icon next to the title).':
+    ' en el menú de diseño de la nota (icono de tipografía junto al título).',
+};
+
+const NOTE_GRAPH_PT: LocaleDictionary = {
+  'Note Graph': 'Gráfico de notas',
+  'How your notes link together. Click a note to open it. Pan and zoom to explore.':
+    'Como as suas notas se ligam. Clique numa nota para abrir. Arraste e amplie para explorar.',
+  'Loading graph…': 'A carregar gráfico…',
+  'No notes to show.': 'Nenhuma nota para mostrar.',
+  'Every note is hidden from the graph. Open a note and turn on ':
+    'Todas as notas estão ocultas no gráfico. Abra uma nota e ative ',
+  'Show in note graph': 'Mostrar no gráfico de notas',
+  ' in the note layout menu (typography icon next to the title).':
+    ' no menu de layout da nota (ícone de tipografia junto ao título).',
+};
+
+const NOTE_GRAPH_FR: LocaleDictionary = {
+  'Note Graph': 'Graphique des notes',
+  'How your notes link together. Click a note to open it. Pan and zoom to explore.':
+    'Comment vos notes sont reliées. Cliquez sur une note pour l’ouvrir. Déplacez et zoomez pour explorer.',
+  'Loading graph…': 'Chargement du graphique…',
+  'No notes to show.': 'Aucune note à afficher.',
+  'Every note is hidden from the graph. Open a note and turn on ':
+    'Chaque note est masquée dans le graphique. Ouvrez une note et activez ',
+  'Show in note graph': 'Afficher dans le graphique des notes',
+  ' in the note layout menu (typography icon next to the title).':
+    ' dans le menu de mise en page de la note (icône de typographie à côté du titre).',
+};
+
+const NOTE_BACKLINKS_ES: LocaleDictionary = {
+  Backlinks: 'Retroenlaces',
+  'No other notes link here yet.': 'Aún no hay otras notas que enlacen aquí.',
+  'Untitled Note': 'Nota sin título',
+};
+
+const NOTE_BACKLINKS_PT: LocaleDictionary = {
+  Backlinks: 'Ligações de retorno',
+  'No other notes link here yet.': 'Ainda não há outras notas que liguem aqui.',
+  'Untitled Note': 'Nota sem título',
+};
+
+const NOTE_BACKLINKS_FR: LocaleDictionary = {
+  Backlinks: 'Rétroliens',
+  'No other notes link here yet.':
+    'Aucune autre note ne renvoie ici pour le moment.',
+  'Untitled Note': 'Note sans titre',
+};
+
 /**
  * Translation dictionary for each supported locale
  * (en-GB and en-CA use the key as-is).
@@ -102,16 +164,22 @@ const TRANSLATIONS: Record<
     ...SHORTCUT_TRANSLATIONS_ES,
     ...CHROME_UI_ES,
     ...FOLDER_CORE_ES,
+    ...NOTE_GRAPH_ES,
+    ...NOTE_BACKLINKS_ES,
   },
   'pt-BR': {
     ...SHORTCUT_TRANSLATIONS_PT,
     ...CHROME_UI_PT,
     ...FOLDER_CORE_PT,
+    ...NOTE_GRAPH_PT,
+    ...NOTE_BACKLINKS_PT,
   },
   'fr-CA': {
     ...SHORTCUT_TRANSLATIONS_FR,
     ...CHROME_UI_FR,
     ...FOLDER_CORE_FR,
+    ...NOTE_GRAPH_FR,
+    ...NOTE_BACKLINKS_FR,
   },
 };
 
@@ -119,7 +187,7 @@ const TRANSLATIONS: Record<
  * Type-safe translation keys extracted from all translation dictionaries.
  * Use this type for autocomplete when calling t().
  */
-export type TranslationKey = keyof typeof TRANSLATIONS['es-ES'];
+export type TranslationKey = keyof (typeof TRANSLATIONS)['es-ES'];
 
 /**
  * Canonicalises a locale string using Intl API.
@@ -253,7 +321,10 @@ export function resolveLocale(
 export function createTranslator(
   preference: LocalePreference,
   systemLocales: readonly string[] = getSystemLocaleCandidates(),
-): { locale: SupportedLocale; t: (key: string, values?: PlaceholderValues) => string } {
+): {
+  locale: SupportedLocale;
+  t: (key: string, values?: PlaceholderValues) => string;
+} {
   const locale = resolveLocale(preference, systemLocales);
   return {
     locale,

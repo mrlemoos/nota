@@ -1,4 +1,4 @@
-import { createTranslator, resolveLocale, t } from './i18n.js';
+import { createTranslator, resolveLocale } from './i18n.js';
 
 describe('i18n', () => {
   it('translates British English keys for Spanish and Portuguese', () => {
@@ -35,7 +35,7 @@ describe('i18n', () => {
 
     // Act
     const resolved = resolveLocale(null, systemLocale);
-    const translated = t('Folder', null, systemLocale);
+    const translated = createTranslator(null, systemLocale).t('Folder');
 
     // Assert
     expect(resolved).toBe('en-GB');

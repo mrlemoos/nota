@@ -22,14 +22,22 @@ import {
   type Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import type { Note } from '~/types/database.types';
-import { useNotesDataVault } from '../context/notes-data-context';
-import { navigateFromLegacyPath } from '../lib/app-navigation';
-import { filterNotesForNoteGraph } from '@nota.app/editor';
-import { applyNoteGraphHoverToEdges } from '../lib/note-graph-hover-edges';
-import { buildNoteLinkGraph } from '../lib/note-link-graph';
-import { notesToIdMap } from '../lib/notes-id-map';
-import { cn } from '@/lib/utils';
+import type { Note } from '@nota.app/database-types';
+import {
+  filterNotesForNoteGraph,
+  persistedDisplayTitle,
+} from '@nota.app/editor';
+import type { PlaceholderValues } from '@nota.app/i18n';
+import { cn } from '@nota.app/web-design/utils';
+import { applyNoteGraphHoverToEdges } from './note-graph-hover-edges';
+import { buildNoteLinkGraph } from './note-link-graph';
+import { notesToIdMap } from './notes-id-map';
+
+export type NotesGraphViewProps = {
+  notes: readonly Note[];
+  onOpenNote: (noteId: string) => void;
+  t: (key: string, values?: PlaceholderValues) => string;
+};
 
 type NoteNodeData = { label: string };
 
@@ -39,7 +47,7 @@ function NoteGraphNode({ data }: { data: NoteNodeData }): JSX.Element {
       <Handle
         type="target"
         position={Position.Top}
-        className="!h-2 !w-2 !border-border !bg-muted"
+        className="h-2! w-2! border-border! bg-muted!"
       />
       <div
         className={cn(
@@ -51,7 +59,7 @@ function NoteGraphNode({ data }: { data: NoteNodeData }): JSX.Element {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="!h-2 !w-2 !border-border !bg-muted"
+        className="h-2! w-2! border-border! bg-muted!"
       />
     </>
   );
@@ -67,7 +75,7 @@ function buildFlowModel(notes: Note[]): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = notes.map((note, i) => {
     const row = Math.floor(i / cols);
     const col = i % cols;
-    const label = note.title?.trim() ? note.title : 'Untitled Note';
+    const label = persistedDisplayTitle(note.title);
     return {
       id: note.id,
       type: 'note',
@@ -93,11 +101,11 @@ function buildFlowModel(notes: Note[]): { nodes: Node[]; edges: Edge[] } {
   return { nodes, edges };
 }
 
-function NotesGraphFlowInner(): JSX.Element {
-  const { notes } = useNotesDataVault();
+function NotesGraphFlowInner(props: NotesGraphViewProps): JSX.Element {
+  const { notes, onOpenNote, t } = props;
 
   const visibleNotes = useMemo(
-    () => filterNotesForNoteGraph(notes),
+    () => filterNotesForNoteGraph([...notes]),
     [notes],
   );
 
@@ -125,12 +133,17 @@ function NotesGraphFlowInner(): JSX.Element {
     const id = requestAnimationFrame(() => {
       void fitView({ padding: 0.15, duration: 200 });
     });
-    return () => { cancelAnimationFrame(id); };
+    return () => {
+      cancelAnimationFrame(id);
+    };
   }, [derivedNodes, derivedEdges, fitView]);
 
-  const onNodeClick = useCallback((_event: MouseEvent, node: Node) => {
-    navigateFromLegacyPath(`/notes/${node.id}`);
-  }, []);
+  const onNodeClick = useCallback(
+    (_event: MouseEvent, node: Node) => {
+      onOpenNote(node.id);
+    },
+    [onOpenNote],
+  );
 
   const onNodeMouseEnter = useCallback((_event: MouseEvent, node: Node) => {
     setHoveredNoteId(node.id);
@@ -142,16 +155,18 @@ function NotesGraphFlowInner(): JSX.Element {
 
   if (notes.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">No notes to show.</p>
+      <p className="text-sm text-muted-foreground">{t('No notes to show.')}</p>
     );
   }
 
   if (visibleNotes.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        Every note is hidden from the graph. Open a note and turn on{' '}
-        <span className="font-medium text-foreground">Show in note graph</span>{' '}
-        in the note layout menu (typography icon next to the title).
+        {t('Every note is hidden from the graph. Open a note and turn on ')}
+        <span className="font-medium text-foreground">
+          {t('Show in note graph')}
+        </span>
+        {t(' in the note layout menu (typography icon next to the title).')}
       </p>
     );
   }
@@ -169,10 +184,10 @@ function NotesGraphFlowInner(): JSX.Element {
       proOptions={{ hideAttribution: true }}
       className="rounded-lg bg-muted/20"
     >
-      <Background gap={20} className="!bg-transparent" />
-      <Controls className="!border-border !bg-card !text-foreground [&_button]:!border-border [&_button]:!bg-card [&_svg]:!fill-foreground" />
+      <Background gap={20} className="bg-transparent!" />
+      <Controls className="border-border! bg-card! text-foreground! [&_button]:border-border! [&_button]:bg-card! [&_svg]:fill-foreground!" />
       <MiniMap
-        className="!border-border !bg-card"
+        className="border-border! bg-card!"
         maskColor="var(--muted)"
         nodeColor={() => 'var(--muted)'}
       />
@@ -180,11 +195,11 @@ function NotesGraphFlowInner(): JSX.Element {
   );
 }
 
-export function NotesGraphView(): JSX.Element {
+export function NotesGraphView(props: NotesGraphViewProps): JSX.Element {
   return (
     <div className="h-[min(70vh,640px)] w-full min-h-[280px] rounded-lg border border-border">
       <ReactFlowProvider>
-        <NotesGraphFlowInner />
+        <NotesGraphFlowInner {...props} />
       </ReactFlowProvider>
     </div>
   );

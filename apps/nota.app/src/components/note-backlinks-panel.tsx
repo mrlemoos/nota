@@ -1,7 +1,7 @@
+import { buildNoteLinkGraph, notesToIdMap } from '@nota.app/note-graph';
 import { useDeferredValue, useMemo, type JSX } from 'react';
-import { buildNoteLinkGraph } from '../lib/note-link-graph';
-import { notesToIdMap } from '../lib/notes-id-map';
 import { cn } from '@/lib/utils';
+import { useNotaTranslator } from '@/lib/use-nota-translator';
 import { useNotesDataVault } from '../context/notes-data-context';
 import { useAppNavigationScreen } from '../hooks/use-app-navigation-screen';
 import { noteHashHref } from './note-detail-panel';
@@ -11,6 +11,7 @@ export function NoteBacklinksPanel({
 }: {
   noteId: string;
 }): JSX.Element {
+  const { t } = useNotaTranslator();
   const { notes } = useNotesDataVault();
   const deferredNotes = useDeferredValue(notes);
   const screen = useAppNavigationScreen();
@@ -31,18 +32,18 @@ export function NoteBacklinksPanel({
         id="note-backlinks-heading"
         className="mb-3 text-sm font-medium text-foreground"
       >
-        (t('Backlinks'))
+        {t('Backlinks')}
       </h2>
       {backlinkIds.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          No other notes link here yet.
+          {t('No other notes link here yet.')}
         </p>
       ) : (
         <ul className="space-y-1">
           {backlinkIds.map((id) => {
             const note = byId.get(id);
             if (!note) return null;
-            const label = note.title?.trim() ? note.title : 'Untitled Note';
+            const label = note.title?.trim() ? note.title : t('Untitled Note');
             const isActive =
               screen.kind === 'notes' &&
               screen.panel === 'note' &&

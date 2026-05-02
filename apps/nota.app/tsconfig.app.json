@@ -2,8 +2,15 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "lib": ["DOM", "DOM.Iterable", "ES2019"],
-    "types": ["vite/client", "node"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2019"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
@@ -12,8 +19,12 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"],
-      "@/*": ["./src/*"]
+      "~/*": [
+        "./src/*"
+      ],
+      "@/*": [
+        "./src/*"
+      ]
     },
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
   },
@@ -72,6 +83,9 @@
     },
     {
       "path": "../../packages/clerk-oauth-protocol/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/note-graph/tsconfig.lib.json"
     }
   ]
 }
