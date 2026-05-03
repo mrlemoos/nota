@@ -275,6 +275,12 @@ function installApplicationMenu(): void {
         onNewFolder: () => {
           sendMenubarAction({ kind: 'create-folder' });
         },
+        onNewNoteFromClipboard: () => {
+          sendMenubarAction({ kind: 'clipboard-note' });
+        },
+        onStudyNotesFromRecording: () => {
+          sendMenubarAction({ kind: 'study-recording' });
+        },
         onQuit: () => {
           app.quit();
         },
@@ -428,7 +434,8 @@ if (!gotTheLock) {
 } else {
   app.on('second-instance', (_event, argv) => {
     const protocolUrl = argv.find(
-      (a): a is string => typeof a === 'string' && a.startsWith(NOTA_CUSTOM_SCHEME_URL_PREFIX),
+      (a): a is string =>
+        typeof a === 'string' && a.startsWith(NOTA_CUSTOM_SCHEME_URL_PREFIX),
     );
     if (protocolUrl) {
       queueOrDeliverSsoFromNotaProtocol(protocolUrl);

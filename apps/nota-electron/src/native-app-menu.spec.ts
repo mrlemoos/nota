@@ -8,6 +8,8 @@ describe('buildNotaAppMenuTemplate', () => {
     const onMoveToFolder = vi.fn();
     const onNewFolder = vi.fn();
     const onQuit = vi.fn();
+    const onNewNoteFromClipboard = vi.fn();
+    const onStudyNotesFromRecording = vi.fn();
 
     // Act
     const template = buildNotaAppMenuTemplate({
@@ -15,6 +17,8 @@ describe('buildNotaAppMenuTemplate', () => {
       onMoveToFolder,
       onNewFolder,
       onQuit,
+      onNewNoteFromClipboard,
+      onStudyNotesFromRecording,
     });
 
     // Assert
@@ -23,9 +27,26 @@ describe('buildNotaAppMenuTemplate', () => {
     const items = submenu ?? [];
     expect(items).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ label: 'New note', accelerator: 'CmdOrCtrl+N' }),
-        expect.objectContaining({ label: 'Move to folder', accelerator: 'CmdOrCtrl+M' }),
-        expect.objectContaining({ label: 'New folder', accelerator: 'CmdOrCtrl+Shift+N' }),
+        expect.objectContaining({
+          label: 'New note',
+          accelerator: 'CmdOrCtrl+N',
+        }),
+        expect.objectContaining({
+          label: 'New note from clipboard',
+          accelerator: 'CmdOrCtrl+Shift+N',
+        }),
+        expect.objectContaining({
+          label: 'Study notes from recording…',
+          accelerator: 'CmdOrCtrl+Shift+R',
+        }),
+        expect.objectContaining({
+          label: 'Move to folder',
+          accelerator: 'CmdOrCtrl+M',
+        }),
+        expect.objectContaining({
+          label: 'New folder',
+          accelerator: 'CmdOrCtrl+Shift+N',
+        }),
       ]),
     );
   });
@@ -36,6 +57,8 @@ describe('buildNotaAppMenuTemplate', () => {
     const onMoveToFolder = vi.fn();
     const onNewFolder = vi.fn();
     const onQuit = vi.fn();
+    const onNewNoteFromClipboard = vi.fn();
+    const onStudyNotesFromRecording = vi.fn();
 
     // Act
     const template = buildNotaAppMenuTemplate({
@@ -43,9 +66,18 @@ describe('buildNotaAppMenuTemplate', () => {
       onMoveToFolder,
       onNewFolder,
       onQuit,
+      onNewNoteFromClipboard,
+      onStudyNotesFromRecording,
     });
-    const items = (template[0]?.submenu ?? []) as Array<{ label?: string; click?: () => void }>;
+    const items = (template[0]?.submenu ?? []) as Array<{
+      label?: string;
+      click?: () => void;
+    }>;
     items.find((item) => item.label === 'New note')?.click?.();
+    items.find((item) => item.label === 'New note from clipboard')?.click?.();
+    items
+      .find((item) => item.label === 'Study notes from recording…')
+      ?.click?.();
     items.find((item) => item.label === 'Move to folder')?.click?.();
     items.find((item) => item.label === 'New folder')?.click?.();
 
@@ -53,6 +85,8 @@ describe('buildNotaAppMenuTemplate', () => {
     expect(onNewNote).toHaveBeenCalledTimes(1);
     expect(onMoveToFolder).toHaveBeenCalledTimes(1);
     expect(onNewFolder).toHaveBeenCalledTimes(1);
+    expect(onNewNoteFromClipboard).toHaveBeenCalledTimes(1);
+    expect(onStudyNotesFromRecording).toHaveBeenCalledTimes(1);
     expect(onQuit).not.toHaveBeenCalled();
   });
 });

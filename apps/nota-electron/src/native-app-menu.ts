@@ -5,6 +5,8 @@ export type NotaAppMenuActions = {
   onMoveToFolder: () => void;
   onNewFolder: () => void;
   onQuit: () => void;
+  onNewNoteFromClipboard: () => void;
+  onStudyNotesFromRecording: () => void;
 };
 
 export function buildNotaAppMenuTemplate(
@@ -34,6 +36,16 @@ export function buildNotaAppMenuTemplate(
           label: 'New note',
           accelerator: 'CmdOrCtrl+N',
           click: actions.onNewNote,
+        },
+        {
+          label: 'New note from clipboard',
+          accelerator: 'CmdOrCtrl+Shift+N',
+          click: actions.onNewNoteFromClipboard,
+        },
+        {
+          label: 'Study notes from recording…',
+          accelerator: 'CmdOrCtrl+Shift+R',
+          click: actions.onStudyNotesFromRecording,
         },
       ],
     },
