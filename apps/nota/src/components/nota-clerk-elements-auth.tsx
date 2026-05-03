@@ -70,6 +70,17 @@ export function NotaClerkSignIn(): JSX.Element {
                   Sign in
                 </SignIn.Action>
                 <SignIn.Action
+                  navigate="forgot-password"
+                  className={cn(
+                    notaButtonVariants({
+                      variant: 'ghost',
+                      className: 'w-full',
+                    }),
+                  )}
+                >
+                  Forgot password?
+                </SignIn.Action>
+                <SignIn.Action
                   navigate="choose-strategy"
                   className={cn(
                     notaButtonVariants({
@@ -160,38 +171,6 @@ export function NotaClerkSignIn(): JSX.Element {
                 </SignIn.Action>
               </div>
             </SignIn.Strategy>
-
-            <SignIn.Strategy name="reset_password_email_code">
-              <div className={stepStackClass}>
-                <p className="text-sm text-muted-foreground">
-                  We sent a code to <SignIn.SafeIdentifier />.
-                </p>
-                <Clerk.Field name="code" className={fieldGroupClass}>
-                  <Clerk.Label className={labelClass}>
-                    Verification code
-                  </Clerk.Label>
-                  <Clerk.Input type="otp" className={inputClass} />
-                  <Clerk.FieldError className="text-sm text-destructive" />
-                </Clerk.Field>
-                <div className="flex flex-col gap-3">
-                  <SignIn.Action submit className={primarySubmitClass}>
-                    Continue
-                  </SignIn.Action>
-                  <SignIn.Action
-                    resend
-                    className={cn(
-                      notaButtonVariants({
-                        variant: 'ghost',
-                        size: 'default',
-                        className: 'w-full',
-                      }),
-                    )}
-                  >
-                    Resend code
-                  </SignIn.Action>
-                </div>
-              </div>
-            </SignIn.Strategy>
           </div>
         </SignIn.Step>
 
@@ -246,6 +225,23 @@ export function NotaClerkSignIn(): JSX.Element {
 
         <SignIn.Step name="forgot-password">
           <div className={stepStackClass}>
+            <p className="text-sm text-muted-foreground">
+              We&apos;ll send a verification code to your email so you can reset
+              your password.
+            </p>
+            <SignIn.SupportedStrategy name="reset_password_email_code" asChild>
+              <button
+                type="button"
+                className={cn(
+                  notaButtonVariants({
+                    variant: 'outline',
+                    className: 'w-full',
+                  }),
+                )}
+              >
+                Send reset code
+              </button>
+            </SignIn.SupportedStrategy>
             <SignIn.Action
               navigate="start"
               className={cn(
