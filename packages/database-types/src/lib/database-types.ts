@@ -63,6 +63,7 @@ export interface Database {
           id: string;
           user_id: string;
           name: string;
+          parent_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -70,6 +71,7 @@ export interface Database {
           id?: string;
           user_id: string;
           name: string;
+          parent_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -77,10 +79,18 @@ export interface Database {
           id?: string;
           user_id?: string;
           name?: string;
+          parent_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: 'folders_parent_id_fkey';
+            columns: ['parent_id'];
+            referencedRelation: 'folders';
+            referencedColumns: ['id'];
+          },
+        ];
       };
       note_attachments: {
         Row: {

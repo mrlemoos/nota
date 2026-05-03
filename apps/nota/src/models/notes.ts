@@ -1,10 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type {
   Database,
+  Folder,
   Json,
   NoteInsert,
   NoteUpdate,
 } from '~/types/database.types';
+import { subtreeFolderIds } from '../lib/folder-tree';
 import { listNoteAttachments, NOTE_PDFS_BUCKET } from './note-attachments';
 
 /** Browser and tests use the generated `Database` shape. */
@@ -128,6 +130,49 @@ export async function moveAllNotesBetweenFolders(
 
   if (error) {
     throw new Error(`Failed to move notes between folders: ${error.message}`);
+  }
+}
+
+export async function listNoteIdsInFolderSubtree(
+  client: TypedSupabaseClient,
+  rootFolderId: string,
+  folders: Folder[],
+): Promise<string[]> {
+  const folderIds = subtreeFolderIds(rootFolderId, folders);
+  if (folderIds.length === 0) {
+    return [];
+  }
+
+  const { data, error } = await client
+    .from('notes')
+    .select('id')
+    .in('folder_id', folderIds);
+
+  if (error) {
+    throw new Error(`Failed to list notes in folder subtree: ${error.message}`);
+  }
+
+  return (data ?? []).map((r) => r.id);
+}
+
+export async function moveAllNotesInFolderSubtree(
+  client: TypedSupabaseClient,
+  fromRootFolderId: string,
+  toFolderId: string | null,
+  folders: Folder[],
+): Promise<void> {
+  const folderIds = subtreeFolderIds(fromRootFolderId, folders);
+  if (folderIds.length === 0) {
+    return;
+  }
+
+  const { error } = await client
+    .from('notes')
+    .update({ folder_id: toFolderId })
+    .in('folder_id', folderIds);
+
+  if (error) {
+    throw new Error(`Failed to move notes in folder subtree: ${error.message}`);
   }
 }
 

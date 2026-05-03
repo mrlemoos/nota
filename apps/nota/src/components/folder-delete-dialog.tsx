@@ -1,4 +1,4 @@
-import { useCallback, useId, useState, type JSX } from 'react';
+import { useCallback, useId, useMemo, useState, type JSX } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { NotaButton } from '@nota/web-design/button';
 import { cn } from '@/lib/utils';
@@ -8,6 +8,7 @@ import {
   clientMoveAllNotesThenDeleteFolder,
 } from '../lib/delete-folder-client';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
+import { folderPathLabel, subtreeFolderIds } from '../lib/folder-tree';
 
 type FolderDeleteDialogProps = {
   folder: Folder | null;
@@ -32,11 +33,19 @@ export function FolderDeleteDialog({
   const titleId = useId();
   const descId = useId();
   const { t } = useNotaTranslator();
+  const pathSep = t(' / ');
+  const excludedIds = useMemo(() => {
+    if (!folder) {
+      return new Set<string>();
+    }
+    return new Set(subtreeFolderIds(folder.id, allFolders));
+  }, [folder, allFolders]);
+
+  const otherFolders = allFolders.filter((f) => !excludedIds.has(f.id));
+
   const [targetId, setTargetId] = useState<string>('');
   const [busy, setBusy] = useState<'move' | 'delete' | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const otherFolders = allFolders.filter((f) => f.id !== folder?.id);
 
   const resetAndClose = useCallback((): void => {
     setTargetId('');
@@ -150,7 +159,7 @@ export function FolderDeleteDialog({
               </option>
               {otherFolders.map((f) => (
                 <option key={f.id} value={f.id}>
-                  {f.name}
+                  {folderPathLabel(f.id, allFolders, pathSep)}
                 </option>
               ))}
             </select>

@@ -11,6 +11,8 @@ type FolderCreateDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string | undefined;
+  /** When set, the new folder is created under this parent (nested). */
+  parentFolderId?: string | null;
   insertFolderSorted: (f: Folder) => void;
   refreshNotesList: (options?: { silent?: boolean }) => Promise<void>;
   onCreated?: (folder: Folder) => void | Promise<void>;
@@ -20,6 +22,7 @@ export function FolderCreateDialog({
   open,
   onOpenChange,
   userId,
+  parentFolderId = null,
   insertFolderSorted,
   refreshNotesList,
   onCreated,
@@ -59,7 +62,7 @@ export function FolderCreateDialog({
     setError(null);
     try {
       const client = getBrowserClient();
-      const row = await createFolder(client, userId, trimmed);
+      const row = await createFolder(client, userId, trimmed, parentFolderId);
       insertFolderSorted(row);
       await onCreated?.(row);
       await refreshNotesList({ silent: true });
@@ -76,6 +79,7 @@ export function FolderCreateDialog({
     name,
     onCreated,
     onOpenChange,
+    parentFolderId,
     refreshNotesList,
     reset,
     t,
@@ -93,7 +97,7 @@ export function FolderCreateDialog({
           aria-labelledby={titleId}
         >
           <Dialog.Title id={titleId} className="font-medium text-foreground">
-            {t('New folder')}
+            {parentFolderId ? t('New subfolder') : t('New folder')}
           </Dialog.Title>
           <label
             className="mt-3 block text-xs text-muted-foreground"

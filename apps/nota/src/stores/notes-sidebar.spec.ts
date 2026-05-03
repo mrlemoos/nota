@@ -45,6 +45,18 @@ describe('notes sidebar store (folder expand/collapse)', () => {
     ).toEqual(['f2']);
   });
 
+  it('expandFolderAncestors removes every listed id from collapsedFolderIds', () => {
+    // Arrange
+    const s = useNotesSidebarStore.getState();
+    s.toggleFolderCollapsed('a');
+    s.toggleFolderCollapsed('b');
+    s.toggleFolderCollapsed('c');
+    // Act
+    s.expandFolderAncestors(['a', 'c']);
+    // Assert
+    expect(useNotesSidebarStore.getState().collapsedFolderIds).toEqual(['b']);
+  });
+
   it('pruneCollapsedFolderIds keeps only ids in the allowlist', () => {
     // Arrange
     const s = useNotesSidebarStore.getState();

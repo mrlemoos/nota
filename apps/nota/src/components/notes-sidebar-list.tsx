@@ -4,6 +4,7 @@ import {
   useMemo,
   useRef,
   useState,
+  Fragment,
   type DragEvent,
   type RefObject,
   type ReactNode,
@@ -44,7 +45,6 @@ import { useNotaTranslator } from '@/lib/use-nota-translator';
 import type { Folder, Note, UserPreferences } from '~/types/database.types';
 import type { NotesShellPanel } from '../lib/app-navigation';
 import { noteHashHref } from './note-detail-panel';
-import { clientCreateNote } from '../lib/create-note-client';
 import { clientDeleteNoteById } from '../lib/delete-note-client';
 import { clientMoveNoteToFolder } from '../lib/move-note-folder-client';
 import {
@@ -53,7 +53,13 @@ import {
 } from '../lib/folder-rename-request';
 import { clientRenameFolder } from '../lib/rename-folder-client';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
-import { buildSidebarFolderSections } from '../lib/note-sidebar-groups';
+import { compareNoteTitles } from '../lib/note-sidebar-groups';
+import {
+  ancestorFolderIds,
+  buildFolderTree,
+  flattenFoldersWithPathLabels,
+  type FolderTreeNode,
+} from '../lib/folder-tree';
 import { FolderCreateDialog } from './folder-create-dialog';
 import { FolderDeleteDialog } from './folder-delete-dialog';
 
@@ -76,7 +82,7 @@ type NotesSidebarListProps = {
 
 function NoteRow(options: {
   note: Note;
-  folders: Folder[];
+  folderMoveTargets: { folderId: string; pathLabel: string }[];
   isActive: boolean;
   /** Nested under a folder row in the tree. */
   nested?: boolean;
@@ -99,7 +105,7 @@ function NoteRow(options: {
   const { t } = useNotaTranslator();
   const {
     note,
-    folders,
+    folderMoveTargets,
     isActive,
     nested = false,
     userId,
@@ -216,12 +222,12 @@ function NoteRow(options: {
                             />
                             <span>{t('Root')}</span>
                           </NotaContextMenuItem>
-                          {folders.map((folder) => (
+                          {folderMoveTargets.map(({ folderId, pathLabel }) => (
                             <NotaContextMenuItem
-                              key={folder.id}
-                              label={folder.name}
+                              key={folderId}
+                              label={pathLabel}
                               onClick={() => {
-                                void onMoveNoteToFolder(note.id, folder.id);
+                                void onMoveNoteToFolder(note.id, folderId);
                               }}
                             >
                               <HugeiconsIcon
@@ -230,7 +236,7 @@ function NoteRow(options: {
                                 className="shrink-0 text-muted-foreground"
                               />
                               <span className="min-w-0 flex-1 truncate">
-                                {folder.name}
+                                {pathLabel}
                               </span>
                             </NotaContextMenuItem>
                           ))}
@@ -311,6 +317,7 @@ function FolderRow(options: {
   startRenamingFolder: (folder: Folder) => void;
   setFolderDeleteTarget: (folder: Folder) => void;
   moveDraggedNoteToFolder: (folderId: string) => Promise<void>;
+  onRequestNewSubfolder: (folder: Folder) => void;
   children: ReactNode;
 }): JSX.Element {
   const { t } = useNotaTranslator();
@@ -332,6 +339,7 @@ function FolderRow(options: {
     startRenamingFolder,
     setFolderDeleteTarget,
     moveDraggedNoteToFolder,
+    onRequestNewSubfolder,
     children,
   } = options;
 
@@ -498,6 +506,19 @@ function FolderRow(options: {
                   <span>{t('Rename')}</span>
                 </NotaContextMenuItem>
                 <NotaContextMenuItem
+                  label={t('New subfolder')}
+                  onClick={() => {
+                    onRequestNewSubfolder(folder);
+                  }}
+                >
+                  <HugeiconsIcon
+                    icon={FolderAddIcon}
+                    size={16}
+                    className="shrink-0 text-muted-foreground"
+                  />
+                  <span>{t('New subfolder')}</span>
+                </NotaContextMenuItem>
+                <NotaContextMenuItem
                   label={`${t('Delete folder')} ${folder.name}`}
                   onClick={() => {
                     setFolderDeleteTarget(folder);
@@ -537,14 +558,32 @@ export function NotesSidebarList({
   refreshNotesList,
 }: NotesSidebarListProps): JSX.Element {
   const uid = userId ?? '';
+  const { t } = useNotaTranslator();
+  const pathSep = t(' / ');
   const [draggedNoteId, setDraggedNoteId] = useState<string | null>(null);
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
-  const { sections, rootNotes } = useMemo(
-    () => buildSidebarFolderSections(notes, folders),
-    [notes, folders],
+  const folderRoots = useMemo(() => buildFolderTree(folders), [folders]);
+  const rootNotes = useMemo(
+    () =>
+      [...notes]
+        .filter((n) => n.folder_id == null)
+        .sort(compareNoteTitles),
+    [notes],
+  );
+  const folderMoveTargets = useMemo(
+    () =>
+      flattenFoldersWithPathLabels(folders, pathSep).map(
+        ({ folder: f, pathLabel }) => ({
+          folderId: f.id,
+          pathLabel,
+        }),
+      ),
+    [folders, pathSep],
   );
 
-  const expandFolder = useNotesSidebarStore((s) => s.expandFolder);
+  const expandFolderAncestors = useNotesSidebarStore(
+    (s) => s.expandFolderAncestors,
+  );
   const collapsedFolderIds = useNotesSidebarStore((s) => s.collapsedFolderIds);
   const pruneCollapsedFolderIds = useNotesSidebarStore(
     (s) => s.pruneCollapsedFolderIds,
@@ -557,6 +596,9 @@ export function NotesSidebarList({
     null,
   );
   const [folderCreateOpen, setFolderCreateOpen] = useState(false);
+  const [folderCreateParentId, setFolderCreateParentId] = useState<string | null>(
+    null,
+  );
   const [pendingNewFolderNote, setPendingNewFolderNote] = useState<{
     noteId: string;
   } | null>(null);
@@ -590,10 +632,14 @@ export function NotesSidebarList({
     if (!folderId) {
       return;
     }
-    if (useNotesSidebarStore.getState().collapsedFolderIds.includes(folderId)) {
-      expandFolder(folderId);
+    const chain = [...ancestorFolderIds(folderId, folders), folderId];
+    const collapsed = useNotesSidebarStore.getState().collapsedFolderIds;
+    const needsExpand = chain.filter((id) => collapsed.includes(id));
+    if (needsExpand.length === 0) {
+      return;
     }
-  }, [panel, routeNoteId, notes, expandFolder]);
+    expandFolderAncestors(needsExpand);
+  }, [panel, routeNoteId, notes, folders, expandFolderAncestors]);
 
   const vaultEmpty = notes.length === 0 && folders.length === 0;
 
@@ -667,6 +713,7 @@ export function NotesSidebarList({
   );
 
   const startCreatingFolderForNote = useCallback((note: Note): void => {
+    setFolderCreateParentId(null);
     setPendingNewFolderNote({
       noteId: note.id,
     });
@@ -685,26 +732,14 @@ export function NotesSidebarList({
     [moveNoteToFolder, pendingNewFolderNote],
   );
 
-  const onCreateNote = (): void => {
-    if (!uid) {
-      return;
-    }
-    void clientCreateNote({
-      userId: uid,
-      insertNoteAtFront,
-      refreshNotesList,
-      notaProEntitled,
-      notes,
-    });
-  };
-
   const startRenamingFolder = useCallback(
     (folder: Folder): void => {
-      expandFolder(folder.id);
+      const chain = [...ancestorFolderIds(folder.id, folders), folder.id];
+      expandFolderAncestors(chain);
       setRenamingFolderId(folder.id);
       setFolderRenameDraft(folder.name);
     },
-    [expandFolder],
+    [expandFolderAncestors, folders],
   );
 
   const stopRenamingFolder = useCallback((): void => {
@@ -761,6 +796,89 @@ export function NotesSidebarList({
     };
   }, [folders, startRenamingFolder]);
 
+  const renderFolderTreeNode = (node: FolderTreeNode): JSX.Element => {
+    const { folder, children } = node;
+    const folderContentId = `sidebar-folder-${folder.id}`;
+    const isCollapsed = collapsedFolderIds.includes(folder.id);
+    const isDropTarget = dropTargetId === folder.id;
+    const notesInFolder = notes
+      .filter((n) => n.folder_id === folder.id)
+      .sort(compareNoteTitles);
+
+    const branchListClass =
+      'm-0 ml-2.5 list-none space-y-1 border-border/35 border-l py-0.5 pl-2';
+
+    return (
+      <FolderRow
+        folder={folder}
+        folderContentId={folderContentId}
+        isCollapsed={isCollapsed}
+        isDropTarget={isDropTarget}
+        draggedNoteId={draggedNoteId}
+        setDraggedNoteId={setDraggedNoteId}
+        setDropTargetId={setDropTargetId}
+        toggleFolderCollapsed={toggleFolderCollapsed}
+        renamingFolderId={renamingFolderId}
+        folderRenameDraft={folderRenameDraft}
+        renameInputRef={renameInputRef}
+        setFolderRenameDraft={setFolderRenameDraft}
+        commitFolderRename={commitFolderRename}
+        stopRenamingFolder={stopRenamingFolder}
+        startRenamingFolder={startRenamingFolder}
+        setFolderDeleteTarget={(value) => {
+          setFolderDeleteTarget(value);
+        }}
+        moveDraggedNoteToFolder={moveDraggedNoteToFolder}
+        onRequestNewSubfolder={(f) => {
+          setFolderCreateParentId(f.id);
+          setFolderCreateOpen(true);
+        }}
+      >
+        {!isCollapsed ? (
+          <div id={folderContentId} className="min-w-0">
+            {children.length > 0 ? (
+              <ul className={branchListClass}>
+                {children.map((child) => (
+                  <Fragment key={child.folder.id}>
+                    {renderFolderTreeNode(child)}
+                  </Fragment>
+                ))}
+              </ul>
+            ) : null}
+            {notesInFolder.length === 0 && children.length === 0 ? (
+              <p className="ml-2.5 border-border/35 border-l py-1 pl-2.5 text-muted-foreground text-xs">
+                {t('No notes in this folder.')}
+              </p>
+            ) : notesInFolder.length > 0 ? (
+              <ul className="m-0 ml-2.5 list-none space-y-0.5 border-border/35 border-l py-0.5 pl-2">
+                {notesInFolder.map((n) => (
+                  <NoteRow
+                    key={n.id}
+                    note={n}
+                    nested
+                    isActive={panel === 'note' && routeNoteId === n.id}
+                    userId={uid}
+                    notaProEntitled={notaProEntitled}
+                    userPreferences={userPreferences}
+                    removeNoteFromList={removeNoteFromList}
+                    removeFolderFromList={removeFolderFromList}
+                    refreshNotesList={refreshNotesList}
+                    draggedNoteId={draggedNoteId}
+                    setDraggedNoteId={setDraggedNoteId}
+                    setDropTargetId={setDropTargetId}
+                    folderMoveTargets={folderMoveTargets}
+                    onMoveNoteToFolder={moveNoteToFolder}
+                    onMoveNoteToNewFolder={startCreatingFolderForNote}
+                  />
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        ) : null}
+      </FolderRow>
+    );
+  };
+
   if (vaultEmpty) {
     return (
       <div className="p-4 text-center text-sm text-muted-foreground">
@@ -772,72 +890,9 @@ export function NotesSidebarList({
   return (
     <>
       <ul className="m-0 list-none space-y-1 p-0">
-        {sections.map(({ folder, notes: fn }) => {
-          const folderContentId = `sidebar-folder-${folder.id}`;
-          const isCollapsed = collapsedFolderIds.includes(folder.id);
-          const isDropTarget = dropTargetId === folder.id;
-          return (
-            <FolderRow
-              key={folder.id}
-              folder={folder}
-              folderContentId={folderContentId}
-              isCollapsed={isCollapsed}
-              isDropTarget={isDropTarget}
-              draggedNoteId={draggedNoteId}
-              setDraggedNoteId={setDraggedNoteId}
-              setDropTargetId={setDropTargetId}
-              toggleFolderCollapsed={toggleFolderCollapsed}
-              renamingFolderId={renamingFolderId}
-              folderRenameDraft={folderRenameDraft}
-              renameInputRef={renameInputRef}
-              setFolderRenameDraft={setFolderRenameDraft}
-              commitFolderRename={commitFolderRename}
-              stopRenamingFolder={stopRenamingFolder}
-              startRenamingFolder={startRenamingFolder}
-              setFolderDeleteTarget={(value) => {
-                setFolderDeleteTarget(value);
-              }}
-              moveDraggedNoteToFolder={moveDraggedNoteToFolder}
-            >
-              {!isCollapsed ? (
-                fn.length === 0 ? (
-                  <p
-                    id={folderContentId}
-                    className="ml-5 border-border/35 border-l py-1 pl-2.5 text-muted-foreground text-xs"
-                  >
-                    No notes in this folder.
-                  </p>
-                ) : (
-                  <ul
-                    id={folderContentId}
-                    className="m-0 ml-2.5 list-none space-y-0.5 border-border/35 border-l py-0.5 pl-2"
-                  >
-                    {fn.map((note) => (
-                      <NoteRow
-                        key={note.id}
-                        note={note}
-                        nested
-                        isActive={panel === 'note' && routeNoteId === note.id}
-                        userId={uid}
-                        notaProEntitled={notaProEntitled}
-                        userPreferences={userPreferences}
-                        removeNoteFromList={removeNoteFromList}
-                        removeFolderFromList={removeFolderFromList}
-                        refreshNotesList={refreshNotesList}
-                        draggedNoteId={draggedNoteId}
-                        setDraggedNoteId={setDraggedNoteId}
-                        setDropTargetId={setDropTargetId}
-                        folders={folders}
-                        onMoveNoteToFolder={moveNoteToFolder}
-                        onMoveNoteToNewFolder={startCreatingFolderForNote}
-                      />
-                    ))}
-                  </ul>
-                )
-              ) : null}
-            </FolderRow>
-          );
-        })}
+        {folderRoots.map((node) => (
+          <Fragment key={node.folder.id}>{renderFolderTreeNode(node)}</Fragment>
+        ))}
 
         <li
           className={cn(
@@ -891,7 +946,7 @@ export function NotesSidebarList({
                   draggedNoteId={draggedNoteId}
                   setDraggedNoteId={setDraggedNoteId}
                   setDropTargetId={setDropTargetId}
-                  folders={folders}
+                  folderMoveTargets={folderMoveTargets}
                   onMoveNoteToFolder={moveNoteToFolder}
                   onMoveNoteToNewFolder={startCreatingFolderForNote}
                 />
@@ -911,9 +966,11 @@ export function NotesSidebarList({
           setFolderCreateOpen(next);
           if (!next) {
             setPendingNewFolderNote(null);
+            setFolderCreateParentId(null);
           }
         }}
         userId={uid}
+        parentFolderId={folderCreateParentId}
         insertFolderSorted={insertFolderSorted}
         refreshNotesList={refreshNotesList}
         onCreated={handleNewFolderCreated}

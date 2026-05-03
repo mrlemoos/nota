@@ -1,4 +1,4 @@
-import { countNotesInFolder, deleteFolderById } from '../models/folders';
+import { countNotesInFolder, deleteFolderById, folderHasChildFolders } from '../models/folders';
 import { getBrowserClient } from './supabase/browser';
 import { isLikelyOnline } from './notes-offline';
 import type { UserPreferences } from '~/types/database.types';
@@ -24,6 +24,10 @@ export async function maybePruneEmptyFolder(options: {
 
   const client = getBrowserClient();
   try {
+    const hasChildFolders = await folderHasChildFolders(client, folderId);
+    if (hasChildFolders) {
+      return;
+    }
     const count = await countNotesInFolder(client, folderId);
     if (count !== 0) {
       return;

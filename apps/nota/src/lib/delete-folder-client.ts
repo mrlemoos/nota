@@ -2,10 +2,11 @@ import { getBrowserClient } from './supabase/browser';
 import { isLikelyOnline } from './notes-offline';
 import {
   deleteNote,
-  listNoteIdsInFolder,
-  moveAllNotesBetweenFolders,
+  listNoteIdsInFolderSubtree,
+  moveAllNotesInFolderSubtree,
 } from '../models/notes';
-import { deleteFolderById } from '../models/folders';
+import { deleteFolderById, listFolders } from '../models/folders';
+import { subtreeFolderIds } from './folder-tree';
 
 export async function clientMoveAllNotesThenDeleteFolder(options: {
   folderId: string;
@@ -17,9 +18,18 @@ export async function clientMoveAllNotesThenDeleteFolder(options: {
     throw new Error('Moving folders requires an internet connection.');
   }
   const client = getBrowserClient();
-  await moveAllNotesBetweenFolders(client, options.folderId, options.targetFolderId);
+  const allFolders = await listFolders(client);
+  await moveAllNotesInFolderSubtree(
+    client,
+    options.folderId,
+    options.targetFolderId,
+    allFolders,
+  );
+  const removedFolderIds = subtreeFolderIds(options.folderId, allFolders);
   await deleteFolderById(client, options.folderId);
-  options.removeFolderFromList(options.folderId);
+  for (const id of removedFolderIds) {
+    options.removeFolderFromList(id);
+  }
   await options.refreshNotesList({ silent: true });
 }
 
@@ -33,12 +43,16 @@ export async function clientDeleteAllNotesInFolderThenDeleteFolder(options: {
     throw new Error('Deleting a folder requires an internet connection.');
   }
   const client = getBrowserClient();
-  const ids = await listNoteIdsInFolder(client, options.folderId);
+  const allFolders = await listFolders(client);
+  const ids = await listNoteIdsInFolderSubtree(client, options.folderId, allFolders);
   for (const id of ids) {
     await deleteNote(client, id);
     options.removeNoteFromList(id);
   }
+  const removedFolderIds = subtreeFolderIds(options.folderId, allFolders);
   await deleteFolderById(client, options.folderId);
-  options.removeFolderFromList(options.folderId);
+  for (const id of removedFolderIds) {
+    options.removeFolderFromList(id);
+  }
   await options.refreshNotesList({ silent: true });
 }

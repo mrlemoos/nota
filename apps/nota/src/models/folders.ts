@@ -22,10 +22,12 @@ export async function createFolder(
   client: TypedSupabaseClient,
   userId: string,
   name: string,
+  parentId: string | null = null,
 ): Promise<Folder> {
   const row: FolderInsert = {
     user_id: userId,
     name: name.trim() || 'Untitled folder',
+    parent_id: parentId,
   };
 
   const { data, error } = await client
@@ -85,4 +87,20 @@ export async function countNotesInFolder(
   }
 
   return count ?? 0;
+}
+
+export async function folderHasChildFolders(
+  client: TypedSupabaseClient,
+  folderId: string,
+): Promise<boolean> {
+  const { count, error } = await client
+    .from('folders')
+    .select('*', { count: 'exact', head: true })
+    .eq('parent_id', folderId);
+
+  if (error) {
+    throw new Error(`Failed to count child folders: ${error.message}`);
+  }
+
+  return (count ?? 0) > 0;
 }

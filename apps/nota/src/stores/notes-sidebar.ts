@@ -10,6 +10,8 @@ export interface NotesSidebarState {
   toggleFolderCollapsed: (folderId: string) => void;
   /** Ensures a folder is expanded (e.g. when opening a note inside it). */
   expandFolder: (folderId: string) => void;
+  /** Expands every listed folder (e.g. ancestors of a nested note). */
+  expandFolderAncestors: (folderIds: readonly string[]) => void;
   /** Remove ids for deleted or unknown folders from persisted storage. */
   pruneCollapsedFolderIds: (validFolderIds: Iterable<string>) => void;
 }
@@ -47,6 +49,17 @@ export const useNotesSidebarStore = create<NotesSidebarState>()(
             (id) => id !== folderId,
           ),
         })),
+      expandFolderAncestors: (folderIds) => {
+        if (folderIds.length === 0) {
+          return;
+        }
+        const drop = new Set(folderIds);
+        set((s) => ({
+          collapsedFolderIds: s.collapsedFolderIds.filter(
+            (id) => !drop.has(id),
+          ),
+        }));
+      },
       pruneCollapsedFolderIds: (validFolderIds) => {
         const valid = new Set(validFolderIds);
         set((s) => ({

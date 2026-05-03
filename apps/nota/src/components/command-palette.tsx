@@ -51,6 +51,8 @@ import {
   toggleIdInSet,
 } from '../lib/move-pick-helpers';
 import type { Folder } from '~/types/database.types';
+import { useNotaTranslator } from '@/lib/use-nota-translator';
+import { flattenFoldersWithPathLabels } from '../lib/folder-tree';
 import { FolderCreateDialog } from './folder-create-dialog';
 import { FolderDeleteDialog } from './folder-delete-dialog';
 import { ReleaseNotesDialog } from './release-notes-dialog';
@@ -139,6 +141,12 @@ export function CommandPalette(): JSX.Element {
     removeNoteFromList,
     removeFolderFromList,
   } = useNotesData();
+  const { t } = useNotaTranslator();
+  const pathSep = t(' / ');
+  const foldersWithPaths = useMemo(
+    () => flattenFoldersWithPathLabels(folders, pathSep),
+    [folders, pathSep],
+  );
   const { user } = useRootLoaderData();
   const { signOut } = useClerk();
   const openTodaysNoteShortcut = useNotaPreferencesStore(
@@ -779,12 +787,17 @@ export function CommandPalette(): JSX.Element {
                           >
                             <span className="min-w-0 flex-1">No folder</span>
                           </Command.Item>
-                          {folders.map((f) => (
+                          {foldersWithPaths.map(({ folder: f, pathLabel }) => (
                             <Command.Item
                               key={`move-to-${f.id}`}
                               value={`move-to:${f.id}`}
                               disabled={busyAction === 'moveNotes'}
-                              keywords={['move', f.name]}
+                              keywords={[
+                                'move',
+                                f.name,
+                                pathLabel,
+                                ...pathLabel.split(pathSep).map((s) => s.trim()),
+                              ]}
                               onSelect={() => {
                                 void completeMoveToTarget(f.id);
                               }}
@@ -796,7 +809,7 @@ export function CommandPalette(): JSX.Element {
                               )}
                             >
                               <span className="min-w-0 flex-1 truncate">
-                                {f.name}
+                                {pathLabel}
                               </span>
                             </Command.Item>
                           ))}
@@ -831,11 +844,17 @@ export function CommandPalette(): JSX.Element {
                       heading="Delete folder — pick folder"
                       className={groupHeadingClassName}
                     >
-                      {folders.map((f) => (
+                      {foldersWithPaths.map(({ folder: f, pathLabel }) => (
                         <Command.Item
                           key={`del-pick-${f.id}`}
                           value={`del-pick:${f.id}`}
-                          keywords={['delete', 'folder', f.name]}
+                          keywords={[
+                            'delete',
+                            'folder',
+                            f.name,
+                            pathLabel,
+                            ...pathLabel.split(pathSep).map((s) => s.trim()),
+                          ]}
                           onSelect={() => {
                             setFolderDeleteTarget(f);
                             setDeleteFolderPickerOpen(false);
@@ -847,7 +866,7 @@ export function CommandPalette(): JSX.Element {
                           )}
                         >
                           <span className="min-w-0 flex-1 truncate">
-                            {f.name}
+                            {pathLabel}
                           </span>
                         </Command.Item>
                       ))}
@@ -872,11 +891,17 @@ export function CommandPalette(): JSX.Element {
                       heading="Rename folder — pick folder"
                       className={groupHeadingClassName}
                     >
-                      {folders.map((f) => (
+                      {foldersWithPaths.map(({ folder: f, pathLabel }) => (
                         <Command.Item
                           key={`rename-pick-${f.id}`}
                           value={`rename-pick:${f.id}`}
-                          keywords={['rename', 'folder', f.name]}
+                          keywords={[
+                            'rename',
+                            'folder',
+                            f.name,
+                            pathLabel,
+                            ...pathLabel.split(pathSep).map((s) => s.trim()),
+                          ]}
                           onSelect={() => {
                             setRenameFolderPickerOpen(false);
                             closePalette();
@@ -889,7 +914,7 @@ export function CommandPalette(): JSX.Element {
                           )}
                         >
                           <span className="min-w-0 flex-1 truncate">
-                            {f.name}
+                            {pathLabel}
                           </span>
                         </Command.Item>
                       ))}
@@ -1079,11 +1104,17 @@ export function CommandPalette(): JSX.Element {
                           >
                             <span className="min-w-0 flex-1">Today</span>
                           </Command.Item>
-                          {folders.map((f) => (
+                          {foldersWithPaths.map(({ folder: f, pathLabel }) => (
                             <Command.Item
                               key={`new-note-f-${f.id}`}
                               value={`new-note-f:${f.id}`}
-                              keywords={['folder', f.name, 'new note']}
+                              keywords={[
+                                'folder',
+                                f.name,
+                                pathLabel,
+                                'new note',
+                                ...pathLabel.split(pathSep).map((s) => s.trim()),
+                              ]}
                               onSelect={() => {
                                 setBusyAction('create');
                                 void (async () => {
@@ -1109,7 +1140,7 @@ export function CommandPalette(): JSX.Element {
                               )}
                             >
                               <span className="min-w-0 flex-1 truncate">
-                                {f.name}
+                                {pathLabel}
                               </span>
                             </Command.Item>
                           ))}

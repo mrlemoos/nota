@@ -31,6 +31,7 @@ describe('NotesSidebarList', () => {
             id: 'folder-1',
             user_id: 'user-1',
             name: 'Computer Science Study',
+            parent_id: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -89,6 +90,7 @@ describe('NotesSidebarList', () => {
             id: 'folder-1',
             user_id: 'user-1',
             name: 'Computer Science Study',
+            parent_id: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -145,6 +147,7 @@ describe('NotesSidebarList', () => {
             id: 'folder-1',
             user_id: 'user-1',
             name: 'Computer Science Study',
+            parent_id: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -235,6 +238,7 @@ describe('NotesSidebarList', () => {
             id: 'folder-1',
             user_id: 'user-1',
             name: 'Computer Science Study',
+            parent_id: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -309,6 +313,7 @@ describe('NotesSidebarList', () => {
             id: 'folder-1',
             user_id: 'user-1',
             name: 'Computer Science Study',
+            parent_id: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -351,6 +356,7 @@ describe('NotesSidebarList', () => {
             id: 'folder-1',
             user_id: 'user-1',
             name: 'Computer Science Study',
+            parent_id: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -385,5 +391,92 @@ describe('NotesSidebarList', () => {
       expect(screen.getByText('Rename')).toBeTruthy();
       expect(screen.getByText('Delete folder')).toBeTruthy();
     });
+  });
+
+  it('renders a nested folder and moves a note when dropped on the inner folder row', () => {
+    // Arrange
+    const patchNoteInList = vi.fn();
+    render(
+      <NotesSidebarList
+        notes={[
+          {
+            id: 'note-1',
+            user_id: 'user-1',
+            title: 'Alpha note',
+            content: {},
+            created_at: '2026-04-15T12:00:00.000Z',
+            updated_at: '2026-04-15T12:00:00.000Z',
+            due_at: null,
+            is_deadline: false,
+            editor_settings: {},
+            banner_attachment_id: null,
+            folder_id: null,
+          },
+        ]}
+        folders={[
+          {
+            id: 'folder-parent',
+            user_id: 'user-1',
+            name: 'Parent',
+            parent_id: null,
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+          {
+            id: 'folder-child',
+            user_id: 'user-1',
+            name: 'Child',
+            parent_id: 'folder-parent',
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={patchNoteInList}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    expect(screen.getByText('Child')).toBeTruthy();
+
+    const noteRow = screen.getByText('Alpha note').closest('li')
+      ?.firstElementChild as HTMLDivElement;
+    const childFolderLabel = screen.getByText('Child');
+    const childFolderRow = childFolderLabel.closest('button')
+      ?.parentElement as HTMLDivElement;
+
+    const dataTransfer = {
+      effectAllowed: '',
+      dropEffect: '',
+      setData: vi.fn(),
+      getData: vi.fn(() => 'note-1'),
+    } as unknown as DataTransfer;
+
+    // Act
+    fireEvent.dragStart(noteRow, { dataTransfer });
+    fireEvent.dragEnter(childFolderRow, { dataTransfer });
+    fireEvent.dragOver(childFolderRow, { dataTransfer });
+    fireEvent.drop(childFolderRow, { dataTransfer });
+
+    // Assert
+    expect(patchNoteInList).toHaveBeenCalledWith('note-1', {
+      folder_id: 'folder-child',
+    });
+    expect(clientMoveNoteToFolder).toHaveBeenCalledWith(
+      expect.objectContaining({
+        noteId: 'note-1',
+        targetFolderId: 'folder-child',
+        previousFolderId: null,
+      }),
+    );
   });
 });
