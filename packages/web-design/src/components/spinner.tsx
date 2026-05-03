@@ -2,7 +2,7 @@
  * Loading affordances: indeterminate spinner and labelled status row for async UI.
  *
  * @remarks
- * Import from the package subpath only: `import { NotaSpinner, NotaLoadingStatus } from '@nota.app/web-design/spinner'`.
+ * Import from the package subpath only: `import { NotaSpinner, NotaLoadingStatus } from '@nota/web-design/spinner'`.
  * `NotaSpinner` is decorative (`aria-hidden`); prefer {@link NotaLoadingStatus} when screen readers should announce progress.
  *
  * @packageDocumentation
@@ -38,7 +38,7 @@ export type NotaSpinnerProps = {
  *
  * @example
  * ```tsx
- * import { NotaSpinner } from '@nota.app/web-design/spinner';
+ * import { NotaSpinner } from '@nota/web-design/spinner';
  *
  * export function Inline() {
  *   return <NotaSpinner size="sm" />;
@@ -84,7 +84,7 @@ export type NotaLoadingStatusProps = {
  *
  * @example
  * ```tsx
- * import { NotaLoadingStatus } from '@nota.app/web-design/spinner';
+ * import { NotaLoadingStatus } from '@nota/web-design/spinner';
  *
  * export function LoadingNotes() {
  *   return <NotaLoadingStatus label="Loading notes…" spinnerSize="sm" />;

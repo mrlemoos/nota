@@ -1,7 +1,7 @@
 import { lazy, Suspense, type JSX } from 'react';
-import type { Note } from '@nota.app/database-types';
-import type { PlaceholderValues } from '@nota.app/i18n';
-import { NotaLoadingStatus } from '@nota.app/web-design/spinner';
+import type { Note } from '@nota/database-types';
+import type { PlaceholderValues } from '@nota/i18n';
+import { NotaLoadingStatus } from '@nota/web-design/spinner';
 
 const NotesGraphViewLazy = lazy(async () => {
   const { NotesGraphView } = await import('./notes-graph-view');

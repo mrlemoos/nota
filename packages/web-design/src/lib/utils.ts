@@ -1,8 +1,8 @@
 /**
- * Tailwind-friendly class name merging for `@nota.app/web-design` and app re-exports.
+ * Tailwind-friendly class name merging for `@nota/web-design` and app re-exports.
  *
  * @remarks
- * Import from the package subpath only: `import { cn, type ClassValue } from '@nota.app/web-design/utils'`.
+ * Import from the package subpath only: `import { cn, type ClassValue } from '@nota/web-design/utils'`.
  * {@link cn} composes conditional classes with `clsx` then deduplicates / merges Tailwind utilities with `tailwind-merge`.
  *
  * @packageDocumentation
@@ -26,7 +26,7 @@ export type { ClassValue };
  *
  * @example
  * ```tsx
- * import { cn } from '@nota.app/web-design/utils';
+ * import { cn } from '@nota/web-design/utils';
  *
  * const className = cn('px-2 py-1', isActive && 'bg-muted', classNameFromProps);
  * ```

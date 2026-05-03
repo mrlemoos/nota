@@ -8,7 +8,7 @@ import {
   postSearchReindexAll,
 } from './nota-server-client.js';
 
-describe('@nota.app/nota-server-client', () => {
+describe('@nota/nota-server-client', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });

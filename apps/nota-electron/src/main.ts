@@ -15,7 +15,7 @@ import path from 'node:path';
 import {
   NOTA_CLERK_SSO_CALLBACK_PATH,
   NOTA_CUSTOM_SCHEME_URL_PREFIX,
-} from '@nota.app/clerk-oauth-protocol';
+} from '@nota/clerk-oauth-protocol';
 import { buildNotaAppMenuTemplate } from './native-app-menu.js';
 import {
   DEV_PORT,
@@ -31,7 +31,7 @@ const isDarwin = process.platform === 'darwin';
 /** IPC channel; keep in sync with `apps/nota-electron/src/preload.ts`. */
 const NOTA_MENUBAR_ACTION_CHANNEL = 'nota-menubar-action';
 
-/** Same cap as `IMAGE_MAX_BYTES` in nota.app (`pdf-attachment-client`). */
+/** Same cap as `IMAGE_MAX_BYTES` in nota (`pdf-attachment-client`). */
 const CLIPBOARD_IMAGE_MAX_BYTES = 25 * 1024 * 1024;
 
 let pendingSsoHttpUrl: string | null = null;

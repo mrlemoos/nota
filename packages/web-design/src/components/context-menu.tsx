@@ -3,7 +3,7 @@
  * popup, item, separator, and submenu helpers.
  *
  * @remarks
- * Import from the package subpath only: `import { NotaContextMenu, … } from '@nota.app/web-design/context-menu'`.
+ * Import from the package subpath only: `import { NotaContextMenu, … } from '@nota/web-design/context-menu'`.
  * `NotaContextMenuPopup` and the item wrappers apply Nota surface styling; the other exports are thin re-exports of Base UI parts.
  *
  * @packageDocumentation

@@ -121,7 +121,7 @@ jobs:
             export CSC_LINK="$CSC_LINK_VALUE"
             export CSC_KEY_PASSWORD='${{ secrets.APPLE_CERTIFICATE_PASSWORD }}'
           fi
-          pnpm exec nx run @nota.app/nota-electron:electron:release
+          pnpm exec nx run @nota/nota-electron:electron:release
 
       - name: Generate release notes from commits (between tags)
         env:

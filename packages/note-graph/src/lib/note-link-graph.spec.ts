@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Note } from '@nota.app/database-types';
+import type { Note } from '@nota/database-types';
 import {
   buildNoteLinkGraph,
   extractOutgoingNoteIdsFromContent,

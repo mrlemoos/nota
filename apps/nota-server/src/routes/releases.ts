@@ -25,7 +25,7 @@ function readLimit(url: URL): number {
 function githubRepo(): string {
   const raw = process.env.NOTA_GITHUB_REPO?.trim();
   if (!raw) {
-    return 'mrlemoos/nota.app';
+    return 'mrlemoos/nota';
   }
   return raw;
 }

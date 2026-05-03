@@ -8,8 +8,8 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from 'react';
 import { DayPicker } from 'react-day-picker';
-import { NotaButton } from '@nota.app/web-design/button';
-import { cn } from '@nota.app/web-design/utils';
+import { NotaButton } from '@nota/web-design/button';
+import { cn } from '@nota/web-design/utils';
 import { firstDateFromText } from '../lib/parse-natural-due-date';
 
 function toTimeInputValue(d: Date): string {

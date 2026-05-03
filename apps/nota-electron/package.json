@@ -1,5 +1,5 @@
 {
-  "name": "@nota.app/nota-electron",
+  "name": "@nota/nota-electron",
   "version": "0.1.4",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@nota.app/clerk-oauth-protocol": "workspace:*",
+    "@nota/clerk-oauth-protocol": "workspace:*",
     "electron-updater": "^6.8.3",
     "wait-on": "^8.0.0"
   },
@@ -35,7 +35,7 @@
         "dependsOn": [
           {
             "target": "build",
-            "projects": "@nota.app/clerk-oauth-protocol"
+            "projects": "@nota/clerk-oauth-protocol"
           }
         ],
         "options": {
@@ -58,7 +58,7 @@
         "dependsOn": [
           {
             "target": "build",
-            "projects": "nota.app"
+            "projects": "nota"
           },
           {
             "target": "build",
@@ -76,7 +76,7 @@
         "dependsOn": [
           {
             "target": "build",
-            "projects": "nota.app"
+            "projects": "nota"
           },
           {
             "target": "build",

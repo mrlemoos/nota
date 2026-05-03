@@ -4,7 +4,7 @@ export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/notes-offline',
   test: {
-    name: '@nota.app/notes-offline',
+    name: '@nota/notes-offline',
     watch: false,
     globals: true,
     environment: 'node',

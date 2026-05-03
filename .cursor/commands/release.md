@@ -1,6 +1,6 @@
 # Release
 
-Trigger **Release Electron (macOS)** in GitHub Actions (`.github/workflows/release-electron.yml`). That workflow builds the SPA, runs **`pnpm exec nx run @nota.app/nota-electron:electron:release`** (via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)), and publishes macOS assets to GitHub Releases.
+Trigger **Release Electron (macOS)** in GitHub Actions (`.github/workflows/release-electron.yml`). That workflow builds the SPA, runs **`pnpm exec nx run @nota/nota-electron:electron:release`** (via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)), and publishes macOS assets to GitHub Releases.
 
 ## Before anything else
 
@@ -49,7 +49,7 @@ The job uses **`environment: Production`**; **`secrets.*`** (and optional signin
 
 Use when you want CI to build from the **selected branch** without adding a tag:
 
-1. Open **[Release Electron (macOS) on GitHub Actions](https://github.com/mrlemoos/nota.app/actions/workflows/release-electron.yml)** (or **Actions** → **Release Electron (macOS)**).
+1. Open **[Release Electron (macOS) on GitHub Actions](https://github.com/mrlemoos/nota/actions/workflows/release-electron.yml)** (or **Actions** → **Release Electron (macOS)**).
 2. **Run workflow**, pick the branch, enter **version** (semver only, e.g. `1.2.3` or `1.2.3-rc.1`).
 3. Set **release kind** to **production** or **release candidate** to match what the user chose above.
 4. Confirm the run under **Production** if the environment has protection rules.
@@ -58,8 +58,8 @@ Use when you want CI to build from the **selected branch** without adding a tag:
 
 From the repo root, with **`GH_TOKEN`** or **`GITHUB_TOKEN`** set (see **`apps/nota-electron/README.md`**):
 
-- **Production:** `pnpm run release:electron` (or `pnpm exec nx run @nota.app/nota-electron:electron:release`).
-- **Release candidate (draft):** `pnpm exec nx run @nota.app/nota-electron:electron:release -- --draft` (same as adding **`--draft`** after the script args forwarded to **`electron-github-release.mjs`**).
+- **Production:** `pnpm run release:electron` (or `pnpm exec nx run @nota/nota-electron:electron:release`).
+- **Release candidate (draft):** `pnpm exec nx run @nota/nota-electron:electron:release -- --draft` (same as adding **`--draft`** after the script args forwarded to **`electron-github-release.mjs`**).
 
 ## After the run
 

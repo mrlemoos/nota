@@ -1,17 +1,17 @@
 # Nota Electron Shell
 
-Desktop wrapper for nota.app using Electron.
+Desktop wrapper for nota using Electron.
 
 ## Development
 
 1. Start the Vite dev server (in another terminal), from the monorepo root:
    ```bash
-   pnpm exec nx dev @nota.app/nota.app
+   pnpm exec nx dev @nota/nota
    ```
 
 2. Run Electron, from the monorepo root:
    ```bash
-   pnpm exec nx dev @nota.app/nota-electron
+   pnpm exec nx dev @nota/nota-electron
    ```
 
    Or start **Vite and Electron together** (both expose a `dev` target):
@@ -24,7 +24,7 @@ Desktop wrapper for nota.app using Electron.
 From the monorepo root, pack macOS artefacts without publishing (no GitHub token required):
 
 ```bash
-pnpm exec nx run @nota.app/nota-electron:electron:pack
+pnpm exec nx run @nota/nota-electron:electron:pack
 ```
 
 Or the equivalent shorthand:
@@ -33,7 +33,7 @@ Or the equivalent shorthand:
 pnpm run electron:pack
 ```
 
-`electron-builder` copies `../nota.app/dist` into the app bundle. Output is under `apps/nota-electron/release/` (DMG and ZIP per architecture). **macOS** is required for the current `electron-builder.yml` targets.
+`electron-builder` copies `../nota/dist` into the app bundle. Output is under `apps/nota-electron/release/` (DMG and ZIP per architecture). **macOS** is required for the current `electron-builder.yml` targets.
 
 ## Publish to GitHub Releases (local)
 
@@ -46,13 +46,13 @@ pnpm run release:electron
 Same as:
 
 ```bash
-pnpm exec nx run @nota.app/nota-electron:electron:release
+pnpm exec nx run @nota/nota-electron:electron:release
 ```
 
 Optional: bump `apps/nota-electron/package.json` for this run only (same as CI’s **`pnpm pkg set version=…`**):
 
 ```bash
-pnpm exec nx run @nota.app/nota-electron:electron:release -- --version 1.2.3
+pnpm exec nx run @nota/nota-electron:electron:release -- --version 1.2.3
 ```
 
 If you omit `--version`, the version already in `apps/nota-electron/package.json` is used.
@@ -61,11 +61,11 @@ If you omit `--version`, the version already in `apps/nota-electron/package.json
 
 - **`electron-builder`** is configured with **`publish.provider: github`** (`owner` / `repo` in `electron-builder.yml`). Packaged apps embed **`app-update.yml`** for **`electron-updater`**.
 - **`main.ts`** calls **`checkForUpdatesAndNotify()`** only when **`app.isPackaged`**. Updates use the **ZIP** assets attached to each release (DMG is for first install).
-- **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver + **release kind**: production vs release candidate / draft). It syncs `apps/nota-electron/package.json` version, then runs **`pnpm exec nx run @nota.app/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
+- **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver + **release kind**: production vs release candidate / draft). It syncs `apps/nota-electron/package.json` version, then runs **`pnpm exec nx run @nota/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
 
 ### Required secrets (embedded SPA, CI)
 
-The **`macos` job** in [`.github/workflows/release-electron.yml`](../../.github/workflows/release-electron.yml) uses **`environment: Production`**, so **`${{ secrets.* }}`** resolves **Production environment secrets** first (and repository secrets where you do not override by name). Define the `VITE_*` keys there (or duplicate them as **repository** secrets if you prefer not to use an environment). Mirror Vercel / [`apps/nota.app/.env.example`](../nota.app/.env.example). **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** are required: the workflow **fails** if either is unset so the app cannot ship with a broken login. Other `VITE_*` secrets may still be empty (features degrade until you add them).
+The **`macos` job** in [`.github/workflows/release-electron.yml`](../../.github/workflows/release-electron.yml) uses **`environment: Production`**, so **`${{ secrets.* }}`** resolves **Production environment secrets** first (and repository secrets where you do not override by name). Define the `VITE_*` keys there (or duplicate them as **repository** secrets if you prefer not to use an environment). Mirror Vercel / [`apps/nota/.env.example`](../nota/.env.example). **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** are required: the workflow **fails** if either is unset so the app cannot ship with a broken login. Other `VITE_*` secrets may still be empty (features degrade until you add them).
 
 If **Production** has protection rules (required reviewers, wait timers), each release run waits for them before the build starts.
 
@@ -82,7 +82,7 @@ If **Production** has protection rules (required reviewers, wait timers), each r
 - **Tag (release candidate → GitHub draft):** use a semver **prerelease** after the patch, e.g. `git tag v1.2.3-rc.1 && git push origin v1.2.3-rc.1` (any `vMAJOR.MINOR.PATCH-<prerelease>` form). CI sets **`EP_DRAFT=true`** for **electron-builder** so the GitHub release is a **draft**.
 - **Manual:** **Actions → Release Electron (macOS) → Run workflow**, enter semver (e.g. `1.2.3` or `1.2.3-rc.1`), then choose **release kind**: **production** (published) or **release candidate** (draft).
 
-**Local draft publish:** `pnpm exec nx run @nota.app/nota-electron:electron:release -- --draft` (forwards **`--draft`** to [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)).
+**Local draft publish:** `pnpm exec nx run @nota/nota-electron:electron:release -- --draft` (forwards **`--draft`** to [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)).
 
 Confirm the new **Release** lists DMG and ZIP assets per architecture plus **`latest-mac.yml`** (used by auto-update). Draft releases stay off the default “latest” path until you publish them on GitHub.
 
@@ -90,7 +90,7 @@ After fixing secrets, **push a new `v*` tag** or run **Release Electron (macOS)*
 
 ### Packaged app: “Missing Supabase environment variables”
 
-That message comes from [`apps/nota.app/src/lib/supabase/browser.ts`](../nota.app/src/lib/supabase/browser.ts): the **Vite build** inlined empty `VITE_SUPABASE_*` strings. GitHub Actions does not inject secrets at runtime on the user’s machine.
+That message comes from [`apps/nota/src/lib/supabase/browser.ts`](../nota/src/lib/supabase/browser.ts): the **Vite build** inlined empty `VITE_SUPABASE_*` strings. GitHub Actions does not inject secrets at runtime on the user’s machine.
 
 1. Add **`VITE_SUPABASE_URL`** and **`VITE_SUPABASE_ANON_KEY`** under **Production** environment secrets (or **repository** secrets), with those exact names — this workflow reads `${{ secrets.* }}` only.
 2. If the URL lives under **Variables**, either duplicate it into **Secrets** or change the workflow to use `${{ vars.VITE_SUPABASE_URL }}` for that key.
@@ -113,6 +113,6 @@ With `APPLE_CERTIFICATE_BASE64` unset, CI still produces **unsigned** artefacts.
 ## Architecture
 
 - **Dev mode**: Loads from `http://localhost:4200` (Vite dev server).
-- **Prod mode (packaged)**: Loads **`https://app.nota.mrlemoos.dev`** — the same deployed **`nota.app`** SPA as the web client ([`src/app-load-url.ts`](src/app-load-url.ts)). Release builds still embed **`nota.app/dist`** via `electron-builder` until that dependency is removed.
+- **Prod mode (packaged)**: Loads **`https://app.nota.mrlemoos.dev`** — the same deployed **`nota`** SPA as the web client ([`src/app-load-url.ts`](src/app-load-url.ts)). Release builds still embed **`nota/dist`** via `electron-builder` until that dependency is removed.
 - **Link preview**: Same as the web app—the SPA calls **`nota-server`** `GET /api/og-preview` using **`VITE_NOTA_SERVER_API_URL`** and the Clerk session JWT. **`CLERK_SECRET_KEY`** belongs only on the **`nota-server`** host, not in the Electron or Vercel SPA builds.
 - **Nota Pro entitlement**: The deployed app must be built with **`VITE_NOTA_SERVER_API_URL`** pointing at **[`nota-server`](../nota-server)**. Ensure **`NOTA_SERVER_CORS_ORIGINS`** on the server includes **`https://app.nota.mrlemoos.dev`** when you use an explicit allowlist.

@@ -4,7 +4,7 @@ export default defineConfig(() => ({
   root: __dirname,
   cacheDir: '../../node_modules/.vite/packages/nota-server-client',
   test: {
-    name: '@nota.app/nota-server-client',
+    name: '@nota/nota-server-client',
     watch: false,
     globals: true,
     environment: 'node',

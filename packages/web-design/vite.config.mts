@@ -49,7 +49,7 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: '@nota.app/web-design',
+    name: '@nota/web-design',
     watch: false,
     globals: true,
     environment: 'jsdom',

@@ -4,7 +4,7 @@
  * `AGENTS.md` policy and guide USD amounts in `apps/nota-marketing`.
  *
  * **Nx (loads `apps/nota-server/.env` via `envFile`):** from monorepo root:
- *   npx nx run @nota.app/nota-server:validate-billing
+ *   npx nx run @nota/nota-server:validate-billing
  *
  * **Direct:** `cd apps/nota-server && bun run scripts/validate-clerk-billing-alignment.ts`
  *   (the script also merges `.env` for keys unset in the environment).

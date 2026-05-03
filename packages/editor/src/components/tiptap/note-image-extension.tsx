@@ -16,8 +16,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   NotaButton,
   notaButtonVariants,
-} from '@nota.app/web-design/button';
-import { NotaLoadingStatus } from '@nota.app/web-design/spinner';
+} from '@nota/web-design/button';
+import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import {
   NotaTooltip,
   NotaTooltipPopup,
@@ -25,8 +25,8 @@ import {
   NotaTooltipPositioner,
   NotaTooltipProvider,
   NotaTooltipTrigger,
-} from '@nota.app/web-design/tooltip';
-import { cn } from '@nota.app/web-design/utils';
+} from '@nota/web-design/tooltip';
+import { cn } from '@nota/web-design/utils';
 import { useNotePdfDocContext } from './note-pdf-extension';
 
 export type NoteImageAlign = 'left' | 'center' | 'right';

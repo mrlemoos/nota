@@ -1,5 +1,5 @@
 {
-  "name": "@nota.app/nota-marketing",
+  "name": "@nota/nota-marketing",
   "private": true,
   "type": "module",
   "scripts": {

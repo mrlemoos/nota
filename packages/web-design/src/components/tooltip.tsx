@@ -2,7 +2,7 @@
  * Tooltip primitives built on Base UI: provider, root, trigger, portal, positioner, and a styled popup wrapper.
  *
  * @remarks
- * Import from the package subpath only: `import { NotaTooltip, NotaTooltipTrigger, … } from '@nota.app/web-design/tooltip'`.
+ * Import from the package subpath only: `import { NotaTooltip, NotaTooltipTrigger, … } from '@nota/web-design/tooltip'`.
  * Wrap subtrees that contain tooltips with {@link NotaTooltipProvider} (or a single provider at app shell). {@link NotaTooltipPopup} is the only export that applies Nota surface styles; {@link NotaTooltip}, {@link NotaTooltipTrigger}, {@link NotaTooltipPortal}, and {@link NotaTooltipPositioner} are thin re-exports of Base UI parts.
  *
  * @packageDocumentation
@@ -83,7 +83,7 @@ export const NotaTooltipPositioner = BaseTooltip.Positioner;
  *   NotaTooltipPortal,
  *   NotaTooltipPositioner,
  *   NotaTooltipPopup,
- * } from '@nota.app/web-design/tooltip';
+ * } from '@nota/web-design/tooltip';
  *
  * export function HelpTip() {
  *   return (

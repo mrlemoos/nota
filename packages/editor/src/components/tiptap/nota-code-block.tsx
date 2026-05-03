@@ -14,7 +14,7 @@ import {
   useState,
   type JSX,
 } from 'react';
-import { cn } from '@nota.app/web-design/utils';
+import { cn } from '@nota/web-design/utils';
 
 /** Wider than TipTap default `[a-z]+` so fences like ```c++``` / ```f#``` work when typed. */
 const backtickFenceRegex = /^```([\w+#.-]+)?[\s\n]$/;

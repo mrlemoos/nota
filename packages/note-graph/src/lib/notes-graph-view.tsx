@@ -22,13 +22,13 @@ import {
   type Node,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import type { Note } from '@nota.app/database-types';
+import type { Note } from '@nota/database-types';
 import {
   filterNotesForNoteGraph,
   persistedDisplayTitle,
-} from '@nota.app/editor';
-import type { PlaceholderValues } from '@nota.app/i18n';
-import { cn } from '@nota.app/web-design/utils';
+} from '@nota/editor';
+import type { PlaceholderValues } from '@nota/i18n';
+import { cn } from '@nota/web-design/utils';
 import { applyNoteGraphHoverToEdges } from './note-graph-hover-edges';
 import { buildNoteLinkGraph } from './note-link-graph';
 import { notesToIdMap } from './notes-id-map';

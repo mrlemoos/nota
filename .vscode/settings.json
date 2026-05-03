@@ -28,6 +28,7 @@
     "prebundled",
     "prosemirror",
     "Railpack",
+    "shadcn",
     "smilie",
     "subpaths",
     "supabase",
@@ -37,5 +38,5 @@
     "winstaller",
     "xyflow"
   ],
-  "tailwindcss.configPath": "./apps/nota.app/styles.css"
+  "tailwindcss.configPath": "./apps/nota/styles.css"
 }

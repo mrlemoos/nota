@@ -13,8 +13,8 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { type JSX, type MouseEvent as ReactMouseEvent } from 'react';
-import { NotaButton } from '@nota.app/web-design/button';
-import { cn } from '@nota.app/web-design/utils';
+import { NotaButton } from '@nota/web-design/button';
+import { cn } from '@nota/web-design/utils';
 
 const menuClass =
   'flex flex-wrap items-center gap-0.5 rounded-md border border-border bg-popover p-1 shadow-md';

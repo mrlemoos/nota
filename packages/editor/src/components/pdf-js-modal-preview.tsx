@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { NotaLoadingStatus } from '@nota.app/web-design/spinner';
-import { cn } from '@nota.app/web-design/utils';
+import { NotaLoadingStatus } from '@nota/web-design/spinner';
+import { cn } from '@nota/web-design/utils';
 import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 type PdfJsModalPreviewProps = {

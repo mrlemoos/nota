@@ -2,7 +2,7 @@
   <h1>Nota</h1>
 </div>
 
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/mrlemoos/nota.app?utm_source=oss&utm_medium=github&utm_campaign=mrlemoos%2Fnota.app&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/mrlemoos/nota?utm_source=oss&utm_medium=github&utm_campaign=mrlemoos%2Fnota&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 ## Philosophy
 
@@ -18,7 +18,7 @@ We leave silence alone on purpose. Boredom at the cursor is the sound of a thoug
 
 Nota is a personal notes app built as an [Nx](https://nx.dev) monorepo. 
 
-The main client ([apps/nota.app](apps/nota.app)) is a **Vite** single-page app with **React 19**; in-app navigation uses the location **hash** (see `app/lib/app-navigation.ts`). 
+The main client ([apps/nota](apps/nota)) is a **Vite** single-page app with **React 19**; in-app navigation uses the location **hash** (see `app/lib/app-navigation.ts`). 
 
 Notes use **Supabase** (Postgres, Storage, and row-level security) with **Clerk** for sign-in (third-party JWTs). The editor is **TipTap** (ProseMirror). 
 
@@ -42,7 +42,7 @@ pnpm install
 
 ## Environment
 
-Copy [apps/nota.app/.env.example](apps/nota.app/.env.example) to `apps/nota.app/.env` and set at least:
+Copy [apps/nota/.env.example](apps/nota/.env.example) to `apps/nota/.env` and set at least:
 
 - `VITE_SUPABASE_URL` — your Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` — your Supabase anon (public) key
@@ -56,17 +56,17 @@ SQL migrations live under [supabase/migrations/](supabase/migrations/) at the re
 ## Run the web app
 
 ```sh
-pnpm exec nx dev @nota.app/nota.app
+pnpm exec nx dev @nota/nota
 ```
 
-(`pnpm exec nx dev nota.app` resolves to the same project.)
+(`pnpm exec nx dev nota` resolves to the same project.)
 
 The Vite dev server listens on **[http://localhost:4200](http://localhost:4200)**.
 
 ## Marketing site (local)
 
 ```sh
-pnpm exec nx run @nota.app/nota-marketing:dev
+pnpm exec nx run @nota/nota-marketing:dev
 ```
 
 ## Optional API server
@@ -76,8 +76,8 @@ For Nota Pro entitlement and related routes outside Vercel serverless, run [nota
 ## Build and test
 
 ```sh
-pnpm exec nx build @nota.app/nota.app
-pnpm exec nx test @nota.app/nota.app
+pnpm exec nx build @nota/nota
+pnpm exec nx test @nota/nota
 ```
 
 Tests use **Vitest** via the Nx Vitest plugin.
@@ -86,7 +86,7 @@ Tests use **Vitest** via the Nx Vitest plugin.
 
 The desktop app expects the web dev server at `http://localhost:4200`. From the repository root you can run:
 
-- `pnpm run electron:dev` — Electron only (start the web app in another terminal with `pnpm exec nx dev @nota.app/nota.app`, or run `pnpm exec nx run-many -t dev` to start Vite and Electron together)
+- `pnpm run electron:dev` — Electron only (start the web app in another terminal with `pnpm exec nx dev @nota/nota`, or run `pnpm exec nx run-many -t dev` to start Vite and Electron together)
 
 More detail: [apps/nota-electron/README.md](apps/nota-electron/README.md).
 
@@ -95,7 +95,7 @@ More detail: [apps/nota-electron/README.md](apps/nota-electron/README.md).
 
 | Path                   | Purpose                                              |
 | ---------------------- | ---------------------------------------------------- |
-| `apps/nota.app/`       | Main Vite SPA (notes, auth, TipTap)                  |
+| `apps/nota/`       | Main Vite SPA (notes, auth, TipTap)                  |
 | `apps/nota-electron/`  | Electron shell                                       |
 | `apps/nota-server/`    | Optional Node API (entitlement, shared server logic) |
 | `apps/nota-marketing/` | Astro marketing site                                 |

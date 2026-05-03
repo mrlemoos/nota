@@ -5,9 +5,9 @@ import {
   type NodeViewProps,
 } from '@tiptap/react';
 import { useEffect, useRef, useState, type JSX } from 'react';
-import { NotaButton } from '@nota.app/web-design/button';
-import { NotaSpinner } from '@nota.app/web-design/spinner';
-import { cn } from '@nota.app/web-design/utils';
+import { NotaButton } from '@nota/web-design/button';
+import { NotaSpinner } from '@nota/web-design/spinner';
+import { cn } from '@nota/web-design/utils';
 import { safeOgImageSrcForPreview } from '../../lib/og-image-url';
 import { revertLinkPreviewToParagraph } from './link-preview-scan';
 import { useNotePdfDocContext } from './note-pdf-extension';

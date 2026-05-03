@@ -1,11 +1,11 @@
 {
-  "name": "@nota.app/editor",
+  "name": "@nota/editor",
   "version": "0.0.1",
   "private": true,
   "type": "module",
   "exports": {
     ".": {
-      "@nota.app/source": {
+      "@nota/source": {
         "types": "./src/index.ts",
         "import": "./src/index.ts",
         "default": "./src/index.ts"
@@ -17,11 +17,14 @@
     "./package.json": "./package.json"
   },
   "nx": {
-    "tags": ["scope:nota", "type:feature"]
+    "tags": [
+      "scope:nota",
+      "type:feature"
+    ]
   },
   "dependencies": {
-    "@nota.app/database-types": "workspace:*",
-    "@nota.app/web-design": "workspace:*",
+    "@nota/database-types": "workspace:*",
+    "@nota/web-design": "workspace:*",
     "@tiptap/extension-code-block": "^2.11.5",
     "@tiptap/extension-code-block-lowlight": "2.11.5",
     "@tiptap/extension-emoji": "^2.27.2",

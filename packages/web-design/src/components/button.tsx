@@ -2,7 +2,7 @@
  * Nota button primitives: Base UI `Button` with CVA styling and theme tokens.
  *
  * @remarks
- * Import from the package subpath only: `import { NotaButton, notaButtonVariants } from '@nota.app/web-design/button'`.
+ * Import from the package subpath only: `import { NotaButton, notaButtonVariants } from '@nota/web-design/button'`.
  * Styling uses semantic Tailwind tokens (`bg-primary`, `border-border`, `ring-ring`, …) so callers should set CSS variables / theme, not hard-coded neutrals.
  *
  * @packageDocumentation
@@ -23,7 +23,7 @@ import { cn } from '../lib/utils.js';
  *
  * @example
  * ```tsx
- * import { notaButtonVariants } from '@nota.app/web-design/button';
+ * import { notaButtonVariants } from '@nota/web-design/button';
  *
  * const className = notaButtonVariants({ variant: 'outline', size: 'sm' });
  * ```
@@ -83,7 +83,7 @@ export type NotaButtonProps = Omit<BaseButton.Props, 'ref'> &
  *
  * @example
  * ```tsx
- * import { NotaButton } from '@nota.app/web-design/button';
+ * import { NotaButton } from '@nota/web-design/button';
  *
  * export function Save() {
  *   return <NotaButton type="submit">Save</NotaButton>;

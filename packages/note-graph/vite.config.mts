@@ -9,7 +9,7 @@ export default defineConfig(() => ({
   //  plugins: [],
   // },
   test: {
-    name: '@nota.app/note-graph',
+    name: '@nota/note-graph',
     watch: false,
     globals: true,
     environment: 'jsdom',

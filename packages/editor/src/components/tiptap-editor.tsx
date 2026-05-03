@@ -34,7 +34,7 @@ import {
 } from './tiptap/note-pdf-extension';
 import { NoteImage } from './tiptap/note-image-extension';
 import { NoteAudio } from './tiptap/note-audio-extension';
-import type { Note, NoteAttachment } from '@nota.app/database-types';
+import type { Note, NoteAttachment } from '@nota/database-types';
 import {
   useRegisterNoteEditorMermaidInserter,
   useRegisterNoteEditorTableInserter,

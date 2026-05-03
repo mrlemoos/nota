@@ -2,7 +2,7 @@
 
 Small API for **server-only** operations: Nota Pro entitlement (Clerk Billing), link previews, **assistive audio-to-note** (xAI speech-to-text + Grok study notes, streamed via SSE), **semantic note search** (OpenAI-compatible embeddings + Supabase pgvector), and related routes. The web and desktop SPAs call this service via **`VITE_NOTA_SERVER_API_URL`** with `Authorization: Bearer <Clerk session JWT>` (there is no same-origin fallback on Vercel).
 
-Production builds bundle TypeScript with **esbuild** and run on **Node.js 22+** (shared Clerk billing logic is imported from `apps/nota.app` at build time). Local development can still use **Bun** for fast runs.
+Production builds bundle TypeScript with **esbuild** and run on **Node.js 22+** (shared Clerk billing logic is imported from `apps/nota` at build time). Local development can still use **Bun** for fast runs.
 
 ## Run locally
 
@@ -43,7 +43,7 @@ When **`NODE_ENV=production`**, the process **refuses to start** if `NOTA_SERVER
 With **`CLERK_SECRET_KEY`** set in **`apps/nota-server/.env`**, run from the **monorepo root** (recommended — Nx loads that file into the task environment):
 
 ```bash
-pnpm exec nx run @nota.app/nota-server:validate-billing
+pnpm exec nx run @nota/nota-server:validate-billing
 ```
 
 Equivalent without Nx (loads **`.env`** inside the script):

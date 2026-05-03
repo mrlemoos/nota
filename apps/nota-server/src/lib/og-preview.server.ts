@@ -264,7 +264,7 @@ export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
       Accept:
         'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'User-Agent':
-        'NotaOgPreview/1.0 (+https://nota.app; link preview for signed-in users)',
+        'NotaOgPreview/1.0 (+https://nota; link preview for signed-in users)',
     },
   };
 

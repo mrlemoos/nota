@@ -1,5 +1,5 @@
 {
-  "name": "@nota.app/nota-server-client",
+  "name": "@nota/nota-server-client",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -7,7 +7,7 @@
   "types": "./src/index.ts",
   "exports": {
     ".": {
-      "@nota.app/source": {
+      "@nota/source": {
         "types": "./src/index.ts",
         "import": "./src/index.ts",
         "default": "./src/index.ts"

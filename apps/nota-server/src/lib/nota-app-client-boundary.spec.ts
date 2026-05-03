@@ -4,7 +4,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const clientAppDir = join(__dirname, '../../../nota.app/src');
+const clientAppDir = join(__dirname, '../../../nota/src');
 
 function collectSourceFiles(dir: string, acc: string[] = []): string[] {
   for (const name of readdirSync(dir)) {
@@ -27,7 +27,7 @@ const FORBIDDEN: { label: string; re: RegExp }[] = [
   { label: 'nota-pro-api-logic', re: /nota-pro-api-logic/ },
 ];
 
-describe('nota.app client tree', () => {
+describe('nota client tree', () => {
   it('does not reference server-only Clerk or moved nota-server libs', () => {
     // Arrange
     const files = collectSourceFiles(clientAppDir);

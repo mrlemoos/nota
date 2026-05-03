@@ -53,11 +53,11 @@ jobs:
         run: pnpm audit
 
       - name: Test web app
-        run: pnpm exec nx run @nota.app/nota.app:test --outputStyle=static
+        run: pnpm exec nx run @nota/nota:test --outputStyle=static
         env:
           CI: 'true'
 
       - name: Build web app and marketing site
-        run: pnpm exec nx run-many -t build --projects=@nota.app/nota.app,@nota.app/nota-marketing --outputStyle=static
+        run: pnpm exec nx run-many -t build --projects=@nota/nota,@nota/nota-marketing --outputStyle=static
         env:
           CI: 'true'

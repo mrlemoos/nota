@@ -2,7 +2,7 @@
  * Composable card layout: themed container and slots for header, title, description, actions, body, and footer.
  *
  * @remarks
- * Import from the package subpath only: `import { NotaCard, NotaCardHeader, … } from '@nota.app/web-design/card'`.
+ * Import from the package subpath only: `import { NotaCard, NotaCardHeader, … } from '@nota/web-design/card'`.
  * Each part sets a stable `data-slot` (`card`, `card-header`, `card-title`, …) for styling and layout hooks. Parent `NotaCard` exposes `data-size` (`default` | `sm`) read by descendants via `group-data-[size=sm]/card`.
  *
  * @packageDocumentation
@@ -44,7 +44,7 @@ export type NotaCardFooterProps = React.ComponentProps<'div'>;
  *   NotaCardTitle,
  *   NotaCardDescription,
  *   NotaCardContent,
- * } from '@nota.app/web-design/card';
+ * } from '@nota/web-design/card';
  *
  * export function Example() {
  *   return (

@@ -1,5 +1,5 @@
 {
-  "name": "@nota.app/nota-server",
+  "name": "@nota/nota-server",
   "private": true,
   "type": "module",
   "engines": {

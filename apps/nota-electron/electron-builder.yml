@@ -6,7 +6,7 @@ npmRebuild: false
 publish:
   provider: github
   owner: mrlemoos
-  repo: nota.app
+  repo: nota
   # Published (non-draft) releases; CI and local RC builds set EP_DRAFT=true to override.
   releaseType: release
 directories:
@@ -19,8 +19,8 @@ protocols:
       - nota
 files:
   - dist/**/*
-  - from: ../nota.app/dist
-    to: nota.app/dist
+  - from: ../nota/dist
+    to: nota/dist
     filter:
       - "**/*"
 extraResources:

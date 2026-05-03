@@ -30,7 +30,7 @@ export default defineConfig(() => ({
     lib: {
       // Could also be a dictionary or array of multiple entry points.
       entry: 'src/index.ts',
-      name: '@nota.app/helper-hooks',
+      name: '@nota/helper-hooks',
       fileName: 'index',
       // Change this to the formats you want to support.
       // Don't forget to update your package.json as well.
@@ -42,7 +42,7 @@ export default defineConfig(() => ({
     },
   },
   test: {
-    name: '@nota.app/helper-hooks',
+    name: '@nota/helper-hooks',
     watch: false,
     globals: true,
     environment: 'jsdom',

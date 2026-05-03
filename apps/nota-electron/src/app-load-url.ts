@@ -1,4 +1,4 @@
-/** Hosted SPA the packaged shell loads (must match deployed nota.app). */
+/** Hosted SPA the packaged shell loads (must match deployed nota). */
 export const PACKAGED_REMOTE_APP_ORIGIN = 'https://app.nota.mrlemoos.dev';
 
 export const DEV_PORT = 4200;

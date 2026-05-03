@@ -14,8 +14,8 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { NotaButton } from '@nota.app/web-design/button';
-import { NotaLoadingStatus } from '@nota.app/web-design/spinner';
+import { NotaButton } from '@nota/web-design/button';
+import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import {
   NotaTooltip,
   NotaTooltipPopup,
@@ -23,11 +23,11 @@ import {
   NotaTooltipPositioner,
   NotaTooltipProvider,
   NotaTooltipTrigger,
-} from '@nota.app/web-design/tooltip';
-import { cn } from '@nota.app/web-design/utils';
+} from '@nota/web-design/tooltip';
+import { cn } from '@nota/web-design/utils';
 import { pdfPreviewSrc } from '../../lib/pdf-preview-url';
 import { PdfJsModalPreview } from '../pdf-js-modal-preview';
-import type { NoteAttachment } from '@nota.app/database-types';
+import type { NoteAttachment } from '@nota/database-types';
 import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 export type CachedSignedUrlEntry = {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Note } from '@nota.app/database-types';
+import type { Note } from '@nota/database-types';
 import { notesToIdMap } from './notes-id-map';
 
 const NOTE_A = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
