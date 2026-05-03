@@ -1,0 +1,91 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2019"
+    ],
+    "types": [
+      "vite/client",
+      "node"
+    ],
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "rootDir": ".",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ],
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
+  },
+  "include": [
+    "src/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx",
+    "**/.client/**/*.ts",
+    "**/.client/**/*.tsx"
+  ],
+  "exclude": [
+    "out-tsc",
+    "dist",
+    "src/**/*.spec.ts",
+    "src/**/*.test.ts",
+    "src/**/*.spec.tsx",
+    "src/**/*.test.tsx",
+    "src/**/*.spec.js",
+    "src/**/*.test.js",
+    "src/**/*.spec.jsx",
+    "src/**/*.test.jsx",
+    "vite.config.ts",
+    "vite.config.mts",
+    "vitest.config.ts",
+    "vitest.config.mts",
+    "eslint.config.js",
+    "eslint.config.cjs",
+    "eslint.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../packages/web-design/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/validation/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/notes-offline/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/nota-server-client/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/i18n/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/helper-hooks/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/editor"
+    },
+    {
+      "path": "../../packages/database-types/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/clerk-oauth-protocol/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/note-graph/tsconfig.lib.json"
+    }
+  ]
+}
