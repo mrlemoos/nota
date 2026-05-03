@@ -11,6 +11,7 @@ function dbName(userId: string): string {
   return `${DB_PREFIX}-${userId}`;
 }
 
+/** Open the IndexedDB database for a user. */
 export function openNotaNotesDb(userId: string): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(dbName(userId), DB_VERSION);
@@ -73,22 +74,36 @@ export async function deleteNotaNotesDb(userId: string): Promise<void> {
   closeNotaNotesDb();
   return new Promise((resolve, reject) => {
     const req = indexedDB.deleteDatabase(dbName(userId));
-    req.onsuccess = (): void => { resolve(); };
-    req.onerror = (): void => { reject(req.error ?? new Error('Failed to delete IndexedDB')); };
+    req.onsuccess = (): void => {
+      resolve();
+    };
+    req.onerror = (): void => {
+      reject(req.error ?? new Error('Failed to delete IndexedDB'));
+    };
   });
 }
 
 export function idbRequest<T>(req: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
-    req.onsuccess = (): void => { resolve(req.result); };
-    req.onerror = (): void => { reject(req.error ?? new Error('IndexedDB request failed')); };
+    req.onsuccess = (): void => {
+      resolve(req.result);
+    };
+    req.onerror = (): void => {
+      reject(req.error ?? new Error('IndexedDB request failed'));
+    };
   });
 }
 
 export function transactionComplete(tx: IDBTransaction): Promise<void> {
   return new Promise((resolve, reject) => {
-    tx.oncomplete = (): void => { resolve(); };
-    tx.onerror = (): void => { reject(tx.error ?? new Error('IndexedDB transaction failed')); };
-    tx.onabort = (): void => { reject(new Error('IndexedDB transaction aborted')); };
+    tx.oncomplete = (): void => {
+      resolve();
+    };
+    tx.onerror = (): void => {
+      reject(tx.error ?? new Error('IndexedDB transaction failed'));
+    };
+    tx.onabort = (): void => {
+      reject(new Error('IndexedDB transaction aborted'));
+    };
   });
 }
