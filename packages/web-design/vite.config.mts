@@ -12,6 +12,7 @@ const libEntries = {
   tooltip: path.join(root, 'src/components/tooltip.tsx'),
   spinner: path.join(root, 'src/components/spinner.tsx'),
   utils: path.join(root, 'src/lib/utils.ts'),
+  theme: path.join(root, 'src/lib/theme.tsx'),
 } as const;
 
 export default defineConfig(() => ({
@@ -44,8 +45,10 @@ export default defineConfig(() => ({
         id === 'clsx' ||
         id === 'tailwind-merge' ||
         id === 'class-variance-authority' ||
+        id === '@nota/helper-hooks' ||
         id.startsWith('react/') ||
-        id.startsWith('@base-ui/'),
+        id.startsWith('@base-ui/') ||
+        id.startsWith('@nota/helper-hooks/'),
     },
   },
   test: {

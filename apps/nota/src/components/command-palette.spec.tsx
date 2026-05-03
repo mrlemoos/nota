@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { beforeAll, describe, expect, it, vi } from 'vitest';
 import { CommandPalette } from './command-palette';
-import { ThemeProvider } from './theme-provider';
+import { ThemeProvider } from '@nota/web-design/theme';
 import { dispatchRenameFolderRequest } from '../lib/folder-rename-request';
 import { NOTA_MENUBAR_MOVE_NOTE_REQUEST_EVENT } from '../lib/electron-menubar-events';
 

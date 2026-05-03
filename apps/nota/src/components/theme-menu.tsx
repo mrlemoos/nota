@@ -11,7 +11,7 @@ import { HugeiconsIcon } from '@hugeicons/react';
 import { notaButtonVariants } from '@nota/web-design/button';
 import { cn } from '@/lib/utils';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
-import { type Theme, useTheme } from './theme-provider';
+import { type Theme, useTheme } from '@nota/web-design/theme';
 
 const itemClass = cn(
   'flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground outline-none',

@@ -39,9 +39,16 @@
       "types": "./dist/lib/utils.d.ts",
       "import": "./dist/utils.js",
       "default": "./dist/utils.js"
+    },
+    "./theme": {
+      "@nota/source": "./src/lib/theme.tsx",
+      "types": "./dist/lib/theme.d.ts",
+      "import": "./dist/theme.js",
+      "default": "./dist/theme.js"
     }
   },
   "peerDependencies": {
+    "@nota/helper-hooks": "workspace:*",
     "react": "^19.0.3",
     "react-dom": "^19.0.3"
   },

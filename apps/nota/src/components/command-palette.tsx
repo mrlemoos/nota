@@ -59,7 +59,7 @@ import {
   startStudyNotesFromRecording,
 } from '../lib/audio-to-note-start';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
-import { useTheme } from './theme-provider';
+import { useTheme } from '@nota/web-design/theme';
 import { CommandPaletteSemanticSync } from './command-palette-semantic-sync';
 import {
   gsap,
