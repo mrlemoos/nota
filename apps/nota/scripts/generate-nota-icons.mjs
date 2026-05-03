@@ -1,23 +1,20 @@
-/**
- * Regenerates derived brand assets from source PNGs.
- *
- * Usage (repo root): `pnpm run generate:nota-icons`
- *
- * Inputs:
- * - `../nota-electron/buildResources/icon.png`
- * - `public/apple-touch-icon.png`
- *
- * Outputs:
- * - `../nota-electron/buildResources/icon.icns` (macOS only, via iconutil)
- * - `public/favicon.svg` (SVG wrapper embedding apple-touch-icon.png)
- */
+// Regenerates derived brand assets from source PNGs.
+//
+// Usage (repo root): `pnpm run generate:nota-icons`
+//
+// Inputs:
+// - `../nota-electron/buildResources/icon.png`
+// - `public/apple-touch-icon.png`
+//
+// Outputs:
+// - `../nota-electron/buildResources/icon.icns` (macOS only, via iconutil)
+// - `public/favicon.svg` (SVG wrapper embedding apple-touch-icon.png)
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import sharp from 'sharp';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));

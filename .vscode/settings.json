@@ -14,6 +14,8 @@
     "hrefs",
     "hugeicons",
     "Hugeicons",
+    "iconset",
+    "iconutil",
     "isbot",
     "mousedown",
     "mrlemoos",
@@ -36,6 +38,7 @@
     "unlayered",
     "vercel",
     "winstaller",
+    "xlink",
     "xyflow"
   ],
   "tailwindcss.configPath": "./apps/nota/styles.css"
