@@ -1,12 +1,15 @@
 /**
- * Regenerates raster brand assets from the stacked-sheet SVG geometry
- * (keep in sync with `app/components/nota-logo.tsx` and `public/favicon.svg`).
+ * Regenerates derived brand assets from source PNGs.
  *
  * Usage (repo root): `pnpm run generate:nota-icons`
  *
+ * Inputs:
+ * - `../nota-electron/buildResources/icon.png`
+ * - `public/apple-touch-icon.png`
+ *
  * Outputs:
- * - `public/apple-touch-icon.png` (180×180, light background)
  * - `../nota-electron/buildResources/icon.icns` (macOS only, via iconutil)
+ * - `public/favicon.svg` (SVG wrapper embedding apple-touch-icon.png)
  */
 
 import { execFileSync } from 'node:child_process';
@@ -20,7 +23,6 @@ import sharp from 'sharp';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const NOTA_APP_ROOT = path.resolve(__dirname, '..');
 const PUBLIC_DIR = path.join(NOTA_APP_ROOT, 'public');
-const FAVICON_SVG_PATH = path.join(PUBLIC_DIR, 'favicon.svg');
 const ELECTRON_BUILD_RESOURCES = path.resolve(
   NOTA_APP_ROOT,
   '..',
@@ -28,26 +30,9 @@ const ELECTRON_BUILD_RESOURCES = path.resolve(
   'buildResources',
 );
 
-function pngFromMark(size) {
-  return sharp(FAVICON_SVG_PATH, { density: 1024 }).resize(size, size).png();
-}
-
-async function writeAppleTouchIcon() {
-  const markSize = 140;
-  const markBuf = await pngFromMark(markSize).toBuffer();
-  await sharp({
-    create: {
-      width: 180,
-      height: 180,
-      channels: 4,
-      background: { r: 255, g: 255, b: 255, alpha: 1 },
-    },
-  })
-    .composite([{ input: markBuf, gravity: 'centre' }])
-    .png()
-    .toFile(path.join(PUBLIC_DIR, 'apple-touch-icon.png'));
-  console.log('Wrote public/apple-touch-icon.png');
-}
+const ICON_PNG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon.png');
+const APPLE_TOUCH_ICON_PATH = path.join(PUBLIC_DIR, 'apple-touch-icon.png');
+const FAVICON_SVG_PATH = path.join(PUBLIC_DIR, 'favicon.svg');
 
 const ICONSET_SIZES = [
   ['icon_16x16.png', 16],
@@ -79,7 +64,7 @@ async function writeIcns() {
   try {
     for (const [filename, size] of ICONSET_SIZES) {
       const outPath = path.join(iconsetDir, filename);
-      await pngFromMark(size).toFile(outPath);
+      await sharp(ICON_PNG_PATH).resize(size, size).png().toFile(outPath);
     }
 
     const icnsOut = path.join(ELECTRON_BUILD_RESOURCES, 'icon.icns');
@@ -92,5 +77,17 @@ async function writeIcns() {
   }
 }
 
-await writeAppleTouchIcon();
+async function writeFaviconSvg() {
+  const pngBuf = fs.readFileSync(APPLE_TOUCH_ICON_PATH);
+  const b64 = pngBuf.toString('base64');
+  const { width, height } = await sharp(APPLE_TOUCH_ICON_PATH).metadata();
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 ${width} ${height}">
+  <image width="${width}" height="${height}" xlink:href="data:image/png;base64,${b64}"/>
+</svg>
+`;
+  fs.writeFileSync(FAVICON_SVG_PATH, svg);
+  console.log('Wrote public/favicon.svg');
+}
+
 await writeIcns();
+await writeFaviconSvg();
