@@ -17,39 +17,107 @@ function extractSignInStep(source: string, stepName: string): string {
   return match?.[1] ?? '';
 }
 
+function extractStrategyBlock(source: string, strategyName: string): string {
+  const escaped = strategyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(
+    `<SignIn\\.Strategy name="${escaped}">([\\s\\S]*?)<\\/SignIn\\.Strategy>`,
+  );
+  const match = source.match(re);
+  return match?.[1] ?? '';
+}
+
 describe('NotaClerkSignIn auth flow', () => {
-  it('keeps reset-password verification out of the default verifications step', () => {
+  it('keeps identifier-only start (no Strategy wrapper) and password in verifications', () => {
     // Arrange
     const source = loadAuthComponentSource();
+    const startStep = extractSignInStep(source, 'start');
     const verificationsStep = extractSignInStep(source, 'verifications');
 
     // Act
-    const containsResetPasswordStrategy = verificationsStep.includes(
-      'reset_password_email_code',
+    const hasStrategyInStart = startStep.includes('<SignIn.Strategy');
+    const hasIdentifierInStart = startStep.includes(
+      '<Clerk.Field name="identifier"',
     );
-
-    // Assert
-    expect(containsResetPasswordStrategy).toBe(false);
-  });
-
-  it('requires an explicit forgot-password action to enter reset-password flow', () => {
-    // Arrange
-    const source = loadAuthComponentSource();
-    const passwordStrategyRegex =
-      /<SignIn\.Strategy name="password">([\s\S]*?)<\/SignIn\.Strategy>/;
-    const passwordStrategy = source.match(passwordStrategyRegex)?.[1] ?? '';
-    const forgotPasswordStep = extractSignInStep(source, 'forgot-password');
-
-    // Act
-    const hasForgotPasswordAction = passwordStrategy.includes(
+    const hasPasswordInStart = startStep.includes(
+      '<Clerk.Field name="password"',
+    );
+    const hasContinueSubmit = startStep.includes('Continue');
+    const hasPasswordStrategyInVerifications = verificationsStep.includes(
+      '<SignIn.Strategy name="password">',
+    );
+    const hasPasswordFieldInVerifications = verificationsStep.includes(
+      '<Clerk.Field name="password"',
+    );
+    const hasResetVerificationStrategy = verificationsStep.includes(
+      '<SignIn.Strategy name="reset_password_email_code">',
+    );
+    const hasForgotPasswordAction = source.includes(
       'navigate="forgot-password"',
     );
-    const forgotPasswordStepStartsReset = forgotPasswordStep.includes(
-      '<SignIn.SupportedStrategy name="reset_password_email_code"',
+
+    // Assert
+    expect(hasStrategyInStart).toBe(false);
+    expect(hasIdentifierInStart).toBe(true);
+    expect(hasPasswordInStart).toBe(false);
+    expect(hasContinueSubmit).toBe(true);
+    expect(hasPasswordStrategyInVerifications).toBe(true);
+    expect(hasPasswordFieldInVerifications).toBe(true);
+    expect(hasResetVerificationStrategy).toBe(true);
+    expect(hasForgotPasswordAction).toBe(true);
+  });
+
+  it('offers OTP escape hatches that only switch to password (no choose-strategy step)', () => {
+    // Arrange
+    const source = loadAuthComponentSource();
+    const emailCodeBlock = extractStrategyBlock(source, 'email_code');
+    const emailLinkBlock = extractStrategyBlock(source, 'email_link');
+
+    // Act
+    const hasChooseStrategyStep = source.includes(
+      '<SignIn.Step name="choose-strategy">',
+    );
+    const emailCodeSwitchesToPassword = emailCodeBlock.includes(
+      '<SignIn.SupportedStrategy name="password"',
+    );
+    const emailLinkSwitchesToPassword = emailLinkBlock.includes(
+      '<SignIn.SupportedStrategy name="password"',
     );
 
     // Assert
-    expect(hasForgotPasswordAction).toBe(true);
-    expect(forgotPasswordStepStartsReset).toBe(true);
+    expect(hasChooseStrategyStep).toBe(false);
+    expect(emailCodeSwitchesToPassword).toBe(true);
+    expect(emailLinkSwitchesToPassword).toBe(true);
+  });
+
+  it('auto-prefers password for OTP or mistaken reset default; honours explicit reset intent', () => {
+    // Arrange
+    const source = loadAuthComponentSource();
+
+    // Act
+    const hasPreferPasswordAuto = source.includes('SignInPreferPasswordAuto');
+    const callsPreparePassword =
+      source.includes('prepareFirstFactor') &&
+      source.includes("strategy: 'password'");
+    const honoursExplicitReset = source.includes(
+      'explicitPasswordResetRequest',
+    );
+    const marksExplicitReset = source.includes(
+      'markNotaExplicitPasswordResetRequest',
+    );
+
+    const hasResetStrategyClick = source.includes(
+      'SignInResetEmailCodeStrategyAutoPreferPassword',
+    );
+    const hasProgrammaticPasswordStrategyClick = source.includes(
+      'passwordBtnRef',
+    );
+
+    // Assert
+    expect(hasPreferPasswordAuto).toBe(true);
+    expect(callsPreparePassword).toBe(true);
+    expect(honoursExplicitReset).toBe(true);
+    expect(marksExplicitReset).toBe(true);
+    expect(hasResetStrategyClick).toBe(true);
+    expect(hasProgrammaticPasswordStrategyClick).toBe(true);
   });
 });
