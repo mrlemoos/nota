@@ -34,6 +34,10 @@ import {
   type NoteEditorSettings,
 } from '@nota/editor';
 import { NoteLayoutMenu } from './note-layout-menu';
+import {
+  NoteImageLightbox,
+  type NoteImageLightboxImage,
+} from './note-image-lightbox';
 import { cn } from '@/lib/utils';
 import type { Editor } from '@tiptap/core';
 import {
@@ -130,6 +134,8 @@ function NoteEditorImpl({
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'error'>(
     'saved',
   );
+  const [lightboxImage, setLightboxImage] =
+    useState<NoteImageLightboxImage | null>(null);
   const [title, setTitle] = useState(() => note.title || '');
 
   const storageOps = useMemo(
@@ -761,8 +767,22 @@ function NoteEditorImpl({
           onNavigateToNote={(id) => navigateFromLegacyPath(hrefForNote(id))}
           getAbsoluteNoteUrl={absoluteUrlForNote}
           storageOps={storageOps}
+          onImagePreviewRequest={(request) => {
+            setLightboxImage({
+              src: request.src,
+              alt: request.alt,
+              filename: request.filename,
+            });
+          }}
         />
       </div>
+      <NoteImageLightbox
+        open={lightboxImage !== null}
+        image={lightboxImage}
+        onClose={() => {
+          setLightboxImage(null);
+        }}
+      />
     </div>
   );
 }
