@@ -45,20 +45,39 @@ export type OgPreviewData = {
   image?: string | null;
 };
 
+export type NoteImagePreviewRequest = {
+  src: string;
+  alt: string;
+  filename: string;
+};
+
 export type NotePdfDocContextValue = {
   noteId: string;
   userId: string;
   attachmentsById: Map<string, NoteAttachment>;
   revalidate: () => void;
-  getOrFetchSignedUrl: (attachmentId: string, storagePath: string) => Promise<SignedUrlResult>;
-  getValidCachedSignedUrl: (attachmentId: string, storagePath: string) => CachedSignedUrlEntry | null;
-  createRawSignedUrl: (storagePath: string, ttlSec: number) => Promise<{ ok: true; signedUrl: string } | { ok: false; error?: string }>;
+  getOrFetchSignedUrl: (
+    attachmentId: string,
+    storagePath: string,
+  ) => Promise<SignedUrlResult>;
+  getValidCachedSignedUrl: (
+    attachmentId: string,
+    storagePath: string,
+  ) => CachedSignedUrlEntry | null;
+  createRawSignedUrl: (
+    storagePath: string,
+    ttlSec: number,
+  ) => Promise<{ ok: true; signedUrl: string } | { ok: false; error?: string }>;
   downloadAttachment: (url: string, filename: string) => Promise<void>;
   removeStorageFile: (storagePath: string) => Promise<void>;
   deleteAttachmentRecord: (attachmentId: string) => Promise<void>;
-  renameAttachmentRecord: (attachmentId: string, newFilename: string) => Promise<void>;
+  renameAttachmentRecord: (
+    attachmentId: string,
+    newFilename: string,
+  ) => Promise<void>;
   signedUrlTtlSec: number;
   fetchOgPreview?: (href: string) => Promise<OgPreviewData>;
+  onImagePreviewRequest?: (request: NoteImagePreviewRequest) => void;
 };
 
 const NotePdfDocContext = createContext<NotePdfDocContextValue | null>(null);
@@ -88,7 +107,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
   const ctx = useNotePdfDocContext();
   const previewDialogRef = useRef<HTMLDialogElement>(null);
   const thumbnailCanvasRef = useRef<HTMLCanvasElement>(null);
-  const thumbnailRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const thumbnailRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const renameInputRef = useRef<HTMLInputElement>(null);
   const renameMutexRef = useRef(false);
   const renameCancelRef = useRef(false);
@@ -96,13 +117,14 @@ export function NotePdfNodeView(props: NodeViewProps) {
   const updateAttributesRef = useRef(props.updateAttributes);
   updateAttributesRef.current = props.updateAttributes;
 
-  const [preview, setPreview] = useState<{ filename: string; url: string } | null>(
-    null,
-  );
+  const [preview, setPreview] = useState<{
+    filename: string;
+    url: string;
+  } | null>(null);
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
-  const [thumbnailPhase, setThumbnailPhase] = useState<'loading' | 'ready' | 'error'>(
-    'loading',
-  );
+  const [thumbnailPhase, setThumbnailPhase] = useState<
+    'loading' | 'ready' | 'error'
+  >('loading');
   const [pdfPreviewUseIframe, setPdfPreviewUseIframe] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -144,14 +166,20 @@ export function NotePdfNodeView(props: NodeViewProps) {
     }
 
     let cancelled = false;
-    const entry = ctx.getValidCachedSignedUrl(attachmentId, attachmentStoragePath);
+    const entry = ctx.getValidCachedSignedUrl(
+      attachmentId,
+      attachmentStoragePath,
+    );
 
     if (entry) {
       setSignedUrl(entry.signedUrl);
     } else {
       setSignedUrl(null);
       void (async () => {
-        const result = await ctx.getOrFetchSignedUrl(attachmentId, attachmentStoragePath);
+        const result = await ctx.getOrFetchSignedUrl(
+          attachmentId,
+          attachmentStoragePath,
+        );
         if (cancelled) return;
         if (!result.ok) {
           setSignedUrl(null);
@@ -170,7 +198,10 @@ export function NotePdfNodeView(props: NodeViewProps) {
       thumbnailRefreshTimerRef.current = setTimeout(() => {
         void (async () => {
           if (!ctx) return;
-          const result = await ctx.getOrFetchSignedUrl(attachmentId, attachmentStoragePath);
+          const result = await ctx.getOrFetchSignedUrl(
+            attachmentId,
+            attachmentStoragePath,
+          );
           if (cancelled) return;
           if (!result.ok) {
             setThumbnailPhase('error');
@@ -231,7 +262,8 @@ export function NotePdfNodeView(props: NodeViewProps) {
         canvas.className = 'block h-full w-full';
         canvas.setAttribute('aria-label', `${displayName} front page`);
 
-        await page.render({ canvasContext: canvasCtx, canvas, viewport }).promise;
+        await page.render({ canvasContext: canvasCtx, canvas, viewport })
+          .promise;
 
         if (cancelled) return;
         setThumbnailPhase('ready');
@@ -295,7 +327,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
       return;
     }
     if (next.length > MAX_ATTACHMENT_FILENAME_LEN) {
-      setActionError(`Name must be at most ${MAX_ATTACHMENT_FILENAME_LEN} characters.`);
+      setActionError(
+        `Name must be at most ${MAX_ATTACHMENT_FILENAME_LEN} characters.`,
+      );
       return;
     }
     if (next === displayName) {
@@ -312,19 +346,11 @@ export function NotePdfNodeView(props: NodeViewProps) {
       skipRenameBlurRef.current = true;
       setRenaming(false);
     } catch (e) {
-      setActionError(
-        e instanceof Error ? e.message : 'Could not rename file',
-      );
+      setActionError(e instanceof Error ? e.message : 'Could not rename file');
     } finally {
       renameMutexRef.current = false;
     }
-  }, [
-    attachment,
-    ctx,
-    draftFilename,
-    displayName,
-    endRenameWithoutBlurCommit,
-  ]);
+  }, [attachment, ctx, draftFilename, displayName, endRenameWithoutBlurCommit]);
 
   const openPreview = useCallback(async () => {
     if (!attachment || !ctx) return;
@@ -340,7 +366,10 @@ export function NotePdfNodeView(props: NodeViewProps) {
         return;
       }
 
-      const result = await ctx.getOrFetchSignedUrl(attachment.id, attachment.storage_path);
+      const result = await ctx.getOrFetchSignedUrl(
+        attachment.id,
+        attachment.storage_path,
+      );
 
       if (!result.ok) {
         throw new Error(result.error);
@@ -348,9 +377,7 @@ export function NotePdfNodeView(props: NodeViewProps) {
 
       setPreview({ filename: attachment.filename, url: result.signedUrl });
     } catch (e) {
-      setActionError(
-        e instanceof Error ? e.message : 'Could not open preview',
-      );
+      setActionError(e instanceof Error ? e.message : 'Could not open preview');
       previewDialogRef.current?.close();
     } finally {
       setPreviewLoading(false);
@@ -365,16 +392,23 @@ export function NotePdfNodeView(props: NodeViewProps) {
   useEffect(() => {
     const dlg = previewDialogRef.current;
     if (!dlg) return;
-    const onClose = () => { setPreview(null); };
+    const onClose = () => {
+      setPreview(null);
+    };
     dlg.addEventListener('close', onClose);
-    return () => { dlg.removeEventListener('close', onClose); };
+    return () => {
+      dlg.removeEventListener('close', onClose);
+    };
   }, []);
 
   const handleDownload = useCallback(async () => {
     if (!attachment || !ctx) return;
     setActionError(null);
     try {
-      const result = await ctx.getOrFetchSignedUrl(attachment.id, attachment.storage_path);
+      const result = await ctx.getOrFetchSignedUrl(
+        attachment.id,
+        attachment.storage_path,
+      );
       if (!result.ok) {
         throw new Error(result.error);
       }
@@ -398,9 +432,7 @@ export function NotePdfNodeView(props: NodeViewProps) {
       props.deleteNode();
       ctx.revalidate();
     } catch (e) {
-      setActionError(
-        e instanceof Error ? e.message : 'Could not remove file',
-      );
+      setActionError(e instanceof Error ? e.message : 'Could not remove file');
     }
   }, [attachment, ctx, props]);
 
@@ -427,7 +459,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
                   ref={renameInputRef}
                   type="text"
                   value={draftFilename}
-                  onChange={(e) => { setDraftFilename(e.target.value); }}
+                  onChange={(e) => {
+                    setDraftFilename(e.target.value);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       e.preventDefault();
@@ -463,7 +497,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
                   />
                   <NotaTooltipPortal>
                     <NotaTooltipPositioner side="top" sideOffset={6}>
-                      <NotaTooltipPopup>Double-click to rename</NotaTooltipPopup>
+                      <NotaTooltipPopup>
+                        Double-click to rename
+                      </NotaTooltipPopup>
                     </NotaTooltipPositioner>
                   </NotaTooltipPortal>
                 </NotaTooltip>
@@ -477,7 +513,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-foreground"
-                  onClick={() => { props.deleteNode(); }}
+                  onClick={() => {
+                    props.deleteNode();
+                  }}
                 >
                   Remove from note
                 </NotaButton>
@@ -498,7 +536,10 @@ export function NotePdfNodeView(props: NodeViewProps) {
                     'focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                   )}
                 >
-                  <div className="pointer-events-none absolute inset-0" data-testid="note-pdf-stack-sheets">
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    data-testid="note-pdf-stack-sheets"
+                  >
                     <div
                       aria-hidden
                       className={cn(
@@ -545,7 +586,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
                           aria-hidden
                           className={cn(
                             'block h-full w-full rounded-xl bg-background transition-opacity duration-200',
-                            thumbnailPhase === 'ready' ? 'opacity-100' : 'opacity-0',
+                            thumbnailPhase === 'ready'
+                              ? 'opacity-100'
+                              : 'opacity-0',
                           )}
                         />
                         {thumbnailPhase === 'ready' ? null : (
@@ -568,7 +611,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
                         ref={renameInputRef}
                         type="text"
                         value={draftFilename}
-                        onChange={(e) => { setDraftFilename(e.target.value); }}
+                        onChange={(e) => {
+                          setDraftFilename(e.target.value);
+                        }}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
@@ -604,7 +649,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
                         />
                         <NotaTooltipPortal>
                           <NotaTooltipPositioner side="top" sideOffset={6}>
-                            <NotaTooltipPopup>Double-click to rename</NotaTooltipPopup>
+                            <NotaTooltipPopup>
+                              Double-click to rename
+                            </NotaTooltipPopup>
                           </NotaTooltipPositioner>
                         </NotaTooltipPortal>
                       </NotaTooltip>
@@ -671,67 +718,67 @@ export function NotePdfNodeView(props: NodeViewProps) {
             </>
           )}
 
-        {actionError ? (
-          <p className="mt-2 text-xs text-destructive" role="alert">
-            {actionError}
-          </p>
-        ) : null}
+          {actionError ? (
+            <p className="mt-2 text-xs text-destructive" role="alert">
+              {actionError}
+            </p>
+          ) : null}
 
-        {typeof document !== 'undefined'
-          ? createPortal(
-              <>
-                {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- native dialog backdrop click */}
-                <dialog
-                  ref={previewDialogRef}
-                  className="fixed left-1/2 top-1/2 z-50 w-[min(100vw-2rem,56rem)] max-h-[min(100vh-2rem,90vh)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-0 shadow-lg [&::backdrop]:bg-black/50"
-                  onClick={(ev) => {
-                    if (ev.target === previewDialogRef.current) {
-                      closePreview();
-                    }
-                  }}
-                >
-                <div className="flex max-h-[min(100vh-2rem,90vh)] flex-col">
-                  <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-                    <h4 className="min-w-0 truncate text-sm font-medium text-foreground">
-                      {preview?.filename ?? 'Preview'}
-                    </h4>
-                    <NotaButton
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={closePreview}
-                    >
-                      Close
-                    </NotaButton>
-                  </div>
-                  <div className="min-h-[50vh] flex-1 bg-muted/30">
-                    {previewLoading ? (
-                      <div className="flex h-[50vh] items-center justify-center text-sm text-muted-foreground">
-                        <NotaLoadingStatus label="Loading preview…" />
+          {typeof document !== 'undefined'
+            ? createPortal(
+                <>
+                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- native dialog backdrop click */}
+                  <dialog
+                    ref={previewDialogRef}
+                    className="fixed left-1/2 top-1/2 z-50 w-[min(100vw-2rem,56rem)] max-h-[min(100vh-2rem,90vh)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-0 shadow-lg [&::backdrop]:bg-black/50"
+                    onClick={(ev) => {
+                      if (ev.target === previewDialogRef.current) {
+                        closePreview();
+                      }
+                    }}
+                  >
+                    <div className="flex max-h-[min(100vh-2rem,90vh)] flex-col">
+                      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
+                        <h4 className="min-w-0 truncate text-sm font-medium text-foreground">
+                          {preview?.filename ?? 'Preview'}
+                        </h4>
+                        <NotaButton
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={closePreview}
+                        >
+                          Close
+                        </NotaButton>
                       </div>
-                    ) : preview ? (
-                      pdfPreviewUseIframe ? (
-                        <iframe
-                          title={preview.filename}
-                          src={pdfPreviewSrc(preview.url)}
-                          className="h-[min(80vh,720px)] w-full border-0 bg-background"
-                        />
-                      ) : (
-                        <PdfJsModalPreview
-                          url={preview.url}
-                          documentTitle={preview.filename}
-                          onRenderFailed={onPdfJsRenderFailed}
-                          className="bg-muted/30"
-                        />
-                      )
-                    ) : null}
-                  </div>
-                </div>
-                </dialog>
-              </>,
-              document.body,
-            )
-          : null}
+                      <div className="min-h-[50vh] flex-1 bg-muted/30">
+                        {previewLoading ? (
+                          <div className="flex h-[50vh] items-center justify-center text-sm text-muted-foreground">
+                            <NotaLoadingStatus label="Loading preview…" />
+                          </div>
+                        ) : preview ? (
+                          pdfPreviewUseIframe ? (
+                            <iframe
+                              title={preview.filename}
+                              src={pdfPreviewSrc(preview.url)}
+                              className="h-[min(80vh,720px)] w-full border-0 bg-background"
+                            />
+                          ) : (
+                            <PdfJsModalPreview
+                              url={preview.url}
+                              documentTitle={preview.filename}
+                              onRenderFailed={onPdfJsRenderFailed}
+                              className="bg-muted/30"
+                            />
+                          )
+                        ) : null}
+                      </div>
+                    </div>
+                  </dialog>
+                </>,
+                document.body,
+              )
+            : null}
         </div>
       </NotaTooltipProvider>
     </NodeViewWrapper>
@@ -775,10 +822,7 @@ export const NotePdf = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return [
-      'div',
-      mergeAttributes({ 'data-note-pdf': '' }, HTMLAttributes),
-    ];
+    return ['div', mergeAttributes({ 'data-note-pdf': '' }, HTMLAttributes)];
   },
 
   addNodeView() {

@@ -13,10 +13,7 @@ import {
   type NodeViewProps,
 } from '@tiptap/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  NotaButton,
-  notaButtonVariants,
-} from '@nota/web-design/button';
+import { NotaButton, notaButtonVariants } from '@nota/web-design/button';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import {
   NotaTooltip,
@@ -113,7 +110,10 @@ export function NoteImageNodeView(props: NodeViewProps) {
     const imageAttachmentId = attachmentId;
     const imageStoragePath = storagePath;
 
-    const entry = ctx.getValidCachedSignedUrl(imageAttachmentId, imageStoragePath);
+    const entry = ctx.getValidCachedSignedUrl(
+      imageAttachmentId,
+      imageStoragePath,
+    );
 
     if (entry) {
       setSignedUrl(entry.signedUrl);
@@ -124,10 +124,7 @@ export function NoteImageNodeView(props: NodeViewProps) {
 
     const scheduleNextRefresh = () => {
       clearRefreshTimer();
-      const ms = Math.max(
-        5_000,
-        Math.floor(ctx.signedUrlTtlSec * 0.85 * 1000),
-      );
+      const ms = Math.max(5_000, Math.floor(ctx.signedUrlTtlSec * 0.85 * 1000));
       refreshTimerRef.current = setTimeout(() => {
         void fetchUrl();
       }, ms);
@@ -135,7 +132,10 @@ export function NoteImageNodeView(props: NodeViewProps) {
 
     async function fetchUrl() {
       if (!ctx) return;
-      const result = await ctx.getOrFetchSignedUrl(imageAttachmentId, imageStoragePath);
+      const result = await ctx.getOrFetchSignedUrl(
+        imageAttachmentId,
+        imageStoragePath,
+      );
 
       if (cancelled) return;
 
@@ -191,9 +191,7 @@ export function NoteImageNodeView(props: NodeViewProps) {
       props.deleteNode();
       ctx.revalidate();
     } catch (e) {
-      setActionError(
-        e instanceof Error ? e.message : 'Could not remove file',
-      );
+      setActionError(e instanceof Error ? e.message : 'Could not remove file');
     }
   }, [attachment, ctx, props]);
 
@@ -221,7 +219,9 @@ export function NoteImageNodeView(props: NodeViewProps) {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-foreground"
-                  onClick={() => { props.deleteNode(); }}
+                  onClick={() => {
+                    props.deleteNode();
+                  }}
                 >
                   Remove from note
                 </NotaButton>
@@ -344,7 +344,9 @@ export function NoteImageNodeView(props: NodeViewProps) {
                     size="sm"
                     className="text-muted-foreground hover:text-foreground"
                     disabled={!signedUrl}
-                    onClick={() => { handleOpenTab(); }}
+                    onClick={() => {
+                      handleOpenTab();
+                    }}
                   >
                     Open
                   </NotaButton>
@@ -396,10 +398,7 @@ export function NoteImageNodeView(props: NodeViewProps) {
                 </div>
               </div>
 
-              <div
-                className={alignRowClass}
-                data-testid="note-image-align-row"
-              >
+              <div className={alignRowClass} data-testid="note-image-align-row">
                 {loadError ? (
                   <p className="p-1 text-sm text-destructive" role="alert">
                     {loadError}
@@ -414,13 +413,33 @@ export function NoteImageNodeView(props: NodeViewProps) {
                     )}
                     data-testid="note-image-asset"
                     loading="lazy"
+                    onClick={(event) => {
+                      if (
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey
+                      ) {
+                        return;
+                      }
+                      event.preventDefault();
+                      event.stopPropagation();
+                      ctx?.onImagePreviewRequest?.({
+                        src: signedUrl,
+                        alt: displayName,
+                        filename: displayName,
+                      });
+                    }}
                     onError={() => {
                       setLoadError('Could not display image');
                     }}
                   />
                 ) : (
                   <div className="flex min-h-[8rem] w-full items-center justify-center text-sm text-muted-foreground">
-                    <NotaLoadingStatus label="Loading image…" spinnerSize="sm" />
+                    <NotaLoadingStatus
+                      label="Loading image…"
+                      spinnerSize="sm"
+                    />
                   </div>
                 )}
               </div>

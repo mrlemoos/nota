@@ -30,6 +30,7 @@ import { convertLinkOnlyParagraphs } from './tiptap/link-preview-scan';
 import {
   NotePdf,
   NotePdfDocProvider,
+  type NoteImagePreviewRequest,
   type NotePdfDocContextValue,
 } from './tiptap/note-pdf-extension';
 import { NoteImage } from './tiptap/note-image-extension';
@@ -62,9 +63,15 @@ export type AttachmentStorageOps = Omit<
 >;
 
 const noopStorageOps: AttachmentStorageOps = {
-  getOrFetchSignedUrl: async () => ({ ok: false, error: 'No storage configured' }),
+  getOrFetchSignedUrl: async () => ({
+    ok: false,
+    error: 'No storage configured',
+  }),
   getValidCachedSignedUrl: () => null,
-  createRawSignedUrl: async () => ({ ok: false, error: 'No storage configured' }),
+  createRawSignedUrl: async () => ({
+    ok: false,
+    error: 'No storage configured',
+  }),
   downloadAttachment: async () => {},
   removeStorageFile: async () => {},
   deleteAttachmentRecord: async () => {},
@@ -106,6 +113,7 @@ export interface TipTapEditorProps {
   onNavigateToNote?: (noteId: string) => void;
   getAbsoluteNoteUrl?: (noteId: string) => string;
   storageOps?: AttachmentStorageOps;
+  onImagePreviewRequest?: (request: NoteImagePreviewRequest) => void;
 }
 
 export function TipTapEditor({
@@ -130,6 +138,7 @@ export function TipTapEditor({
   onNavigateToNote,
   getAbsoluteNoteUrl,
   storageOps,
+  onImagePreviewRequest,
 }: TipTapEditorProps): JSX.Element {
   useLayoutEffect(() => {
     setNotaSmilieReplacerEnabled(emojiReplacerEnabled);
@@ -163,7 +172,9 @@ export function TipTapEditor({
       const c = noteMentionCandidates.filter((n) => n.id !== noteId);
       if (!q) return c;
       return c.filter((n) =>
-        persistedDisplayTitle(n.title || '').toLowerCase().includes(q),
+        persistedDisplayTitle(n.title || '')
+          .toLowerCase()
+          .includes(q),
       );
     },
     [noteMentionCandidates, noteId],
@@ -230,14 +241,20 @@ export function TipTapEditor({
         },
       }),
       Highlight.configure({ HTMLAttributes: { class: 'nota-text-highlight' } }),
-      Emoji.configure({ enableEmoticons: false, suggestion: { allow: () => false } }),
+      Emoji.configure({
+        enableEmoticons: false,
+        suggestion: { allow: () => false },
+      }),
       NotaSmilieReplacer,
       Placeholder.configure({ placeholder }),
       LinkPreview,
       NotePdf,
       NoteImage,
       NoteAudio,
-      Table.configure({ resizable: true, HTMLAttributes: { class: 'nota-table' } }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: { class: 'nota-table' },
+      }),
       TableRow,
       TableHeader,
       TableCell,
@@ -275,7 +292,11 @@ export function TipTapEditor({
           alignMentionNavToTrigger();
           const next = (mentionSelectedIndexRef.current + 1) % filtered.length;
           mentionSelectedIndexRef.current = next;
-          setMention({ from: trigger.from, query: trigger.query, selectedIndex: next });
+          setMention({
+            from: trigger.from,
+            query: trigger.query,
+            selectedIndex: next,
+          });
           return true;
         }
         if (event.key === 'ArrowUp') {
@@ -286,7 +307,11 @@ export function TipTapEditor({
             (mentionSelectedIndexRef.current - 1 + filtered.length) %
             filtered.length;
           mentionSelectedIndexRef.current = next;
-          setMention({ from: trigger.from, query: trigger.query, selectedIndex: next });
+          setMention({
+            from: trigger.from,
+            query: trigger.query,
+            selectedIndex: next,
+          });
           return true;
         }
         const confirmByKey =
@@ -331,7 +356,9 @@ export function TipTapEditor({
         click: (_view: EditorView, event: MouseEvent) => {
           if (event.button !== 0) return false;
           const el = event.target as HTMLElement | null;
-          const anchor = el?.closest?.('a.tiptap-link') as HTMLAnchorElement | null;
+          const anchor = el?.closest?.(
+            'a.tiptap-link',
+          ) as HTMLAnchorElement | null;
           if (!anchor) return false;
           const raw = anchor.getAttribute('href');
           if (!raw) return false;
@@ -392,7 +419,8 @@ export function TipTapEditor({
           const { files } = dt;
           if (!files?.length) return false;
           event.preventDefault();
-          if (!canInsertAttachmentsRef.current || uploadingRef.current) return true;
+          if (!canInsertAttachmentsRef.current || uploadingRef.current)
+            return true;
           if (!proEntitledRef.current) {
             setUploadError('Cloud attachments require Nota Pro.');
             return true;
@@ -562,7 +590,13 @@ export function TipTapEditor({
         setUploading(false);
       }
     },
-    [editor, insertAttachmentNode, onUploadFile, acceptsFile, onRefreshNotesList],
+    [
+      editor,
+      insertAttachmentNode,
+      onUploadFile,
+      acceptsFile,
+      onRefreshNotesList,
+    ],
   );
 
   processFilesRef.current = processFiles;
@@ -598,10 +632,20 @@ export function TipTapEditor({
       noteId,
       userId,
       attachmentsById,
-      revalidate: () => { onRefreshNotesList?.(); },
+      revalidate: () => {
+        onRefreshNotesList?.();
+      },
+      onImagePreviewRequest,
       ...resolvedStorageOps,
     }),
-    [noteId, userId, attachmentsById, onRefreshNotesList, resolvedStorageOps],
+    [
+      noteId,
+      userId,
+      attachmentsById,
+      onRefreshNotesList,
+      onImagePreviewRequest,
+      resolvedStorageOps,
+    ],
   );
 
   if (!isMounted || !editor) {
