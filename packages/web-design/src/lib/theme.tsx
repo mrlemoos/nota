@@ -63,19 +63,23 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    root.classList.remove('light', 'dark');
+    const applyResolved = (resolved: 'dark' | 'light') => {
+      root.classList.remove('light', 'dark');
+      root.classList.add(resolved);
+    };
 
     if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-        .matches
-        ? 'dark'
-        : 'light';
+      const mql = window.matchMedia('(prefers-color-scheme: dark)');
+      const applySystem = () => {
+        applyResolved(mql.matches ? 'dark' : 'light');
+      };
 
-      root.classList.add(systemTheme);
-      return;
+      applySystem();
+      mql.addEventListener('change', applySystem);
+      return () => mql.removeEventListener('change', applySystem);
     }
 
-    root.classList.add(theme);
+    applyResolved(theme);
   }, [theme]);
 
   return (

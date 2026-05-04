@@ -1,0 +1,119 @@
+import { fireEvent, render, screen } from '@testing-library/react';
+import { type JSX } from 'react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ThemeProvider, useTheme } from './theme.js';
+
+type ChangeCallback = (event: { matches: boolean }) => void;
+
+const STORAGE_KEY = 'nota-test-theme-system-mql';
+let changeListeners: ChangeCallback[] = [];
+const mqlState = { matches: false };
+
+function firePrefersColorSchemeChange(): void {
+  const snapshot = [...changeListeners];
+  for (const cb of snapshot) {
+    cb({ matches: mqlState.matches });
+  }
+}
+
+function TestHarness(): JSX.Element {
+  const { setTheme } = useTheme();
+
+  return (
+    <button type="button" onClick={() => setTheme('light')}>
+      force-light
+    </button>
+  );
+}
+
+describe('ThemeProvider (system + prefers-color-scheme)', () => {
+  beforeEach(() => {
+    changeListeners = [];
+    mqlState.matches = false;
+    localStorage.removeItem(STORAGE_KEY);
+    document.documentElement.classList.remove('light', 'dark');
+
+    vi.stubGlobal(
+      'matchMedia',
+      vi.fn((query: string) => {
+        expect(query).toBe('(prefers-color-scheme: dark)');
+        return {
+          get matches() {
+            return mqlState.matches;
+          },
+          media: query,
+          addEventListener: (type: string, cb: EventListener) => {
+            if (type === 'change') {
+              changeListeners.push(cb as ChangeCallback);
+            }
+          },
+          removeEventListener: (type: string, cb: EventListener) => {
+            if (type === 'change') {
+              changeListeners = changeListeners.filter((l) => l !== cb);
+            }
+          },
+        };
+      }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    localStorage.removeItem(STORAGE_KEY);
+    document.documentElement.classList.remove('light', 'dark');
+  });
+
+  it('updates document class when prefers-color-scheme changes while theme is system', () => {
+    // Arrange
+    mqlState.matches = false;
+
+    // Act
+    render(
+      <ThemeProvider defaultTheme="system" storageKey={STORAGE_KEY}>
+        <span>child</span>
+      </ThemeProvider>,
+    );
+
+    // Assert
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+
+    // Act
+    mqlState.matches = true;
+    firePrefersColorSchemeChange();
+
+    // Assert
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(document.documentElement.classList.contains('light')).toBe(false);
+  });
+
+  it('removes prefers-color-scheme listener when leaving system theme', () => {
+    // Arrange
+    mqlState.matches = false;
+
+    // Act
+    render(
+      <ThemeProvider defaultTheme="system" storageKey={STORAGE_KEY}>
+        <TestHarness />
+      </ThemeProvider>,
+    );
+
+    expect(changeListeners.length).toBeGreaterThan(0);
+
+    // Act
+    fireEvent.click(screen.getByRole('button', { name: 'force-light' }));
+
+    // Assert
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+    expect(changeListeners.length).toBe(0);
+
+    // Act — stale system listener would flip to dark when matches is true
+    mqlState.matches = true;
+    firePrefersColorSchemeChange();
+
+    // Assert
+    expect(document.documentElement.classList.contains('light')).toBe(true);
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+  });
+});
