@@ -27,6 +27,11 @@ export { NotaCodeBlock } from './components/tiptap/nota-code-block';
 export { NotaLink } from './components/tiptap/nota-link';
 
 export {
+  NotePdfThumbnailFrame,
+  type NotePdfThumbnailPhase,
+} from './components/tiptap/note-pdf-thumbnail-frame';
+
+export {
   insertNoteLinkAtMentionRange,
   insertNoteLinkAtMentionRangeView,
   tryConfirmNoteMention,

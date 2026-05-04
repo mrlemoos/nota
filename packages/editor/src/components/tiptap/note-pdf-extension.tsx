@@ -27,6 +27,7 @@ import {
 import { cn } from '@nota/web-design/utils';
 import { pdfPreviewSrc } from '../../lib/pdf-preview-url';
 import { PdfJsModalPreview } from '../pdf-js-modal-preview';
+import { NotePdfThumbnailFrame } from './note-pdf-thumbnail-frame';
 import type { NoteAttachment } from '@nota/database-types';
 import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
@@ -259,8 +260,6 @@ export function NotePdfNodeView(props: NodeViewProps) {
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        canvas.className = 'block h-full w-full';
-        canvas.setAttribute('aria-label', `${displayName} front page`);
 
         await page.render({ canvasContext: canvasCtx, canvas, viewport })
           .promise;
@@ -269,6 +268,12 @@ export function NotePdfNodeView(props: NodeViewProps) {
         setThumbnailPhase('ready');
       } catch {
         if (!cancelled) {
+          const ctx2d = canvas.getContext('2d');
+          if (ctx2d && canvas.width > 0 && canvas.height > 0) {
+            ctx2d.clearRect(0, 0, canvas.width, canvas.height);
+          }
+          canvas.width = 0;
+          canvas.height = 0;
           setThumbnailPhase('error');
         }
       }
@@ -277,7 +282,7 @@ export function NotePdfNodeView(props: NodeViewProps) {
     return () => {
       cancelled = true;
     };
-  }, [displayName, signedUrl]);
+  }, [signedUrl]);
 
   const onPdfJsRenderFailed = useCallback(() => {
     setPdfPreviewUseIframe(true);
@@ -577,28 +582,10 @@ export function NotePdfNodeView(props: NodeViewProps) {
 
                   <div className="relative z-10 overflow-hidden rounded-2xl border border-transparent bg-transparent shadow-none transition-[border-color,background-color,box-shadow] duration-300 ease-out group-hover:border-border/80 group-hover:bg-background group-hover:shadow-lg group-focus-within:border-border/80 group-focus-within:bg-background group-focus-within:shadow-lg">
                     <div className="relative aspect-[8.5/11] bg-transparent p-2">
-                      <div
-                        data-testid="note-pdf-thumbnail"
-                        className="absolute inset-0 flex items-stretch justify-stretch p-2"
-                      >
-                        <canvas
-                          ref={thumbnailCanvasRef}
-                          aria-hidden
-                          className={cn(
-                            'block h-full w-full rounded-xl bg-background transition-opacity duration-200',
-                            thumbnailPhase === 'ready'
-                              ? 'opacity-100'
-                              : 'opacity-0',
-                          )}
-                        />
-                        {thumbnailPhase === 'ready' ? null : (
-                          <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-border/60 bg-muted/20 text-xs text-muted-foreground">
-                            {thumbnailPhase === 'error'
-                              ? 'Preview unavailable'
-                              : 'Loading preview…'}
-                          </div>
-                        )}
-                      </div>
+                      <NotePdfThumbnailFrame
+                        phase={thumbnailPhase}
+                        canvasRef={thumbnailCanvasRef}
+                      />
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-background/80 to-transparent" />
                     </div>
                   </div>
