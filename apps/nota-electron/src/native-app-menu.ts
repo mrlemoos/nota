@@ -64,5 +64,21 @@ export function buildNotaAppMenuTemplate(
         },
       ],
     },
+    {
+      label: 'View',
+      submenu: [
+        {
+          label: 'Refresh',
+          role: 'reload',
+          accelerator: 'CmdOrCtrl+R',
+        },
+        { type: 'separator' },
+        {
+          label: 'Open Developer Tools',
+          role: 'toggleDevTools',
+          accelerator: 'Alt+CmdOrCtrl+I',
+        },
+      ],
+    },
   ];
 }
