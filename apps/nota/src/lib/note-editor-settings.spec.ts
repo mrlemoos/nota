@@ -9,7 +9,7 @@ import {
   noteSurfaceClassNames,
   noteThemeSelectValue,
   parseNoteEditorSettings,
-} from './note-editor-settings';
+} from '@nota/editor';
 import type { Json, Note } from '~/types/database.types';
 
 describe('parseNoteEditorSettings', () => {

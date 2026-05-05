@@ -71,11 +71,14 @@ export function subtreeFolderIds(
   const result: string[] = [];
   const stack = [rootFolderId];
   while (stack.length > 0) {
-    const id = stack.pop() as string;
+    const id = stack.pop();
+    if (id === undefined) {
+      break;
+    }
     result.push(id);
     const kids = byParent.get(id) ?? [];
-    for (let i = kids.length - 1; i >= 0; i -= 1) {
-      stack.push(kids[i] as string);
+    for (const kid of kids.slice().reverse()) {
+      stack.push(kid);
     }
   }
   return result;

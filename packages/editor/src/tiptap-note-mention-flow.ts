@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-deprecated `RefObject` matches writable `.current` for TipTap refs */
 import type { Editor } from '@tiptap/core';
 import { TextSelection } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';

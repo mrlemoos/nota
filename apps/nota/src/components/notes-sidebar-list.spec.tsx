@@ -60,7 +60,10 @@ describe('NotesSidebarList', () => {
     fireEvent.doubleClick(screen.getByText('Computer Science Study'));
     const renameInput = screen.getByLabelText(
       'Rename folder Computer Science Study',
-    ) as HTMLInputElement;
+    );
+    if (!(renameInput instanceof HTMLInputElement)) {
+      throw new Error('expected folder rename input');
+    }
     const hasFocusAfterRename = document.activeElement === renameInput;
     const caretStartAfterRename = renameInput.selectionStart;
     const caretEndAfterRename = renameInput.selectionEnd;

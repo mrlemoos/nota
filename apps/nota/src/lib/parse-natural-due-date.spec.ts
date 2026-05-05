@@ -4,7 +4,7 @@ import {
   dateSpanContainingOffset,
   firstDateFromText,
   parseNaturalDueDate,
-} from './parse-natural-due-date';
+} from '@nota/editor';
 
 describe('parseNaturalDueDate', () => {
   it('returns null for empty or whitespace input', () => {

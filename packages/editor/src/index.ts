@@ -18,6 +18,7 @@ export {
   parseNoteEditorSettings,
   noteEditorSettingsToJson,
   filterNotesForNoteGraph,
+  isNoteVisibleInNoteGraph,
   noteSurfaceClassNames,
 } from './lib/note-editor-settings';
 export type { NoteEditorSettings } from './lib/note-editor-settings';
@@ -40,6 +41,13 @@ export {
   tryConfirmNoteMention,
 } from './tiptap-note-mention-flow';
 export type { NoteMentionConfirmRefs } from './tiptap-note-mention-flow';
+
+export {
+  allDateSpansInText,
+  dateSpanContainingOffset,
+  firstDateFromText,
+  parseNaturalDueDate,
+} from './lib/parse-natural-due-date';
 
 export {
   NoteDueDatePickerPanel,

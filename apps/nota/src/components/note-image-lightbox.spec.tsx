@@ -9,6 +9,7 @@ vi.mock('@/lib/use-is-electron', () => ({
   useIsElectron: () => isElectronMock(),
 }));
 
+// eslint-disable-next-line import/first -- Vitest: vi.mock is hoisted; SUT must load after mock factory.
 import { NoteImageLightbox } from './note-image-lightbox';
 
 describe('NoteImageLightbox', () => {

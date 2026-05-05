@@ -21,7 +21,12 @@ function TestHarness(): JSX.Element {
   const { setTheme } = useTheme();
 
   return (
-    <button type="button" onClick={() => setTheme('light')}>
+    <button
+      type="button"
+      onClick={() => {
+        setTheme('light');
+      }}
+    >
       force-light
     </button>
   );
@@ -45,12 +50,14 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
           media: query,
           addEventListener: (type: string, cb: EventListener) => {
             if (type === 'change') {
-              changeListeners.push(cb as ChangeCallback);
+              changeListeners.push(cb as unknown as ChangeCallback);
             }
           },
           removeEventListener: (type: string, cb: EventListener) => {
             if (type === 'change') {
-              changeListeners = changeListeners.filter((l) => l !== cb);
+              changeListeners = changeListeners.filter(
+                (l) => l !== (cb as unknown as ChangeCallback),
+              );
             }
           },
         };

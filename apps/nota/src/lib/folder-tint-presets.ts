@@ -89,7 +89,7 @@ export const FOLDER_TINT_PRESETS: readonly FolderTintOption[] = [
   },
 ] as const;
 
-const DEFAULT_PRESET = FOLDER_TINT_PRESETS[0]!;
+const DEFAULT_PRESET = FOLDER_TINT_PRESETS[0];
 
 const byPersisted = new Map<string | null, FolderTintOption>([
   [null, DEFAULT_PRESET],

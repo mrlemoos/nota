@@ -18,7 +18,19 @@
     "tags": [
       "scope:nota",
       "type:util"
-    ]
+    ],
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "options": {
+          "cwd": "packages/i18n",
+          "command": "pnpm run build"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "pnpm exec tsc -p tsconfig.lib.json"
   },
   "dependencies": {}
 }

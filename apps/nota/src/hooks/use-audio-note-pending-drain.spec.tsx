@@ -252,11 +252,11 @@ describe('useAudioNotePendingDrain', () => {
     render(<Harness />);
 
     // Act
-    await waitFor(() =>
+    await waitFor(() => {
       expect(drainMocks.removePendingAudioNoteJob).toHaveBeenCalledWith(
         'job-1',
-      ),
-    );
+      );
+    });
 
     // Assert
     expect(drainMocks.listPendingAudioNoteJobs).toHaveBeenCalledWith('user-1');
@@ -303,9 +303,9 @@ describe('useAudioNotePendingDrain', () => {
     render(<Harness />);
 
     // Act
-    await waitFor(() =>
-      expect(drainMocks.applyAudioNoteStudyResult).toHaveBeenCalled(),
-    );
+    await waitFor(() => {
+      expect(drainMocks.applyAudioNoteStudyResult).toHaveBeenCalled();
+    });
 
     // Assert
     expect(drainMocks.applyAudioNoteStudyResult).toHaveBeenCalledWith(
@@ -330,11 +330,11 @@ describe('useAudioNotePendingDrain', () => {
     render(<Harness />);
 
     // Act
-    await waitFor(() =>
+    await waitFor(() => {
       expect(useAudioToNoteSession.getState().recordingAttachmentWarning).toBe(
         'formatted-upload-warning',
-      ),
-    );
+      );
+    });
 
     // Assert
     expect(drainMocks.formatStudyRecordingUploadWarning).toHaveBeenCalledWith(
@@ -369,7 +369,9 @@ describe('useAudioNotePendingDrain', () => {
     render(<Harness />);
 
     // Act
-    await waitFor(() => expect(errorSpy).toHaveBeenCalled());
+    await waitFor(() => {
+      expect(errorSpy).toHaveBeenCalled();
+    });
 
     // Assert
     expect(drainMocks.removePendingAudioNoteJob).not.toHaveBeenCalled();
@@ -379,16 +381,18 @@ describe('useAudioNotePendingDrain', () => {
   it('runs drain again when the online subscription callback fires', async () => {
     // Arrange
     render(<Harness />);
-    await waitFor(() =>
-      expect(drainMocks.listPendingAudioNoteJobs).toHaveBeenCalled(),
-    );
+    await waitFor(() => {
+      expect(drainMocks.listPendingAudioNoteJobs).toHaveBeenCalled();
+    });
     drainMocks.listPendingAudioNoteJobs.mockClear();
     const listener = drainMocks.onlineListeners[0];
     expect(listener).toBeTypeOf('function');
 
     // Act
     await act(async () => {
-      listener?.();
+      if (listener) {
+        listener();
+      }
       await Promise.resolve();
     });
 

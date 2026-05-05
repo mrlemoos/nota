@@ -57,7 +57,11 @@ export function ThemeProvider({
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window === 'undefined') return defaultTheme;
-    return (localStorage.getItem(storageKey) as Theme) || defaultTheme;
+    const stored = localStorage.getItem(storageKey);
+    if (stored === 'dark' || stored === 'light' || stored === 'system') {
+      return stored;
+    }
+    return defaultTheme;
   });
 
   useEffect(() => {
@@ -76,10 +80,13 @@ export function ThemeProvider({
 
       applySystem();
       mql.addEventListener('change', applySystem);
-      return () => mql.removeEventListener('change', applySystem);
+      return () => {
+        mql.removeEventListener('change', applySystem);
+      };
     }
 
     applyResolved(theme);
+    return undefined;
   }, [theme]);
 
   return (

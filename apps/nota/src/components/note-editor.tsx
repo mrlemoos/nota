@@ -9,8 +9,13 @@ import {
   type ChangeEvent,
   type KeyboardEvent,
 } from 'react';
-import { TipTapEditor } from '@nota/editor';
-import type { AttachmentStorageOps } from '@nota/editor';
+import {
+  TipTapEditor,
+  type AttachmentStorageOps,
+  noteEditorSettingsToJson,
+  parseNoteEditorSettings,
+  type NoteEditorSettings,
+} from '@nota/editor';
 import { useStickyDocTitle } from '../context/sticky-doc-title';
 import { persistedDisplayTitle } from '../lib/note-title';
 import { getBrowserClient } from '../lib/supabase/browser';
@@ -28,11 +33,6 @@ import {
 } from '@/lib/notes-offline';
 import { updateNote } from '../models/notes';
 import type { Json, Note, NoteAttachment } from '~/types/database.types';
-import {
-  noteEditorSettingsToJson,
-  parseNoteEditorSettings,
-  type NoteEditorSettings,
-} from '@nota/editor';
 import { NoteLayoutMenu } from './note-layout-menu';
 import {
   NoteImageLightbox,
@@ -764,7 +764,9 @@ function NoteEditorImpl({
           }
           acceptsFile={(file) => classifyNoteAttachmentFile(file) !== null}
           resolveNoteIdFromPath={parseNoteLinkPath}
-          onNavigateToNote={(id) => navigateFromLegacyPath(hrefForNote(id))}
+          onNavigateToNote={(id) => {
+            navigateFromLegacyPath(hrefForNote(id));
+          }}
           getAbsoluteNoteUrl={absoluteUrlForNote}
           storageOps={storageOps}
           onImagePreviewRequest={(request) => {

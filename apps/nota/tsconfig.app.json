@@ -65,7 +65,7 @@
       "path": "../../packages/helper-hooks/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/editor"
+      "path": "../../packages/editor/tsconfig.lib.json"
     },
     {
       "path": "../../packages/database-types/tsconfig.lib.json"

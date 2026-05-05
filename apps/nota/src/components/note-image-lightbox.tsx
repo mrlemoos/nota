@@ -49,8 +49,18 @@ export function NoteImageLightbox({
       aria-modal="true"
       aria-label={`Image preview for ${image.filename}`}
       data-testid="note-image-lightbox-backdrop"
+      tabIndex={-1}
       onClick={(event) => {
         if (event.target === event.currentTarget) {
+          onClose();
+        }
+      }}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) {
+          return;
+        }
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
           onClose();
         }
       }}

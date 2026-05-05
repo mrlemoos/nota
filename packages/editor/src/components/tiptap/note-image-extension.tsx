@@ -413,7 +413,29 @@ export function NoteImageNodeView(props: NodeViewProps) {
                     )}
                     data-testid="note-image-asset"
                     loading="lazy"
+                    role="button"
+                    tabIndex={0}
                     onClick={(event) => {
+                      if (
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey
+                      ) {
+                        return;
+                      }
+                      event.preventDefault();
+                      event.stopPropagation();
+                      ctx?.onImagePreviewRequest?.({
+                        src: signedUrl,
+                        alt: displayName,
+                        filename: displayName,
+                      });
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== 'Enter' && event.key !== ' ') {
+                        return;
+                      }
                       if (
                         event.metaKey ||
                         event.ctrlKey ||
