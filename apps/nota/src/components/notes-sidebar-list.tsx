@@ -21,6 +21,7 @@ import {
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
 import { NotaButton } from '@nota/web-design/button';
+import { NotaTintCircle } from '@nota/web-design/nota-tint-circle';
 import {
   NotaContextMenu,
   NotaContextMenuItem,
@@ -51,7 +52,14 @@ import {
   NOTA_RENAME_FOLDER_REQUEST_EVENT,
   type RenameFolderRequestDetail,
 } from '../lib/folder-rename-request';
+import {
+  FOLDER_TINT_PRESET_LABEL_KEY,
+  FOLDER_TINT_SWATCH_PRESETS,
+  folderTintRowBackground,
+  folderTintSwatchColour,
+} from '../lib/folder-tint-presets';
 import { clientRenameFolder } from '../lib/rename-folder-client';
+import { clientUpdateFolderTint } from '../lib/update-folder-tint-client';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
 import { compareNoteTitles } from '../lib/note-sidebar-groups';
 import {
@@ -318,6 +326,9 @@ function FolderRow(options: {
   setFolderDeleteTarget: (folder: Folder) => void;
   moveDraggedNoteToFolder: (folderId: string) => Promise<void>;
   onRequestNewSubfolder: (folder: Folder) => void;
+  userId: string;
+  notaProEntitled: boolean;
+  patchFolderInList: (id: string, patch: Partial<Folder>) => void;
   children: ReactNode;
 }): JSX.Element {
   const { t } = useNotaTranslator();
@@ -340,6 +351,9 @@ function FolderRow(options: {
     setFolderDeleteTarget,
     moveDraggedNoteToFolder,
     onRequestNewSubfolder,
+    userId,
+    notaProEntitled,
+    patchFolderInList,
     children,
   } = options;
 
@@ -354,6 +368,12 @@ function FolderRow(options: {
                 isDropTarget &&
                   'scale-[1.01] bg-muted/90 text-foreground ring-1 ring-border/50 shadow-sm',
               )}
+              data-folder-tint={folder.tint ?? ''}
+              style={{
+                background: isDropTarget
+                  ? undefined
+                  : folderTintRowBackground(folder.tint ?? null),
+              }}
               onDragEnter={(event) => {
                 if (!draggedNoteId) {
                   return;
@@ -413,6 +433,19 @@ function FolderRow(options: {
                   aria-hidden
                 />
               </NotaButton>
+              <span
+                className="inline-flex shrink-0"
+                style={{
+                  color: folderTintSwatchColour(folder.tint ?? null),
+                }}
+                aria-hidden
+              >
+                <HugeiconsIcon
+                  icon={Folder01Icon}
+                  size={14}
+                  strokeWidth={1.5}
+                />
+              </span>
               <button
                 type="button"
                 className="flex min-w-0 flex-1 items-center gap-0.5 text-left"
@@ -518,6 +551,66 @@ function FolderRow(options: {
                   />
                   <span>{t('New subfolder')}</span>
                 </NotaContextMenuItem>
+                {notaProEntitled ? (
+                  <NotaContextMenuSubmenuRoot>
+                    <NotaContextMenuSubmenuTrigger label={t('Tint folder')}>
+                      <span className="inline-flex min-w-0 flex-1 items-center gap-2">
+                        <HugeiconsIcon
+                          icon={Folder01Icon}
+                          size={16}
+                          className="shrink-0 text-muted-foreground"
+                        />
+                        <span className="min-w-0 flex-1">
+                          {t('Tint folder')}
+                        </span>
+                      </span>
+                      <HugeiconsIcon
+                        icon={ArrowRight01Icon}
+                        size={14}
+                        className="shrink-0 text-muted-foreground"
+                      />
+                    </NotaContextMenuSubmenuTrigger>
+                    <NotaContextMenuPortal>
+                      <NotaContextMenuPositioner
+                        side="right"
+                        align="start"
+                        sideOffset={4}
+                      >
+                        <NotaContextMenuPopup className="min-w-[unset] p-1">
+                          <NotaContextMenuViewport className="flex max-h-none max-w-[11rem] flex-row flex-wrap gap-1 overflow-visible">
+                            {FOLDER_TINT_SWATCH_PRESETS.map((preset) => (
+                              <NotaContextMenuItem
+                                key={preset.id}
+                                className="size-8 shrink-0 justify-center p-0"
+                                label={t(
+                                  FOLDER_TINT_PRESET_LABEL_KEY[preset.id],
+                                )}
+                                onClick={() => {
+                                  void clientUpdateFolderTint({
+                                    folderId: folder.id,
+                                    nextPersistedTint: preset.persistedTint,
+                                    previousPersistedTint: folder.tint ?? null,
+                                    userId,
+                                    notaProEntitled,
+                                    patchFolderInList,
+                                  });
+                                }}
+                              >
+                                <NotaTintCircle
+                                  colour={preset.swatchColour}
+                                  sizePx={18}
+                                  aria-label={t(
+                                    FOLDER_TINT_PRESET_LABEL_KEY[preset.id],
+                                  )}
+                                />
+                              </NotaContextMenuItem>
+                            ))}
+                          </NotaContextMenuViewport>
+                        </NotaContextMenuPopup>
+                      </NotaContextMenuPositioner>
+                    </NotaContextMenuPortal>
+                  </NotaContextMenuSubmenuRoot>
+                ) : null}
                 <NotaContextMenuItem
                   label={`${t('Delete folder')} ${folder.name}`}
                   onClick={() => {
@@ -564,10 +657,7 @@ export function NotesSidebarList({
   const [dropTargetId, setDropTargetId] = useState<string | null>(null);
   const folderRoots = useMemo(() => buildFolderTree(folders), [folders]);
   const rootNotes = useMemo(
-    () =>
-      [...notes]
-        .filter((n) => n.folder_id == null)
-        .sort(compareNoteTitles),
+    () => [...notes].filter((n) => n.folder_id == null).sort(compareNoteTitles),
     [notes],
   );
   const folderMoveTargets = useMemo(
@@ -596,9 +686,9 @@ export function NotesSidebarList({
     null,
   );
   const [folderCreateOpen, setFolderCreateOpen] = useState(false);
-  const [folderCreateParentId, setFolderCreateParentId] = useState<string | null>(
-    null,
-  );
+  const [folderCreateParentId, setFolderCreateParentId] = useState<
+    string | null
+  >(null);
   const [pendingNewFolderNote, setPendingNewFolderNote] = useState<{
     noteId: string;
   } | null>(null);
@@ -833,6 +923,9 @@ export function NotesSidebarList({
           setFolderCreateParentId(f.id);
           setFolderCreateOpen(true);
         }}
+        userId={uid}
+        notaProEntitled={notaProEntitled}
+        patchFolderInList={patchFolderInList}
       >
         {!isCollapsed ? (
           <div id={folderContentId} className="min-w-0">

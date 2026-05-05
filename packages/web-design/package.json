@@ -34,6 +34,12 @@
       "import": "./dist/spinner.js",
       "default": "./dist/spinner.js"
     },
+    "./nota-tint-circle": {
+      "@nota/source": "./src/components/nota-tint-circle.tsx",
+      "types": "./dist/components/nota-tint-circle.d.ts",
+      "import": "./dist/nota-tint-circle.js",
+      "default": "./dist/nota-tint-circle.js"
+    },
     "./utils": {
       "@nota/source": "./src/lib/utils.ts",
       "types": "./dist/lib/utils.d.ts",

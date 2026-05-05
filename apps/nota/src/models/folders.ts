@@ -5,7 +5,9 @@ import type {
 } from '~/types/database.types';
 import type { TypedSupabaseClient } from './notes';
 
-export async function listFolders(client: TypedSupabaseClient): Promise<Folder[]> {
+export async function listFolders(
+  client: TypedSupabaseClient,
+): Promise<Folder[]> {
   const { data, error } = await client
     .from('folders')
     .select('*')
@@ -46,7 +48,7 @@ export async function createFolder(
 export async function updateFolder(
   client: TypedSupabaseClient,
   id: string,
-  patch: Pick<FolderUpdate, 'name'>,
+  patch: Pick<FolderUpdate, 'name' | 'tint'>,
 ): Promise<Folder> {
   const { data, error } = await client
     .from('folders')

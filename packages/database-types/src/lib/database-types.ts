@@ -64,6 +64,7 @@ export interface Database {
           user_id: string;
           name: string;
           parent_id: string | null;
+          tint: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -72,6 +73,7 @@ export interface Database {
           user_id: string;
           name: string;
           parent_id?: string | null;
+          tint?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -80,6 +82,7 @@ export interface Database {
           user_id?: string;
           name?: string;
           parent_id?: string | null;
+          tint?: string | null;
           created_at?: string;
           updated_at?: string;
         };

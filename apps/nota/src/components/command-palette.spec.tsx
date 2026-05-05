@@ -4,6 +4,11 @@ import { CommandPalette } from './command-palette';
 import { ThemeProvider } from '@nota/web-design/theme';
 import { dispatchRenameFolderRequest } from '../lib/folder-rename-request';
 import { NOTA_MENUBAR_MOVE_NOTE_REQUEST_EVENT } from '../lib/electron-menubar-events';
+import { clientUpdateFolderTint } from '../lib/update-folder-tint-client';
+
+vi.mock('../lib/update-folder-tint-client', () => ({
+  clientUpdateFolderTint: vi.fn(() => Promise.resolve()),
+}));
 
 vi.mock('../lib/folder-rename-request', () => ({
   dispatchRenameFolderRequest: vi.fn(),
@@ -32,6 +37,7 @@ vi.mock('../context/notes-data-context', () => ({
         user_id: 'user-1',
         name: 'Computer Science Study',
         parent_id: null,
+        tint: null,
         created_at: '2026-04-25T00:00:00.000Z',
         updated_at: '2026-04-25T00:00:00.000Z',
       },
@@ -44,6 +50,7 @@ vi.mock('../context/notes-data-context', () => ({
     patchNoteInList: vi.fn(),
     removeNoteFromList: vi.fn(),
     removeFolderFromList: vi.fn(),
+    patchFolderInList: vi.fn(),
   }),
 }));
 
@@ -125,6 +132,28 @@ describe('CommandPalette', () => {
 
     // Assert
     expect(dispatchRenameFolderRequest).toHaveBeenCalledWith('folder-1');
+  });
+
+  it('runs tint folder flow and applies a folder tint', async () => {
+    // Arrange
+    renderPalette();
+    fireEvent.keyDown(document, { key: 'k', metaKey: true, bubbles: true });
+    const dialog = await screen.findByRole('dialog');
+
+    // Act
+    fireEvent.click(within(dialog).getByText('Tint folder…'));
+    fireEvent.click(within(dialog).getByText('Computer Science Study'));
+    fireEvent.click(within(dialog).getByText('Folder tint Blue'));
+
+    // Assert
+    expect(clientUpdateFolderTint).toHaveBeenCalledWith(
+      expect.objectContaining({
+        folderId: 'folder-1',
+        nextPersistedTint: 'blue',
+        previousPersistedTint: null,
+        userId: 'user-1',
+      }),
+    );
   });
 
   it('opens the move flow from the menubar request event', async () => {

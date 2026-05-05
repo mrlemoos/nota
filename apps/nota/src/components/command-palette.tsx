@@ -53,6 +53,11 @@ import {
 import type { Folder } from '~/types/database.types';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
 import { flattenFoldersWithPathLabels } from '../lib/folder-tree';
+import {
+  FOLDER_TINT_PALETTE_PRESETS,
+  FOLDER_TINT_PRESET_LABEL_KEY,
+} from '../lib/folder-tint-presets';
+import { clientUpdateFolderTint } from '../lib/update-folder-tint-client';
 import { FolderCreateDialog } from './folder-create-dialog';
 import { FolderDeleteDialog } from './folder-delete-dialog';
 import { ReleaseNotesDialog } from './release-notes-dialog';
@@ -62,6 +67,7 @@ import {
 } from '../lib/audio-to-note-start';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { useTheme } from '@nota/web-design/theme';
+import { NotaTintCircle } from '@nota/web-design/nota-tint-circle';
 import { CommandPaletteSemanticSync } from './command-palette-semantic-sync';
 import {
   gsap,
@@ -140,6 +146,7 @@ export function CommandPalette(): JSX.Element {
     patchNoteInList,
     removeNoteFromList,
     removeFolderFromList,
+    patchFolderInList,
   } = useNotesData();
   const { t } = useNotaTranslator();
   const pathSep = t(' / ');
@@ -195,6 +202,10 @@ export function CommandPalette(): JSX.Element {
   moveSelectedNoteIdsRef.current = moveSelectedNoteIds;
   const [deleteFolderPickerOpen, setDeleteFolderPickerOpen] = useState(false);
   const [renameFolderPickerOpen, setRenameFolderPickerOpen] = useState(false);
+  const [tintFolderFlow, setTintFolderFlow] = useState<
+    'idle' | 'pickFolder' | 'pickColour'
+  >('idle');
+  const [tintFolderId, setTintFolderId] = useState<string | null>(null);
   const [releaseNotesOpen, setReleaseNotesOpen] = useState(false);
 
   useEffect(() => {
@@ -208,6 +219,8 @@ export function CommandPalette(): JSX.Element {
       setFolderCreateDlgOpen(false);
       setFolderDeleteTarget(null);
       setRenameFolderPickerOpen(false);
+      setTintFolderFlow('idle');
+      setTintFolderId(null);
       setMoveFlow('pickNote');
       setMoveTargetNoteIds([]);
       setMoveMultiSelectActive(false);
@@ -260,6 +273,8 @@ export function CommandPalette(): JSX.Element {
       setFolderDeleteTarget(null);
       setDeleteFolderPickerOpen(false);
       setRenameFolderPickerOpen(false);
+      setTintFolderFlow('idle');
+      setTintFolderId(null);
     }
   }, [open]);
 
@@ -273,6 +288,13 @@ export function CommandPalette(): JSX.Element {
       setPaletteSearch('');
     }
   }, [moveFlow]);
+
+  useEffect(() => {
+    if (tintFolderFlow === 'pickFolder' || tintFolderFlow === 'pickColour') {
+      setPaletteValue('');
+      setPaletteSearch('');
+    }
+  }, [tintFolderFlow]);
 
   const notesForOpenPalette = useMemo(() => {
     if (semanticOrderedIds === null) {
@@ -511,7 +533,12 @@ export function CommandPalette(): JSX.Element {
 
     if (mod && (e.key === 'm' || e.key === 'M') && !e.shiftKey && !e.altKey) {
       e.preventDefault();
-      if (!notaProEntitled || busy || moveFlow !== 'idle') {
+      if (
+        !notaProEntitled ||
+        busy ||
+        moveFlow !== 'idle' ||
+        tintFolderFlow !== 'idle'
+      ) {
         return;
       }
       setMoveMultiSelectActive(false);
@@ -796,7 +823,9 @@ export function CommandPalette(): JSX.Element {
                                 'move',
                                 f.name,
                                 pathLabel,
-                                ...pathLabel.split(pathSep).map((s) => s.trim()),
+                                ...pathLabel
+                                  .split(pathSep)
+                                  .map((s) => s.trim()),
                               ]}
                               onSelect={() => {
                                 void completeMoveToTarget(f.id);
@@ -934,11 +963,128 @@ export function CommandPalette(): JSX.Element {
                       </Command.Item>
                     </Command.Group>
                   ) : null}
+                  {notaProEntitled && tintFolderFlow === 'pickFolder' ? (
+                    <Command.Group
+                      heading={t('Tint folder — pick folder')}
+                      className={groupHeadingClassName}
+                    >
+                      {foldersWithPaths.map(({ folder: f, pathLabel }) => (
+                        <Command.Item
+                          key={`tint-pick-${f.id}`}
+                          value={`tint-pick:${f.id}`}
+                          keywords={[
+                            'tint',
+                            'colour',
+                            'color',
+                            'folder',
+                            f.name,
+                            pathLabel,
+                            ...pathLabel.split(pathSep).map((s) => s.trim()),
+                          ]}
+                          onSelect={() => {
+                            setTintFolderId(f.id);
+                            setTintFolderFlow('pickColour');
+                          }}
+                          className={cn(
+                            commandItemRowClass,
+                            'group text-foreground',
+                            'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                          )}
+                        >
+                          <span className="min-w-0 flex-1 truncate">
+                            {pathLabel}
+                          </span>
+                        </Command.Item>
+                      ))}
+                      <Command.Item
+                        value="tint-pick-cancel"
+                        keywords={['cancel']}
+                        onSelect={() => {
+                          setTintFolderFlow('idle');
+                          setTintFolderId(null);
+                        }}
+                        className={cn(
+                          commandItemRowClass,
+                          'group text-muted-foreground',
+                          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                        )}
+                      >
+                        {t('Cancel')}
+                      </Command.Item>
+                    </Command.Group>
+                  ) : null}
+                  {notaProEntitled &&
+                  tintFolderFlow === 'pickColour' &&
+                  tintFolderId ? (
+                    <Command.Group
+                      heading={t('Tint folder — choose colour')}
+                      className={groupHeadingClassName}
+                    >
+                      {FOLDER_TINT_PALETTE_PRESETS.map((preset) => (
+                        <Command.Item
+                          key={`tint-colour-${preset.id}`}
+                          value={`tint-colour:${preset.id}`}
+                          keywords={[
+                            'tint',
+                            'colour',
+                            'color',
+                            preset.id,
+                            preset.persistedTint ?? 'default',
+                          ]}
+                          onSelect={() => {
+                            const previousPersistedTint =
+                              folders.find((f) => f.id === tintFolderId)
+                                ?.tint ?? null;
+                            void clientUpdateFolderTint({
+                              folderId: tintFolderId,
+                              nextPersistedTint: preset.persistedTint,
+                              previousPersistedTint,
+                              userId: user?.id ?? '',
+                              notaProEntitled,
+                              patchFolderInList,
+                            });
+                            setTintFolderFlow('idle');
+                            setTintFolderId(null);
+                          }}
+                          className={cn(
+                            commandItemRowClass,
+                            'group text-foreground',
+                            'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                          )}
+                        >
+                          <NotaTintCircle
+                            colour={preset.swatchColour}
+                            sizePx={16}
+                            aria-hidden
+                          />
+                          <span className="min-w-0 flex-1">
+                            {t(FOLDER_TINT_PRESET_LABEL_KEY[preset.id])}
+                          </span>
+                        </Command.Item>
+                      ))}
+                      <Command.Item
+                        value="tint-colour-back"
+                        keywords={['back', 'cancel']}
+                        onSelect={() => {
+                          setTintFolderFlow('pickFolder');
+                          setTintFolderId(null);
+                        }}
+                        className={cn(
+                          commandItemRowClass,
+                          'group text-muted-foreground',
+                          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                        )}
+                      >
+                        {t('Back')}
+                      </Command.Item>
+                    </Command.Group>
+                  ) : null}
                   {notaProEntitled &&
                   folderDeleteTarget === null &&
                   moveFlow === 'idle' &&
                   !renameFolderPickerOpen &&
-                  !deleteFolderPickerOpen ? (
+                  !deleteFolderPickerOpen &&
+                  tintFolderFlow === 'idle' ? (
                     <Command.Group
                       heading="Folders"
                       className={groupHeadingClassName}
@@ -969,6 +1115,10 @@ export function CommandPalette(): JSX.Element {
                           setMoveMultiSelectActive(false);
                           setMoveSelectedNoteIds(new Set());
                           setMoveTargetNoteIds([]);
+                          setRenameFolderPickerOpen(false);
+                          setDeleteFolderPickerOpen(false);
+                          setTintFolderFlow('idle');
+                          setTintFolderId(null);
                           setMoveFlow('pickNote');
                         }}
                         className={cn(
@@ -993,6 +1143,8 @@ export function CommandPalette(): JSX.Element {
                         ]}
                         onSelect={() => {
                           setDeleteFolderPickerOpen(false);
+                          setTintFolderFlow('idle');
+                          setTintFolderId(null);
                           setRenameFolderPickerOpen(true);
                         }}
                         className={cn(
@@ -1005,11 +1157,39 @@ export function CommandPalette(): JSX.Element {
                         <span className="min-w-0 flex-1">Rename folder…</span>
                       </Command.Item>
                       <Command.Item
+                        value="cmd-tint-folder"
+                        disabled={folders.length === 0}
+                        keywords={[
+                          'tint folder',
+                          'folder tint',
+                          'colour folder',
+                          'color folder',
+                          'folder colour',
+                        ]}
+                        onSelect={() => {
+                          setRenameFolderPickerOpen(false);
+                          setDeleteFolderPickerOpen(false);
+                          setTintFolderFlow('pickFolder');
+                        }}
+                        className={cn(
+                          commandItemRowClass,
+                          'group text-foreground',
+                          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                          'aria-disabled:pointer-events-none aria-disabled:opacity-50',
+                        )}
+                      >
+                        <span className="min-w-0 flex-1">
+                          {t('Tint folder…')}
+                        </span>
+                      </Command.Item>
+                      <Command.Item
                         value="cmd-delete-folder"
                         disabled={folders.length === 0}
                         keywords={['delete folder', 'remove folder']}
                         onSelect={() => {
                           setRenameFolderPickerOpen(false);
+                          setTintFolderFlow('idle');
+                          setTintFolderId(null);
                           setDeleteFolderPickerOpen(true);
                         }}
                         className={cn(
@@ -1030,7 +1210,11 @@ export function CommandPalette(): JSX.Element {
                     >
                       <Command.Item
                         value="create-note"
-                        disabled={busy || moveFlow !== 'idle'}
+                        disabled={
+                          busy ||
+                          moveFlow !== 'idle' ||
+                          tintFolderFlow !== 'idle'
+                        }
                         keywords={['new', 'add']}
                         onSelect={() => {
                           setBusyAction('create');
@@ -1113,7 +1297,9 @@ export function CommandPalette(): JSX.Element {
                                 f.name,
                                 pathLabel,
                                 'new note',
-                                ...pathLabel.split(pathSep).map((s) => s.trim()),
+                                ...pathLabel
+                                  .split(pathSep)
+                                  .map((s) => s.trim()),
                               ]}
                               onSelect={() => {
                                 setBusyAction('create');
