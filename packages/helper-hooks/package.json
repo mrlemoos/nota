@@ -33,6 +33,21 @@
     "tags": [
       "scope:nota",
       "type:util"
-    ]
+    ],
+    "targets": {
+      "build": {
+        "executor": "nx:run-commands",
+        "dependsOn": [
+          "^build"
+        ],
+        "outputs": [
+          "{projectRoot}/dist"
+        ],
+        "options": {
+          "cwd": "packages/helper-hooks",
+          "command": "vite build && pnpm exec tsc -b tsconfig.lib.json"
+        }
+      }
+    }
   }
 }
