@@ -17,7 +17,18 @@
     "release:electron": "nx run @nota/nota-electron:electron:release",
     "dev": "nx run-many -t dev",
     "generate:nota-icons": "node apps/nota/scripts/generate-nota-icons.mjs",
-    "test": "nx run-many -t test"
+    "test": "nx run-many -t test",
+    "postinstall": "husky",
+    "format": "nx format:write"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "nx exec -- eslint --fix --no-error-on-unmatched-pattern",
+      "nx format:write --files"
+    ],
+    "*.{json,md,mdx,yml,yaml,css,html,astro}": [
+      "nx format:write --files"
+    ]
   },
   "dependencies": {
     "electron": "catalog:",
@@ -59,8 +70,10 @@
     "eslint-plugin-jsx-a11y": "6.10.1",
     "eslint-plugin-react": "7.35.0",
     "eslint-plugin-react-hooks": "5.0.0",
+    "husky": "^9.1.7",
     "jiti": "2.4.2",
     "jsdom": "catalog:",
+    "lint-staged": "^16.4.0",
     "nx": "22.6.1",
     "postcss": "catalog:",
     "prettier": "~3.6.2",
