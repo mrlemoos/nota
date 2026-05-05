@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { safeOgImageSrcForPreview } from './og-image-url';
+import { safeOgImageSrcForPreview } from '@nota/editor';
 
 describe('safeOgImageSrcForPreview', () => {
   it('accepts http and https URLs', () => {

@@ -11,8 +11,6 @@ import {
 import type { NoteAttachment } from '~/types/database.types';
 
 export const ATTACHMENT_SIGNED_URL_TTL_SEC = 3600;
-/** @deprecated use ATTACHMENT_SIGNED_URL_TTL_SEC */
-export const PDF_SIGNED_URL_TTL_SEC = ATTACHMENT_SIGNED_URL_TTL_SEC;
 
 export type GetOrFetchNoteAttachmentSignedUrlResult =
   | { ok: true; signedUrl: string }
@@ -139,9 +137,6 @@ export async function downloadBlobFromSignedUrl(url: string, filename: string) {
     URL.revokeObjectURL(objectUrl);
   }
 }
-
-/** @deprecated use downloadBlobFromSignedUrl */
-export const downloadPdfFromSignedUrl = downloadBlobFromSignedUrl;
 
 /**
  * Upload a PDF or allowlisted raster image to the note attachments bucket
