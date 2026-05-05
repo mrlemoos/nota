@@ -37,7 +37,10 @@ function getCorsOriginOption(): boolean | string[] {
   if (!raw) {
     return DEFAULT_CORS_ORIGINS;
   }
-  const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  const parts = raw
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (parts.length === 0) {
     return DEFAULT_CORS_ORIGINS;
   }
@@ -140,14 +143,20 @@ app.get('/api/releases', (req, res, next) => {
   })();
 });
 
-app.post('/api/audio-to-note', audioUpload.single('audio'), (req, res, next) => {
-  void audioToNoteHandler(req, res).catch(next);
-});
+app.post(
+  '/api/audio-to-note',
+  audioUpload.single('audio'),
+  (req, res, next) => {
+    void audioToNoteHandler(req, res).catch(next);
+  },
+);
 
 app.post('/api/semantic-search', (req, res, next) => {
   void (async () => {
     try {
-      const r = await semanticSearchPostHandler(expressToWebRequestWithJsonBody(req));
+      const r = await semanticSearchPostHandler(
+        expressToWebRequestWithJsonBody(req),
+      );
       await sendWebResponse(res, r);
     } catch (e) {
       next(e);
@@ -158,7 +167,9 @@ app.post('/api/semantic-search', (req, res, next) => {
 app.post('/api/search/index-note', (req, res, next) => {
   void (async () => {
     try {
-      const r = await indexNotePostHandler(expressToWebRequestWithJsonBody(req));
+      const r = await indexNotePostHandler(
+        expressToWebRequestWithJsonBody(req),
+      );
       await sendWebResponse(res, r);
     } catch (e) {
       next(e);
@@ -169,7 +180,9 @@ app.post('/api/search/index-note', (req, res, next) => {
 app.post('/api/search/reindex-all', (req, res, next) => {
   void (async () => {
     try {
-      const r = await reindexAllPostHandler(expressToWebRequestWithJsonBody(req));
+      const r = await reindexAllPostHandler(
+        expressToWebRequestWithJsonBody(req),
+      );
       await sendWebResponse(res, r);
     } catch (e) {
       next(e);

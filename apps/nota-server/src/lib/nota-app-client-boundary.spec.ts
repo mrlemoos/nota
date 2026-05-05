@@ -12,7 +12,10 @@ function collectSourceFiles(dir: string, acc: string[] = []): string[] {
     const st = statSync(p);
     if (st.isDirectory()) {
       collectSourceFiles(p, acc);
-    } else if (/\.(ts|tsx)$/.test(name) && !/\.(spec|test)\.(ts|tsx)$/.test(name)) {
+    } else if (
+      /\.(ts|tsx)$/.test(name) &&
+      !/\.(spec|test)\.(ts|tsx)$/.test(name)
+    ) {
       acc.push(p);
     }
   }

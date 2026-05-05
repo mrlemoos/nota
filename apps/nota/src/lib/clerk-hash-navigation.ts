@@ -76,7 +76,9 @@ export function mapClerkToHashFragment(
     (parsed.pathname === '/' || parsed.pathname === '') &&
     parsed.hash.length > 1
   ) {
-    const rawHash = parsed.hash.startsWith('#') ? parsed.hash.slice(1) : parsed.hash;
+    const rawHash = parsed.hash.startsWith('#')
+      ? parsed.hash.slice(1)
+      : parsed.hash;
     if (rawHash.startsWith('/')) {
       const hq = rawHash.indexOf('?');
       const hashPath = hq === -1 ? rawHash : rawHash.slice(0, hq);
@@ -149,8 +151,7 @@ function redirectOrReturnUrlLooksPoisoned(encodedValue: string): boolean {
   return false;
 }
 
-const SIGN_REDIRECT_PARAM =
-  /^sign_(?:in|up)_(?:force|fallback)_redirect_url$/i;
+const SIGN_REDIRECT_PARAM = /^sign_(?:in|up)_(?:force|fallback)_redirect_url$/i;
 
 const REDIRECT_OR_RETURN_PARAM = /^(redirect_url|return_url)$/i;
 
@@ -228,7 +229,10 @@ function authHashFragmentStillPoisoned(fragment: string): boolean {
   }
   const params = new URLSearchParams(fragment.slice(qIndex + 1));
   for (const key of params.keys()) {
-    if (!isAllowedAuthHashQueryKey(key) || isPathologicalAuthHashQueryKey(key)) {
+    if (
+      !isAllowedAuthHashQueryKey(key) ||
+      isPathologicalAuthHashQueryKey(key)
+    ) {
       return true;
     }
     const val = params.get(key);
@@ -238,7 +242,10 @@ function authHashFragmentStillPoisoned(fragment: string): boolean {
     if (SIGN_REDIRECT_PARAM.test(key) && redirectParamLooksNested(val)) {
       return true;
     }
-    if (REDIRECT_OR_RETURN_PARAM.test(key) && redirectOrReturnUrlLooksPoisoned(val)) {
+    if (
+      REDIRECT_OR_RETURN_PARAM.test(key) &&
+      redirectOrReturnUrlLooksPoisoned(val)
+    ) {
       return true;
     }
   }
@@ -276,7 +283,10 @@ export function sanitizeClerkAuthHashFragment(fragment: string): string {
   const params = new URLSearchParams(fragment.slice(qIndex + 1));
 
   for (const key of [...params.keys()]) {
-    if (!isAllowedAuthHashQueryKey(key) || isPathologicalAuthHashQueryKey(key)) {
+    if (
+      !isAllowedAuthHashQueryKey(key) ||
+      isPathologicalAuthHashQueryKey(key)
+    ) {
       params.delete(key);
     }
   }
@@ -293,11 +303,11 @@ export function sanitizeClerkAuthHashFragment(fragment: string): string {
       }
       continue;
     }
-    if (REDIRECT_OR_RETURN_PARAM.test(key) && redirectOrReturnUrlLooksPoisoned(val)) {
-      params.set(
-        key,
-        canonicalUrlForPoisonedRedirectOrReturn(pathPart, val),
-      );
+    if (
+      REDIRECT_OR_RETURN_PARAM.test(key) &&
+      redirectOrReturnUrlLooksPoisoned(val)
+    ) {
+      params.set(key, canonicalUrlForPoisonedRedirectOrReturn(pathPart, val));
     }
   }
   const out = params.toString();

@@ -32,6 +32,8 @@ export function useSettingsShortcut(
       return;
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); };
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [userId, enabled, onKeyDown]);
 }

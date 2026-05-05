@@ -10,7 +10,11 @@ describe('WELCOME_NOTE_CONTENT', () => {
     // Arrange
     const doc = WELCOME_NOTE_CONTENT as {
       type: string;
-      content?: Array<{ type: string; attrs?: { level?: number }; content?: unknown }>;
+      content?: Array<{
+        type: string;
+        attrs?: { level?: number };
+        content?: unknown;
+      }>;
     };
 
     // Act

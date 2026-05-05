@@ -9,8 +9,7 @@ describe('getUserPreferences', () => {
       from: () => ({
         select: () => ({
           eq: () => ({
-            maybeSingle: () =>
-              Promise.resolve({ data: null, error: null }),
+            maybeSingle: () => Promise.resolve({ data: null, error: null }),
           }),
         }),
       }),

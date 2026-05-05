@@ -9,7 +9,8 @@
 @theme inline {
   --font-sans: 'Source Sans 3 Variable', ui-sans-serif, system-ui, sans-serif;
   --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
-  --font-note-body: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+  --font-note-body:
+    'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -55,8 +56,16 @@
 /* Radial lift behind hero content — barely perceptible, avoids flat void */
 .mkt-hero-shell {
   background-image:
-    radial-gradient(120% 80% at 50% -20%, oklch(0.22 0.02 250 / 0.35), transparent 55%),
-    radial-gradient(90% 60% at 100% 50%, oklch(0.2 0.015 280 / 0.12), transparent 50%);
+    radial-gradient(
+      120% 80% at 50% -20%,
+      oklch(0.22 0.02 250 / 0.35),
+      transparent 55%
+    ),
+    radial-gradient(
+      90% 60% at 100% 50%,
+      oklch(0.2 0.015 280 / 0.12),
+      transparent 50%
+    );
 }
 
 .mkt-dark {

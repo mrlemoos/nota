@@ -124,7 +124,12 @@ describe('clientCreateNote', () => {
     await clientCreateNote(args);
 
     // Assert
-    expect(createLocalOnlyNote).toHaveBeenCalledWith('u1', undefined, undefined, null);
+    expect(createLocalOnlyNote).toHaveBeenCalledWith(
+      'u1',
+      undefined,
+      undefined,
+      null,
+    );
     expect(createNote).not.toHaveBeenCalled();
     expect(refreshNotesList).toHaveBeenCalled();
   });

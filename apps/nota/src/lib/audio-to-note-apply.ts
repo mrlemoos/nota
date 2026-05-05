@@ -77,9 +77,7 @@ export function buildAudioNoteApplyPatch(options: {
     content: {
       type: 'doc',
       content:
-        merged.length > 0
-          ? merged
-          : [{ type: 'paragraph', content: [] }],
+        merged.length > 0 ? merged : [{ type: 'paragraph', content: [] }],
     } as Json,
   };
 }

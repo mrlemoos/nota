@@ -7,13 +7,7 @@ import {
   ReactNodeViewRenderer,
   type NodeViewProps,
 } from '@tiptap/react';
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type JSX,
-} from 'react';
+import { useEffect, useId, useRef, useState, type JSX } from 'react';
 import { cn } from '@nota/web-design/utils';
 
 /** Wider than TipTap default `[a-z]+` so fences like ```c++``` / ```f#``` work when typed. */
@@ -23,18 +17,23 @@ const tildeFenceRegex = /^~~~([\w+#.-]+)?[\s\n]$/;
 const MERMAID_DEBOUNCE_MS = 350;
 
 function useDocumentDarkClass(): boolean {
-  const [dark, setDark] = useState(() =>
-    typeof document !== 'undefined' &&
+  const [dark, setDark] = useState(
+    () =>
+      typeof document !== 'undefined' &&
       document.documentElement.classList.contains('dark'),
   );
 
   useEffect(() => {
     const el = document.documentElement;
-    const sync = () => { setDark(el.classList.contains('dark')); };
+    const sync = () => {
+      setDark(el.classList.contains('dark'));
+    };
     const obs = new MutationObserver(sync);
     obs.observe(el, { attributes: true, attributeFilter: ['class'] });
     sync();
-    return () => { obs.disconnect(); };
+    return () => {
+      obs.disconnect();
+    };
   }, []);
 
   return dark;
@@ -119,8 +118,12 @@ function NotaCodeBlockView(props: NodeViewProps): JSX.Element {
   const isDark = useDocumentDarkClass();
 
   useEffect(() => {
-    const t = setTimeout(() => { setDebouncedText(rawText); }, MERMAID_DEBOUNCE_MS);
-    return () => { clearTimeout(t); };
+    const t = setTimeout(() => {
+      setDebouncedText(rawText);
+    }, MERMAID_DEBOUNCE_MS);
+    return () => {
+      clearTimeout(t);
+    };
   }, [rawText]);
 
   return (

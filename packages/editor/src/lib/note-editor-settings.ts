@@ -92,7 +92,9 @@ export function noteEditorSettingsToJson(settings: NoteEditorSettings): Json {
 export function isNoteVisibleInNoteGraph(
   note: Pick<Note, 'editor_settings'>,
 ): boolean {
-  return parseNoteEditorSettings(note.editor_settings).showInNoteGraph !== false;
+  return (
+    parseNoteEditorSettings(note.editor_settings).showInNoteGraph !== false
+  );
 }
 
 export function filterNotesForNoteGraph(notes: Note[]): Note[] {

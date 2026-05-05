@@ -5,7 +5,10 @@ export type {
   NotePdfDocContextValue,
 } from './components/tiptap-editor';
 
-export { NoteEditorCommandsProvider, useNoteEditorCommands } from './context/note-editor-commands';
+export {
+  NoteEditorCommandsProvider,
+  useNoteEditorCommands,
+} from './context/note-editor-commands';
 
 export {
   NOTE_THEME_LABEL,

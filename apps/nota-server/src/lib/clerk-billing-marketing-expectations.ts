@@ -42,8 +42,13 @@ const PRICE_RE_ANNUAL = /const\s+priceAnnualUsd\s*=\s*'([\d.]+)'/;
 export type MarketingGuidePrices = { monthlyUsd: number; annualUsd: number };
 
 /** Read `priceMonthlyUsd` / `priceAnnualUsd` from marketing Astro; ensure pricing and home stay aligned. */
-export function readMarketingGuidePrices(repoRoot: string): MarketingGuidePrices {
-  const pricingPath = join(repoRoot, 'apps/nota-marketing/src/pages/pricing.astro');
+export function readMarketingGuidePrices(
+  repoRoot: string,
+): MarketingGuidePrices {
+  const pricingPath = join(
+    repoRoot,
+    'apps/nota-marketing/src/pages/pricing.astro',
+  );
   const homePath = join(repoRoot, 'apps/nota-marketing/src/pages/index.astro');
   const pricingSrc = readFileSync(pricingPath, 'utf8');
   const homeSrc = readFileSync(homePath, 'utf8');
@@ -72,7 +77,9 @@ export function readMarketingGuidePrices(repoRoot: string): MarketingGuidePrices
 }
 
 function isUsd(m: MoneyLike): m is NonNullable<MoneyLike> {
-  return m != null && typeof m.amount === 'number' && typeof m.currency === 'string';
+  return (
+    m != null && typeof m.amount === 'number' && typeof m.currency === 'string'
+  );
 }
 
 /** Map Clerk Billing money to decimal USD; assumes `amount` is in minor units for USD. */
@@ -87,7 +94,11 @@ export function moneyToUsdDecimal(m: MoneyLike): number | null {
   return usdMinorUnitsToDecimal(m.amount);
 }
 
-export function withinUsdTolerance(actual: number, expected: number, tolerance = 0.02): boolean {
+export function withinUsdTolerance(
+  actual: number,
+  expected: number,
+  tolerance = 0.02,
+): boolean {
   return Math.abs(actual - expected) <= tolerance;
 }
 
@@ -100,7 +111,9 @@ export function validateUserBillingPlansAgainstExpectations(
 ): AlignmentIssue[] {
   const issues: AlignmentIssue[] = [];
 
-  const visibleUser = plans.filter((p) => p.forPayerType === 'user' && p.publiclyVisible);
+  const visibleUser = plans.filter(
+    (p) => p.forPayerType === 'user' && p.publiclyVisible,
+  );
 
   if (visibleUser.length === 0) {
     issues.push({
@@ -120,7 +133,10 @@ export function validateUserBillingPlansAgainstExpectations(
         message: `Plan "${p.name}" (${p.slug}) has freeTrialEnabled with ${p.freeTrialDays ?? 0} trial day(s). Marketing and AGENTS.md state there is no free trial for the full vault.`,
       });
     }
-    if (p.freeTrialEnabled && (p.freeTrialDays == null || p.freeTrialDays === 0)) {
+    if (
+      p.freeTrialEnabled &&
+      (p.freeTrialDays == null || p.freeTrialDays === 0)
+    ) {
       issues.push({
         level: 'warn',
         code: 'free_trial_flag_without_days',
@@ -162,7 +178,10 @@ export function validateUserBillingPlansAgainstExpectations(
       continue;
     }
     const monthly = moneyToUsdDecimal(p.fee);
-    if (monthly === 0 || (p.annualFee && moneyToUsdDecimal(p.annualFee) === 0)) {
+    if (
+      monthly === 0 ||
+      (p.annualFee && moneyToUsdDecimal(p.annualFee) === 0)
+    ) {
       issues.push({
         level: 'error',
         code: 'zero_recurring_price',

@@ -266,9 +266,14 @@ export function bootstrapAppNavigation(): void {
    * blank grey window (transparent shell).
    */
   const patchKey = '__notaHistoryNavigationPatched';
-  if (!(patchKey in window) || !(window as unknown as Record<string, boolean>)[patchKey]) {
+  if (
+    !(patchKey in window) ||
+    !(window as unknown as Record<string, boolean>)[patchKey]
+  ) {
     (window as unknown as Record<string, boolean>)[patchKey] = true;
-    const patchHistoryNavigation = (key: 'pushState' | 'replaceState'): void => {
+    const patchHistoryNavigation = (
+      key: 'pushState' | 'replaceState',
+    ): void => {
       const { history } = window;
       const original = history[key].bind(history) as (
         data: unknown,

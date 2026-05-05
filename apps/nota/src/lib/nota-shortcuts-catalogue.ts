@@ -321,8 +321,7 @@ export function filterShortcutCatalogSections(
   return sections.map((section) => ({
     ...section,
     rows: section.rows.filter(
-      (row) =>
-        !row.requiresTodaysNotePreference || includeTodaysNoteRows,
+      (row) => !row.requiresTodaysNotePreference || includeTodaysNoteRows,
     ),
   }));
 }

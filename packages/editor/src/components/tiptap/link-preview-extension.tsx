@@ -15,7 +15,8 @@ import { useNotePdfDocContext } from './note-pdf-extension';
 function stringifyPreviewAttr(value: unknown): string {
   if (value == null) return '';
   if (typeof value === 'string') return value;
-  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value);
   return '';
 }
 
@@ -175,7 +176,9 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
                 size="xs"
                 className="text-muted-foreground"
                 disabled={loading}
-                onClick={() => { setRefreshNonce((n) => n + 1); }}
+                onClick={() => {
+                  setRefreshNonce((n) => n + 1);
+                }}
               >
                 Refresh
               </NotaButton>
@@ -209,8 +212,7 @@ export const LinkPreview = Node.create({
       href: {
         default: '',
         parseHTML: (el) => el.getAttribute('data-href') ?? '',
-        renderHTML: (attrs) =>
-          attrs.href ? { 'data-href': attrs.href } : {},
+        renderHTML: (attrs) => (attrs.href ? { 'data-href': attrs.href } : {}),
       },
       linkText: {
         default: '',

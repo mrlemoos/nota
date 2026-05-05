@@ -2,7 +2,9 @@ import { en } from 'chrono-node';
 
 const option = { forwardDate: true } as const;
 
-function trimBounds(text: string): { lead: number; trimmed: string; trailEnd: number } | null {
+function trimBounds(
+  text: string,
+): { lead: number; trimmed: string; trailEnd: number } | null {
   const trimmed = text.trim();
   if (!trimmed) {
     return null;
@@ -23,7 +25,10 @@ function offsetTouchesSpan(
 /**
  * Every chrono match in the trimmed slice, mapped to indices in `text`, merged on overlap.
  */
-export function allDateSpansInText(text: string, ref: Date): Array<{ start: number; end: number }> {
+export function allDateSpansInText(
+  text: string,
+  ref: Date,
+): Array<{ start: number; end: number }> {
   const b = trimBounds(text);
   if (!b) {
     return [];

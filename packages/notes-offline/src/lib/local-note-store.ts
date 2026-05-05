@@ -63,7 +63,9 @@ export async function saveLocalNoteDraft(
   const now = new Date().toISOString();
   const tx = db.transaction(NOTES_OBJECT_STORE, 'readwrite');
   const store = tx.objectStore(NOTES_OBJECT_STORE);
-  const existing = (await idbRequest(store.get(patch.id))) as StoredNote | undefined;
+  const existing = (await idbRequest(store.get(patch.id))) as
+    | StoredNote
+    | undefined;
 
   const title = patch.title ?? existing?.title ?? '';
   const content = patch.content ?? existing?.content ?? DEFAULT_NOTE_CONTENT;
@@ -76,9 +78,7 @@ export async function saveLocalNoteDraft(
     created_at: patch.created_at ?? existing?.created_at ?? now,
     updated_at: now,
     due_at:
-      patch.due_at !== undefined
-        ? patch.due_at
-        : (existing?.due_at ?? null),
+      patch.due_at !== undefined ? patch.due_at : (existing?.due_at ?? null),
     is_deadline:
       patch.is_deadline !== undefined
         ? patch.is_deadline
@@ -86,7 +86,7 @@ export async function saveLocalNoteDraft(
     editor_settings:
       patch.editor_settings !== undefined
         ? patch.editor_settings
-        : (existing?.editor_settings ?? ({})),
+        : (existing?.editor_settings ?? {}),
     banner_attachment_id:
       patch.banner_attachment_id !== undefined
         ? patch.banner_attachment_id
@@ -157,7 +157,9 @@ export async function markPendingDelete(
   const db = await getNotaNotesDb(userId);
   const tx = db.transaction(NOTES_OBJECT_STORE, 'readwrite');
   const store = tx.objectStore(NOTES_OBJECT_STORE);
-  const existing = (await idbRequest(store.get(noteId))) as StoredNote | undefined;
+  const existing = (await idbRequest(store.get(noteId))) as
+    | StoredNote
+    | undefined;
 
   if (!wasSynced && existing?.pending_create) {
     store.delete(noteId);
@@ -232,7 +234,10 @@ export async function createLocalOnlyNote(
   return id;
 }
 
-export async function removeStoredNote(userId: string, noteId: string): Promise<void> {
+export async function removeStoredNote(
+  userId: string,
+  noteId: string,
+): Promise<void> {
   const db = await getNotaNotesDb(userId);
   const tx = db.transaction(NOTES_OBJECT_STORE, 'readwrite');
   tx.objectStore(NOTES_OBJECT_STORE).delete(noteId);

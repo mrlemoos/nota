@@ -36,7 +36,11 @@ export async function startStudyNotesFromRecording(options: {
 
   const c = getBrowserClient();
   try {
-    const row = await createNote(c, options.userId, studyNotePlaceholderRecordingTitle());
+    const row = await createNote(
+      c,
+      options.userId,
+      studyNotePlaceholderRecordingTitle(),
+    );
     options.insertNoteAtFront(row);
     goToNote(row.id);
     await options.refreshNotesList({ silent: true });

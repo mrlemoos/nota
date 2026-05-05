@@ -27,7 +27,10 @@ function sseWrite(res: Response, event: string, data: unknown): void {
 /**
  * Express handler: expects `multer` to have attached `req.file` for field `audio`.
  */
-export async function audioToNoteHandler(req: Request, res: Response): Promise<void> {
+export async function audioToNoteHandler(
+  req: Request,
+  res: Response,
+): Promise<void> {
   const webReq = bearerWebRequest(req);
   const userId = await getUserIdFromBearer(webReq);
   if (!userId) {
@@ -41,7 +44,9 @@ export async function audioToNoteHandler(req: Request, res: Response): Promise<v
   }
 
   if (!process.env.XAI_API_KEY?.trim()) {
-    res.status(503).json({ error: 'Audio-to-note is not configured on the server.' });
+    res
+      .status(503)
+      .json({ error: 'Audio-to-note is not configured on the server.' });
     return;
   }
 
@@ -52,7 +57,9 @@ export async function audioToNoteHandler(req: Request, res: Response): Promise<v
   }
 
   if (!isAllowedAudioUploadMime(file.mimetype)) {
-    res.status(400).json({ error: `Unsupported audio type: ${file.mimetype ?? 'unknown'}` });
+    res
+      .status(400)
+      .json({ error: `Unsupported audio type: ${file.mimetype ?? 'unknown'}` });
     return;
   }
 

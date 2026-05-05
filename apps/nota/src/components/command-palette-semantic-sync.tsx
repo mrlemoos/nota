@@ -22,8 +22,12 @@ export function CommandPaletteSemanticSync(options: {
   const [debounced, setDebounced] = useState('');
 
   useEffect(() => {
-    const t = window.setTimeout(() => { setDebounced(search); }, DEBOUNCE_MS);
-    return () => { window.clearTimeout(t); };
+    const t = window.setTimeout(() => {
+      setDebounced(search);
+    }, DEBOUNCE_MS);
+    return () => {
+      window.clearTimeout(t);
+    };
   }, [search]);
 
   useEffect(() => {
@@ -54,8 +58,7 @@ export function CommandPaletteSemanticSync(options: {
           return;
         }
         const json = (await res.json()) as SemanticSearchJson;
-        const ids =
-          json.results?.map((r) => r.noteId).filter(Boolean) ?? [];
+        const ids = json.results?.map((r) => r.noteId).filter(Boolean) ?? [];
         onSemanticOrderedIds(ids);
       } catch {
         if (!cancelled) {

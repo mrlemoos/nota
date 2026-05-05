@@ -41,9 +41,7 @@ export function studyNotesBlocksToTiptapNodes(
       content.push({
         type: 'heading',
         attrs: { level: block.level },
-        content: block.text.trim()
-          ? [textNode(block.text.trim())]
-          : [],
+        content: block.text.trim() ? [textNode(block.text.trim())] : [],
       });
       continue;
     }
@@ -94,9 +92,6 @@ export function studyNotesResultToTiptapDoc(
 
   return {
     type: 'doc',
-    content:
-      nodes.length > 0
-        ? nodes
-        : [{ type: 'paragraph', content: [] }],
+    content: nodes.length > 0 ? nodes : [{ type: 'paragraph', content: [] }],
   } as Json;
 }

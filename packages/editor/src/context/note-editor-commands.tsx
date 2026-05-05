@@ -145,7 +145,9 @@ export function useRegisterNoteEditorMermaidInserter(
   }, [editor, ctx]);
 }
 
-export function useRegisterNoteEditorTableInserter(editor: Editor | null): void {
+export function useRegisterNoteEditorTableInserter(
+  editor: Editor | null,
+): void {
   const ctx = useContext(NoteEditorCommandsContext);
 
   useEffect(() => {

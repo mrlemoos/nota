@@ -24,13 +24,22 @@ const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" wi
 async function main() {
   await fs.promises.mkdir(publicRoot, { recursive: true });
 
-  const png16 = await sharp(Buffer.from(MARK_SVG)).resize(16, 16).png().toBuffer();
-  const png32 = await sharp(Buffer.from(MARK_SVG)).resize(32, 32).png().toBuffer();
+  const png16 = await sharp(Buffer.from(MARK_SVG))
+    .resize(16, 16)
+    .png()
+    .toBuffer();
+  const png32 = await sharp(Buffer.from(MARK_SVG))
+    .resize(32, 32)
+    .png()
+    .toBuffer();
   const ico = await toIco([png16, png32]);
   await fs.promises.writeFile(path.join(publicRoot, 'favicon.ico'), ico);
 
   const markSize = 140;
-  const markBuf = await sharp(Buffer.from(MARK_SVG)).resize(markSize, markSize).png().toBuffer();
+  const markBuf = await sharp(Buffer.from(MARK_SVG))
+    .resize(markSize, markSize)
+    .png()
+    .toBuffer();
   await sharp({
     create: {
       width: 180,

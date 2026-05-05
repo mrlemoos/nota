@@ -23,7 +23,12 @@ describe('note-attachment-signed-url-cache', () => {
     const id = 'a1111111-1111-4111-8111-111111111111';
     const path = 'u/test/banner.webp';
     const url = 'https://example.com/signed?token=1';
-    setCachedNoteAttachmentSignedUrl(id, path, url, ATTACHMENT_SIGNED_URL_TTL_SEC);
+    setCachedNoteAttachmentSignedUrl(
+      id,
+      path,
+      url,
+      ATTACHMENT_SIGNED_URL_TTL_SEC,
+    );
 
     // Act
     const got = getCachedNoteAttachmentSignedUrl(id, path);
@@ -39,10 +44,7 @@ describe('note-attachment-signed-url-cache', () => {
     const t0 = 50_000_000;
     vi.setSystemTime(t0);
     setCachedNoteAttachmentSignedUrl(id, path, 'https://x.test/u', 3600);
-    const safetyMarginMs = Math.max(
-      60_000,
-      Math.floor(3600 * 0.15 * 1000),
-    );
+    const safetyMarginMs = Math.max(60_000, Math.floor(3600 * 0.15 * 1000));
 
     // Act — valid while now < expiresAt - safetyMargin
     vi.setSystemTime(t0 + 3600 * 1000 - safetyMarginMs + 1);

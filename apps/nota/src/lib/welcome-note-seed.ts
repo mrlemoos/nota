@@ -1,7 +1,10 @@
 import { createLocalOnlyNote } from './notes-offline';
 import { getBrowserClient } from './supabase/browser';
 import { WELCOME_NOTE_CONTENT, WELCOME_NOTE_TITLE } from './welcome-note-doc';
-import { getUserPreferences, upsertUserPreferences } from '../models/user-preferences';
+import {
+  getUserPreferences,
+  upsertUserPreferences,
+} from '../models/user-preferences';
 
 /**
  * One promise per user for the welcome seed. Kept after settle so Strict Mode
@@ -58,7 +61,10 @@ export async function runWelcomeNoteSeedIfNeeded(
           welcome_seeded: true,
         });
       } catch (e) {
-        console.error('Welcome note: failed to set welcome_seeded preference', e);
+        console.error(
+          'Welcome note: failed to set welcome_seeded preference',
+          e,
+        );
       }
       return id;
     } catch (e) {

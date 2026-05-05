@@ -17,11 +17,26 @@ interface NotaPreferencesState {
   /** Local calendar date (YYYY-MM-DD) → note id; device-local only. */
   dailyNoteIdByLocalDate: Record<string, string>;
 
-  setOpenTodaysNoteShortcut: (value: boolean, options?: { pendingSync?: boolean }) => void;
-  setLocale: (value: string | null, options?: { pendingSync?: boolean }) => void;
-  setShowNoteBacklinks: (value: boolean, options?: { pendingSync?: boolean }) => void;
-  setSemanticSearchEnabled: (value: boolean, options?: { pendingSync?: boolean }) => void;
-  setEmojiReplacerEnabled: (value: boolean, options?: { pendingSync?: boolean }) => void;
+  setOpenTodaysNoteShortcut: (
+    value: boolean,
+    options?: { pendingSync?: boolean },
+  ) => void;
+  setLocale: (
+    value: string | null,
+    options?: { pendingSync?: boolean },
+  ) => void;
+  setShowNoteBacklinks: (
+    value: boolean,
+    options?: { pendingSync?: boolean },
+  ) => void;
+  setSemanticSearchEnabled: (
+    value: boolean,
+    options?: { pendingSync?: boolean },
+  ) => void;
+  setEmojiReplacerEnabled: (
+    value: boolean,
+    options?: { pendingSync?: boolean },
+  ) => void;
   setCursorVisualStyle: (value: CursorVisualStyle) => void;
   hydratePreferencesFromServer: (prefs: UserPreferences) => void;
   markPreferencesSynced: (prefs: UserPreferences) => void;
@@ -109,7 +124,10 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
 
       setDailyNoteForLocalDate: (dateKey, noteId) =>
         set((s) => ({
-          dailyNoteIdByLocalDate: { ...s.dailyNoteIdByLocalDate, [dateKey]: noteId },
+          dailyNoteIdByLocalDate: {
+            ...s.dailyNoteIdByLocalDate,
+            [dateKey]: noteId,
+          },
         })),
 
       clearDailyNoteForLocalDate: (dateKey) =>

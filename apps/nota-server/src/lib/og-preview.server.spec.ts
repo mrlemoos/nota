@@ -1,12 +1,5 @@
 import * as dns from 'node:dns/promises';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  spyOn,
-} from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import {
   assertResolvedAddressesSafeForOgFetch,
   assertUrlSafeForOgFetch,
@@ -147,9 +140,9 @@ describe('assertResolvedAddressesSafeForOgFetch', () => {
 
   it('rejects when DNS resolves to a private address', async () => {
     // Arrange
-    const spy = spyOn(dns, 'lookup').mockImplementation(
-      async () => [{ address: '10.0.0.1', family: 4 }],
-    );
+    const spy = spyOn(dns, 'lookup').mockImplementation(async () => [
+      { address: '10.0.0.1', family: 4 },
+    ]);
     const host = 'example.com';
 
     try {
@@ -168,9 +161,9 @@ describe('fetchOgPreview', () => {
   let lookupSpy: ReturnType<typeof spyOn>;
 
   beforeEach(() => {
-    lookupSpy = spyOn(dns, 'lookup').mockImplementation(
-      async () => [{ address: '8.8.8.8', family: 4 }],
-    );
+    lookupSpy = spyOn(dns, 'lookup').mockImplementation(async () => [
+      { address: '8.8.8.8', family: 4 },
+    ]);
   });
 
   afterEach(() => {

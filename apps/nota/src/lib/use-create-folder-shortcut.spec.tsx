@@ -62,9 +62,7 @@ describe('useCreateFolderShortcut', () => {
   it('does nothing when the shortcut hook is disabled', () => {
     // Arrange
     const onOpen = vi.fn();
-    render(
-      <Harness userId="user-1" enabled={false} onOpen={onOpen} />,
-    );
+    render(<Harness userId="user-1" enabled={false} onOpen={onOpen} />);
     const keyEvent = { key: 'n', metaKey: true, shiftKey: true, bubbles: true };
 
     // Act

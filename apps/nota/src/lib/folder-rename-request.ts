@@ -9,8 +9,11 @@ export function dispatchRenameFolderRequest(folderId: string): void {
     return;
   }
   window.dispatchEvent(
-    new CustomEvent<RenameFolderRequestDetail>(NOTA_RENAME_FOLDER_REQUEST_EVENT, {
-      detail: { folderId },
-    }),
+    new CustomEvent<RenameFolderRequestDetail>(
+      NOTA_RENAME_FOLDER_REQUEST_EVENT,
+      {
+        detail: { folderId },
+      },
+    ),
   );
 }

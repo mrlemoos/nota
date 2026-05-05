@@ -2,15 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2019"
-    ],
-    "types": [
-      "vite/client",
-      "node"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2019"],
+    "types": ["vite/client", "node"],
     "esModuleInterop": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true,
@@ -19,12 +12,8 @@
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "~/*": [
-        "./src/*"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
+      "~/*": ["./src/*"],
+      "@/*": ["./src/*"]
     },
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo"
   },

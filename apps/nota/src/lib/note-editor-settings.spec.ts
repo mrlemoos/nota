@@ -136,9 +136,9 @@ describe('noteEditorSettingsToJson', () => {
   });
 
   it('serialises showInNoteGraph false only', () => {
-    expect(
-      noteEditorSettingsToJson({ showInNoteGraph: false }),
-    ).toEqual({ showInNoteGraph: false });
+    expect(noteEditorSettingsToJson({ showInNoteGraph: false })).toEqual({
+      showInNoteGraph: false,
+    });
     expect(noteEditorSettingsToJson({ showInNoteGraph: true })).toEqual({});
     expect(noteEditorSettingsToJson({})).toEqual({});
   });
@@ -146,9 +146,9 @@ describe('noteEditorSettingsToJson', () => {
 
 describe('showInNoteGraph', () => {
   it('parses false and true', () => {
-    expect(
-      parseNoteEditorSettings({ showInNoteGraph: false }),
-    ).toEqual({ showInNoteGraph: false });
+    expect(parseNoteEditorSettings({ showInNoteGraph: false })).toEqual({
+      showInNoteGraph: false,
+    });
     expect(parseNoteEditorSettings({ showInNoteGraph: true })).toEqual({
       showInNoteGraph: true,
     });
@@ -165,9 +165,7 @@ describe('showInNoteGraph', () => {
 
 describe('isNoteVisibleInNoteGraph', () => {
   it('treats missing and true as visible', () => {
-    expect(isNoteVisibleInNoteGraph({ editor_settings: {} })).toBe(
-      true,
-    );
+    expect(isNoteVisibleInNoteGraph({ editor_settings: {} })).toBe(true);
     expect(
       isNoteVisibleInNoteGraph({
         editor_settings: { showInNoteGraph: true },

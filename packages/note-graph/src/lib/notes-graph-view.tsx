@@ -23,10 +23,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import type { Note } from '@nota/database-types';
-import {
-  filterNotesForNoteGraph,
-  persistedDisplayTitle,
-} from '@nota/editor';
+import { filterNotesForNoteGraph, persistedDisplayTitle } from '@nota/editor';
 import type { PlaceholderValues } from '@nota/i18n';
 import { cn } from '@nota/web-design/utils';
 import { applyNoteGraphHoverToEdges } from './note-graph-hover-edges';

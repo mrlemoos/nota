@@ -182,7 +182,9 @@ describe('@nota/nota-server-client', () => {
     // Arrange
     const fetchSpy = vi
       .spyOn(globalThis, 'fetch')
-      .mockResolvedValue(new Response(JSON.stringify({ ok: true, indexed: 0 })));
+      .mockResolvedValue(
+        new Response(JSON.stringify({ ok: true, indexed: 0 })),
+      );
     const baseUrl = 'https://ns.example';
     const token = 'jwt';
 

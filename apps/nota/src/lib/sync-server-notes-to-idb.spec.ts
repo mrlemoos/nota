@@ -21,10 +21,15 @@ function mockNote(id: string): Note {
 
 describe('syncServerNotesToIdbInChunks', () => {
   beforeEach(() => {
-    vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback): number => {
-      queueMicrotask(() => { cb(performance.now()); });
-      return 1;
-    });
+    vi.stubGlobal(
+      'requestAnimationFrame',
+      (cb: FrameRequestCallback): number => {
+        queueMicrotask(() => {
+          cb(performance.now());
+        });
+        return 1;
+      },
+    );
   });
 
   afterEach(() => {

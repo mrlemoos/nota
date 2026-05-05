@@ -14,11 +14,7 @@ const base = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-function f(
-  id: string,
-  name: string,
-  parent_id: string | null = null,
-): Folder {
+function f(id: string, name: string, parent_id: string | null = null): Folder {
   return { id, name, parent_id, ...base };
 }
 
@@ -75,10 +71,7 @@ describe('folder-tree', () => {
 
   it('folderPathLabel joins ancestor names with the separator', () => {
     // Arrange
-    const folders: Folder[] = [
-      f('r', 'Work', null),
-      f('p', 'Project', 'r'),
-    ];
+    const folders: Folder[] = [f('r', 'Work', null), f('p', 'Project', 'r')];
     const sep = ' / ';
 
     // Act

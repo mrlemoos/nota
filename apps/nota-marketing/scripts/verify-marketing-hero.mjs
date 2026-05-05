@@ -13,7 +13,9 @@ let html;
 try {
   html = readFileSync(htmlPath, 'utf8');
 } catch {
-  console.error('verify-marketing-hero: missing dist/index.html — run astro build first');
+  console.error(
+    'verify-marketing-hero: missing dist/index.html — run astro build first',
+  );
   process.exit(1);
 }
 
@@ -29,7 +31,9 @@ const checks = [
 
 for (const [needle, label] of checks) {
   if (!html.includes(needle)) {
-    console.error(`verify-marketing-hero: expected ${label} (${needle}) in dist/index.html`);
+    console.error(
+      `verify-marketing-hero: expected ${label} (${needle}) in dist/index.html`,
+    );
     process.exit(1);
   }
 }

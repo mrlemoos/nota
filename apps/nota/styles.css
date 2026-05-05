@@ -1,9 +1,9 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@import "react-day-picker/style.css";
+@import 'react-day-picker/style.css';
 
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @source "../../apps";
 @source "../../packages";
@@ -20,7 +20,11 @@
 /* Due date popover calendar — semantic tokens (avoid hard-coded greys) */
 .nota-due-day-picker .rdp-root {
   --rdp-accent-color: var(--primary);
-  --rdp-accent-background-color: color-mix(in oklch, var(--muted) 80%, transparent);
+  --rdp-accent-background-color: color-mix(
+    in oklch,
+    var(--muted) 80%,
+    transparent
+  );
   --rdp-today-color: var(--primary);
   color: var(--foreground);
 }
@@ -420,7 +424,12 @@
   outline: none;
 }
 
-.tiptap-editor .ProseMirror li.nota-task-item > label input:focus-visible + span {
+.tiptap-editor
+  .ProseMirror
+  li.nota-task-item
+  > label
+  input:focus-visible
+  + span {
   box-shadow:
     0 0 0 2px var(--background),
     0 0 0 4px color-mix(in oklch, var(--ring) 85%, transparent);
@@ -667,35 +676,113 @@
  */
 .tiptap-editor .ProseMirror .tableWrapper table thead tr:first-child > th,
 .tiptap-editor .ProseMirror .tableWrapper table thead tr:first-child > td,
-.tiptap-editor .ProseMirror .tableWrapper table:not(:has(thead)) tbody tr:first-child > th,
-.tiptap-editor .ProseMirror .tableWrapper table:not(:has(thead)) tbody tr:first-child > td,
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table:not(:has(thead))
+  tbody
+  tr:first-child
+  > th,
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table:not(:has(thead))
+  tbody
+  tr:first-child
+  > td,
 .tiptap-editor .ProseMirror table.nota-table thead tr:first-child > th,
 .tiptap-editor .ProseMirror table.nota-table thead tr:first-child > td,
-.tiptap-editor .ProseMirror table.nota-table:not(:has(thead)) tbody tr:first-child > th,
-.tiptap-editor .ProseMirror table.nota-table:not(:has(thead)) tbody tr:first-child > td {
+.tiptap-editor
+  .ProseMirror
+  table.nota-table:not(:has(thead))
+  tbody
+  tr:first-child
+  > th,
+.tiptap-editor
+  .ProseMirror
+  table.nota-table:not(:has(thead))
+  tbody
+  tr:first-child
+  > td {
   border-top: 1px solid var(--nota-table-grid);
 }
 
-.tiptap-editor .ProseMirror .tableWrapper table thead tr:first-child > :first-child,
-.tiptap-editor .ProseMirror .tableWrapper table:not(:has(thead)) tbody tr:first-child > :first-child,
-.tiptap-editor .ProseMirror table.nota-table thead tr:first-child > :first-child,
-.tiptap-editor .ProseMirror table.nota-table:not(:has(thead)) tbody tr:first-child > :first-child {
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table
+  thead
+  tr:first-child
+  > :first-child,
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table:not(:has(thead))
+  tbody
+  tr:first-child
+  > :first-child,
+.tiptap-editor
+  .ProseMirror
+  table.nota-table
+  thead
+  tr:first-child
+  > :first-child,
+.tiptap-editor
+  .ProseMirror
+  table.nota-table:not(:has(thead))
+  tbody
+  tr:first-child
+  > :first-child {
   border-top-left-radius: var(--radius);
 }
 
-.tiptap-editor .ProseMirror .tableWrapper table thead tr:first-child > :last-child,
-.tiptap-editor .ProseMirror .tableWrapper table:not(:has(thead)) tbody tr:first-child > :last-child,
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table
+  thead
+  tr:first-child
+  > :last-child,
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table:not(:has(thead))
+  tbody
+  tr:first-child
+  > :last-child,
 .tiptap-editor .ProseMirror table.nota-table thead tr:first-child > :last-child,
-.tiptap-editor .ProseMirror table.nota-table:not(:has(thead)) tbody tr:first-child > :last-child {
+.tiptap-editor
+  .ProseMirror
+  table.nota-table:not(:has(thead))
+  tbody
+  tr:first-child
+  > :last-child {
   border-top-right-radius: var(--radius);
 }
 
-.tiptap-editor .ProseMirror .tableWrapper table tbody tr:last-child > :first-child,
-.tiptap-editor .ProseMirror table.nota-table tbody tr:last-child > :first-child {
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table
+  tbody
+  tr:last-child
+  > :first-child,
+.tiptap-editor
+  .ProseMirror
+  table.nota-table
+  tbody
+  tr:last-child
+  > :first-child {
   border-bottom-left-radius: var(--radius);
 }
 
-.tiptap-editor .ProseMirror .tableWrapper table tbody tr:last-child > :last-child,
+.tiptap-editor
+  .ProseMirror
+  .tableWrapper
+  table
+  tbody
+  tr:last-child
+  > :last-child,
 .tiptap-editor .ProseMirror table.nota-table tbody tr:last-child > :last-child {
   border-bottom-right-radius: var(--radius);
 }
@@ -757,7 +844,8 @@
   /* London theme: Instrument Serif titles; Geist Sans body. */
   --font-london-body: 'Geist Sans', ui-sans-serif, system-ui, sans-serif;
   /* Marketing / legacy long-form serif (nota London body uses --font-london-body). */
-  --font-note-body: 'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
+  --font-note-body:
+    'Source Serif 4 Variable', Georgia, 'Times New Roman', serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);

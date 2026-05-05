@@ -26,7 +26,12 @@ function applyTimeToDate(date: Date, timeStr: string): Date {
 function mergeCalendarDay(preserveFrom: Date | null, picked: Date): Date {
   const base = preserveFrom ?? picked;
   const next = new Date(picked);
-  next.setHours(base.getHours(), base.getMinutes(), base.getSeconds(), base.getMilliseconds());
+  next.setHours(
+    base.getHours(),
+    base.getMinutes(),
+    base.getSeconds(),
+    base.getMilliseconds(),
+  );
   return next;
 }
 
@@ -45,7 +50,9 @@ export function dueInstantIsLocalStartOfDay(d: Date): boolean {
   );
 }
 
-export function initialIncludeTimeFromPersisted(persistedDueAt: string | null): boolean {
+export function initialIncludeTimeFromPersisted(
+  persistedDueAt: string | null,
+): boolean {
   if (!persistedDueAt) return true;
   const d = new Date(persistedDueAt);
   if (Number.isNaN(d.getTime())) return true;
@@ -57,7 +64,12 @@ export function isInteractiveBubbleTarget(el: Element): boolean {
     if (el.tagName === 'TEXTAREA' || el.isContentEditable) return true;
     if (el.tagName === 'INPUT') {
       const type = (el as HTMLInputElement).type;
-      if (type === 'text' || type === 'search' || type === 'time' || type === 'checkbox') {
+      if (
+        type === 'text' ||
+        type === 'search' ||
+        type === 'time' ||
+        type === 'checkbox'
+      ) {
         return true;
       }
     }
@@ -214,7 +226,9 @@ export function NoteDueDatePickerPanel({
           <input
             type="text"
             value={nlInput}
-            onChange={(e) => { setNlInput(e.target.value); }}
+            onChange={(e) => {
+              setNlInput(e.target.value);
+            }}
             onBlur={applyNaturalLanguage}
             onKeyDown={onNlInputKeyDown}
             placeholder="e.g. next Friday 3pm"
@@ -292,7 +306,9 @@ export function NoteDueDatePickerPanel({
           type="checkbox"
           checked={draftDeadline}
           disabled={!selectedDate || saving || disabled}
-          onChange={(e) => { setDraftDeadline(e.target.checked); }}
+          onChange={(e) => {
+            setDraftDeadline(e.target.checked);
+          }}
           className="size-3.5 cursor-pointer rounded border-input accent-primary"
         />
         <label
@@ -316,7 +332,9 @@ export function NoteDueDatePickerPanel({
           size="sm"
           disabled={saving || disabled || (!persistedDueAt && !selectedDate)}
           onMouseDown={keepEditorTextSelection}
-          onClick={() => { void handleClear(); }}
+          onClick={() => {
+            void handleClear();
+          }}
         >
           Clear
         </NotaButton>
@@ -325,7 +343,9 @@ export function NoteDueDatePickerPanel({
           size="sm"
           disabled={saving || disabled}
           onMouseDown={keepEditorTextSelection}
-          onClick={() => { void handleSave(); }}
+          onClick={() => {
+            void handleSave();
+          }}
         >
           Save
         </NotaButton>

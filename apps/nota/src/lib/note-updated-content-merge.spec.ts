@@ -7,7 +7,12 @@ function makeNote(overrides: Partial<Note> = {}): Note {
     id: 'n1',
     user_id: 'u1',
     title: 'T',
-    content: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: 'server' }] }] },
+    content: {
+      type: 'doc',
+      content: [
+        { type: 'paragraph', content: [{ type: 'text', text: 'server' }] },
+      ],
+    },
     created_at: '2020-01-01T00:00:00Z',
     updated_at: '2020-01-02T00:00:00Z',
     due_at: null,
@@ -46,7 +51,11 @@ describe('mergeUpdatedNoteLocalContent', () => {
 
     // Act
     const mergedNull = mergeUpdatedNoteLocalContent(serverRow, null, fallback);
-    const mergedUndef = mergeUpdatedNoteLocalContent(serverRow, undefined, fallback);
+    const mergedUndef = mergeUpdatedNoteLocalContent(
+      serverRow,
+      undefined,
+      fallback,
+    );
 
     // Assert
     expect(mergedNull.content).toBe(fallback);
@@ -55,7 +64,10 @@ describe('mergeUpdatedNoteLocalContent', () => {
 
   it('preserves other fields from the updated note', () => {
     // Arrange
-    const serverRow = makeNote({ title: 'From server', updated_at: '2026-03-24T12:00:00Z' });
+    const serverRow = makeNote({
+      title: 'From server',
+      updated_at: '2026-03-24T12:00:00Z',
+    });
     const pending = { type: 'doc', content: [] };
     const fallback = serverRow.content;
 

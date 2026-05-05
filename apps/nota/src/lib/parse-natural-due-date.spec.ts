@@ -144,6 +144,8 @@ describe('allDateSpansInText', () => {
 
     // Assert
     expect(spans.length).toBeGreaterThanOrEqual(1);
-    expect(spans.some((s) => s.start === start && s.end === start + inner.length)).toBe(true);
+    expect(
+      spans.some((s) => s.start === start && s.end === start + inner.length),
+    ).toBe(true);
   });
 });

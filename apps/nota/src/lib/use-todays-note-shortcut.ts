@@ -20,12 +20,7 @@ export function useTodaysNoteShortcut(
     }
 
     const mod = e.metaKey || e.ctrlKey;
-    if (
-      !mod ||
-      (e.key !== 'd' && e.key !== 'D') ||
-      e.shiftKey ||
-      e.altKey
-    ) {
+    if (!mod || (e.key !== 'd' && e.key !== 'D') || e.shiftKey || e.altKey) {
       return;
     }
 
@@ -55,6 +50,8 @@ export function useTodaysNoteShortcut(
       return;
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); };
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [enabled, userId, onKeyDown]);
 }

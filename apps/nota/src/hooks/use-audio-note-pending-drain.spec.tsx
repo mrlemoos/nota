@@ -33,7 +33,9 @@ const drainMocks = vi.hoisted(() => {
     setUserPreferencesInState: vi.fn(),
   }));
   const isLikelyOnline = vi.fn(() => true);
-  const listPendingAudioNoteJobs = vi.fn(async () => [] as PendingAudioNoteJob[]);
+  const listPendingAudioNoteJobs = vi.fn(
+    async () => [] as PendingAudioNoteJob[],
+  );
   const removePendingAudioNoteJob = vi.fn(async () => {});
   const postAudioToNoteStream = vi.fn(async () => studyResult);
   const applyAudioNoteStudyResult = vi.fn(async () => {});
@@ -41,7 +43,9 @@ const drainMocks = vi.hoisted(() => {
     id: 'att-1',
     filename: 'recording.webm',
   }));
-  const formatStudyRecordingUploadWarning = vi.fn(() => 'formatted-upload-warning');
+  const formatStudyRecordingUploadWarning = vi.fn(
+    () => 'formatted-upload-warning',
+  );
   const onlineListeners: Array<() => void> = [];
   const subscribeOnline = vi.fn((listener: () => void) => {
     onlineListeners.push(listener);
@@ -91,8 +95,7 @@ vi.mock('../lib/audio-note-pending-idb', () => ({
 }));
 
 vi.mock('../lib/audio-to-note-client', () => ({
-  postAudioToNoteStream: (blob: Blob) =>
-    drainMocks.postAudioToNoteStream(blob),
+  postAudioToNoteStream: (blob: Blob) => drainMocks.postAudioToNoteStream(blob),
 }));
 
 vi.mock('../lib/audio-to-note-apply', () => ({
@@ -250,7 +253,9 @@ describe('useAudioNotePendingDrain', () => {
 
     // Act
     await waitFor(() =>
-      expect(drainMocks.removePendingAudioNoteJob).toHaveBeenCalledWith('job-1'),
+      expect(drainMocks.removePendingAudioNoteJob).toHaveBeenCalledWith(
+        'job-1',
+      ),
     );
 
     // Assert
@@ -326,9 +331,9 @@ describe('useAudioNotePendingDrain', () => {
 
     // Act
     await waitFor(() =>
-      expect(
-        useAudioToNoteSession.getState().recordingAttachmentWarning,
-      ).toBe('formatted-upload-warning'),
+      expect(useAudioToNoteSession.getState().recordingAttachmentWarning).toBe(
+        'formatted-upload-warning',
+      ),
     );
 
     // Assert
@@ -341,7 +346,9 @@ describe('useAudioNotePendingDrain', () => {
         recording: undefined,
       }),
     );
-    expect(drainMocks.removePendingAudioNoteJob).toHaveBeenCalledWith('job-warn');
+    expect(drainMocks.removePendingAudioNoteJob).toHaveBeenCalledWith(
+      'job-warn',
+    );
     warnSpy.mockRestore();
   });
 

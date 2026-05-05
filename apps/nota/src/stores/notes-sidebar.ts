@@ -63,7 +63,9 @@ export const useNotesSidebarStore = create<NotesSidebarState>()(
       pruneCollapsedFolderIds: (validFolderIds) => {
         const valid = new Set(validFolderIds);
         set((s) => ({
-          collapsedFolderIds: s.collapsedFolderIds.filter((id) => valid.has(id)),
+          collapsedFolderIds: s.collapsedFolderIds.filter((id) =>
+            valid.has(id),
+          ),
         }));
       },
     }),

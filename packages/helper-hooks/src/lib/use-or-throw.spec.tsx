@@ -21,39 +21,33 @@ test("useOrThrow(ValidContext, 'unused error') reads values from given context",
   expect(result.current).toBe('hello');
 });
 
-test(
-  "useOrThrow(TestContext, 'expected message') throws CannotUseContextNullError when provider value is null",
-  () => {
-    // Arrange
-    const message = 'expected message';
-    const wrapper = ({ children }: { children: ReactNode }) => (
-      <TestContext.Provider value={null}>{children}</TestContext.Provider>
-    );
+test("useOrThrow(TestContext, 'expected message') throws CannotUseContextNullError when provider value is null", () => {
+  // Arrange
+  const message = 'expected message';
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <TestContext.Provider value={null}>{children}</TestContext.Provider>
+  );
 
-    // Act
-    const act = () => {
-      renderHook(() => useOrThrow(TestContext, message), { wrapper });
-    };
+  // Act
+  const act = () => {
+    renderHook(() => useOrThrow(TestContext, message), { wrapper });
+  };
 
-    // Assert
-    expect(act).toThrow(CannotUseContextNullError);
-    expect(act).toThrow(message);
-  },
-);
+  // Assert
+  expect(act).toThrow(CannotUseContextNullError);
+  expect(act).toThrow(message);
+});
 
-test(
-  "useOrThrow(TestContext, 'missing provider') throws CannotUseContextNullError when no provider wraps the tree",
-  () => {
-    // Arrange
-    const message = 'missing provider';
+test("useOrThrow(TestContext, 'missing provider') throws CannotUseContextNullError when no provider wraps the tree", () => {
+  // Arrange
+  const message = 'missing provider';
 
-    // Act
-    const act = () => {
-      renderHook(() => useOrThrow(TestContext, message));
-    };
+  // Act
+  const act = () => {
+    renderHook(() => useOrThrow(TestContext, message));
+  };
 
-    // Assert
-    expect(act).toThrow(CannotUseContextNullError);
-    expect(act).toThrow(message);
-  },
-);
+  // Assert
+  expect(act).toThrow(CannotUseContextNullError);
+  expect(act).toThrow(message);
+});

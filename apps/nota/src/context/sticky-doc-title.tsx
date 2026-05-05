@@ -27,8 +27,9 @@ type StickyDocTitleContextValue = {
   resetSticky: () => void;
 };
 
-const StickyDocTitleContext =
-  createContext<StickyDocTitleContextValue | null>(null);
+const StickyDocTitleContext = createContext<StickyDocTitleContextValue | null>(
+  null,
+);
 
 /** Used when `Layout` / `StickyDocTitleProvider` is not in the tree (e.g. route stubs in tests). */
 const fallbackScrollRootRef: RefObject<HTMLElement | null> = { current: null };

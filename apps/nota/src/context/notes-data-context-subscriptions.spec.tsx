@@ -81,11 +81,11 @@ function PatchNoteTitle() {
     <button
       type="button"
       data-testid="patch"
-      onClick={() =>
-        { patchNoteInList('aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee', {
+      onClick={() => {
+        patchNoteInList('aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee', {
           title: 'Patched',
-        }); }
-      }
+        });
+      }}
     >
       patch
     </button>
@@ -95,8 +95,8 @@ function PatchNoteTitle() {
 describe('Notes data slice subscriptions', () => {
   it('keeps actions slice referentially stable when the vault list mutates', () => {
     // Arrange
-    let refreshBefore: (typeof noopRefresh) | undefined;
-    let refreshAfter: (typeof noopRefresh) | undefined;
+    let refreshBefore: typeof noopRefresh | undefined;
+    let refreshAfter: typeof noopRefresh | undefined;
 
     function CaptureRefresh() {
       const { refreshNotesList } = useNotesDataActions();

@@ -26,7 +26,10 @@ describe('extractPlainTextFromDocJson', () => {
       content: [
         {
           type: 'paragraph',
-          content: [{ type: 'text', text: 'Hello ' }, { type: 'text', text: 'world' }],
+          content: [
+            { type: 'text', text: 'Hello ' },
+            { type: 'text', text: 'world' },
+          ],
         },
       ],
     };

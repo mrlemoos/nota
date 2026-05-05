@@ -61,9 +61,7 @@ export async function postAudioToNoteStream(
   });
 
   if (res.status === 401 || res.status === 403) {
-    throw new Error(
-      res.status === 403 ? 'Nota Pro required' : 'Unauthorized',
-    );
+    throw new Error(res.status === 403 ? 'Nota Pro required' : 'Unauthorized');
   }
 
   if (!res.ok) {
@@ -133,7 +131,10 @@ function parseSseBlock(block: string): AudioToNoteSseEvent | null {
 
   switch (eventName) {
     case 'transcript':
-      return { event: 'transcript', data: data as { text: string; duration: number } };
+      return {
+        event: 'transcript',
+        data: data as { text: string; duration: number },
+      };
     case 'notes_delta':
       return { event: 'notes_delta', data: data as { text: string } };
     case 'notes_done':

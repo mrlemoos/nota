@@ -39,7 +39,8 @@ export function useNotesHistoryShortcut(
       return;
     }
     document.addEventListener('keydown', onKeyDown, { capture: true });
-    return () =>
-      { document.removeEventListener('keydown', onKeyDown, { capture: true }); };
+    return () => {
+      document.removeEventListener('keydown', onKeyDown, { capture: true });
+    };
   }, [userId, enabled, onKeyDown]);
 }

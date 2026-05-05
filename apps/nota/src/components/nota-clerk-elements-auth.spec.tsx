@@ -108,9 +108,8 @@ describe('NotaClerkSignIn auth flow', () => {
     const hasResetStrategyClick = source.includes(
       'SignInResetEmailCodeStrategyAutoPreferPassword',
     );
-    const hasProgrammaticPasswordStrategyClick = source.includes(
-      'passwordBtnRef',
-    );
+    const hasProgrammaticPasswordStrategyClick =
+      source.includes('passwordBtnRef');
 
     // Assert
     expect(hasPreferPasswordAuto).toBe(true);

@@ -189,9 +189,11 @@ export function sanitizeOgImageUrl(
   }
 }
 
-export function parseOgFromHtml(html: string, pageUrl: string): OgPreviewResult {
-  const title =
-    matchOgOrMeta(html, 'og:title') ?? matchTitleTag(html) ?? null;
+export function parseOgFromHtml(
+  html: string,
+  pageUrl: string,
+): OgPreviewResult {
+  const title = matchOgOrMeta(html, 'og:title') ?? matchTitleTag(html) ?? null;
   const description =
     matchOgOrMeta(html, 'og:description') ?? matchNameDescription(html) ?? null;
   let image = matchOgOrMeta(html, 'og:image');
@@ -261,8 +263,7 @@ export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
     signal: controller.signal,
     redirect: 'manual' as RequestRedirect,
     headers: {
-      Accept:
-        'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'User-Agent':
         'NotaOgPreview/1.0 (+https://nota; link preview for signed-in users)',
     },

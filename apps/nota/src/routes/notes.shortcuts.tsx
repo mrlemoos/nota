@@ -36,9 +36,12 @@ export default function NotesShortcuts(): JSX.Element {
             {t('Shortcuts')}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {t('Keyboard reference for Nota. Mod means {modChar} on your device.', {
-              modChar: isApple ? '⌘' : 'Ctrl',
-            })}
+            {t(
+              'Keyboard reference for Nota. Mod means {modChar} on your device.',
+              {
+                modChar: isApple ? '⌘' : 'Ctrl',
+              },
+            )}
           </p>
         </div>
 
@@ -57,7 +60,9 @@ export default function NotesShortcuts(): JSX.Element {
                     className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm text-foreground">{t(row.description)}</p>
+                      <p className="text-sm text-foreground">
+                        {t(row.description)}
+                      </p>
                       {row.detail ? (
                         <p className="mt-1 text-muted-foreground text-xs leading-snug">
                           {t(row.detail)}

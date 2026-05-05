@@ -44,7 +44,11 @@ export async function clientDeleteAllNotesInFolderThenDeleteFolder(options: {
   }
   const client = getBrowserClient();
   const allFolders = await listFolders(client);
-  const ids = await listNoteIdsInFolderSubtree(client, options.folderId, allFolders);
+  const ids = await listNoteIdsInFolderSubtree(
+    client,
+    options.folderId,
+    allFolders,
+  );
   for (const id of ids) {
     await deleteNote(client, id);
     options.removeNoteFromList(id);

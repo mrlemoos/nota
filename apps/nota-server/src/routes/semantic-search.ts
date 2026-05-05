@@ -42,7 +42,9 @@ function jsonError(
   return Response.json(base, { status });
 }
 
-export async function semanticSearchPostHandler(request: Request): Promise<Response> {
+export async function semanticSearchPostHandler(
+  request: Request,
+): Promise<Response> {
   if (request.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }
@@ -94,7 +96,9 @@ export async function semanticSearchPostHandler(request: Request): Promise<Respo
   }
 }
 
-export async function indexNotePostHandler(request: Request): Promise<Response> {
+export async function indexNotePostHandler(
+  request: Request,
+): Promise<Response> {
   if (request.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }
@@ -149,7 +153,9 @@ export async function indexNotePostHandler(request: Request): Promise<Response> 
   }
 }
 
-export async function reindexAllPostHandler(request: Request): Promise<Response> {
+export async function reindexAllPostHandler(
+  request: Request,
+): Promise<Response> {
   if (request.method !== 'POST') {
     return new Response('Method Not Allowed', { status: 405 });
   }

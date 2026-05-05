@@ -5,16 +5,19 @@ Desktop wrapper for nota using Electron.
 ## Development
 
 1. Start the Vite dev server (in another terminal), from the monorepo root:
+
    ```bash
    pnpm exec nx dev @nota/nota
    ```
 
 2. Run Electron, from the monorepo root:
+
    ```bash
    pnpm exec nx dev @nota/nota-electron
    ```
 
    Or start **Vite and Electron together** (both expose a `dev` target):
+
    ```bash
    pnpm exec nx run-many -t dev
    ```
@@ -69,12 +72,12 @@ The **`macos` job** in [`.github/workflows/release-electron.yml`](../../.github/
 
 If **Production** has protection rules (required reviewers, wait timers), each release run waits for them before the build starts.
 
-| Secret | Purpose |
-|--------|---------|
-| `VITE_SUPABASE_URL` | Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anon (public) key |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (same instance as the web app) |
-| `VITE_NOTA_SERVER_API_URL` | **Required** for Nota Pro and link previews: nota-server HTTPS origin, no trailing slash (production Railway example: `https://notaappnota-server-production.up.railway.app`). OG fetch runs on the server, not in the SPA build. |
+| Secret                       | Purpose                                                                                                                                                                                                                           |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_SUPABASE_URL`          | Supabase project URL                                                                                                                                                                                                              |
+| `VITE_SUPABASE_ANON_KEY`     | Supabase anon (public) key                                                                                                                                                                                                        |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk publishable key (same instance as the web app)                                                                                                                                                                              |
+| `VITE_NOTA_SERVER_API_URL`   | **Required** for Nota Pro and link previews: nota-server HTTPS origin, no trailing slash (production Railway example: `https://notaappnota-server-production.up.railway.app`). OG fetch runs on the server, not in the SPA build. |
 
 ### Triggering CI release
 
@@ -100,13 +103,13 @@ That message comes from [`apps/nota/src/lib/supabase/browser.ts`](../nota/src/li
 
 Store these as **repository** secrets or under the same **Production** environment, matching the names below.
 
-| Secret | Purpose |
-|--------|---------|
-| `APPLE_CERTIFICATE_BASE64` | Base64-encoded `.p12` (Developer ID Application) |
-| `APPLE_CERTIFICATE_PASSWORD` | `.p12` password; also **`CSC_KEY_PASSWORD`** for the build |
-| `APPLE_ID` | Apple ID email (for notarisation, when enabled) |
-| `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password |
-| `APPLE_TEAM_ID` | Team ID |
+| Secret                        | Purpose                                                    |
+| ----------------------------- | ---------------------------------------------------------- |
+| `APPLE_CERTIFICATE_BASE64`    | Base64-encoded `.p12` (Developer ID Application)           |
+| `APPLE_CERTIFICATE_PASSWORD`  | `.p12` password; also **`CSC_KEY_PASSWORD`** for the build |
+| `APPLE_ID`                    | Apple ID email (for notarisation, when enabled)            |
+| `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password                                      |
+| `APPLE_TEAM_ID`               | Team ID                                                    |
 
 With `APPLE_CERTIFICATE_BASE64` unset, CI still produces **unsigned** artefacts. Set **`mac.notarize: true`** in `electron-builder.yml` when the Apple ID secrets above are configured.
 

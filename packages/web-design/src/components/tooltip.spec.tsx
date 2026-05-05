@@ -40,10 +40,8 @@ describe('NotaTooltipPopup (default popover styles)', () => {
 
     // Assert
     const popup = within(baseElement).getByText('Test label', { exact: true });
-    const surface = (popup).closest('div') ?? popup;
-    const classes = (surface).className
-      .split(/\s+/)
-      .filter(Boolean);
+    const surface = popup.closest('div') ?? popup;
+    const classes = surface.className.split(/\s+/).filter(Boolean);
     for (const token of [
       'z-100',
       'max-w-xs',

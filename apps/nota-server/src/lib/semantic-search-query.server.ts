@@ -44,10 +44,7 @@ export function parseSemanticSearchQuery(input: string): {
   }
   semanticChunks.push(buf);
 
-  const semantic = semanticChunks
-    .join('')
-    .replace(/\s+/g, ' ')
-    .trim();
+  const semantic = semanticChunks.join('').replace(/\s+/g, ' ').trim();
 
   return { semantic, literals };
 }

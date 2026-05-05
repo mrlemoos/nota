@@ -1,4 +1,7 @@
-import type { Request as ExpressRequest, Response as ExpressResponse } from 'express';
+import type {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from 'express';
 
 export function expressToWebRequest(req: ExpressRequest): Request {
   const host = req.headers.host ?? 'localhost';

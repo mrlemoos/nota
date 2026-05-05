@@ -2,13 +2,8 @@ import type { StoredNote } from './types.js';
 import type { Note } from '@nota/database-types';
 
 function noteFromStored(stored: StoredNote): Note {
-  const {
-    dirty,
-    pending_create,
-    pending_delete,
-    server_updated_at,
-    ...note
-  } = stored;
+  const { dirty, pending_create, pending_delete, server_updated_at, ...note } =
+    stored;
   void dirty;
   void pending_create;
   void pending_delete;

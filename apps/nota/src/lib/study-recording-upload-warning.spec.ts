@@ -23,7 +23,9 @@ describe('formatStudyRecordingUploadWarning', () => {
     const result = formatStudyRecordingUploadWarning(err);
 
     // Assert
-    expect(result).toContain('Something went wrong while saving the recording.');
+    expect(result).toContain(
+      'Something went wrong while saving the recording.',
+    );
     expect(result).toContain('Your study notes were still saved.');
   });
 
@@ -35,7 +37,9 @@ describe('formatStudyRecordingUploadWarning', () => {
     const result = formatStudyRecordingUploadWarning(err);
 
     // Assert
-    expect(result).toContain('Something went wrong while saving the recording.');
+    expect(result).toContain(
+      'Something went wrong while saving the recording.',
+    );
     expect(result).not.toContain('[object Object]');
   });
 

@@ -48,9 +48,7 @@ export default tseslint.config(
     },
   },
   {
-    files: [
-      '**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}',
-    ],
+    files: ['**/*.{ts,tsx,cts,mts,js,jsx,cjs,mjs}'],
     plugins: { import: importPlugin },
     rules: {
       'import/no-duplicates': 'error',

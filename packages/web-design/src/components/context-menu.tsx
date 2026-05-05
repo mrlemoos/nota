@@ -31,7 +31,9 @@ export type NotaContextMenuPopupProps = ComponentProps<
 export type NotaContextMenuViewportProps = ComponentProps<
   typeof BaseMenu.Viewport
 >;
-export type NotaContextMenuItemProps = ComponentProps<typeof BaseContextMenu.Item>;
+export type NotaContextMenuItemProps = ComponentProps<
+  typeof BaseContextMenu.Item
+>;
 export type NotaContextMenuSeparatorProps = ComponentProps<
   typeof BaseContextMenu.Separator
 >;
@@ -113,8 +115,16 @@ export function NotaContextMenuPopup({
   );
 }
 
-export function NotaContextMenuItem({ className, ...props }: NotaContextMenuItemProps) {
-  return <BaseContextMenu.Item className={cn(DEFAULT_CONTEXT_MENU_ITEM_CLASS, className)} {...props} />;
+export function NotaContextMenuItem({
+  className,
+  ...props
+}: NotaContextMenuItemProps) {
+  return (
+    <BaseContextMenu.Item
+      className={cn(DEFAULT_CONTEXT_MENU_ITEM_CLASS, className)}
+      {...props}
+    />
+  );
 }
 
 export function NotaContextMenuSubmenuTrigger({

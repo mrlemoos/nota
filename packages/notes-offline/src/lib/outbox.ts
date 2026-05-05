@@ -18,7 +18,10 @@ export async function enqueueOutbox(
   await transactionComplete(tx);
 }
 
-export async function removeOutboxEntry(userId: string, noteId: string): Promise<void> {
+export async function removeOutboxEntry(
+  userId: string,
+  noteId: string,
+): Promise<void> {
   const db = await getNotaNotesDb(userId);
   const tx = db.transaction(OUTBOX_OBJECT_STORE, 'readwrite');
   tx.objectStore(OUTBOX_OBJECT_STORE).delete(noteId);

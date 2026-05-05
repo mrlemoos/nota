@@ -9,7 +9,11 @@ const baseFolder = {
   updated_at: '2026-01-01T00:00:00.000Z',
 };
 
-function makeFolder(id: string, name: string, parent_id: string | null): Folder {
+function makeFolder(
+  id: string,
+  name: string,
+  parent_id: string | null,
+): Folder {
   return { id, name, parent_id, ...baseFolder };
 }
 

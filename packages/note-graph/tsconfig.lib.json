@@ -9,11 +9,7 @@
     ],
     "rootDir": "src",
     "jsx": "react-jsx",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ES2019"
-    ],
+    "lib": ["DOM", "DOM.Iterable", "ES2019"],
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo"
   },
   "exclude": [
@@ -35,12 +31,7 @@
     "eslint.config.cjs",
     "eslint.config.mjs"
   ],
-  "include": [
-    "src/**/*.js",
-    "src/**/*.jsx",
-    "src/**/*.ts",
-    "src/**/*.tsx"
-  ],
+  "include": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
   "references": [
     {
       "path": "../database-types/tsconfig.lib.json"

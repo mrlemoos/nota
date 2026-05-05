@@ -11,12 +11,7 @@ export function useNotesSidebarShortcut(
     }
 
     const mod = e.metaKey || e.ctrlKey;
-    if (
-      !mod ||
-      (e.key !== 's' && e.key !== 'S') ||
-      e.shiftKey ||
-      e.altKey
-    ) {
+    if (!mod || (e.key !== 's' && e.key !== 'S') || e.shiftKey || e.altKey) {
       return;
     }
 
@@ -37,6 +32,8 @@ export function useNotesSidebarShortcut(
       return;
     }
     document.addEventListener('keydown', onKeyDown);
-    return () => { document.removeEventListener('keydown', onKeyDown); };
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+    };
   }, [userId, enabled, onKeyDown]);
 }

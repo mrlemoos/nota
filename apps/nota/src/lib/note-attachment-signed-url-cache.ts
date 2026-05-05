@@ -6,14 +6,23 @@ export type NoteAttachmentSignedUrlCacheEntry = {
   expiresAtMs: number;
 };
 
-const cacheByAttachmentId = new Map<string, NoteAttachmentSignedUrlCacheEntry>();
+const cacheByAttachmentId = new Map<
+  string,
+  NoteAttachmentSignedUrlCacheEntry
+>();
 
 /** Same idea as banner refresh: refresh before the token is close to expiry. */
 function safetyMarginMs(): number {
-  return Math.max(60_000, Math.floor(ATTACHMENT_SIGNED_URL_TTL_SEC * 0.15 * 1000));
+  return Math.max(
+    60_000,
+    Math.floor(ATTACHMENT_SIGNED_URL_TTL_SEC * 0.15 * 1000),
+  );
 }
 
-function isStillUsable(entry: NoteAttachmentSignedUrlCacheEntry, now: number): boolean {
+function isStillUsable(
+  entry: NoteAttachmentSignedUrlCacheEntry,
+  now: number,
+): boolean {
   return now < entry.expiresAtMs - safetyMarginMs();
 }
 
@@ -47,7 +56,10 @@ export function getValidNoteAttachmentSignedUrlCacheEntry(
     return null;
   }
 
-  if (expectedStoragePath != null && entry.storagePath !== expectedStoragePath) {
+  if (
+    expectedStoragePath != null &&
+    entry.storagePath !== expectedStoragePath
+  ) {
     cacheByAttachmentId.delete(attachmentId);
     return null;
   }

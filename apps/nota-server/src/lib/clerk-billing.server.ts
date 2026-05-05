@@ -17,11 +17,7 @@ function subscriptionStatusGrantsNotaPro(status: string | undefined): boolean {
   if (!status) {
     return false;
   }
-  return (
-    status === 'active' ||
-    status === 'trialing' ||
-    status === 'past_due'
-  );
+  return status === 'active' || status === 'trialing' || status === 'past_due';
 }
 
 export function invalidateServerNotaProCache(userId: string): void {

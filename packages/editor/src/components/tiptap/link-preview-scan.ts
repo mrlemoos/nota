@@ -11,8 +11,12 @@ export function convertLinkOnlyParagraphs(editor: Editor): void {
   const previewType = state.schema.nodes.linkPreview;
   if (!linkType || !previewType) return;
 
-  const toReplace: { from: number; to: number; href: string; linkText: string }[] =
-    [];
+  const toReplace: {
+    from: number;
+    to: number;
+    href: string;
+    linkText: string;
+  }[] = [];
 
   state.doc.descendants((node, pos) => {
     if (node.type.name !== 'paragraph') return true;
@@ -40,7 +44,8 @@ export function convertLinkOnlyParagraphs(editor: Editor): void {
     }
 
     const markOnText = linkType.isInSet(child.marks);
-    if (!markOnText || markOnText.attrs['skipLinkPreview'] === true) return true;
+    if (!markOnText || markOnText.attrs['skipLinkPreview'] === true)
+      return true;
     const href = (markOnText.attrs['href'] as string) || '';
     if (!href) return true;
     if (parseNoteLinkPath(href)) return true;

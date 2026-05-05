@@ -19,10 +19,8 @@ vi.mock('./supabase/browser', () => ({
   getBrowserClient: () => ({
     storage: {
       from: () => ({
-        createSignedUrl: (
-          path: string,
-          ttl: number,
-        ) => createSignedUrlMock(path, ttl),
+        createSignedUrl: (path: string, ttl: number) =>
+          createSignedUrlMock(path, ttl),
       }),
     },
   }),

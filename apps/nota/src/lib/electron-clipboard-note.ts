@@ -112,7 +112,9 @@ export async function createNoteFromMenubarClipboard(options: {
       await refreshNotesList({ silent: true });
     } catch (err) {
       onError(
-        err instanceof Error ? err.message : 'Could not upload clipboard image.',
+        err instanceof Error
+          ? err.message
+          : 'Could not upload clipboard image.',
       );
     }
   } catch {

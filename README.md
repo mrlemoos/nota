@@ -6,7 +6,7 @@
 
 ## Philosophy
 
-You know the feeling: you open something to think, and the software starts performing (offering, suggesting, nudging) until the room for your own pace shrinks. Useful automation has its place elsewhere; in a notes app, that itch to always *do something next* can mistake motion for thinking.
+You know the feeling: you open something to think, and the software starts performing (offering, suggesting, nudging) until the room for your own pace shrinks. Useful automation has its place elsewhere; in a notes app, that itch to always _do something next_ can mistake motion for thinking.
 
 [Nota](https://nota.mrlemoos.dev) treats your attention as something to **protect**, not to harvest. It gives you a steady place to write and arrange ideas, and it steps back when you pause so your mind can do the unglamorous part: wandering, revising, waiting for the right phrase without the product trying to entertain the lull.
 
@@ -14,15 +14,15 @@ We leave silence alone on purpose. Boredom at the cursor is the sound of a thoug
 
 ## What it is
 
-![A macOS screenshot of the welcome screen of Nota with a button to start.](assets/welcome-screen.png "Welcome screen")
+![A macOS screenshot of the welcome screen of Nota with a button to start.](assets/welcome-screen.png 'Welcome screen')
 
-Nota is a personal notes app built as an [Nx](https://nx.dev) monorepo. 
+Nota is a personal notes app built as an [Nx](https://nx.dev) monorepo.
 
-The main client ([apps/nota](apps/nota)) is a **Vite** single-page app with **React 19**; in-app navigation uses the location **hash** (see `app/lib/app-navigation.ts`). 
+The main client ([apps/nota](apps/nota)) is a **Vite** single-page app with **React 19**; in-app navigation uses the location **hash** (see `app/lib/app-navigation.ts`).
 
-Notes use **Supabase** (Postgres, Storage, and row-level security) with **Clerk** for sign-in (third-party JWTs). The editor is **TipTap** (ProseMirror). 
+Notes use **Supabase** (Postgres, Storage, and row-level security) with **Clerk** for sign-in (third-party JWTs). The editor is **TipTap** (ProseMirror).
 
-Subscriptions use **Clerk Billing** (checkout in the SPA; server-side entitlement checks on Vercel `api/*` or optional **[nota-server](apps/nota-server)**). 
+Subscriptions use **Clerk Billing** (checkout in the SPA; server-side entitlement checks on Vercel `api/*` or optional **[nota-server](apps/nota-server)**).
 
 An **Electron** desktop shell wraps the same build—see [apps/nota-electron/README.md](apps/nota-electron/README.md). The public marketing site lives in [apps/nota-marketing](apps/nota-marketing) (Astro).
 
@@ -92,16 +92,14 @@ More detail: [apps/nota-electron/README.md](apps/nota-electron/README.md).
 
 ## Repository layout
 
-
 | Path                   | Purpose                                              |
 | ---------------------- | ---------------------------------------------------- |
-| `apps/nota/`       | Main Vite SPA (notes, auth, TipTap)                  |
+| `apps/nota/`           | Main Vite SPA (notes, auth, TipTap)                  |
 | `apps/nota-electron/`  | Electron shell                                       |
 | `apps/nota-server/`    | Optional Node API (entitlement, shared server logic) |
 | `apps/nota-marketing/` | Astro marketing site                                 |
 | `supabase/`            | Supabase config and SQL migrations                   |
 | `assets/`              | Shared assets (e.g. screenshots for docs)            |
-
 
 ## Licence
 

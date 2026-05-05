@@ -8,8 +8,8 @@ import { setSupabaseClerkGetToken } from './src/lib/supabase/browser';
 // needs a full `Storage` shape (e.g. notes sidebar folder collapse state).
 const inMemoryLocalStorage: Record<string, string> = {};
 if (
-  typeof (globalThis as { localStorage?: { setItem?: unknown } })
-    .localStorage?.setItem !== 'function'
+  typeof (globalThis as { localStorage?: { setItem?: unknown } }).localStorage
+    ?.setItem !== 'function'
 ) {
   vi.stubGlobal('localStorage', {
     get length() {

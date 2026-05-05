@@ -29,7 +29,9 @@ type TableEditorMenuProps = {
   editor: Editor | null;
 };
 
-export function TableEditorMenu({ editor }: TableEditorMenuProps): JSX.Element | null {
+export function TableEditorMenu({
+  editor,
+}: TableEditorMenuProps): JSX.Element | null {
   if (!editor) {
     return null;
   }
@@ -84,10 +86,7 @@ export function TableEditorMenu({ editor }: TableEditorMenuProps): JSX.Element |
         >
           <HugeiconsIcon icon={DeleteRowIcon} size={14} />
         </NotaButton>
-        <span
-          className="mx-0.5 h-4 w-px shrink-0 bg-border"
-          aria-hidden
-        />
+        <span className="mx-0.5 h-4 w-px shrink-0 bg-border" aria-hidden />
         <NotaButton
           type="button"
           variant="ghost"
@@ -121,10 +120,7 @@ export function TableEditorMenu({ editor }: TableEditorMenuProps): JSX.Element |
         >
           <HugeiconsIcon icon={DeleteColumnIcon} size={14} />
         </NotaButton>
-        <span
-          className="mx-0.5 h-4 w-px shrink-0 bg-border"
-          aria-hidden
-        />
+        <span className="mx-0.5 h-4 w-px shrink-0 bg-border" aria-hidden />
         <NotaButton
           type="button"
           variant="ghost"
@@ -147,10 +143,7 @@ export function TableEditorMenu({ editor }: TableEditorMenuProps): JSX.Element |
         >
           <HugeiconsIcon icon={LayoutTable01Icon} size={14} />
         </NotaButton>
-        <span
-          className="mx-0.5 h-4 w-px shrink-0 bg-border"
-          aria-hidden
-        />
+        <span className="mx-0.5 h-4 w-px shrink-0 bg-border" aria-hidden />
         <NotaButton
           type="button"
           variant="ghost"

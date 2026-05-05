@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import type { Note } from '~/types/database.types';
 import { shouldRefetchOpenNoteFromVaultList } from './open-note-vault-list-sync';
 
-function makeNote(partial: Partial<Note> & Pick<Note, 'id' | 'updated_at'>): Note {
+function makeNote(
+  partial: Partial<Note> & Pick<Note, 'id' | 'updated_at'>,
+): Note {
   return {
     user_id: 'u',
     title: 't',

@@ -67,8 +67,7 @@ export const NOTE_ATTACHMENT_IMAGE_MIMES = [
 
 export function isPdfFile(file: File) {
   return (
-    file.type === 'application/pdf' ||
-    file.name.toLowerCase().endsWith('.pdf')
+    file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
   );
 }
 
@@ -76,9 +75,7 @@ export function isImageFile(file: File): boolean {
   if (isPdfFile(file)) {
     return false;
   }
-  if (
-    (NOTE_ATTACHMENT_IMAGE_MIMES as readonly string[]).includes(file.type)
-  ) {
+  if ((NOTE_ATTACHMENT_IMAGE_MIMES as readonly string[]).includes(file.type)) {
     return true;
   }
   const n = file.name.toLowerCase();
@@ -169,12 +166,7 @@ export async function uploadNoteAttachmentFile(
 
   const { ext, contentType } = storageMetaForFile(file, kind);
   const objectId = crypto.randomUUID();
-  const storagePath = noteAttachmentStoragePath(
-    userId,
-    noteId,
-    objectId,
-    ext,
-  );
+  const storagePath = noteAttachmentStoragePath(userId, noteId, objectId, ext);
   const client = getBrowserClient();
 
   const { error: upErr } = await client.storage

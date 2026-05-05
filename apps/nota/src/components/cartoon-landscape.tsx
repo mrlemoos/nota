@@ -27,7 +27,7 @@ export function CartoonLandscape({
       <div
         className={cn(
           'absolute inset-0 bg-background/40 dark:bg-background/50',
-          overlayClassName
+          overlayClassName,
         )}
         aria-hidden="true"
       />

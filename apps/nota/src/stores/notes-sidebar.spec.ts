@@ -23,13 +23,14 @@ describe('notes sidebar store (folder expand/collapse)', () => {
     s.toggleFolderCollapsed('folder-a');
     s.toggleFolderCollapsed('folder-b');
     // Assert
-    expect(
-      useNotesSidebarStore.getState().collapsedFolderIds,
-    ).toEqual(['folder-a', 'folder-b']);
+    expect(useNotesSidebarStore.getState().collapsedFolderIds).toEqual([
+      'folder-a',
+      'folder-b',
+    ]);
     s.toggleFolderCollapsed('folder-a');
-    expect(
-      useNotesSidebarStore.getState().collapsedFolderIds,
-    ).toEqual(['folder-b']);
+    expect(useNotesSidebarStore.getState().collapsedFolderIds).toEqual([
+      'folder-b',
+    ]);
   });
 
   it('expandFolder removes an id from collapsedFolderIds', () => {
@@ -40,9 +41,7 @@ describe('notes sidebar store (folder expand/collapse)', () => {
     // Act
     s.expandFolder('f1');
     // Assert
-    expect(
-      useNotesSidebarStore.getState().collapsedFolderIds,
-    ).toEqual(['f2']);
+    expect(useNotesSidebarStore.getState().collapsedFolderIds).toEqual(['f2']);
   });
 
   it('expandFolderAncestors removes every listed id from collapsedFolderIds', () => {
@@ -65,9 +64,9 @@ describe('notes sidebar store (folder expand/collapse)', () => {
     // Act
     s.pruneCollapsedFolderIds(['keep']);
     // Assert
-    expect(
-      useNotesSidebarStore.getState().collapsedFolderIds,
-    ).toEqual(['keep']);
+    expect(useNotesSidebarStore.getState().collapsedFolderIds).toEqual([
+      'keep',
+    ]);
   });
 
   it('partializeNotesSidebarForStorage serialises only open and collapsedFolderIds (reload contract)', () => {

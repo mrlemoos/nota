@@ -38,9 +38,7 @@ export function readMovePickNoteIdFromHighlightedItem(
   if (!paletteRoot) {
     return null;
   }
-  const el = paletteRoot.querySelector(
-    '[cmdk-item][data-selected="true"]',
-  );
+  const el = paletteRoot.querySelector('[cmdk-item][data-selected="true"]');
   if (!(el instanceof HTMLElement)) {
     return null;
   }
@@ -58,9 +56,7 @@ export function readHighlightedCmdkItemValue(
   if (!paletteRoot) {
     return null;
   }
-  const el = paletteRoot.querySelector(
-    '[cmdk-item][data-selected="true"]',
-  );
+  const el = paletteRoot.querySelector('[cmdk-item][data-selected="true"]');
   if (!(el instanceof HTMLElement)) {
     return null;
   }

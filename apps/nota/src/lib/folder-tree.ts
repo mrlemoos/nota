@@ -36,7 +36,10 @@ export function buildFolderTree(folders: Folder[]): FolderTreeNode[] {
 }
 
 /** Ancestor folder ids from immediate parent toward the root. */
-export function ancestorFolderIds(folderId: string, folders: Folder[]): string[] {
+export function ancestorFolderIds(
+  folderId: string,
+  folders: Folder[],
+): string[] {
   const byId = new Map(folders.map((f) => [f.id, f] as const));
   const result: string[] = [];
   let cur: string | null | undefined = byId.get(folderId)?.parent_id ?? null;
@@ -50,7 +53,10 @@ export function ancestorFolderIds(folderId: string, folders: Folder[]): string[]
 /**
  * This folder id plus every descendant folder id (depth-first from root).
  */
-export function subtreeFolderIds(rootFolderId: string, folders: Folder[]): string[] {
+export function subtreeFolderIds(
+  rootFolderId: string,
+  folders: Folder[],
+): string[] {
   const byParent = new Map<string | null, string[]>();
   for (const f of folders) {
     const p = f.parent_id ?? null;

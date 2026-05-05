@@ -1,4 +1,8 @@
-import { countNotesInFolder, deleteFolderById, folderHasChildFolders } from '../models/folders';
+import {
+  countNotesInFolder,
+  deleteFolderById,
+  folderHasChildFolders,
+} from '../models/folders';
 import { getBrowserClient } from './supabase/browser';
 import { isLikelyOnline } from './notes-offline';
 import type { UserPreferences } from '~/types/database.types';

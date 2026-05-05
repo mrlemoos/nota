@@ -10,7 +10,10 @@ import {
 
 const key = new PluginKey('notaDueDateInteraction');
 
-function ancestorHasTableName($pos: { node: (d: number) => { type: { name: string } } }, depth: number): boolean {
+function ancestorHasTableName(
+  $pos: { node: (d: number) => { type: { name: string } } },
+  depth: number,
+): boolean {
   for (let d = depth; d > 0; d--) {
     if ($pos.node(d).type.name === 'table') {
       return true;

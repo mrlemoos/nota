@@ -39,9 +39,7 @@ export function isNotaMenubarActionPayload(
   }
   if (ck === 'image') {
     const img = cb as { base64?: unknown; mimeType?: unknown };
-    return (
-      typeof img.base64 === 'string' && img.mimeType === 'image/png'
-    );
+    return typeof img.base64 === 'string' && img.mimeType === 'image/png';
   }
   return false;
 }

@@ -14,7 +14,9 @@ const ALLOWED_AUDIO_UPLOAD_MIMES = new Set([
   'video/webm',
 ]);
 
-export function isAllowedAudioUploadMime(mimetype: string | undefined): boolean {
+export function isAllowedAudioUploadMime(
+  mimetype: string | undefined,
+): boolean {
   if (!mimetype) {
     return false;
   }

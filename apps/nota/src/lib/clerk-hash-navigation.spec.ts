@@ -166,8 +166,7 @@ describe('mapClerkToHashFragment', () => {
 
   it('maps auth targets whose path lives in the document hash (hash routing)', () => {
     // Arrange
-    const url =
-      'http://localhost:4200/#/sign-up?redirect_url=%2Fnotes';
+    const url = 'http://localhost:4200/#/sign-up?redirect_url=%2Fnotes';
 
     // Act
     const result = mapClerkToHashFragment(url, current);

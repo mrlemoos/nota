@@ -56,10 +56,7 @@ function NoteAudioNodeView(props: NodeViewProps) {
 
     const scheduleNextRefresh = () => {
       clearRefreshTimer();
-      const ms = Math.max(
-        5_000,
-        Math.floor(ctx.signedUrlTtlSec * 0.85 * 1000),
-      );
+      const ms = Math.max(5_000, Math.floor(ctx.signedUrlTtlSec * 0.85 * 1000));
       refreshTimerRef.current = setTimeout(() => {
         void fetchUrl();
       }, ms);
@@ -151,7 +148,9 @@ function NoteAudioNodeView(props: NodeViewProps) {
                   variant="ghost"
                   size="sm"
                   className="text-muted-foreground hover:text-foreground"
-                  onClick={() => { props.deleteNode(); }}
+                  onClick={() => {
+                    props.deleteNode();
+                  }}
                 >
                   Remove from note
                 </NotaButton>
@@ -222,7 +221,10 @@ function NoteAudioNodeView(props: NodeViewProps) {
                 />
               ) : (
                 <div className="flex min-h-[3rem] items-center justify-center text-sm text-muted-foreground">
-                  <NotaLoadingStatus label="Loading recording…" spinnerSize="sm" />
+                  <NotaLoadingStatus
+                    label="Loading recording…"
+                    spinnerSize="sm"
+                  />
                 </div>
               )}
             </div>

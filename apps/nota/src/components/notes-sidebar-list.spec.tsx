@@ -13,6 +13,10 @@ vi.mock('../lib/move-note-folder-client', () => ({
   clientMoveNoteToFolder: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('../lib/update-folder-tint-client', () => ({
+  clientUpdateFolderTint: vi.fn(() => Promise.resolve()),
+}));
+
 describe('NotesSidebarList', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,6 +36,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Computer Science Study',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -91,6 +96,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Computer Science Study',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -148,6 +154,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Computer Science Study',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -170,7 +177,8 @@ describe('NotesSidebarList', () => {
     const noteRow = screen.getByText('Alpha note').closest('li')
       ?.firstElementChild as HTMLDivElement;
     const folderLabel = screen.getByText('Computer Science Study');
-    const folderRow = folderLabel.closest('button')?.parentElement as HTMLDivElement;
+    const folderRow = folderLabel.closest('button')
+      ?.parentElement as HTMLDivElement;
 
     const dataTransfer = {
       effectAllowed: '',
@@ -239,6 +247,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Computer Science Study',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -260,7 +269,9 @@ describe('NotesSidebarList', () => {
 
     const draggedRow = screen.getByText('Alpha note').closest('li')
       ?.firstElementChild as HTMLDivElement;
-    const rootDropRow = screen.getByText('Root note').closest('li') as HTMLLIElement;
+    const rootDropRow = screen
+      .getByText('Root note')
+      .closest('li') as HTMLLIElement;
 
     const dataTransfer = {
       effectAllowed: '',
@@ -314,6 +325,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Computer Science Study',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -357,6 +369,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Computer Science Study',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -377,7 +390,8 @@ describe('NotesSidebarList', () => {
     );
 
     const folderLabel = screen.getByText('Computer Science Study');
-    const folderRow = folderLabel.closest('li')?.firstElementChild as HTMLDivElement;
+    const folderRow = folderLabel.closest('li')
+      ?.firstElementChild as HTMLDivElement;
 
     expect(
       screen.queryByLabelText('Delete folder Computer Science Study'),
@@ -419,6 +433,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Parent',
             parent_id: null,
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -427,6 +442,7 @@ describe('NotesSidebarList', () => {
             user_id: 'user-1',
             name: 'Child',
             parent_id: 'folder-parent',
+            tint: null,
             created_at: '2026-04-25T00:00:00.000Z',
             updated_at: '2026-04-25T00:00:00.000Z',
           },
@@ -478,5 +494,40 @@ describe('NotesSidebarList', () => {
         previousFolderId: null,
       }),
     );
+  });
+
+  it('exposes data-folder-tint when a folder has a persisted tint', () => {
+    // Arrange
+    render(
+      <NotesSidebarList
+        notes={[]}
+        folders={[
+          {
+            id: 'folder-1',
+            user_id: 'user-1',
+            name: 'Tinted folder',
+            parent_id: null,
+            tint: 'blue',
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    // Assert
+    expect(document.querySelector('[data-folder-tint="blue"]')).toBeTruthy();
   });
 });

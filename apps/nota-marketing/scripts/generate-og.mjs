@@ -77,8 +77,16 @@ async function main() {
   await writePng('home.png', homeInner);
   await writePng('pricing.png', pricingInner);
   const publicRoot = path.join(__dirname, '../public');
-  await fs.promises.copyFile(path.join(outDir, 'home.png'), path.join(publicRoot, 'og-default.png'));
-  console.log('Wrote', path.join(outDir, 'home.png'), ', pricing.png, and', path.join(publicRoot, 'og-default.png'));
+  await fs.promises.copyFile(
+    path.join(outDir, 'home.png'),
+    path.join(publicRoot, 'og-default.png'),
+  );
+  console.log(
+    'Wrote',
+    path.join(outDir, 'home.png'),
+    ', pricing.png, and',
+    path.join(publicRoot, 'og-default.png'),
+  );
 }
 
 main().catch((err) => {

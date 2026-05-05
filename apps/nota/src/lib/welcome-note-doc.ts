@@ -50,7 +50,11 @@ export const WELCOME_NOTE_CONTENT: Json = {
             {
               type: 'paragraph',
               content: [
-                { type: 'text', marks: [{ type: 'bold' }], text: 'Command palette' },
+                {
+                  type: 'text',
+                  marks: [{ type: 'bold' }],
+                  text: 'Command palette',
+                },
                 {
                   type: 'text',
                   text: ' — Press ⌘K to jump to a note, create one, or sign out.',
@@ -82,7 +86,7 @@ export const WELCOME_NOTE_CONTENT: Json = {
               content: [
                 {
                   type: 'text',
-                  text: "Optional ",
+                  text: 'Optional ',
                 },
                 {
                   type: 'text',

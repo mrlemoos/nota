@@ -1,5 +1,8 @@
 /** Smiley / emoticon → emoji input-rule patterns (trailing space). Generated from product spec. */
-export const NOTA_SMILIE_REPLACEMENTS: ReadonlyArray<{ find: RegExp; replace: string }> = [
+export const NOTA_SMILIE_REPLACEMENTS: ReadonlyArray<{
+  find: RegExp;
+  replace: string;
+}> = [
   { find: /-___- $/, replace: '😑 ' },
   { find: /:'-\) $/, replace: '😂 ' },
   { find: /':-\) $/, replace: '😅 ' },

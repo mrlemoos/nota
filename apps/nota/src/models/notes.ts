@@ -67,7 +67,9 @@ export async function createNote(
     ...(options?.editor_settings !== undefined
       ? { editor_settings: options.editor_settings }
       : {}),
-    ...(options?.folder_id !== undefined ? { folder_id: options.folder_id } : {}),
+    ...(options?.folder_id !== undefined
+      ? { folder_id: options.folder_id }
+      : {}),
   };
 
   const { data, error } = await client

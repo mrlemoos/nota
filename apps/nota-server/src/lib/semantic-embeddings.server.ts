@@ -91,7 +91,9 @@ export async function embedTextsForSemanticSearch(
   return vectors;
 }
 
-export async function embedTextForSemanticSearch(text: string): Promise<number[]> {
+export async function embedTextForSemanticSearch(
+  text: string,
+): Promise<number[]> {
   const [v] = await embedTextsForSemanticSearch([text]);
   if (!v) {
     throw new Error('nota-server: empty embedding response');
