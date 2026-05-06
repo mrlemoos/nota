@@ -1,26 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
-  <style>
-    .back {
-      fill: #171717;
-      fill-opacity: 0.35;
-    }
-    .mid {
-      fill: #171717;
-      fill-opacity: 0.7;
-    }
-    .front {
-      fill: #171717;
-      fill-opacity: 1;
-    }
-    @media (prefers-color-scheme: dark) {
-      .back,
-      .mid,
-      .front {
-        fill: #fafafa;
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bgL" x1="0.25" y1="0" x2="0.75" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#c8d4e0"/>
+      <stop offset="100%" stop-color="#dde6f0"/>
+    </linearGradient>
+    <linearGradient id="bgD" x1="0.25" y1="0" x2="0.75" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#1e2a36"/>
+      <stop offset="100%" stop-color="#263040"/>
+    </linearGradient>
+    <style>
+      .bg { fill: url(#bgL); }
+      .logo { stroke: #333f4e; }
+      @media (prefers-color-scheme: dark) {
+        .bg { fill: url(#bgD); }
+        .logo { stroke: #c8d8ea; }
       }
-    }
-  </style>
-  <rect class="back" x="4" y="4" width="30" height="30" rx="5.5" />
-  <rect class="mid" x="7" y="7" width="30" height="30" rx="5.5" />
-  <rect class="front" x="10" y="10" width="30" height="30" rx="5.5" />
+    </style>
+  </defs>
+
+  <rect class="bg" width="512" height="512" rx="108"/>
+
+  <g class="logo" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <!-- pen nib – left outer wall -->
+    <path stroke-width="13" d="M 202,147 C 194,155 185,172 179,192 L 158,272 C 146,310 133,332 130,352 L 138,363 L 145,370"/>
+    <!-- pen nib – right outer wall -->
+    <path stroke-width="13" d="M 215,147 C 223,158 230,174 232,194 L 226,272 C 221,308 212,330 202,344 L 186,358 L 174,366 L 160,373"/>
+    <!-- pen nib – centre slit -->
+    <path stroke-width="6" d="M 152,318 L 152,364"/>
+    <!-- leaf – left outer wall -->
+    <path stroke-width="13" d="M 370,143 C 349,154 322,168 308,188 L 292,238 C 284,266 284,294 290,318 L 295,344 C 287,352 286,362 290,370"/>
+    <!-- leaf – right outer wall -->
+    <path stroke-width="13" d="M 376,143 C 379,158 380,178 379,202 L 373,248 C 366,280 352,304 336,322 L 314,342 C 302,352 298,360 300,368"/>
+    <!-- leaf – midrib -->
+    <path stroke-width="6" d="M 372,146 C 358,204 336,272 302,362"/>
+  </g>
 </svg>
