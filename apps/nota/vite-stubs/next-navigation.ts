@@ -23,9 +23,13 @@ function subscribeToLocation(cb: () => void): () => void {
   }
   window.addEventListener('hashchange', cb);
   window.addEventListener('popstate', cb);
+  // history.replaceState (used by clerkRouterReplace and the replace() helper below) does not
+  // fire `hashchange`, only the custom `nota:hash-history` event patched in app-navigation.ts.
+  window.addEventListener('nota:hash-history', cb);
   return () => {
     window.removeEventListener('hashchange', cb);
     window.removeEventListener('popstate', cb);
+    window.removeEventListener('nota:hash-history', cb);
   };
 }
 

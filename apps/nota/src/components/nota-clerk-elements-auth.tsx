@@ -2,7 +2,7 @@ import * as Clerk from '@clerk/elements/common';
 import * as SignIn from '@clerk/elements/sign-in';
 import * as SignUp from '@clerk/elements/sign-up';
 import { useClerk } from '@clerk/react';
-import { type JSX, useEffect, useRef } from 'react';
+import { type JSX, forwardRef, useCallback, useEffect, useRef } from 'react';
 
 import { notaButtonVariants } from '@nota/web-design/button';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
@@ -15,20 +15,17 @@ import { cn } from '@/lib/utils';
  */
 const notaSignInPasswordPreferGate = {
   explicitPasswordResetRequest: false,
-  lastAutoPreferKey: null as string | null,
   /** Dedupes programmatic SupportedStrategy(password) clicks across remounts (e.g. StrictMode). */
   lastAutoPasswordStrategyClickSignInId: null as string | null,
 };
 
 function markNotaExplicitPasswordResetRequest(): void {
   notaSignInPasswordPreferGate.explicitPasswordResetRequest = true;
-  notaSignInPasswordPreferGate.lastAutoPreferKey = null;
   notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = null;
 }
 
 function clearNotaSignInPasswordResetIntent(): void {
   notaSignInPasswordPreferGate.explicitPasswordResetRequest = false;
-  notaSignInPasswordPreferGate.lastAutoPreferKey = null;
   notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = null;
 }
 
@@ -44,6 +41,58 @@ const stepStackClass = 'flex flex-col gap-4';
 const rootStackClass = 'flex flex-col gap-6';
 
 /**
+ * `STRATEGY.UPDATE` is only handled by the Clerk Elements XState machine in `ChooseStrategy`
+ * state, not in `Pending`. A bare `SupportedStrategy` click from `Pending` is silently dropped.
+ * Fix: dispatch `NAVIGATE.CHOOSE_STRATEGY` first (transitions Pending → ChooseStrategy), then
+ * `STRATEGY.UPDATE` (switches to password). Both clicks happen synchronously — XState processes
+ * them in sequence before React re-renders.
+ */
+const SignInSwitchToPasswordButton = forwardRef<
+  HTMLButtonElement,
+  { className?: string; children: React.ReactNode }
+>(({ className, children }, forwardedRef) => {
+  const chooseRef = useRef<HTMLButtonElement>(null);
+  const passwordRef = useRef<HTMLButtonElement>(null);
+
+  const handleClick = useCallback(() => {
+    chooseRef.current?.click();
+    passwordRef.current?.click();
+  }, []);
+
+  return (
+    <>
+      <SignIn.Action navigate="choose-strategy" asChild>
+        <button
+          type="button"
+          ref={chooseRef}
+          aria-hidden
+          style={{ display: 'none' }}
+          tabIndex={-1}
+        />
+      </SignIn.Action>
+      <SignIn.SupportedStrategy name="password" asChild>
+        <button
+          type="button"
+          ref={passwordRef}
+          aria-hidden
+          style={{ display: 'none' }}
+          tabIndex={-1}
+        />
+      </SignIn.SupportedStrategy>
+      <button
+        type="button"
+        ref={forwardedRef}
+        className={className}
+        onClick={handleClick}
+      >
+        {children}
+      </button>
+    </>
+  );
+});
+SignInSwitchToPasswordButton.displayName = 'SignInSwitchToPasswordButton';
+
+/**
  * Clerk Elements applies first-factor switches via `STRATEGY.UPDATE` (SupportedStrategy),
  * not reliably via `client.signIn.prepareFirstFactor` from outside that flow. When the
  * reset-email-code strategy is shown without explicit forgot-password intent, synthesise
@@ -51,7 +100,7 @@ const rootStackClass = 'flex flex-col gap-6';
  */
 function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
   const clerk = useClerk();
-  const passwordBtnRef = useRef<HTMLButtonElement>(null);
+  const switchBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const sid = clerk.client?.signIn?.id ?? '';
@@ -69,7 +118,7 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
     notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = sid;
 
     queueMicrotask(() => {
-      passwordBtnRef.current?.click();
+      switchBtnRef.current?.click();
     });
   }, [clerk.client?.signIn?.id]);
 
@@ -79,85 +128,57 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
         Nota signs you in with a password. If you see a reset code instead, use
         the button below.
       </p>
-      <SignIn.SupportedStrategy name="password" asChild>
-        <button
-          type="button"
-          ref={passwordBtnRef}
-          className={cn(
-            notaButtonVariants({
-              variant: 'outline',
-              className: 'w-full',
-            }),
-          )}
-        >
-          Use password instead
-        </button>
-      </SignIn.SupportedStrategy>
+      <SignInSwitchToPasswordButton
+        ref={switchBtnRef}
+        className={cn(
+          notaButtonVariants({
+            variant: 'outline',
+            className: 'w-full',
+          }),
+        )}
+      >
+        Use password instead
+      </SignInSwitchToPasswordButton>
     </div>
   );
 }
 
 /**
- * Prefer password when Clerk opens email OTP/link before password. Reset-code mistaken
- * default is handled by {@link SignInResetEmailCodeStrategyAutoPreferPassword} inside that strategy.
+ * Auto-switch from OTP strategy (email_code / email_link) to password by programmatically
+ * clicking the `SupportedStrategy` button once per sign-in id, matching the pattern used
+ * by {@link SignInResetEmailCodeStrategyAutoPreferPassword}.
  */
-function SignInPreferPasswordAuto(): null {
+function SignInOtpStrategyAutoPreferPassword(): JSX.Element {
   const clerk = useClerk();
+  const switchBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const tryPreferPassword = (): void => {
-      const signIn = clerk.client?.signIn;
-      const status = signIn?.status ?? null;
-      const factorStrategy = signIn?.firstFactorVerification?.strategy ?? null;
-      const supported = signIn?.supportedFirstFactors ?? null;
-
-      if (!signIn) return;
-
-      if (status === 'needs_identifier') {
-        clearNotaSignInPasswordResetIntent();
-        return;
-      }
-
-      if (status !== 'needs_first_factor') return;
-
-      const hasPassword = (supported ?? []).some(
-        (f) => f.strategy === 'password',
-      );
-      if (!hasPassword) return;
-
-      if (factorStrategy === 'password') return;
-
-      // Reset mistaken default is corrected via Elements `STRATEGY.UPDATE` (SupportedStrategy
-      // click) in `SignInResetEmailCodeStrategyAutoPreferPassword`, not `prepareFirstFactor`.
-      if (factorStrategy === 'reset_password_email_code') return;
-
-      const shouldPreferPassword =
-        factorStrategy === null ||
-        factorStrategy === 'email_code' ||
-        factorStrategy === 'email_link';
-
-      if (!shouldPreferPassword) return;
-
-      const sid = signIn.id ?? '';
-      const key = `${sid}:${factorStrategy ?? 'null'}`;
-      if (notaSignInPasswordPreferGate.lastAutoPreferKey === key) return;
-      notaSignInPasswordPreferGate.lastAutoPreferKey = key;
-
-      void signIn
-        .prepareFirstFactor({ strategy: 'password' } as never)
-        .catch(() => {
-          notaSignInPasswordPreferGate.lastAutoPreferKey = null;
-        });
-    };
-
-    tryPreferPassword();
-    const unsubscribe = clerk.addListener(() => {
-      tryPreferPassword();
+    const sid = clerk.client?.signIn?.id ?? '';
+    if (!sid) return;
+    if (
+      notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId === sid
+    ) {
+      return;
+    }
+    notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = sid;
+    queueMicrotask(() => {
+      switchBtnRef.current?.click();
     });
-    return unsubscribe;
-  }, [clerk]);
+  }, [clerk.client?.signIn?.id]);
 
-  return null;
+  return (
+    <SignInSwitchToPasswordButton
+      ref={switchBtnRef}
+      className={cn(
+        notaButtonVariants({
+          variant: 'outline',
+          className: 'w-full',
+        }),
+      )}
+    >
+      Use password instead
+    </SignInSwitchToPasswordButton>
+  );
 }
 
 const authFallback = (
@@ -173,7 +194,6 @@ const authFallback = (
 export function NotaClerkSignIn(): JSX.Element {
   return (
     <SignIn.Root path="/sign-in" routing="hash" fallback={authFallback}>
-      <SignInPreferPasswordAuto />
       <div className={rootStackClass}>
         <Clerk.GlobalError className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive" />
 
@@ -214,19 +234,7 @@ export function NotaClerkSignIn(): JSX.Element {
                   Nota signs you in with a password. If Clerk opened email
                   verification instead, use the button below.
                 </p>
-                <SignIn.SupportedStrategy name="password" asChild>
-                  <button
-                    type="button"
-                    className={cn(
-                      notaButtonVariants({
-                        variant: 'outline',
-                        className: 'w-full',
-                      }),
-                    )}
-                  >
-                    Use password instead
-                  </button>
-                </SignIn.SupportedStrategy>
+                <SignInOtpStrategyAutoPreferPassword />
               </div>
             </SignIn.Strategy>
 
@@ -236,19 +244,7 @@ export function NotaClerkSignIn(): JSX.Element {
                   Nota signs you in with a password. If an email link was
                   offered instead, use the button below.
                 </p>
-                <SignIn.SupportedStrategy name="password" asChild>
-                  <button
-                    type="button"
-                    className={cn(
-                      notaButtonVariants({
-                        variant: 'outline',
-                        className: 'w-full',
-                      }),
-                    )}
-                  >
-                    Use password instead
-                  </button>
-                </SignIn.SupportedStrategy>
+                <SignInOtpStrategyAutoPreferPassword />
               </div>
             </SignIn.Strategy>
 

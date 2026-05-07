@@ -76,17 +76,23 @@ describe('NotaClerkSignIn auth flow', () => {
     const hasChooseStrategyStep = source.includes(
       '<SignIn.Step name="choose-strategy">',
     );
+    // Strategies use the auto-prefer component which renders SupportedStrategy internally.
     const emailCodeSwitchesToPassword = emailCodeBlock.includes(
-      '<SignIn.SupportedStrategy name="password"',
+      'SignInOtpStrategyAutoPreferPassword',
     );
     const emailLinkSwitchesToPassword = emailLinkBlock.includes(
-      '<SignIn.SupportedStrategy name="password"',
+      'SignInOtpStrategyAutoPreferPassword',
     );
+    // The component definition must contain the actual SupportedStrategy switch.
+    const otpComponentHasSupportedStrategy =
+      source.includes('function SignInOtpStrategyAutoPreferPassword') &&
+      source.includes('<SignIn.SupportedStrategy name="password"');
 
     // Assert
     expect(hasChooseStrategyStep).toBe(false);
     expect(emailCodeSwitchesToPassword).toBe(true);
     expect(emailLinkSwitchesToPassword).toBe(true);
+    expect(otpComponentHasSupportedStrategy).toBe(true);
   });
 
   it('auto-prefers password for OTP or mistaken reset default; honours explicit reset intent', () => {
@@ -94,8 +100,10 @@ describe('NotaClerkSignIn auth flow', () => {
     const source = loadAuthComponentSource();
 
     // Act
-    const hasPreferPasswordAuto = source.includes('SignInPreferPasswordAuto');
-    const callsPreparePassword =
+    const hasOtpStrategyAutoPreferPassword = source.includes(
+      'SignInOtpStrategyAutoPreferPassword',
+    );
+    const callsInvalidPreparePassword =
       source.includes('prepareFirstFactor') &&
       source.includes("strategy: 'password'");
     const honoursExplicitReset = source.includes(
@@ -104,16 +112,16 @@ describe('NotaClerkSignIn auth flow', () => {
     const marksExplicitReset = source.includes(
       'markNotaExplicitPasswordResetRequest',
     );
-
     const hasResetStrategyClick = source.includes(
       'SignInResetEmailCodeStrategyAutoPreferPassword',
     );
     const hasProgrammaticPasswordStrategyClick =
-      source.includes('passwordBtnRef');
+      source.includes('SignInSwitchToPasswordButton') &&
+      source.includes('switchBtnRef');
 
     // Assert
-    expect(hasPreferPasswordAuto).toBe(true);
-    expect(callsPreparePassword).toBe(true);
+    expect(hasOtpStrategyAutoPreferPassword).toBe(true);
+    expect(callsInvalidPreparePassword).toBe(false);
     expect(honoursExplicitReset).toBe(true);
     expect(marksExplicitReset).toBe(true);
     expect(hasResetStrategyClick).toBe(true);
