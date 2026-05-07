@@ -2,7 +2,7 @@ import * as Clerk from '@clerk/elements/common';
 import * as SignIn from '@clerk/elements/sign-in';
 import * as SignUp from '@clerk/elements/sign-up';
 import { useClerk } from '@clerk/react';
-import { type JSX, forwardRef, useCallback, useEffect, useRef } from 'react';
+import { type JSX, useEffect, useLayoutEffect, useRef } from 'react';
 
 import { notaButtonVariants } from '@nota/web-design/button';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
  */
 const notaSignInPasswordPreferGate = {
   explicitPasswordResetRequest: false,
-  /** Dedupes programmatic SupportedStrategy(password) clicks across remounts (e.g. StrictMode). */
+  /** Dedupes programmatic navigate-to-choose-strategy clicks across remounts (e.g. StrictMode). */
   lastAutoPasswordStrategyClickSignInId: null as string | null,
 };
 
@@ -41,66 +41,46 @@ const stepStackClass = 'flex flex-col gap-4';
 const rootStackClass = 'flex flex-col gap-6';
 
 /**
- * `STRATEGY.UPDATE` is only handled by the Clerk Elements XState machine in `ChooseStrategy`
- * state, not in `Pending`. A bare `SupportedStrategy` click from `Pending` is silently dropped.
- * Fix: dispatch `NAVIGATE.CHOOSE_STRATEGY` first (transitions Pending → ChooseStrategy), then
- * `STRATEGY.UPDATE` (switches to password). Both clicks happen synchronously — XState processes
- * them in sequence before React re-renders.
+ * `STRATEGY.UPDATE` is only handled by the Clerk Elements XState inner machine in
+ * `ChooseStrategy` state — in `Pending` it is silently dropped. `<SignIn.SupportedStrategy>`
+ * must therefore be placed inside `<SignIn.Step name="choose-strategy">`, which is only
+ * active when the outer router is in `ChoosingStrategy` sub-state.
+ *
+ * This component lives inside that step and auto-selects the password strategy via
+ * `useLayoutEffect` so the transition fires before the browser paints.
  */
-const SignInSwitchToPasswordButton = forwardRef<
-  HTMLButtonElement,
-  { className?: string; children: React.ReactNode }
->(({ className, children }, forwardedRef) => {
-  const chooseRef = useRef<HTMLButtonElement>(null);
-  const passwordRef = useRef<HTMLButtonElement>(null);
+function SignInChooseStrategyAutoSelectPassword(): JSX.Element | null {
+  const passwordBtnRef = useRef<HTMLButtonElement>(null);
 
-  const handleClick = useCallback(() => {
-    chooseRef.current?.click();
-    passwordRef.current?.click();
+  useLayoutEffect(() => {
+    passwordBtnRef.current?.click();
   }, []);
 
   return (
-    <>
-      <SignIn.Action navigate="choose-strategy" asChild>
-        <button
-          type="button"
-          ref={chooseRef}
-          aria-hidden
-          style={{ display: 'none' }}
-          tabIndex={-1}
-        />
-      </SignIn.Action>
-      <SignIn.SupportedStrategy name="password" asChild>
-        <button
-          type="button"
-          ref={passwordRef}
-          aria-hidden
-          style={{ display: 'none' }}
-          tabIndex={-1}
-        />
-      </SignIn.SupportedStrategy>
+    <SignIn.SupportedStrategy name="password" asChild>
       <button
         type="button"
-        ref={forwardedRef}
-        className={className}
-        onClick={handleClick}
+        ref={passwordBtnRef}
+        aria-hidden
+        style={{ display: 'none' }}
+        tabIndex={-1}
       >
-        {children}
+        Use password instead
       </button>
-    </>
+    </SignIn.SupportedStrategy>
   );
-});
-SignInSwitchToPasswordButton.displayName = 'SignInSwitchToPasswordButton';
+}
 
 /**
  * Clerk Elements applies first-factor switches via `STRATEGY.UPDATE` (SupportedStrategy),
  * not reliably via `client.signIn.prepareFirstFactor` from outside that flow. When the
- * reset-email-code strategy is shown without explicit forgot-password intent, synthesise
- * the same event as choosing the password strategy once per sign-in id.
+ * reset-email-code strategy is shown without explicit forgot-password intent, navigate to
+ * the choose-strategy step once per sign-in id. The choose-strategy step then
+ * auto-selects password via {@link SignInChooseStrategyAutoSelectPassword}.
  */
 function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
   const clerk = useClerk();
-  const switchBtnRef = useRef<HTMLButtonElement>(null);
+  const navigateBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const sid = clerk.client?.signIn?.id ?? '';
@@ -118,7 +98,7 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
     notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = sid;
 
     queueMicrotask(() => {
-      switchBtnRef.current?.click();
+      navigateBtnRef.current?.click();
     });
   }, [clerk.client?.signIn?.id]);
 
@@ -128,8 +108,9 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
         Nota signs you in with a password. If you see a reset code instead, use
         the button below.
       </p>
-      <SignInSwitchToPasswordButton
-        ref={switchBtnRef}
+      <SignIn.Action
+        navigate="choose-strategy"
+        ref={navigateBtnRef}
         className={cn(
           notaButtonVariants({
             variant: 'outline',
@@ -138,19 +119,19 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
         )}
       >
         Use password instead
-      </SignInSwitchToPasswordButton>
+      </SignIn.Action>
     </div>
   );
 }
 
 /**
- * Auto-switch from OTP strategy (email_code / email_link) to password by programmatically
- * clicking the `SupportedStrategy` button once per sign-in id, matching the pattern used
- * by {@link SignInResetEmailCodeStrategyAutoPreferPassword}.
+ * Auto-navigate from OTP strategy (email_code / email_link) to the choose-strategy step
+ * once per sign-in id. The choose-strategy step then auto-selects password via
+ * {@link SignInChooseStrategyAutoSelectPassword}.
  */
 function SignInOtpStrategyAutoPreferPassword(): JSX.Element {
   const clerk = useClerk();
-  const switchBtnRef = useRef<HTMLButtonElement>(null);
+  const navigateBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const sid = clerk.client?.signIn?.id ?? '';
@@ -162,13 +143,14 @@ function SignInOtpStrategyAutoPreferPassword(): JSX.Element {
     }
     notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = sid;
     queueMicrotask(() => {
-      switchBtnRef.current?.click();
+      navigateBtnRef.current?.click();
     });
   }, [clerk.client?.signIn?.id]);
 
   return (
-    <SignInSwitchToPasswordButton
-      ref={switchBtnRef}
+    <SignIn.Action
+      navigate="choose-strategy"
+      ref={navigateBtnRef}
       className={cn(
         notaButtonVariants({
           variant: 'outline',
@@ -177,7 +159,7 @@ function SignInOtpStrategyAutoPreferPassword(): JSX.Element {
       )}
     >
       Use password instead
-    </SignInSwitchToPasswordButton>
+    </SignIn.Action>
   );
 }
 
@@ -309,6 +291,16 @@ export function NotaClerkSignIn(): JSX.Element {
               </div>
             </SignIn.Strategy>
           </div>
+        </SignIn.Step>
+
+        {/*
+         * `STRATEGY.UPDATE` is only handled in the inner machine's `ChooseStrategy` state.
+         * `<SignIn.SupportedStrategy>` must live here — inside choose-strategy — where the
+         * XState machine accepts the event. Auto-select password via useLayoutEffect so the
+         * transition fires before the browser paints.
+         */}
+        <SignIn.Step name="choose-strategy">
+          <SignInChooseStrategyAutoSelectPassword />
         </SignIn.Step>
 
         <SignIn.Step name="forgot-password">

@@ -66,33 +66,58 @@ describe('NotaClerkSignIn auth flow', () => {
     expect(hasForgotPasswordAction).toBe(true);
   });
 
-  it('offers OTP escape hatches that only switch to password (no choose-strategy step)', () => {
+  it('uses a choose-strategy step for SupportedStrategy per the Clerk Elements API contract', () => {
     // Arrange
     const source = loadAuthComponentSource();
+    const chooseStrategyStep = extractSignInStep(source, 'choose-strategy');
     const emailCodeBlock = extractStrategyBlock(source, 'email_code');
     const emailLinkBlock = extractStrategyBlock(source, 'email_link');
 
-    // Act
+    // The choose-strategy step must exist — SupportedStrategy only works there
+    // because STRATEGY.UPDATE is only handled by the XState inner machine in
+    // ChooseStrategy state, not in Pending.
     const hasChooseStrategyStep = source.includes(
       '<SignIn.Step name="choose-strategy">',
     );
-    // Strategies use the auto-prefer component which renders SupportedStrategy internally.
-    const emailCodeSwitchesToPassword = emailCodeBlock.includes(
+    // The choose-strategy step delegates to the auto-select component
+    const chooseStepUsesAutoSelect = chooseStrategyStep.includes(
+      'SignInChooseStrategyAutoSelectPassword',
+    );
+    // The auto-select component definition contains SupportedStrategy(password).
+    // name="password" is on a separate line in multiline JSX, so check both
+    // the component definition and the strategy attribute independently.
+    const autoSelectComponentHasSupportedStrategy =
+      source.includes('function SignInChooseStrategyAutoSelectPassword') &&
+      source.includes('<SignIn.SupportedStrategy') &&
+      /SignInChooseStrategyAutoSelectPassword[\s\S]*?name="password"/.test(
+        source,
+      );
+    // SupportedStrategy(password) does NOT appear directly in verifications strategy blocks
+    const supportedStrategyInEmailCode = emailCodeBlock.includes(
+      '<SignIn.SupportedStrategy name="password"',
+    );
+    const supportedStrategyInEmailLink = emailLinkBlock.includes(
+      '<SignIn.SupportedStrategy name="password"',
+    );
+    // OTP strategy blocks navigate to choose-strategy (single XState event, documented API)
+    const emailCodeNavigatesToChooseStrategy = emailCodeBlock.includes(
       'SignInOtpStrategyAutoPreferPassword',
     );
-    const emailLinkSwitchesToPassword = emailLinkBlock.includes(
+    const emailLinkNavigatesToChooseStrategy = emailLinkBlock.includes(
       'SignInOtpStrategyAutoPreferPassword',
     );
-    // The component definition must contain the actual SupportedStrategy switch.
-    const otpComponentHasSupportedStrategy =
-      source.includes('function SignInOtpStrategyAutoPreferPassword') &&
-      source.includes('<SignIn.SupportedStrategy name="password"');
+    // No two-hidden-button hack component
+    const hasHiddenButtonHack = source.includes('SignInSwitchToPasswordButton');
 
     // Assert
-    expect(hasChooseStrategyStep).toBe(false);
-    expect(emailCodeSwitchesToPassword).toBe(true);
-    expect(emailLinkSwitchesToPassword).toBe(true);
-    expect(otpComponentHasSupportedStrategy).toBe(true);
+    expect(hasChooseStrategyStep).toBe(true);
+    expect(chooseStepUsesAutoSelect).toBe(true);
+    expect(autoSelectComponentHasSupportedStrategy).toBe(true);
+    expect(supportedStrategyInEmailCode).toBe(false);
+    expect(supportedStrategyInEmailLink).toBe(false);
+    expect(emailCodeNavigatesToChooseStrategy).toBe(true);
+    expect(emailLinkNavigatesToChooseStrategy).toBe(true);
+    expect(hasHiddenButtonHack).toBe(false);
   });
 
   it('auto-prefers password for OTP or mistaken reset default; honours explicit reset intent', () => {
@@ -115,9 +140,10 @@ describe('NotaClerkSignIn auth flow', () => {
     const hasResetStrategyClick = source.includes(
       'SignInResetEmailCodeStrategyAutoPreferPassword',
     );
-    const hasProgrammaticPasswordStrategyClick =
-      source.includes('SignInSwitchToPasswordButton') &&
-      source.includes('switchBtnRef');
+    // Auto-prefer navigates to choose-strategy (single event), not a two-step hidden-button click
+    const autoPreferUsesNavigateToChooseStrategy =
+      source.includes('navigate="choose-strategy"') &&
+      source.includes('navigateBtnRef');
 
     // Assert
     expect(hasOtpStrategyAutoPreferPassword).toBe(true);
@@ -125,6 +151,6 @@ describe('NotaClerkSignIn auth flow', () => {
     expect(honoursExplicitReset).toBe(true);
     expect(marksExplicitReset).toBe(true);
     expect(hasResetStrategyClick).toBe(true);
-    expect(hasProgrammaticPasswordStrategyClick).toBe(true);
+    expect(autoPreferUsesNavigateToChooseStrategy).toBe(true);
   });
 });
