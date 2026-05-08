@@ -335,13 +335,39 @@ export function clerkFullNotesUrl(): string {
   return `${clerkSpaOriginWithPath()}#/notes`;
 }
 
+/**
+ * After a successful sign-in/up, Clerk calls `routerPush(signInForceRedirectUrl)` —
+ * e.g. `http://localhost:4200#/notes`. `mapClerkToHashFragment` only handles auth paths
+ * and returns null for `/notes`, so without this fallback the navigation silently drops.
+ * Extract the hash path from any same-origin URL so post-auth redirects land correctly.
+ */
+function extractSameOriginHashPath(to: string): string | null {
+  try {
+    const parsed = new URL(to, window.location.href);
+    if (parsed.origin !== window.location.origin) return null;
+    const hash = parsed.hash.startsWith('#')
+      ? parsed.hash.slice(1)
+      : parsed.hash;
+    return hash.startsWith('/') ? hash : null;
+  } catch {
+    return null;
+  }
+}
+
 export function clerkRouterPush(
   to: string,
   metadata?: { windowNavigate: (u: URL | string) => void },
 ): void {
   const mapped = mapClerkToHashFragment(to, window.location.href);
   if (!mapped) {
-    metadata?.windowNavigate(to);
+    const hashPath = extractSameOriginHashPath(to);
+    if (hashPath !== null) {
+      const url = new URL(window.location.href);
+      url.hash = hashPath;
+      window.history.pushState(window.history.state, '', url.toString());
+    } else {
+      metadata?.windowNavigate(to);
+    }
     return;
   }
   const url = new URL(window.location.href);
@@ -356,7 +382,14 @@ export function clerkRouterReplace(
 ): void {
   const mapped = mapClerkToHashFragment(to, window.location.href);
   if (!mapped) {
-    metadata?.windowNavigate(to);
+    const hashPath = extractSameOriginHashPath(to);
+    if (hashPath !== null) {
+      const url = new URL(window.location.href);
+      url.hash = hashPath;
+      window.history.replaceState(window.history.state, '', url.toString());
+    } else {
+      metadata?.windowNavigate(to);
+    }
     return;
   }
   const url = new URL(window.location.href);

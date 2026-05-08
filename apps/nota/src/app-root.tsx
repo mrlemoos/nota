@@ -149,10 +149,10 @@ export function NotaApp(): JSX.Element {
         )}
       </AppShellPanel>
       <AppShellPanel active={loginActive} panelId="screen-login">
-        <Login />
+        {loginActive && <Login />}
       </AppShellPanel>
       <AppShellPanel active={signupActive} panelId="screen-signup">
-        <Signup />
+        {signupActive && <Signup />}
       </AppShellPanel>
       <AppShellPanel active={notesActive} panelId="screen-notes">
         <NotesDataProvider>
