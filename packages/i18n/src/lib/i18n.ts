@@ -145,7 +145,7 @@ const FOLDER_CORE_FR: LocaleDictionary = {
 };
 
 const NOTE_GRAPH_ES: LocaleDictionary = {
-  'Note Graph': 'Gráfico de notas',
+  'Note Graph': 'Grafo de notas',
   'How your notes link together. Click a note to open it. Pan and zoom to explore.':
     'Cómo se enlazan tus notas. Haz clic en una nota para abrirla. Arrastra y amplía para explorar.',
   'Loading graph…': 'Cargando gráfico…',

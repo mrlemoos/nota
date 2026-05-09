@@ -34,9 +34,27 @@ function TestHarness(): JSX.Element {
 
 describe('ThemeProvider (system + prefers-color-scheme)', () => {
   beforeEach(() => {
+    const storage = new Map<string, string>();
+    vi.stubGlobal('localStorage', {
+      clear: () => {
+        storage.clear();
+      },
+      getItem: (key: string) => (storage.has(key) ? storage.get(key)! : null),
+      key: (index: number) => [...storage.keys()][index] ?? null,
+      get length() {
+        return storage.size;
+      },
+      removeItem: (key: string) => {
+        storage.delete(key);
+      },
+      setItem: (key: string, value: string) => {
+        storage.set(key, value);
+      },
+    } as Storage);
+
     changeListeners = [];
     mqlState.matches = false;
-    localStorage.removeItem(STORAGE_KEY);
+    storage.delete(STORAGE_KEY);
     document.documentElement.classList.remove('light', 'dark');
 
     vi.stubGlobal(
@@ -67,7 +85,6 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    localStorage.removeItem(STORAGE_KEY);
     document.documentElement.classList.remove('light', 'dark');
   });
 
