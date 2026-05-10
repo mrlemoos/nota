@@ -61,6 +61,7 @@ import {
   navigateFromLegacyPath,
 } from '../lib/app-navigation';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
+import { createTypewriterScrollUserGuard } from '@/lib/nota-typewriter-scroll-guard';
 
 function buildStorageOps(noteId: string, userId: string): AttachmentStorageOps {
   const client = getBrowserClient();
@@ -159,6 +160,10 @@ function NoteEditorImpl({
   const onNoteUpdatedRef = useRef(onNoteUpdated);
   const userIdRef = useRef(user?.id);
   const notaProEntitledRef = useRef(notaProEntitled);
+  const typewriterScrollGuard = useMemo(
+    () => createTypewriterScrollUserGuard(),
+    [],
+  );
   noteRef.current = note;
   onNoteUpdatedRef.current = onNoteUpdated;
   userIdRef.current = user?.id;
@@ -199,7 +204,8 @@ function NoteEditorImpl({
       cancelAnimationFrame(typewriterRafRef.current);
       typewriterRafRef.current = null;
     }
-  }, [note.id, resetSticky]);
+    typewriterScrollGuard.reset();
+  }, [note.id, resetSticky, typewriterScrollGuard]);
 
   const syncTitleTextareaHeight = useCallback(() => {
     const el = titleTextareaRef.current;
@@ -234,6 +240,65 @@ function NoteEditorImpl({
       observer.disconnect();
     };
   }, [note.id, scrollRootEpoch, scrollRootRef, setSticky]);
+
+  useLayoutEffect(() => {
+    const root = scrollRootRef.current;
+    if (!root) {
+      return;
+    }
+    const onScroll = () => {
+      typewriterScrollGuard.onScrollRootScroll();
+    };
+    root.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      root.removeEventListener('scroll', onScroll);
+    };
+  }, [note.id, scrollRootEpoch, scrollRootRef, typewriterScrollGuard]);
+
+  useLayoutEffect(() => {
+    let cancelled = false;
+    let raf: number | null = null;
+    let cleanupDom: (() => void) | null = null;
+
+    const schedule = () => {
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        if (cancelled) {
+          return;
+        }
+        const ed = bodyEditorRef.current;
+        if (!ed || ed.isDestroyed) {
+          if (!cancelled) {
+            schedule();
+          }
+          return;
+        }
+        const dom = ed.view.dom;
+        const onGesture = () => {
+          typewriterScrollGuard.onEditorUserGesture();
+        };
+        dom.addEventListener('beforeinput', onGesture, { passive: true });
+        dom.addEventListener('paste', onGesture);
+        dom.addEventListener('pointerdown', onGesture);
+        cleanupDom = () => {
+          dom.removeEventListener('beforeinput', onGesture);
+          dom.removeEventListener('paste', onGesture);
+          dom.removeEventListener('pointerdown', onGesture);
+          cleanupDom = null;
+        };
+      });
+    };
+
+    schedule();
+
+    return () => {
+      cancelled = true;
+      if (raf !== null) {
+        cancelAnimationFrame(raf);
+      }
+      cleanupDom?.();
+    };
+  }, [note.id, typewriterScrollGuard]);
 
   useEffect(() => {
     return () => {
@@ -343,6 +408,9 @@ function NoteEditorImpl({
     if (!root || !editor || editor.isDestroyed || !editor.isFocused) {
       return;
     }
+    if (typewriterScrollGuard.shouldSkipTypewriterAlign()) {
+      return;
+    }
 
     const { selection } = editor.state;
     if (!selection.empty) {
@@ -374,13 +442,14 @@ function NoteEditorImpl({
       return;
     }
 
+    typewriterScrollGuard.beforeProgrammaticScroll();
     if (prefersReducedMotionRef.current) {
       root.scrollTop = nextScrollTop;
       return;
     }
 
     root.scrollTo({ top: nextScrollTop, behavior: 'auto' });
-  }, [scrollRootRef]);
+  }, [scrollRootRef, typewriterScrollGuard]);
 
   const scheduleTypewriterScroll = useCallback(() => {
     if (typewriterRafRef.current !== null) {
