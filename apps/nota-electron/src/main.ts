@@ -265,26 +265,26 @@ function installApplicationMenu(): void {
   }
   Menu.setApplicationMenu(
     Menu.buildFromTemplate(
-      buildNotaAppMenuTemplate({
-        onNewNote: () => {
-          sendMenubarAction({ kind: 'create-note' });
+      buildNotaAppMenuTemplate(
+        {
+          onNewNote: () => {
+            sendMenubarAction({ kind: 'create-note' });
+          },
+          onMoveToFolder: () => {
+            sendMenubarAction({ kind: 'move-note' });
+          },
+          onNewFolder: () => {
+            sendMenubarAction({ kind: 'create-folder' });
+          },
+          onNewNoteFromClipboard: () => {
+            sendMenubarAction({ kind: 'clipboard-note' });
+          },
+          onStudyNotesFromRecording: () => {
+            sendMenubarAction({ kind: 'study-recording' });
+          },
         },
-        onMoveToFolder: () => {
-          sendMenubarAction({ kind: 'move-note' });
-        },
-        onNewFolder: () => {
-          sendMenubarAction({ kind: 'create-folder' });
-        },
-        onNewNoteFromClipboard: () => {
-          sendMenubarAction({ kind: 'clipboard-note' });
-        },
-        onStudyNotesFromRecording: () => {
-          sendMenubarAction({ kind: 'study-recording' });
-        },
-        onQuit: () => {
-          app.quit();
-        },
-      }),
+        { isMac: isDarwin },
+      ),
     ),
   );
 }

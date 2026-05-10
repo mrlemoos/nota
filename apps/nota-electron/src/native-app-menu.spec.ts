@@ -11,25 +11,122 @@ function submenuOf(
   return Array.isArray(sub) ? sub : [];
 }
 
+function rolesOnly(
+  items: MenuItemConstructorOptions[],
+): NonNullable<MenuItemConstructorOptions['role']>[] {
+  return items
+    .filter(
+      (
+        i,
+      ): i is MenuItemConstructorOptions & {
+        role: NonNullable<typeof i.role>;
+      } => 'role' in i && i.role != null,
+    )
+    .map((i) => i.role);
+}
+
+function noopActions() {
+  return {
+    onNewNote: vi.fn(),
+    onMoveToFolder: vi.fn(),
+    onNewFolder: vi.fn(),
+    onNewNoteFromClipboard: vi.fn(),
+    onStudyNotesFromRecording: vi.fn(),
+  };
+}
+
 describe('buildNotaAppMenuTemplate', () => {
-  it('includes note actions with accelerators', () => {
+  it('includes Nota app submenu roles in order', () => {
     // Arrange
-    const onNewNote = vi.fn();
-    const onMoveToFolder = vi.fn();
-    const onNewFolder = vi.fn();
-    const onQuit = vi.fn();
-    const onNewNoteFromClipboard = vi.fn();
-    const onStudyNotesFromRecording = vi.fn();
+    const actions = noopActions();
 
     // Act
-    const template = buildNotaAppMenuTemplate({
-      onNewNote,
-      onMoveToFolder,
-      onNewFolder,
-      onQuit,
-      onNewNoteFromClipboard,
-      onStudyNotesFromRecording,
-    });
+    const template = buildNotaAppMenuTemplate(actions, { isMac: true });
+
+    // Assert
+    const notaItems = submenuOf(template, 'Nota');
+    expect(rolesOnly(notaItems)).toEqual([
+      'about',
+      'services',
+      'hide',
+      'hideOthers',
+      'unhide',
+      'quit',
+    ]);
+  });
+
+  it('uses native quit without a custom click handler', () => {
+    // Arrange
+    const actions = noopActions();
+
+    // Act
+    const template = buildNotaAppMenuTemplate(actions, { isMac: true });
+    const notaItems = submenuOf(template, 'Nota');
+    const quitItem = notaItems.find(
+      (i): i is MenuItemConstructorOptions & { role: 'quit' } =>
+        'role' in i && i.role === 'quit',
+    );
+
+    // Assert
+    expect(quitItem).toEqual({ role: 'quit' });
+    expect(
+      quitItem && 'click' in quitItem ? quitItem.click : undefined,
+    ).toBeUndefined();
+  });
+
+  it('includes Edit menu with macOS-specific items when isMac is true', () => {
+    // Arrange
+    const actions = noopActions();
+
+    // Act
+    const template = buildNotaAppMenuTemplate(actions, { isMac: true });
+
+    // Assert
+    const editItems = submenuOf(template, 'Edit');
+    expect(editItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ role: 'undo' }),
+        expect.objectContaining({ role: 'pasteAndMatchStyle' }),
+        expect.objectContaining({ role: 'selectAll' }),
+        expect.objectContaining({
+          label: 'Speech',
+          submenu: [
+            expect.objectContaining({ role: 'startSpeaking' }),
+            expect.objectContaining({ role: 'stopSpeaking' }),
+          ],
+        }),
+      ]),
+    );
+  });
+
+  it('includes Edit menu without Speech when isMac is false', () => {
+    // Arrange
+    const actions = noopActions();
+
+    // Act
+    const template = buildNotaAppMenuTemplate(actions, { isMac: false });
+
+    // Assert
+    const editItems = submenuOf(template, 'Edit');
+    expect(editItems.some((i) => i.label === 'Speech')).toBe(false);
+    expect(editItems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ role: 'undo' }),
+        expect.objectContaining({ role: 'delete' }),
+        expect.objectContaining({ role: 'selectAll' }),
+      ]),
+    );
+    expect(
+      editItems.some((i) => 'role' in i && i.role === 'pasteAndMatchStyle'),
+    ).toBe(false);
+  });
+
+  it('includes note actions with accelerators', () => {
+    // Arrange
+    const actions = noopActions();
+
+    // Act
+    const template = buildNotaAppMenuTemplate(actions, { isMac: true });
 
     // Assert
     const notesItems = submenuOf(template, 'Notes');
@@ -66,17 +163,10 @@ describe('buildNotaAppMenuTemplate', () => {
 
   it('includes View refresh and developer tools with roles', () => {
     // Arrange
-    const noop = vi.fn();
+    const actions = noopActions();
 
     // Act
-    const template = buildNotaAppMenuTemplate({
-      onNewNote: noop,
-      onMoveToFolder: noop,
-      onNewFolder: noop,
-      onQuit: noop,
-      onNewNoteFromClipboard: noop,
-      onStudyNotesFromRecording: noop,
-    });
+    const template = buildNotaAppMenuTemplate(actions, { isMac: true });
 
     // Assert
     const viewItems = submenuOf(template, 'View');
@@ -101,19 +191,20 @@ describe('buildNotaAppMenuTemplate', () => {
     const onNewNote = vi.fn();
     const onMoveToFolder = vi.fn();
     const onNewFolder = vi.fn();
-    const onQuit = vi.fn();
     const onNewNoteFromClipboard = vi.fn();
     const onStudyNotesFromRecording = vi.fn();
 
     // Act
-    const template = buildNotaAppMenuTemplate({
-      onNewNote,
-      onMoveToFolder,
-      onNewFolder,
-      onQuit,
-      onNewNoteFromClipboard,
-      onStudyNotesFromRecording,
-    });
+    const template = buildNotaAppMenuTemplate(
+      {
+        onNewNote,
+        onMoveToFolder,
+        onNewFolder,
+        onNewNoteFromClipboard,
+        onStudyNotesFromRecording,
+      },
+      { isMac: true },
+    );
     const notesItems = submenuOf(template, 'Notes') as Array<{
       label?: string;
       click?: () => void;
@@ -138,6 +229,5 @@ describe('buildNotaAppMenuTemplate', () => {
     expect(onNewFolder).toHaveBeenCalledTimes(1);
     expect(onNewNoteFromClipboard).toHaveBeenCalledTimes(1);
     expect(onStudyNotesFromRecording).toHaveBeenCalledTimes(1);
-    expect(onQuit).not.toHaveBeenCalled();
   });
 });

@@ -4,30 +4,67 @@ export type NotaAppMenuActions = {
   onNewNote: () => void;
   onMoveToFolder: () => void;
   onNewFolder: () => void;
-  onQuit: () => void;
   onNewNoteFromClipboard: () => void;
   onStudyNotesFromRecording: () => void;
 };
 
+export type NotaAppMenuTemplateOptions = {
+  isMac: boolean;
+};
+
+function buildEditSubmenu(isMac: boolean): MenuItemConstructorOptions[] {
+  return [
+    { role: 'undo' },
+    { role: 'redo' },
+    { type: 'separator' },
+    { role: 'cut' },
+    { role: 'copy' },
+    { role: 'paste' },
+    ...(isMac
+      ? [
+          { role: 'pasteAndMatchStyle' as const },
+          { role: 'delete' as const },
+          { role: 'selectAll' as const },
+          { type: 'separator' as const },
+          {
+            label: 'Speech',
+            submenu: [
+              { role: 'startSpeaking' as const },
+              { role: 'stopSpeaking' as const },
+            ],
+          },
+        ]
+      : [
+          { role: 'delete' as const },
+          { type: 'separator' as const },
+          { role: 'selectAll' as const },
+        ]),
+  ] as MenuItemConstructorOptions[];
+}
+
 export function buildNotaAppMenuTemplate(
   actions: NotaAppMenuActions,
+  options: NotaAppMenuTemplateOptions,
 ): MenuItemConstructorOptions[] {
+  const { isMac } = options;
   return [
     {
       label: 'Nota',
       submenu: [
         { role: 'about' },
         { type: 'separator' },
-        { role: 'hide', label: 'Hide Nota' },
-        { role: 'hideOthers', label: 'Hide Others' },
-        { role: 'unhide', label: 'Show All' },
+        { role: 'services' },
         { type: 'separator' },
-        {
-          label: 'Quit Nota',
-          role: 'quit',
-          click: actions.onQuit,
-        },
+        { role: 'hide' },
+        { role: 'hideOthers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' },
       ],
+    },
+    {
+      label: 'Edit',
+      submenu: buildEditSubmenu(isMac),
     },
     {
       label: 'Notes',
