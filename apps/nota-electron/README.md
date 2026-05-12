@@ -63,7 +63,7 @@ If you omit `--version`, the version already in `apps/nota-electron/package.json
 ## GitHub Releases and auto-updates
 
 - **`electron-builder`** is configured with **`publish.provider: github`** (`owner` / `repo` in `electron-builder.yml`). Packaged apps embed **`app-update.yml`** for **`electron-updater`**.
-- **`main.ts`** calls **`checkForUpdatesAndNotify()`** only when **`app.isPackaged`**. Updates use the **ZIP** assets attached to each release (DMG is for first install).
+- **`main.ts`** wires **`registerNotaUpdaterIpc()`** / **`startPackagedNotaUpdater()`** ([`nota-updater.ts`](src/nota-updater.ts)): **`checkForUpdates()`** on launch (no duplicate OS notify), status events to the renderer, **`quitAndInstall(false, true)`** after download. **Settings** ([`electron-update-settings-section.tsx`](../nota/src/components/electron-update-settings-section.tsx)) calls the same check path via preload.
 - **CI**: `.github/workflows/release-electron.yml` runs on **`v*`** tags and on **`workflow_dispatch`** (semver + **release kind**: production vs release candidate / draft). It syncs `apps/nota-electron/package.json` version, then runs **`pnpm exec nx run @nota/nota-electron:electron:release`** (build + **`electron-builder --publish always`** via [`tools/electron-github-release.mjs`](../../tools/electron-github-release.mjs)). Actions sets **`GH_TOKEN`** from **`GITHUB_TOKEN`** to upload assets and `latest-mac.yml`.
 
 ### Required secrets (embedded SPA, CI)

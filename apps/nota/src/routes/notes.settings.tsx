@@ -13,7 +13,9 @@ import {
   useNotaPreferencesStore,
   type CursorVisualStyle,
 } from '../stores/nota-preferences';
+import { ElectronUpdateSettingsSection } from '../components/electron-update-settings-section';
 import { NotaProSettingsSection } from '../components/nota-pro-settings-section';
+import { useIsElectron } from '../lib/use-is-electron';
 import { hashForScreen } from '../lib/app-navigation';
 import { navigatorLooksLikeApplePlatform } from '../lib/navigator-apple-platform';
 import { useNotaTranslator } from '../lib/use-nota-translator';
@@ -51,6 +53,7 @@ export default function NotesSettings(): JSX.Element {
     (s) => s.setCursorVisualStyle,
   );
   const { t } = useNotaTranslator();
+  const isElectron = useIsElectron();
   const cursorStyleOptions = useMemo(
     (): ReadonlyArray<{
       value: CursorVisualStyle;
@@ -334,6 +337,8 @@ export default function NotesSettings(): JSX.Element {
             {t('Turn off to keep text like :-) as plain characters.')}
           </p>
         </section>
+
+        {isElectron ? <ElectronUpdateSettingsSection /> : null}
 
         {notaProEntitled ? (
           <section className="space-y-3">

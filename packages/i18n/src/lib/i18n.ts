@@ -202,6 +202,61 @@ const NOTE_BACKLINKS_FR: LocaleDictionary = {
   'Untitled Note': 'Note sans titre',
 };
 
+const ELECTRON_UPDATE_ES: LocaleDictionary = {
+  'Desktop app updates': 'Actualizaciones de la app de escritorio',
+  'Nota checks GitHub Releases for the latest signed Mac build.':
+    'Nota consulta las versiones publicadas en GitHub para la última compilación firmada para Mac.',
+  'Check for updates': 'Buscar actualizaciones',
+  'Checking for updates…': 'Buscando actualizaciones…',
+  "You're on the latest version.": 'Tienes la última versión.',
+  'Update {version} is available.':
+    'Hay una actualización disponible: {version}.',
+  'Downloading update… {percent}%': 'Descargando actualización… {percent} %',
+  'Update ready. Restart Nota to finish installing.':
+    'Actualización lista. Reinicia Nota para terminar la instalación.',
+  'Restart and update': 'Reiniciar e instalar',
+  'Update check failed: {message}':
+    'Error al buscar actualizaciones: {message}',
+  'Updates are only checked in the packaged Mac app.':
+    'Las actualizaciones solo se buscan en la app empaquetada para Mac.',
+};
+
+const ELECTRON_UPDATE_PT: LocaleDictionary = {
+  'Desktop app updates': 'Atualizações da app para computador',
+  'Nota checks GitHub Releases for the latest signed Mac build.':
+    'O Nota verifica as versões publicadas no GitHub para a última compilação assinada para Mac.',
+  'Check for updates': 'Procurar atualizações',
+  'Checking for updates…': 'A procurar atualizações…',
+  "You're on the latest version.": 'Está na versão mais recente.',
+  'Update {version} is available.': 'Está disponível a atualização {version}.',
+  'Downloading update… {percent}%': 'A transferir atualização… {percent} %',
+  'Update ready. Restart Nota to finish installing.':
+    'Atualização pronta. Reinicie o Nota para concluir a instalação.',
+  'Restart and update': 'Reiniciar e atualizar',
+  'Update check failed: {message}': 'Falha ao procurar atualizações: {message}',
+  'Updates are only checked in the packaged Mac app.':
+    'As atualizações só são verificadas na app empacotada para Mac.',
+};
+
+const ELECTRON_UPDATE_FR: LocaleDictionary = {
+  'Desktop app updates': 'Mises à jour de l’app bureau',
+  'Nota checks GitHub Releases for the latest signed Mac build.':
+    'Nota consulte les versions publiées sur GitHub pour la dernière version signée pour Mac.',
+  'Check for updates': 'Vérifier les mises à jour',
+  'Checking for updates…': 'Vérification des mises à jour…',
+  "You're on the latest version.": 'Vous utilisez la dernière version.',
+  'Update {version} is available.': 'La mise à jour {version} est disponible.',
+  'Downloading update… {percent}%':
+    'Téléchargement de la mise à jour… {percent} %',
+  'Update ready. Restart Nota to finish installing.':
+    'Mise à jour prête. Redémarrez Nota pour terminer l’installation.',
+  'Restart and update': 'Redémarrer et mettre à jour',
+  'Update check failed: {message}':
+    'Échec de la vérification des mises à jour : {message}',
+  'Updates are only checked in the packaged Mac app.':
+    'Les mises à jour ne sont vérifiées que dans l’application Mac empaquetée.',
+};
+
 /**
  * Translation dictionary for each supported locale
  * (en-GB and en-CA use the key as-is).
@@ -217,6 +272,7 @@ const TRANSLATIONS: Record<
     ...FOLDER_CORE_ES,
     ...NOTE_GRAPH_ES,
     ...NOTE_BACKLINKS_ES,
+    ...ELECTRON_UPDATE_ES,
   },
   'pt-BR': {
     ...SHORTCUT_TRANSLATIONS_PT,
@@ -224,6 +280,7 @@ const TRANSLATIONS: Record<
     ...FOLDER_CORE_PT,
     ...NOTE_GRAPH_PT,
     ...NOTE_BACKLINKS_PT,
+    ...ELECTRON_UPDATE_PT,
   },
   'fr-CA': {
     ...SHORTCUT_TRANSLATIONS_FR,
@@ -231,6 +288,7 @@ const TRANSLATIONS: Record<
     ...FOLDER_CORE_FR,
     ...NOTE_GRAPH_FR,
     ...NOTE_BACKLINKS_FR,
+    ...ELECTRON_UPDATE_FR,
   },
 };
 

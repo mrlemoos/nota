@@ -22,13 +22,19 @@ import {
   resolveMainWindowLoadUrl,
   ssoCallbackBaseUrl,
 } from './app-load-url.js';
+import {
+  registerNotaUpdaterIpc,
+  startPackagedNotaUpdater,
+} from './nota-updater.js';
+
+registerNotaUpdaterIpc();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const isDev = !app.isPackaged;
 const isDarwin = process.platform === 'darwin';
 
-/** IPC channel; keep in sync with `apps/nota-electron/src/preload.ts`. */
+/** IPC channel; keep in sync with `apps/nota-electron/src/preload.cts`. */
 const NOTA_MENUBAR_ACTION_CHANNEL = 'nota-menubar-action';
 
 /** Same cap as `IMAGE_MAX_BYTES` in nota (`pdf-attachment-client`). */
@@ -410,22 +416,6 @@ async function startServer(): Promise<void> {
   });
 }
 
-async function registerAutoUpdater(): Promise<void> {
-  if (!app.isPackaged) {
-    return;
-  }
-  const electronUpdater = (await import('electron-updater')).default;
-  const { autoUpdater } = electronUpdater;
-  autoUpdater.autoDownload = true;
-  autoUpdater.on('error', (error) => {
-    console.error('[nota-electron] auto-updater error', error);
-  });
-  autoUpdater.on('update-downloaded', () => {
-    console.log('[nota-electron] update downloaded; restart to apply');
-  });
-  void autoUpdater.checkForUpdatesAndNotify();
-}
-
 // Single instance lock
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -474,7 +464,7 @@ if (!gotTheLock) {
       createWindow();
       installApplicationMenu();
       createTray();
-      await registerAutoUpdater();
+      await startPackagedNotaUpdater();
     } catch (error) {
       console.error('Failed to start app:', error);
       app.quit();
