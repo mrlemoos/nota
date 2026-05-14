@@ -27,6 +27,9 @@ import {
   startPackagedNotaUpdater,
 } from './nota-updater.js';
 
+/** Human-readable name for menus, notifications, and `electron-updater` `{appName}` (not `package.json` `name`). */
+app.setName('Nota');
+
 registerNotaUpdaterIpc();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
