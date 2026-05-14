@@ -1,4 +1,4 @@
-import { parseNoteLinkPath } from '@nota/editor';
+import { parseNoteLinkPath } from '@nota/internal-note-link';
 import type { Note } from '@nota/database-types';
 
 /** Avoid re-walking unchanged TipTap JSON when only one note’s body changes (e.g. after autosave). */

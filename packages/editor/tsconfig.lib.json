@@ -29,6 +29,9 @@
       "path": "../database-types/tsconfig.lib.json"
     },
     {
+      "path": "../internal-note-link/tsconfig.lib.json"
+    },
+    {
       "path": "../web-design/tsconfig.lib.json"
     }
   ]

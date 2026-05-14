@@ -5,8 +5,8 @@ import {
   transactionComplete,
 } from './db.js';
 import { enqueueOutbox, removeOutboxEntry } from './outbox.js';
-import type { StoredNote } from './types.js';
-import { DEFAULT_NOTE_CONTENT } from './types.js';
+import type { StoredNote } from '@nota/notes-offline-core';
+import { DEFAULT_NOTE_CONTENT } from '@nota/notes-offline-core';
 import type { Json, Note } from '@nota/database-types';
 
 function toStoredFromServer(note: Note): StoredNote {

@@ -3,8 +3,8 @@ export type {
   OutboxEntry,
   OutboxKind,
   StoredNote,
-} from './lib/types.js';
-export { DEFAULT_NOTE_CONTENT } from './lib/types.js';
+} from '@nota/notes-offline-core';
+export { DEFAULT_NOTE_CONTENT } from '@nota/notes-offline-core';
 export {
   closeNotaNotesDb,
   deleteNotaNotesDb,
@@ -33,4 +33,4 @@ export {
   mergeNoteLists,
   mergeNoteWithLocal,
   storedNoteToListRow,
-} from './lib/merge-note-with-local.js';
+} from '@nota/notes-offline-core';

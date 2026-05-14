@@ -1,4 +1,4 @@
-import { buildNoteLinkGraph, notesToIdMap } from '@nota/note-graph';
+import { buildNoteLinkGraph, notesToIdMap } from '@nota/note-link-graph';
 import { useDeferredValue, useMemo, type JSX } from 'react';
 import { cn } from '@/lib/utils';
 import { useNotaTranslator } from '@/lib/use-nota-translator';

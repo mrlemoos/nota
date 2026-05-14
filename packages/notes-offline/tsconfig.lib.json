@@ -16,6 +16,9 @@
   "references": [
     {
       "path": "../database-types/tsconfig.lib.json"
+    },
+    {
+      "path": "../notes-offline-core/tsconfig.lib.json"
     }
   ],
   "exclude": [

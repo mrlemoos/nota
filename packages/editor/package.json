@@ -19,7 +19,8 @@
   "nx": {
     "tags": [
       "scope:nota",
-      "type:feature"
+      "type:feature",
+      "platform:web"
     ],
     "targets": {
       "build": {
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "@nota/database-types": "workspace:*",
+    "@nota/internal-note-link": "workspace:*",
     "@nota/web-design": "workspace:*",
     "@tiptap/extension-code-block": "^2.11.5",
     "@tiptap/extension-code-block-lowlight": "2.11.5",

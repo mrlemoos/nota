@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sortOutboxForProcessing } from './outbox.js';
+import { sortOutboxForProcessing } from './sort-outbox-for-processing.js';
 import type { OutboxEntry } from './types.js';
 
 describe('sortOutboxForProcessing', () => {

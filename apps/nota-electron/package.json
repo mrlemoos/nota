@@ -90,6 +90,10 @@
         }
       }
     },
-    "tags": []
+    "tags": [
+      "scope:nota",
+      "type:app",
+      "platform:node"
+    ]
   }
 }

@@ -56,10 +56,19 @@
       "path": "../../packages/notes-offline/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/note-graph/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/nota-server-client/tsconfig.lib.json"
     },
     {
       "path": "../../packages/i18n/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/note-link-graph/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/internal-note-link/tsconfig.lib.json"
     },
     {
       "path": "../../packages/helper-hooks/tsconfig.lib.json"
@@ -72,9 +81,6 @@
     },
     {
       "path": "../../packages/clerk-oauth-protocol/tsconfig.lib.json"
-    },
-    {
-      "path": "../../packages/note-graph/tsconfig.lib.json"
     }
   ]
 }

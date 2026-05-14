@@ -43,6 +43,9 @@
       "path": "../i18n/tsconfig.lib.json"
     },
     {
+      "path": "../note-link-graph/tsconfig.lib.json"
+    },
+    {
       "path": "../web-design/tsconfig.lib.json"
     }
   ]

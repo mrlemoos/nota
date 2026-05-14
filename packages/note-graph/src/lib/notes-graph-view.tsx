@@ -27,8 +27,7 @@ import { filterNotesForNoteGraph, persistedDisplayTitle } from '@nota/editor';
 import type { PlaceholderValues } from '@nota/i18n';
 import { cn } from '@nota/web-design/utils';
 import { applyNoteGraphHoverToEdges } from './note-graph-hover-edges';
-import { buildNoteLinkGraph } from './note-link-graph';
-import { notesToIdMap } from './notes-id-map';
+import { buildNoteLinkGraph, notesToIdMap } from '@nota/note-link-graph';
 
 export type NotesGraphViewProps = {
   notes: readonly Note[];

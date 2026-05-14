@@ -1,9 +1,9 @@
-export { applyNoteGraphHoverToEdges } from './lib/note-graph-hover-edges';
 export {
   buildNoteLinkGraph,
   extractOutgoingNoteIdsFromContent,
-} from './lib/note-link-graph';
-export { notesToIdMap } from './lib/notes-id-map';
+} from '@nota/note-link-graph';
+export { notesToIdMap } from '@nota/note-link-graph';
+export { applyNoteGraphHoverToEdges } from './lib/note-graph-hover-edges';
 export type { NotesGraphScreenProps } from './lib/notes-graph-screen';
 export { NotesGraphScreen } from './lib/notes-graph-screen';
 export type { NotesGraphViewProps } from './lib/notes-graph-view';

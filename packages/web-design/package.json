@@ -81,7 +81,8 @@
   "nx": {
     "tags": [
       "scope:nota",
-      "type:ui"
+      "type:ui",
+      "platform:web"
     ],
     "targets": {
       "build": {

@@ -4,7 +4,10 @@ import {
   OUTBOX_OBJECT_STORE,
   transactionComplete,
 } from './db.js';
-import type { OutboxEntry, OutboxKind } from './types.js';
+import type { OutboxEntry, OutboxKind } from '@nota/notes-offline-core';
+import { sortOutboxForProcessing } from '@nota/notes-offline-core';
+
+export { sortOutboxForProcessing };
 
 export async function enqueueOutbox(
   userId: string,
@@ -36,15 +39,4 @@ export async function listOutbox(userId: string): Promise<OutboxEntry[]> {
   const rows = await idbRequest(req);
   await transactionComplete(tx);
   return rows as OutboxEntry[];
-}
-
-/** Process deletes after upserts for the same note id to avoid invalid API order. */
-export function sortOutboxForProcessing(entries: OutboxEntry[]): OutboxEntry[] {
-  return [...entries].sort((a, b) => {
-    if (a.noteId !== b.noteId) {
-      return a.noteId.localeCompare(b.noteId);
-    }
-    if (a.kind === b.kind) return 0;
-    return a.kind === 'upsert' ? -1 : 1;
-  });
 }

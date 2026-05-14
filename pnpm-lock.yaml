@@ -327,12 +327,18 @@ importers:
       '@nota/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@nota/internal-note-link':
+        specifier: workspace:*
+        version: link:../../packages/internal-note-link
       '@nota/nota-server-client':
         specifier: workspace:*
         version: link:../../packages/nota-server-client
       '@nota/note-graph':
         specifier: workspace:*
         version: link:../../packages/note-graph
+      '@nota/note-link-graph':
+        specifier: workspace:*
+        version: link:../../packages/note-link-graph
       '@nota/notes-offline':
         specifier: workspace:*
         version: link:../../packages/notes-offline
@@ -556,6 +562,9 @@ importers:
       '@nota/database-types':
         specifier: workspace:*
         version: link:../database-types
+      '@nota/internal-note-link':
+        specifier: workspace:*
+        version: link:../internal-note-link
       '@nota/web-design':
         specifier: workspace:*
         version: link:../web-design
@@ -680,6 +689,18 @@ importers:
 
   packages/i18n: {}
 
+  packages/internal-note-link:
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vite:
+        specifier: 'catalog:'
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
+
   packages/nota-server-client:
     devDependencies:
       typescript:
@@ -700,6 +721,9 @@ importers:
       '@nota/i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@nota/note-link-graph':
+        specifier: workspace:*
+        version: link:../note-link-graph
       '@nota/web-design':
         specifier: workspace:*
         version: link:../web-design
@@ -738,7 +762,39 @@ importers:
         specifier: 'catalog:'
         version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
 
+  packages/note-link-graph:
+    dependencies:
+      '@nota/database-types':
+        specifier: workspace:*
+        version: link:../database-types
+      '@nota/internal-note-link':
+        specifier: workspace:*
+        version: link:../internal-note-link
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vite:
+        specifier: 'catalog:'
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
+
   packages/notes-offline:
+    dependencies:
+      '@nota/database-types':
+        specifier: workspace:*
+        version: link:../database-types
+      '@nota/notes-offline-core':
+        specifier: workspace:*
+        version: link:../notes-offline-core
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/notes-offline-core:
     dependencies:
       '@nota/database-types':
         specifier: workspace:*
@@ -747,6 +803,12 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      vite:
+        specifier: 'catalog:'
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
 
   packages/validation:
     dependencies:

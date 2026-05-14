@@ -13,6 +13,8 @@
     "@nota/database-types": "workspace:*",
     "@nota/editor": "workspace:*",
     "@nota/helper-hooks": "workspace:*",
+    "@nota/internal-note-link": "workspace:*",
+    "@nota/note-link-graph": "workspace:*",
     "@nota/i18n": "workspace:*",
     "@nota/nota-server-client": "workspace:*",
     "@nota/note-graph": "workspace:*",
@@ -56,5 +58,12 @@
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "vitest": "catalog:"
+  },
+  "nx": {
+    "tags": [
+      "scope:nota",
+      "type:app",
+      "platform:web"
+    ]
   }
 }

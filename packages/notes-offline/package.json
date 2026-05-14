@@ -21,7 +21,8 @@
   "nx": {
     "tags": [
       "scope:nota",
-      "type:feature"
+      "type:feature",
+      "platform:web"
     ],
     "targets": {
       "build": {
@@ -34,7 +35,8 @@
     }
   },
   "dependencies": {
-    "@nota/database-types": "workspace:*"
+    "@nota/database-types": "workspace:*",
+    "@nota/notes-offline-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "catalog:"

@@ -39,7 +39,7 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
       clear: () => {
         storage.clear();
       },
-      getItem: (key: string) => (storage.has(key) ? storage.get(key)! : null),
+      getItem: (key: string) => storage.get(key) ?? null,
       key: (index: number) => [...storage.keys()][index] ?? null,
       get length() {
         return storage.size;
@@ -50,7 +50,7 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
       setItem: (key: string, value: string) => {
         storage.set(key, value);
       },
-    } as Storage);
+    } satisfies Storage);
 
     changeListeners = [];
     mqlState.matches = false;

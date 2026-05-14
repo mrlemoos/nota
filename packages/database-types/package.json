@@ -21,7 +21,8 @@
   "nx": {
     "tags": [
       "scope:nota",
-      "type:types"
+      "type:types",
+      "platform:shared"
     ],
     "targets": {
       "build": {
