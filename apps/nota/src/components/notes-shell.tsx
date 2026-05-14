@@ -17,6 +17,7 @@ import { NotaButton } from '@nota/web-design/button';
 import { NotaTooltipProvider } from '@nota/web-design/tooltip';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import { ELECTRON_WINDOW_NO_DRAG_CLASS } from '@/lib/electron-window-chrome';
+import { notesMainChrome, notesSidebarChrome } from '@/lib/notes-shell-chrome';
 import { cn } from '@/lib/utils';
 import { useStickyDocTitle } from '../context/sticky-doc-title';
 import { useIsElectron } from '../lib/use-is-electron';
@@ -217,9 +218,6 @@ export function NotesShell(): JSX.Element {
     { dependencies: [open, prefersReducedMotion] },
   );
 
-  const notesChrome =
-    'bg-background/55 backdrop-blur-xl backdrop-saturate-150 text-foreground';
-
   const onCreateNote = (): void => {
     if (!user?.id) {
       return;
@@ -302,7 +300,7 @@ export function NotesShell(): JSX.Element {
                 'flex h-full min-h-0 min-w-0 shrink-0 flex-col overflow-hidden',
                 // Match NOTA_SIDEBAR_WIDTH_PX so first paint is capped before GSAP applies inline maxWidth.
                 open ? 'max-w-[288px]' : 'max-w-0',
-                notesChrome,
+                notesSidebarChrome,
                 !open && 'pointer-events-none',
               )}
               aria-hidden={!open}
@@ -441,7 +439,7 @@ export function NotesShell(): JSX.Element {
             className={cn(
               'min-h-0 flex-1 overflow-auto',
               '[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
-              notesChrome,
+              notesMainChrome,
               paywalled
                 ? isElectron
                   ? 'pt-[max(1rem,env(safe-area-inset-top))]'

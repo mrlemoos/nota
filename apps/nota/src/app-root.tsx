@@ -12,6 +12,7 @@ import { NotFoundScreen } from './components/not-found-screen';
 import { replaceAppHash, syncAppNavigation } from './lib/app-navigation';
 import { repairClerkAuthLocationHash } from './lib/clerk-hash-navigation';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
+import { useIsElectron } from './lib/use-is-electron';
 import { cn } from './lib/utils';
 
 interface AppShellProps {
@@ -68,6 +69,7 @@ export function NotaApp(): JSX.Element {
   const { user, loading } = useAppSession();
   const screen = useAppNavigationScreen();
   const kind = screen.kind;
+  const isElectron = useIsElectron();
 
   useLayoutEffect(() => {
     redirectAuthShell(user, loading, kind);
@@ -91,6 +93,10 @@ export function NotaApp(): JSX.Element {
     signupActive ||
     notesActive;
 
+  /** Opaque root blocks Electron `vibrancy` + CSS glass; keep transparent only on the notes shell. */
+  const appRootBackground =
+    isElectron && notesActive ? 'bg-transparent' : 'bg-background';
+
   useEffect(() => {
     if (loading || anyShellActive) {
       return;
@@ -108,7 +114,12 @@ export function NotaApp(): JSX.Element {
   }
 
   return (
-    <div className="relative flex h-dvh min-h-0 flex-col bg-background text-foreground">
+    <div
+      className={cn(
+        'relative flex h-dvh min-h-0 flex-col text-foreground',
+        appRootBackground,
+      )}
+    >
       <ElectronWindowDragBand />
       {!anyShellActive ? (
         <div

@@ -978,9 +978,28 @@ html.nota-electron #root {
   height: 100%;
   min-height: 0;
   overflow: hidden;
+  background-color: transparent;
 }
 
 html.nota-electron .nota-notes-root {
   background-color: transparent;
   background-image: none;
+}
+
+/*
+ * Notes shell: users who disable transparency (macOS / Windows) should get solid surfaces
+ * instead of backdrop blur. Unlayered so these override Tailwind backdrop utilities.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  .nota-notes-sidebar-chrome {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: color-mix(in oklch, var(--sidebar) 94%, transparent);
+  }
+
+  .nota-notes-main-chrome {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: color-mix(in oklch, var(--background) 97%, transparent);
+  }
 }
