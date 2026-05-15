@@ -51,6 +51,14 @@ export function convertLinkOnlyParagraphs(editor: Editor): void {
     if (parseNoteLinkPath(href)) return true;
 
     const linkText = text.slice(lead, text.length - trail);
+    if (linkText.trim() !== href.trim()) return true;
+
+    const $inside = state.doc.resolve(pos + 1);
+    for (let d = $inside.depth; d > 0; d--) {
+      const ancestorName = $inside.node(d).type.name;
+      if (ancestorName === 'listItem' || ancestorName === 'taskItem')
+        return true;
+    }
 
     toReplace.push({
       from: pos,
