@@ -1,0 +1,43 @@
+---
+import { blogPostUrl, formatBlogDate } from '@/lib/blog';
+import type { BlogPost } from '@/lib/blog';
+
+interface Props {
+  post: BlogPost;
+}
+
+const { post } = Astro.props;
+const href = blogPostUrl(post.id);
+---
+
+<article class="group border-b border-border/60 py-8 first:pt-0">
+  <time
+    datetime={post.data.pubDate.toISOString()}
+    class="text-xs font-medium uppercase tracking-wide text-muted-foreground"
+  >
+    {formatBlogDate(post.data.pubDate)}
+  </time>
+  <h2 class="mt-2 font-serif text-2xl font-normal text-foreground">
+    <a href={href} class="mkt-focus transition group-hover:text-foreground/80">
+      {post.data.title}
+    </a>
+  </h2>
+  <p class="mt-2 max-w-2xl text-muted-foreground">{post.data.description}</p>
+  {
+    post.data.tags.length > 0 && (
+      <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tags">
+        {post.data.tags.map((tag) => (
+          <li>
+            <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{tag}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  <a
+    href={href}
+    class="mkt-focus mt-4 inline-block text-sm font-medium text-foreground underline decoration-border underline-offset-4 transition hover:decoration-foreground"
+  >
+    Read post
+  </a>
+</article>

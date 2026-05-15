@@ -1,0 +1,124 @@
+---
+import SiteHeader from '@/components/SiteHeader.astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import {
+  blogPostUrl,
+  formatBlogDate,
+  isBlogPostPublished,
+} from '@/lib/blog';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = (await getCollection('blog')).filter(isBlogPostPublished);
+  return posts.map((post) => ({
+    params: { id: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+
+const site = Astro.site;
+if (!site) {
+  throw new Error('Marketing site requires `site` in astro.config.');
+}
+const siteRoot = new URL('/', site).href;
+const blogUrl = new URL('/blog', site).href;
+const postUrl = new URL(blogPostUrl(post.id), site).href;
+
+const displayDate = post.data.updatedDate ?? post.data.pubDate;
+const pageTitle = `${post.data.title} — Nota`;
+const pageDescription = post.data.description;
+
+const { Content } = await render(post);
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: siteRoot },
+        { '@type': 'ListItem', position: 2, name: 'Blog', item: blogUrl },
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: post.data.title,
+          item: postUrl,
+        },
+      ],
+    },
+    {
+      '@type': 'BlogPosting',
+      headline: post.data.title,
+      description: post.data.description,
+      datePublished: post.data.pubDate.toISOString(),
+      dateModified: displayDate.toISOString(),
+      author: { '@type': 'Organization', name: post.data.author },
+      publisher: { '@type': 'Organization', name: 'Nota', url: siteRoot },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
+      url: postUrl,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonicalPath={blogPostUrl(post.id)}
+  ogType="article"
+>
+  <script type="application/ld+json" slot="head-extras" is:inline set:html={JSON.stringify(structuredData)} />
+  <main id="main-content">
+    <SiteHeader />
+    <article class="mx-auto max-w-3xl px-6 py-16 md:px-10 md:py-24">
+      <header class="mb-10 border-b border-border/60 pb-10">
+        <p class="text-sm text-muted-foreground">
+          <a href="/blog" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">
+            Blog
+          </a>
+        </p>
+        <h1 class="mt-4 font-serif text-4xl font-normal text-foreground md:text-5xl">{post.data.title}</h1>
+        <p class="mt-4 max-w-2xl text-lg text-muted-foreground">{post.data.description}</p>
+        <p class="mt-6 text-sm text-muted-foreground">
+          <time datetime={displayDate.toISOString()}>{formatBlogDate(displayDate)}</time>
+          {
+            post.data.updatedDate && (
+              <>
+                {' '}
+                · Updated{' '}
+                <time datetime={post.data.updatedDate.toISOString()}>
+                  {formatBlogDate(post.data.updatedDate)}
+                </time>
+              </>
+            )
+          }
+          {' '}
+          · {post.data.author}
+        </p>
+        {
+          post.data.tags.length > 0 && (
+            <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tags">
+              {post.data.tags.map((tag) => (
+                <li>
+                  <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{tag}</span>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+      </header>
+
+      <div class="mkt-prose">
+        <Content />
+      </div>
+
+      <footer class="mt-14 border-t border-border/60 pt-10 text-center text-sm text-muted-foreground">
+        <a href="/blog" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">
+          ← All posts
+        </a>
+      </footer>
+    </article>
+  </main>
+</BaseLayout>

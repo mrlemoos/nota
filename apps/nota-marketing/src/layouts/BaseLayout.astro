@@ -14,6 +14,8 @@ interface Props {
   canonicalPath?: string;
   /** Browser chrome colour; defaults to light page background. */
   themeColor?: string;
+  /** Open Graph type; use `article` for blog posts. */
+  ogType?: 'website' | 'article';
 }
 
 const OG_IMAGE_WIDTH = 1200;
@@ -28,6 +30,7 @@ const {
   ogDescription,
   canonicalPath,
   themeColor = MKT_THEME_COLOR_PAGE,
+  ogType = 'website',
 } = Astro.props;
 
 const site = Astro.site;
@@ -52,7 +55,7 @@ const socialDescription = ogDescription ?? description;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content="Nota" />
     <meta property="og:title" content={socialTitle} />
     <meta property="og:description" content={socialDescription} />

@@ -6,5 +6,10 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.astro", "astro.config.mjs"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.astro",
+    "src/content.config.ts",
+    "astro.config.mjs"
+  ]
 }

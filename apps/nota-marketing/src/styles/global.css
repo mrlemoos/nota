@@ -150,6 +150,59 @@
   }
 }
 
+/* Markdown body for blog posts (content collections) */
+.mkt-prose {
+  @apply font-note-body text-base leading-relaxed text-foreground/90;
+}
+
+.mkt-prose :where(h2, h3) {
+  @apply mt-10 mb-4 font-serif font-normal text-foreground;
+}
+
+.mkt-prose h2 {
+  @apply text-2xl;
+}
+
+.mkt-prose h3 {
+  @apply text-xl;
+}
+
+.mkt-prose :where(p, ul, ol, blockquote) {
+  @apply mb-4;
+}
+
+.mkt-prose ul {
+  @apply list-disc pl-6;
+}
+
+.mkt-prose ol {
+  @apply list-decimal pl-6;
+}
+
+.mkt-prose a {
+  @apply text-foreground underline decoration-border underline-offset-4 transition hover:decoration-foreground;
+}
+
+.mkt-prose blockquote {
+  @apply border-l-2 border-border pl-4 text-muted-foreground italic;
+}
+
+.mkt-prose :where(code):not(:where(pre *)) {
+  @apply rounded-sm bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground;
+}
+
+.mkt-prose pre {
+  @apply mb-4 overflow-x-auto rounded-md bg-muted p-4 text-sm;
+}
+
+.mkt-prose pre code {
+  @apply bg-transparent p-0;
+}
+
+.mkt-prose img {
+  @apply my-6 rounded-md;
+}
+
 @layer base {
   html {
     @apply scroll-smooth font-sans antialiased;
