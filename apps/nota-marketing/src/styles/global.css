@@ -102,7 +102,7 @@
   z-index: 1;
 }
 
-@keyframes mkt-hero-in {
+@keyframes mkt-hero-fade-in {
   from {
     opacity: 0;
     transform: translateY(0.75rem);
@@ -113,39 +113,35 @@
   }
 }
 
-.mkt-hero-animate {
-  animation: mkt-hero-in 0.75s ease-out both;
+.mkt-hero-fade {
+  animation: mkt-hero-fade-in 0.75s ease-out both;
 }
 
-.mkt-hero-animate-delay-1 {
-  animation-delay: 0.08s;
+.mkt-hero-fade-delay-1 {
+  animation-delay: 0.1s;
 }
 
-.mkt-hero-animate-delay-2 {
-  animation-delay: 0.16s;
+.mkt-hero-fade-delay-2 {
+  animation-delay: 0.2s;
 }
 
-.mkt-hero-animate-delay-3 {
-  animation-delay: 0.24s;
+.mkt-hero-fade-delay-3 {
+  animation-delay: 0.35s;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mkt-hero-animate,
-  .mkt-hero-animate-delay-1,
-  .mkt-hero-animate-delay-2,
-  .mkt-hero-animate-delay-3 {
+  .mkt-hero-fade,
+  .mkt-hero-fade-delay-1,
+  .mkt-hero-fade-delay-2,
+  .mkt-hero-fade-delay-3 {
     animation: none;
     opacity: 1;
     transform: none;
   }
+}
 
-  [data-nota-hero-video] {
-    display: none !important;
-  }
-
-  [data-nota-hero-fallback] {
-    display: block !important;
-  }
+.mkt-hero-screenshot-frame {
+  transform: translateZ(0);
 }
 
 @layer utilities {

@@ -1,5 +1,5 @@
 /**
- * Post-build guard: homepage must ship an accessible autoplay hero video.
+ * Post-build guard: homepage must ship the desktop hero screenshot with priority hints.
  * Run from `apps/nota-marketing` after `astro build`.
  */
 import { readFileSync } from 'node:fs';
@@ -20,13 +20,13 @@ try {
 }
 
 const checks = [
-  ['<video', 'video element'],
-  ['data-nota-hero-video', 'hero video hook'],
-  ['autoplay', 'autoplay'],
-  ['muted', 'muted'],
-  ['playsinline', 'playsinline'],
-  ['/video/nota-hero.mp4', 'mp4 source'],
-  ['aria-label=', 'video aria-label'],
+  ['/desktop-app-screenshot.png', 'hero screenshot asset'],
+  ['data-nota-hero-screenshot', 'hero screenshot hook'],
+  ['fetchpriority="high"', 'hero image fetch priority'],
+  ['alt=', 'hero image alt text'],
+  ['mkt-hero-fade mkt-hero-fade-delay-3', 'hero screenshot fade-in'],
+  ['mkt-hero-fade mkt-hero-fade-delay-1', 'hero download fade-in'],
+  ['mkt-hero-fade mkt-hero-fade-delay-2', 'hero pricing link fade-in'],
 ];
 
 for (const [needle, label] of checks) {

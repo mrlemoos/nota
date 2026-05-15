@@ -1,30 +1,25 @@
 ---
-import { Image } from 'astro:assets';
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import HeroLandscape from '@/components/HeroLandscape.astro';
-import HeroWithVideo from '@/components/HeroWithVideo.astro';
+import DownloadMacButton from '@/components/DownloadMacButton.astro';
 import SiteHeader from '@/components/SiteHeader.astro';
+import { MKT_THEME_COLOR_HERO } from '@/lib/marketing-theme';
 import { NOTA_GITHUB_LATEST, NOTA_GITHUB_RELEASES, NOTA_GITHUB_REPO } from '@/lib/site';
-import signInShot from '@/assets/marketing/sign-in.png';
-import editorOverview from '@/assets/marketing/editor-overview.png';
-import editorCode from '@/assets/marketing/editor-code.png';
-import noteGraph from '@/assets/marketing/note-graph.png';
 
 const site = Astro.site;
 if (!site) {
   throw new Error('Marketing site requires `site` in astro.config.');
 }
 const siteRoot = new URL('/', site).href;
-const screenshotUrl = new URL('/og/home.png', site).href;
+const heroScreenshot = '/desktop-app-screenshot.png';
 const downloadUrl = NOTA_GITHUB_LATEST;
 
 /** Guide amounts; keep in sync with `pricing.astro` and Clerk Billing (USD). */
 const priceMonthlyUsd = '2.49';
 const priceAnnualUsd = '19.49';
 
-const homeTitle = 'Nota — Calm Mac Notes, Subscription Included';
+const homeTitle = 'Nota — Quiet Mac Notes';
 const homeDescription =
-  'Nota is a native Mac app for focused writing and linked notes. Subscribe after sign-in for cloud sync and backup—no separate web checkout, no hollowed-out free tier.';
+  'A native Mac notes app that protects your attention. No feeds, no nudges—just a calm place to write and link ideas. Subscribe in-app after install.';
 
 const faqEntities = [
   {
@@ -45,15 +40,6 @@ const faqEntities = [
         'Full access to writing, the note graph, attachments, and cloud sync with secure backup across devices where you use Nota while signed in.',
     },
   },
-  {
-    '@type': 'Question',
-    name: 'Where do I subscribe?',
-    acceptedAnswer: {
-      '@type': 'Answer',
-      text:
-        'Install Nota from GitHub Releases, sign in, and complete checkout from Settings inside the app. There is no separate purchase page on this marketing site.',
-    },
-  },
 ];
 
 const structuredData = {
@@ -71,7 +57,7 @@ const structuredData = {
       '@id': `${siteRoot}#website`,
       url: siteRoot,
       name: 'Nota',
-      description: 'Paid Mac note-taking app with cloud sync — subscribe in-app after install.',
+      description: homeDescription,
       publisher: { '@id': `${siteRoot}#organization` },
     },
     {
@@ -80,11 +66,10 @@ const structuredData = {
       name: 'Nota',
       operatingSystem: 'macOS',
       applicationCategory: 'ProductivityApplication',
-      description:
-        'Paid Mac app for writing and linking notes. Subscribe in-app for sync and backup.',
+      description: homeDescription,
       url: siteRoot,
       downloadUrl,
-      screenshot: screenshotUrl,
+      screenshot: new URL(heroScreenshot, site).href,
       author: {
         '@type': 'Person',
         name: 'Leo Lemos',
@@ -121,234 +106,152 @@ const structuredData = {
     },
   ],
 };
+
+const heroScreenshotAlt =
+  'Nota on macOS over a soft cityscape: dark glass sidebar, serif note title, and a calm writing surface without feeds or nudges';
 ---
 
-<BaseLayout title={homeTitle} description={homeDescription} image="/og/home.png">
+<BaseLayout
+  title={homeTitle}
+  description={homeDescription}
+  image="/og/home.png"
+  themeColor={MKT_THEME_COLOR_HERO}
+>
   <script type="application/ld+json" slot="head-extras" is:inline set:html={JSON.stringify(structuredData)} />
   <main id="main-content">
     <div class="mkt-dark mkt-hero-shell overflow-hidden">
-      <HeroLandscape />
-      <SiteHeader />
-      <HeroWithVideo>
-        <div class="mkt-hero-animate flex flex-col items-center gap-8 text-center lg:items-start lg:text-left">
-          <div class="max-w-xl space-y-5">
-            <h1
-              class="font-serif text-4xl font-normal leading-tight text-balance text-foreground md:text-5xl lg:text-[2.75rem] lg:leading-[1.12]"
-            >
-              Think without the feed.
-            </h1>
-            <p class="font-serif text-2xl font-normal leading-snug text-muted-foreground md:text-3xl">
-              Stillness is a practice.
-            </p>
-            <p class="text-base leading-relaxed text-muted-foreground md:text-lg">
-              A native Mac notes app for writing and linking ideas—calm, minimal, offline-first when you need it.
-            </p>
-          </div>
-          <div class="flex w-full max-w-xl flex-col items-center gap-4 sm:max-w-none lg:items-start" id="download">
-            <div
-              class="mkt-hero-animate mkt-hero-animate-delay-1 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4 sm:gap-y-2"
-            >
-              <a
-                href={NOTA_GITHUB_LATEST}
-                class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-sm transition hover:opacity-90"
-              >
-                Download for macOS
-              </a>
-              <a
-                href={NOTA_GITHUB_RELEASES}
-                class="mkt-focus text-sm font-medium text-muted-foreground underline decoration-muted-foreground/50 underline-offset-4 transition hover:text-foreground"
-              >
-                All releases
-              </a>
-              <a
-                href={NOTA_GITHUB_REPO}
-                class="mkt-focus text-sm font-medium text-muted-foreground underline decoration-muted-foreground/50 underline-offset-4 transition hover:text-foreground"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Open-source repo
-              </a>
-            </div>
-            <p class="mkt-hero-animate mkt-hero-animate-delay-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-              <a href="/pricing" class="mkt-focus font-medium text-foreground underline decoration-border underline-offset-4">
-                Pricing
-              </a>
-              <span class="text-muted-foreground">
-                {' '}— subscribe from Settings inside the app after you install (no web checkout here).
-              </span>
-            </p>
-          </div>
-        </div>
-      </HeroWithVideo>
-    </div>
+      <SiteHeader borderless />
 
-    <section id="writing" class="border-t border-border bg-background px-6 py-16 md:px-10 md:py-20">
-      <div class="mx-auto max-w-6xl">
-        <h2 class="mb-3 font-serif text-3xl font-normal text-foreground md:text-4xl">The product</h2>
-        <p class="mb-12 max-w-2xl text-muted-foreground md:mb-14">
-          Rich text, code blocks, tables, internal links, backlinks, and a note graph—held in a calm, minimal
-          surface that stays out of your way.
-        </p>
-        <div class="grid gap-10 md:grid-cols-2 md:gap-12">
-          <figure class="space-y-3">
-            <Image
-              src={signInShot}
-              alt="Nota sign-in screen with a dark, minimal aesthetic"
-              loading="lazy"
-              decoding="async"
-              class="w-full rounded-[var(--radius)] border border-border shadow-sm"
-            />
-            <figcaption class="text-sm text-muted-foreground">A restrained, focused shell—no clutter around your words.</figcaption>
-          </figure>
-          <figure class="space-y-3">
-            <Image
-              src={editorOverview}
-              alt="Nota notes list and editor with welcome content"
-              loading="lazy"
-              decoding="async"
-              class="w-full rounded-[var(--radius)] border border-border shadow-sm"
-            />
-            <figcaption class="text-sm text-muted-foreground">Sidebar, document, and typography aligned for long sessions.</figcaption>
-          </figure>
-          <figure class="space-y-3">
-            <Image
-              src={editorCode}
-              alt="Nota editor showing a code block with syntax highlighting"
-              loading="lazy"
-              decoding="async"
-              class="w-full rounded-[var(--radius)] border border-border shadow-sm"
-            />
-            <figcaption class="text-sm text-muted-foreground">Code fences, diagrams, and structured content when you need them.</figcaption>
-          </figure>
-          <figure class="space-y-3 md:col-span-2">
-            <Image
-              src={noteGraph}
-              alt="Nota Note Graph on macOS: a dark canvas of linked note nodes—Welcome, Journal, dated entries—with curved connections, zoom controls, and a minimap; the window sits over a soft classical landscape painting"
-              loading="lazy"
-              decoding="async"
-              class="mx-auto w-full max-w-5xl rounded-[var(--radius)] border border-border shadow-sm"
-            />
-            <figcaption class="mx-auto max-w-3xl text-center text-sm leading-relaxed text-muted-foreground">
-              <span class="font-medium text-foreground">Note graph</span> — step back and see how your notes touch
-              each other. Pan and zoom through your own geography of ideas; click a node to open it. No scores, no
-              streaks—just a quiet map of what you have already written.
-            </figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <section class="border-t border-border bg-sidebar px-6 py-16 md:px-10 md:py-20">
-      <div class="mx-auto max-w-2xl text-center">
-        <h2 class="mb-8 font-sans text-2xl font-normal text-foreground md:text-3xl">Philosophy</h2>
-        <blockquote
-          class="font-sans text-left text-lg leading-relaxed text-foreground md:text-xl [&_strong]:font-semibold"
-        >
-          <p>
-            You know the feeling: you open something to think, and the software starts performing (offering,
-            suggesting, nudging) until the room for your own pace shrinks. Useful automation has its place
-            elsewhere; in a notes app, that itch to always <em>do something next</em> can mistake motion for
-            thinking.
-            <strong> Nota treats your attention as something to protect, not to harvest.</strong>
-            It gives you a steady place to write and arrange ideas, and it steps back when you pause so your mind
-            can do the unglamorous part: wandering, revising, waiting for the right phrase without the product
-            trying to entertain the lull. We leave silence alone on purpose. Boredom at the cursor is the sound of
-            a thought catching up.
+      <section
+        class="relative z-10 mx-auto flex max-w-6xl flex-col gap-16 px-6 pb-16 pt-16 md:gap-20 md:px-10 md:pb-20 md:pt-20 lg:gap-24"
+        aria-labelledby="hero-heading"
+      >
+        <div class="mx-auto flex max-w-2xl flex-col items-center gap-10 text-center md:gap-12 lg:max-w-3xl">
+          <h1
+            id="hero-heading"
+            class="font-serif text-4xl font-normal leading-[1.1] text-balance text-foreground md:text-5xl lg:text-[3.25rem]"
+          >
+            Think without the feed.
+          </h1>
+          <p class="text-base leading-relaxed text-muted-foreground md:text-lg">
+            A native Mac notes app for writing and linking ideas. Nota steps back when you pause.<br />
+            <span class="text-foreground">No performance, no nudges.</span>
           </p>
-        </blockquote>
-      </div>
-    </section>
+          <div
+            class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-5"
+            id="download"
+          >
+            <DownloadMacButton class="mkt-hero-fade mkt-hero-fade-delay-1" />
+            <a
+              href="/pricing"
+              class="mkt-hero-fade mkt-hero-fade-delay-2 mkt-focus inline-flex min-h-11 items-center justify-center px-2 py-3 text-sm font-medium text-muted-foreground underline decoration-muted-foreground/40 underline-offset-4 transition hover:text-foreground"
+            >
+              Pricing
+            </a>
+          </div>
+          <p class="text-sm leading-relaxed text-muted-foreground/90">
+            Install from GitHub Releases, sign in, subscribe in Settings.
+          </p>
+        </div>
+
+        <figure class="mkt-hero-fade mkt-hero-fade-delay-3 mx-auto w-full max-w-5xl">
+          <div
+            class="mkt-hero-screenshot-frame overflow-hidden rounded-xl border border-border/80 bg-card/20 p-1.5 shadow-[0_32px_90px_-24px_rgba(0,0,0,0.65)] ring-1 ring-white/10"
+          >
+            <img
+              src={heroScreenshot}
+              alt={heroScreenshotAlt}
+              width={2828}
+              height={1854}
+              class="h-auto w-full rounded-[calc(var(--radius)-2px)]"
+              data-nota-hero-screenshot
+              loading="eager"
+              decoding="async"
+              fetchpriority="high"
+            />
+          </div>
+        </figure>
+      </section>
+    </div>
 
     <section
       id="faq"
       class="border-t border-border bg-background px-6 py-16 md:px-10 md:py-20"
       aria-labelledby="faq-heading"
     >
-      <div class="mx-auto max-w-2xl">
-        <h2 id="faq-heading" class="mb-10 text-center font-serif text-2xl font-normal text-foreground md:text-3xl">
+      <div class="mx-auto max-w-xl">
+        <h2 id="faq-heading" class="mb-10 font-serif text-2xl font-normal text-foreground md:text-3xl">
           Common questions
         </h2>
-        <dl class="space-y-8">
+        <dl class="space-y-8 text-sm md:text-base">
           <div>
             <dt class="font-medium text-foreground">Is there a free tier or trial?</dt>
-            <dd class="mt-2 text-muted-foreground">
-              No. You can download the app for macOS from GitHub Releases, then sign in and subscribe in Settings to
-              write and sync. See <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4"
+            <dd class="mt-2 leading-relaxed text-muted-foreground">
+              No. Download the Mac app from
+              <a
+                href={NOTA_GITHUB_RELEASES}
+                class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+                >GitHub Releases</a
+              >, sign in, and subscribe in Settings to write and sync. See
+              <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
                 >pricing</a
               > for current USD guide prices.
             </dd>
           </div>
           <div>
             <dt class="font-medium text-foreground">What does a subscription include?</dt>
-            <dd class="mt-2 text-muted-foreground">
-              The full notes experience: writing, note graph, attachments, cloud sync, and backup across your devices
-              while signed in.
-            </dd>
-          </div>
-          <div>
-            <dt class="font-medium text-foreground">Where do I subscribe?</dt>
-            <dd class="mt-2 text-muted-foreground">
-              Install Nota, open Settings after sign-in, and complete checkout there. Monthly, annual, and lifetime
-              options are offered when configured in the app.
+            <dd class="mt-2 leading-relaxed text-muted-foreground">
+              Writing, internal links, the note graph, attachments, and cloud sync with backup while you are signed in.
             </dd>
           </div>
         </dl>
       </div>
     </section>
 
-    <section class="border-t border-border bg-background px-6 py-14 text-center md:px-10 md:py-16">
-      <h2 class="mb-3 font-serif text-2xl text-foreground">Ready when you are</h2>
-      <p class="mb-8 text-muted-foreground">
-        No web app—download Nota for Mac, sign in, and subscribe in the app when you are ready.
-      </p>
-      <div class="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
-        <a
-          href={NOTA_GITHUB_LATEST}
-          class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90"
-        >
-          Download for macOS
-        </a>
+    <footer class="bg-background px-6 py-12 text-center md:px-10 md:py-14">
+      <p class="font-serif text-xl text-foreground">Ready when you are.</p>
+      <p class="mt-2 text-sm text-muted-foreground">Download for Mac. Subscribe when it suits you.</p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+        <DownloadMacButton
+          class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center gap-2 rounded-[var(--radius)] bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+        />
         <a
           href="/pricing"
-          class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] border border-border bg-card px-6 py-3 text-sm font-medium text-card-foreground transition hover:bg-muted"
+          class="mkt-focus inline-flex min-h-11 min-w-[12rem] items-center justify-center rounded-[var(--radius)] border border-border px-6 py-3 text-sm font-medium text-foreground transition hover:bg-muted"
         >
           View pricing
         </a>
       </div>
-    </section>
-
-    <footer class="border-t border-border bg-background px-6 py-10 text-center text-sm text-muted-foreground">
-      <p>
-        <a
-          href={NOTA_GITHUB_REPO}
-          class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
-          rel="noopener noreferrer"
-          target="_blank">Open source</a
-        >
-        ·
-        <a
-          href={NOTA_GITHUB_RELEASES}
-          class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">Releases</a
-        >
-        ·
-        <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
-          >Pricing</a
-        >
-        ·
-        <a href="/refunds" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
-          >Refunds</a
-        >
-      </p>
-      <p class="mt-6">
-        Copyright &copy;{' '}
-        <a
-          href="https://mrlemoos.dev"
-          class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
-          rel="noopener noreferrer"
-          target="_blank">mrlemoos.dev</a
-        >
-        {' '}{new Date().getFullYear()}
-      </p>
+      <div
+        class="mt-10 flex flex-col items-center gap-4 text-sm text-muted-foreground sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-10 sm:gap-y-3 md:gap-x-12"
+      >
+        <p>
+          <a
+            href={NOTA_GITHUB_REPO}
+            class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+            rel="noopener noreferrer"
+            target="_blank">Open source</a
+          >
+          ·
+          <a href="/pricing" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+            >Pricing</a
+          >
+          ·
+          <a href="/refunds" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+            >Refunds</a
+          >
+        </p>
+        <p>
+          Copyright &copy;{' '}
+          <a
+            href="https://mrlemoos.dev"
+            class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+            rel="noopener noreferrer"
+            target="_blank">mrlemoos.dev</a
+          >
+          {' '}{new Date().getFullYear()}
+        </p>
+      </div>
     </footer>
   </main>
 </BaseLayout>

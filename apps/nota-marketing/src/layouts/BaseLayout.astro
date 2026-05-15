@@ -1,5 +1,6 @@
 ---
 import Analytics from '@vercel/analytics/astro';
+import { MKT_THEME_COLOR_PAGE } from '@/lib/marketing-theme';
 import '../styles/global.css';
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
   ogDescription?: string;
   /** Defaults to `Astro.url.pathname` */
   canonicalPath?: string;
+  /** Browser chrome colour; defaults to light page background. */
+  themeColor?: string;
 }
 
 const OG_IMAGE_WIDTH = 1200;
@@ -24,6 +27,7 @@ const {
   ogTitle,
   ogDescription,
   canonicalPath,
+  themeColor = MKT_THEME_COLOR_PAGE,
 } = Astro.props;
 
 const site = Astro.site;
@@ -44,7 +48,7 @@ const socialDescription = ogDescription ?? description;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="theme-color" content={themeColor} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 

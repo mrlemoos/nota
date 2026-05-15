@@ -1,9 +1,19 @@
 ---
+import GitHubIcon from '@/components/GitHubIcon.astro';
 import { NOTA_GITHUB_LATEST, NOTA_GITHUB_REPO } from '@/lib/site';
+
+interface Props {
+  borderless?: boolean;
+}
+
+const { borderless = false } = Astro.props;
 ---
 
 <header
-  class="sticky top-0 z-50 border-b border-border bg-background/85 px-5 py-4 text-foreground backdrop-blur-md md:px-8"
+  class:list={[
+    'sticky top-0 z-50 bg-background/80 px-5 py-4 text-foreground backdrop-blur-md md:px-8',
+    !borderless && 'border-b border-border/60',
+  ]}
 >
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-6">
     <a href="/" class="mkt-focus font-serif text-xl tracking-tight text-foreground"> Nota </a>
@@ -12,17 +22,16 @@ import { NOTA_GITHUB_LATEST, NOTA_GITHUB_REPO } from '@/lib/site';
         Download
       </a>
       <a href="/pricing" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Pricing </a>
-      <a href="/refunds" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Refunds </a>
+      <a href="/#faq" class="mkt-focus text-muted-foreground transition hover:text-foreground"> FAQ </a>
       <a
         href={NOTA_GITHUB_REPO}
-        class="mkt-focus text-muted-foreground transition hover:text-foreground"
+        class="mkt-focus inline-flex size-9 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground transition hover:bg-muted hover:text-foreground"
         rel="noopener noreferrer"
         target="_blank"
+        aria-label="Nota on GitHub"
       >
-        Open source
+        <GitHubIcon />
       </a>
-      <a href="/#writing" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Product </a>
-      <a href="/#faq" class="mkt-focus text-muted-foreground transition hover:text-foreground"> FAQ </a>
     </nav>
   </div>
 </header>
