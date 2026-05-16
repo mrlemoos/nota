@@ -41,7 +41,7 @@ function assertExcludes(html, relativePath, needle, label) {
 const indexHtml = readDistHtml('index.html');
 
 const heroChecks = [
-  ['/desktop-app-screenshot.png', 'hero screenshot asset'],
+  ['/_astro/desktop-app-screenshot.', 'hero screenshot asset'],
   ['data-nota-hero-screenshot', 'hero screenshot hook'],
   ['fetchpriority="high"', 'hero image fetch priority'],
   ['alt=', 'hero image alt text'],
