@@ -14,6 +14,7 @@ export default defineConfig({
     envPrefix: ['VITE_', 'PUBLIC_'],
     plugins: [tailwindcss()],
     resolve: {
+      conditions: ['@nota/source', 'import', 'module', 'browser', 'default'],
       alias: {
         '@': path.resolve(__dirname, 'src'),
         '@nota/note-doc-plain-text': path.resolve(

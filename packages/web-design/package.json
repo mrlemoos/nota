@@ -51,6 +51,12 @@
       "types": "./dist/lib/theme.d.ts",
       "import": "./dist/theme.js",
       "default": "./dist/theme.js"
+    },
+    "./theme-color": {
+      "@nota/source": "./src/lib/theme-color.ts",
+      "types": "./dist/lib/theme-color.d.ts",
+      "import": "./dist/theme-color.js",
+      "default": "./dist/theme-color.js"
     }
   },
   "peerDependencies": {

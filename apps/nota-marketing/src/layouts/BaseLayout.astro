@@ -1,6 +1,10 @@
 ---
 import Analytics from '@vercel/analytics/astro';
-import { MKT_THEME_COLOR_PAGE } from '@/lib/marketing-theme';
+import {
+  MKT_THEME_COLOR_META_ID,
+  MKT_THEME_COLOR_PAGE,
+  chromeSchemeForThemeColor,
+} from '@/lib/marketing-theme';
 import '../styles/global.css';
 
 interface Props {
@@ -44,25 +48,40 @@ const imageUrl = new URL(image, site).href;
 
 const socialTitle = ogTitle ?? title;
 const socialDescription = ogDescription ?? description;
+const chromeScheme = chromeSchemeForThemeColor(themeColor);
 ---
 
 <!doctype html>
-<html lang="en-GB">
+<html lang="en-GB" class={chromeScheme}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta
+      id={MKT_THEME_COLOR_META_ID}
       name="theme-color"
-      content="#ffffff"
-      media="(prefers-color-scheme: light)"
+      content={themeColor}
     />
-    <meta
-      name="theme-color"
-      content="#0a0a0a"
-      media="(prefers-color-scheme: dark)"
-    />
-    <meta name="theme-color" content={themeColor} />
+    <script
+      is:inline
+      define:vars={{ themeColor, chromeScheme, metaId: MKT_THEME_COLOR_META_ID }}
+    >
+      (function () {
+        var root = document.documentElement;
+        root.classList.remove('light', 'dark');
+        root.classList.add(chromeScheme);
+        var meta = document.getElementById(metaId);
+        if (meta) {
+          meta.setAttribute('content', themeColor);
+          meta.removeAttribute('media');
+        }
+        document
+          .querySelectorAll('meta[name="theme-color"][media]')
+          .forEach(function (node) {
+            node.remove();
+          });
+      })();
+    </script>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
 

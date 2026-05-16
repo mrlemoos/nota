@@ -10,6 +10,11 @@ export function themeColorForResolved(resolved: ResolvedTheme): string {
   return resolved === 'dark' ? THEME_COLOR_DARK : THEME_COLOR_LIGHT;
 }
 
+/** Maps a hex `theme-color` meta value to document `color-scheme` (Safari chrome). */
+export function chromeSchemeForThemeColor(themeColor: string): ResolvedTheme {
+  return themeColor.toLowerCase() === THEME_COLOR_DARK ? 'dark' : 'light';
+}
+
 /** Resolves stored preference + system appearance to a paint theme. */
 export function resolveStoredTheme(
   stored: string | null,
@@ -41,12 +46,15 @@ export function applyThemeColorMeta(resolved: ResolvedTheme): void {
   if (typeof document === 'undefined') return;
 
   const content = themeColorForResolved(resolved);
-  let meta =
-    document.getElementById(THEME_COLOR_META_ID) ??
-    document.querySelector<HTMLMetaElement>(
-      `meta[name="${THEME_COLOR_META}"]:not([media])`,
-    ) ??
-    document.querySelector<HTMLMetaElement>(`meta[name="${THEME_COLOR_META}"]`);
+  let meta: HTMLMetaElement | null = document.getElementById(
+    THEME_COLOR_META_ID,
+  ) as HTMLMetaElement | null;
+  meta ??= document.querySelector<HTMLMetaElement>(
+    `meta[name="${THEME_COLOR_META}"]:not([media])`,
+  );
+  meta ??= document.querySelector<HTMLMetaElement>(
+    `meta[name="${THEME_COLOR_META}"]`,
+  );
 
   if (!meta) {
     meta = document.createElement('meta');

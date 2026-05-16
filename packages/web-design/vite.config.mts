@@ -14,6 +14,7 @@ const libEntries = {
   'nota-tint-circle': path.join(root, 'src/components/nota-tint-circle.tsx'),
   utils: path.join(root, 'src/lib/utils.ts'),
   theme: path.join(root, 'src/lib/theme.tsx'),
+  'theme-color': path.join(root, 'src/lib/theme-color.ts'),
 } as const;
 
 export default defineConfig(() => ({

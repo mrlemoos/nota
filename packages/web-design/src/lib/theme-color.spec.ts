@@ -4,6 +4,7 @@ import {
   THEME_COLOR_DARK,
   THEME_COLOR_LIGHT,
   applyThemeColorMeta,
+  chromeSchemeForThemeColor,
   resolveStoredTheme,
   resolveThemePreference,
   themeColorForResolved,
@@ -34,6 +35,13 @@ describe('theme-color (Safari meta)', () => {
     expect(resolveStoredTheme('system', false)).toBe('light');
     expect(resolveStoredTheme(null, true, 'system')).toBe('dark');
     expect(resolveStoredTheme('invalid', false, 'light')).toBe('light');
+  });
+
+  it('chromeSchemeForThemeColor maps hex meta values to light or dark chrome', () => {
+    // Assert
+    expect(chromeSchemeForThemeColor(THEME_COLOR_DARK)).toBe('dark');
+    expect(chromeSchemeForThemeColor(THEME_COLOR_LIGHT)).toBe('light');
+    expect(chromeSchemeForThemeColor('#0A0A0A')).toBe('dark');
   });
 
   it('resolveThemePreference mirrors ThemeProvider resolution', () => {
