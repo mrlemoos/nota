@@ -48,6 +48,7 @@ const heroChecks = [
   ['mkt-hero-fade mkt-hero-fade-delay-3', 'hero screenshot fade-in'],
   ['mkt-hero-fade mkt-hero-fade-delay-1', 'hero download fade-in'],
   ['mkt-hero-fade mkt-hero-fade-delay-2', 'hero pricing link fade-in'],
+  ['mkt-btn--primary', 'primary button transition class'],
 ];
 
 for (const [needle, label] of heroChecks) {
@@ -61,6 +62,18 @@ assertIncludes(
   'Safari theme-color meta id',
 );
 assertIncludes(indexHtml, 'index.html', '#0a0a0a', 'dark hero theme-color hex');
+assertIncludes(
+  indexHtml,
+  'index.html',
+  'body{background-color:#ffffff}',
+  'marketing body hex background',
+);
+assertIncludes(
+  indexHtml,
+  'index.html',
+  'mkt-safari-top-chrome',
+  'Safari top chrome hex header class',
+);
 assertIncludes(
   indexHtml,
   'index.html',
@@ -80,6 +93,12 @@ assertIncludes(
   'pricing/index.html',
   '#ffffff',
   'light page theme-color hex',
+);
+assertIncludes(
+  pricingHtml,
+  'pricing/index.html',
+  'body{background-color:#ffffff}',
+  'light page body hex background',
 );
 assertIncludes(
   pricingHtml,

@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@import '@nota/web-design/theme-chrome.css';
+
 @import '@fontsource/geist-sans/latin.css';
 @import '@fontsource/instrument-serif/400.css';
 
@@ -56,6 +58,12 @@ html.dark {
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
+
+  /* Marketing buttons (transitions.dev easing) */
+  --btn-dur: 200ms;
+  --btn-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --btn-lift: -1px;
+  --btn-active-scale: 0.98;
 }
 
 /* Radial lift behind hero content — barely perceptible, avoids flat void */
@@ -74,6 +82,7 @@ html.dark {
 }
 
 .mkt-dark {
+  --background-hex: #0a0a0a;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
@@ -90,7 +99,7 @@ html.dark {
   --ring: oklch(0.556 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  background-color: var(--background);
+  background-color: var(--background-hex);
   color: var(--foreground);
   position: relative;
   isolation: isolate;
@@ -152,6 +161,73 @@ html.dark {
 @layer utilities {
   .mkt-focus {
     @apply rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}
+
+@layer components {
+  /* Sticky top chrome: solid hex so Safari 26 samples toolbar colour (not oklch / opacity). */
+  .mkt-safari-top-chrome {
+    background-color: var(--background-hex);
+  }
+
+  .mkt-btn {
+    @apply inline-flex min-h-11 min-w-[12rem] items-center justify-center gap-2 rounded-[var(--radius)] px-6 py-3 text-sm font-medium;
+    transition:
+      transform var(--btn-dur) var(--btn-ease),
+      box-shadow var(--btn-dur) var(--btn-ease),
+      background-color var(--btn-dur) var(--btn-ease),
+      border-color var(--btn-dur) var(--btn-ease),
+      color var(--btn-dur) var(--btn-ease);
+  }
+
+  .mkt-btn--primary {
+    @apply bg-primary text-primary-foreground shadow-sm;
+  }
+
+  .mkt-btn--primary:hover {
+    transform: translateY(var(--btn-lift));
+    box-shadow:
+      0 1px 2px oklch(0 0 0 / 0.06),
+      0 6px 20px -4px oklch(0 0 0 / 0.18);
+  }
+
+  .mkt-btn--primary:active {
+    transform: translateY(0) scale(var(--btn-active-scale));
+    box-shadow: 0 1px 2px oklch(0 0 0 / 0.08);
+  }
+
+  .mkt-btn--secondary {
+    @apply border border-border text-foreground;
+  }
+
+  .mkt-btn--secondary:hover {
+    @apply bg-muted;
+    transform: translateY(var(--btn-lift));
+  }
+
+  .mkt-btn--secondary:active {
+    transform: translateY(0) scale(var(--btn-active-scale));
+  }
+
+  .mkt-btn--compact {
+    @apply min-w-0 px-5 py-2.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mkt-btn--primary:hover,
+  .mkt-btn--primary:active,
+  .mkt-btn--secondary:hover,
+  .mkt-btn--secondary:active {
+    transform: none;
+  }
+
+  .mkt-btn {
+    transition:
+      background-color var(--btn-dur) var(--btn-ease),
+      border-color var(--btn-dur) var(--btn-ease),
+      color var(--btn-dur) var(--btn-ease),
+      box-shadow var(--btn-dur) var(--btn-ease);
   }
 }
 
@@ -218,6 +294,6 @@ html.dark {
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
   }
 }

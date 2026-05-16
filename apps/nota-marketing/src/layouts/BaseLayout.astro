@@ -5,6 +5,9 @@ import {
   MKT_THEME_COLOR_PAGE,
   chromeSchemeForThemeColor,
 } from '@/lib/marketing-theme';
+
+/** Marketing body is always light; dark hero chrome uses `.mkt-dark` / sticky header hex. */
+const BODY_BACKGROUND_HEX = MKT_THEME_COLOR_PAGE;
 import '../styles/global.css';
 
 interface Props {
@@ -62,6 +65,7 @@ const chromeScheme = chromeSchemeForThemeColor(themeColor);
       name="theme-color"
       content={themeColor}
     />
+    <style is:inline set:html={`body{background-color:${BODY_BACKGROUND_HEX}}`} />
     <script
       is:inline
       define:vars={{ themeColor, chromeScheme, metaId: MKT_THEME_COLOR_META_ID }}

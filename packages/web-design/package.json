@@ -57,7 +57,8 @@
       "types": "./dist/lib/theme-color.d.ts",
       "import": "./dist/theme-color.js",
       "default": "./dist/theme-color.js"
-    }
+    },
+    "./theme-chrome.css": "./src/theme-chrome.css"
   },
   "peerDependencies": {
     "@nota/helper-hooks": "workspace:*",

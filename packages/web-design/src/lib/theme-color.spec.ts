@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   THEME_COLOR_DARK,
   THEME_COLOR_LIGHT,
+  applySafariChromeBackground,
   applyThemeColorMeta,
   chromeSchemeForThemeColor,
   resolveStoredTheme,
@@ -49,6 +50,40 @@ describe('theme-color (Safari meta)', () => {
     expect(resolveThemePreference('dark', false)).toBe('dark');
     expect(resolveThemePreference('light', true)).toBe('light');
     expect(resolveThemePreference('system', true)).toBe('dark');
+  });
+
+  it('applySafariChromeBackground paints body with hex (Safari 26 toolbar sampling)', () => {
+    // Arrange
+    document.documentElement.classList.remove('nota-electron');
+
+    // Act
+    applySafariChromeBackground('dark');
+
+    // Assert
+    expect(
+      document.documentElement.style.getPropertyValue('--background-hex'),
+    ).toBe(THEME_COLOR_DARK);
+    expect(document.body.style.backgroundColor).toBe('rgb(10, 10, 10)');
+
+    // Act
+    applySafariChromeBackground('light');
+
+    // Assert
+    expect(document.body.style.backgroundColor).toBe('rgb(255, 255, 255)');
+  });
+
+  it('applySafariChromeBackground skips body on Electron (transparent vibrancy)', () => {
+    // Arrange
+    document.documentElement.classList.add('nota-electron');
+    document.body.style.backgroundColor = 'transparent';
+
+    // Act
+    applySafariChromeBackground('light');
+
+    // Assert
+    expect(document.body.style.backgroundColor).toBe('transparent');
+
+    document.documentElement.classList.remove('nota-electron');
   });
 
   it('applyThemeColorMeta sets meta content and clears media', () => {

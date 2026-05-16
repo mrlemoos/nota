@@ -1,0 +1,12 @@
+/**
+ * Hex page background for Safari 26 toolbar sampling (oklch is not read).
+ * Keep `--background-hex` values in sync with theme-color.ts.
+ */
+:root,
+html.light {
+  --background-hex: #ffffff;
+}
+
+html:not(.nota-electron) body {
+  background-color: var(--background-hex);
+}

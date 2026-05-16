@@ -8,6 +8,7 @@ import {
 import { useOrThrow } from '@nota/helper-hooks';
 
 import {
+  applySafariChromeBackground,
   applyThemeColorMeta,
   resolveThemePreference,
   type ResolvedTheme,
@@ -77,6 +78,7 @@ export function ThemeProvider({
       root.classList.remove('light', 'dark');
       root.classList.add(resolved);
       applyThemeColorMeta(resolved);
+      applySafariChromeBackground(resolved);
     };
 
     if (theme === 'system') {

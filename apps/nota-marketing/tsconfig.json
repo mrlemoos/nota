@@ -11,5 +11,10 @@
     "src/**/*.astro",
     "src/content.config.ts",
     "astro.config.mjs"
+  ],
+  "references": [
+    {
+      "path": "../../packages/web-design"
+    }
   ]
 }

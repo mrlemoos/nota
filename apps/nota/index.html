@@ -34,10 +34,18 @@
           document.querySelector('meta[name="theme-color"]');
         if (dark) {
           root.classList.add('dark');
+          root.style.setProperty('--background-hex', '#0a0a0a');
           if (meta) meta.setAttribute('content', '#0a0a0a');
+          if (!root.classList.contains('nota-electron')) {
+            document.body.style.backgroundColor = '#0a0a0a';
+          }
         } else {
           root.classList.add('light');
+          root.style.setProperty('--background-hex', '#ffffff');
           if (meta) meta.setAttribute('content', '#ffffff');
+          if (!root.classList.contains('nota-electron')) {
+            document.body.style.backgroundColor = '#ffffff';
+          }
         }
         if (meta) meta.removeAttribute('media');
       })();

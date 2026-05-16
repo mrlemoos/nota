@@ -4,6 +4,9 @@ import type { Theme } from './theme.js';
 export const THEME_COLOR_LIGHT = '#ffffff';
 export const THEME_COLOR_DARK = '#0a0a0a';
 
+/** CSS custom property for hex page background (Safari 26 samples `body` / sticky chrome). */
+export const BACKGROUND_HEX_CSS_VAR = '--background-hex';
+
 export type ResolvedTheme = 'light' | 'dark';
 
 export function themeColorForResolved(resolved: ResolvedTheme): string {
@@ -65,4 +68,18 @@ export function applyThemeColorMeta(resolved: ResolvedTheme): void {
 
   meta.setAttribute('content', content);
   meta.removeAttribute('media');
+}
+
+/** Sets hex `--background-hex` and `body` background for Safari 26 toolbar tinting. */
+export function applySafariChromeBackground(resolved: ResolvedTheme): void {
+  if (typeof document === 'undefined') return;
+
+  const hex = themeColorForResolved(resolved);
+  document.documentElement.style.setProperty(BACKGROUND_HEX_CSS_VAR, hex);
+
+  if (document.documentElement.classList.contains('nota-electron')) {
+    return;
+  }
+
+  document.body.style.backgroundColor = hex;
 }
