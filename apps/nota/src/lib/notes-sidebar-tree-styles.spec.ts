@@ -1,0 +1,70 @@
+import { describe, expect, it } from 'vitest';
+import {
+  NOTA_SIDEBAR_TREE_BRANCH_CLASS,
+  notesSidebarTreeFolderRowVariants,
+  notesSidebarTreeLeafRowVariants,
+  notesSidebarTreeRowVariants,
+} from './notes-sidebar-tree-styles';
+
+describe('notes-sidebar-tree-styles', () => {
+  it('exposes branch indentation without a left border guide', () => {
+    // Arrange
+    // Act
+    const branch = NOTA_SIDEBAR_TREE_BRANCH_CLASS;
+
+    // Assert
+    expect(branch).not.toContain('border-l');
+    expect(branch).toContain('ml-4');
+    expect(branch).toContain('pl-1');
+  });
+
+  it('does not apply hover background on note rows', () => {
+    // Arrange
+    // Act
+    const noteRow = notesSidebarTreeRowVariants();
+
+    // Assert
+    expect(noteRow).not.toContain('hover:before:opacity-100');
+  });
+
+  it('applies a subtle full-row background when a note row is selected', () => {
+    // Arrange
+    // Act
+    const selected = notesSidebarTreeRowVariants({
+      selected: true,
+      dragOver: false,
+    });
+    const dragOver = notesSidebarTreeRowVariants({
+      selected: false,
+      dragOver: true,
+    });
+
+    // Assert
+    expect(selected).toContain('bg-muted/20');
+    expect(selected).not.toContain('before:');
+    expect(dragOver).toContain('bg-primary/15');
+  });
+
+  it('uses a slimmer row height for folder rows than note rows', () => {
+    // Arrange
+    // Act
+    const folderRow = notesSidebarTreeFolderRowVariants();
+    const noteRow = notesSidebarTreeRowVariants();
+
+    // Assert
+    expect(folderRow).toContain('py-1');
+    expect(folderRow).toContain('before:h-7');
+    expect(noteRow).toContain('py-2');
+    expect(noteRow).not.toContain('before:h-8');
+  });
+
+  it('indents leaf rows for notes under a folder branch', () => {
+    // Arrange
+    // Act
+    const leaf = notesSidebarTreeLeafRowVariants({ selected: true });
+
+    // Assert
+    expect(leaf).toContain('ml-5');
+    expect(leaf).toContain('bg-muted/20');
+  });
+});

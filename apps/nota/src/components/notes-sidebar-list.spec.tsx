@@ -499,6 +499,48 @@ describe('NotesSidebarList', () => {
     );
   });
 
+  it('rotates the folder chevron when the folder is expanded', () => {
+    // Arrange
+    render(
+      <NotesSidebarList
+        notes={[]}
+        folders={[
+          {
+            id: 'folder-1',
+            user_id: 'user-1',
+            name: 'Expanded folder',
+            parent_id: null,
+            tint: null,
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+    const expandButton = screen.getByRole('button', {
+      name: 'Collapse folder Expanded folder',
+    });
+
+    // Act
+    const chevron = expandButton.querySelector('svg');
+
+    // Assert
+    expect(chevron?.getAttribute('class') ?? '').toContain('rotate-90');
+    expect(document.getElementById('sidebar-folder-folder-1')).toBeTruthy();
+  });
+
   it('exposes data-folder-tint when a folder has a persisted tint', () => {
     // Arrange
     render(

@@ -11,7 +11,6 @@ import {
   type JSX,
 } from 'react';
 import {
-  ArrowDown01Icon,
   ArrowRight01Icon,
   Delete02Icon,
   Folder01Icon,
@@ -20,7 +19,6 @@ import {
   PencilEdit01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { NotaButton } from '@nota/web-design/button';
 import { NotaTintCircle } from '@nota/web-design/nota-tint-circle';
 import {
   NotaContextMenu,
@@ -43,7 +41,15 @@ import {
 } from '@nota/web-design/tooltip';
 import { cn } from '@/lib/utils';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
-import { NOTA_SIDEBAR_ROW_CLASS } from '@/lib/nota-interaction';
+import {
+  NOTA_SIDEBAR_TREE_BRANCH_CLASS,
+  notesSidebarTreeChevronClass,
+  notesSidebarTreeFolderLabelClass,
+  notesSidebarTreeFolderRowVariants,
+  notesSidebarTreeFolderTriggerClass,
+  notesSidebarTreeLeafRowVariants,
+  notesSidebarTreeRowVariants,
+} from '@/lib/notes-sidebar-tree-styles';
 import type { Folder, Note, UserPreferences } from '~/types/database.types';
 import type { NotesShellPanel } from '../lib/app-navigation';
 import { noteHashHref } from './note-detail-panel';
@@ -140,9 +146,9 @@ function NoteRow(options: {
           render={
             <div
               className={cn(
-                NOTA_SIDEBAR_ROW_CLASS,
-                'flex transform-gpu items-center gap-0 rounded-md',
-                isActive ? 'bg-muted' : 'text-foreground hover:bg-muted/60',
+                nested
+                  ? notesSidebarTreeLeafRowVariants({ selected: isActive })
+                  : notesSidebarTreeRowVariants({ selected: isActive }),
                 noteIsDragged && 'opacity-60',
               )}
               draggable
@@ -159,21 +165,13 @@ function NoteRow(options: {
             >
               <a
                 href={noteHashHref(note.id)}
-                className={cn(
-                  'min-w-0 flex-1 py-2 text-sm transition-colors duration-300 ease-in-out',
-                  nested ? 'pl-2 pr-1' : 'px-3',
-                  isActive ? 'font-medium text-foreground' : 'text-foreground',
-                )}
+                className="relative z-0 min-w-0 flex-1 truncate px-1 text-sm font-normal"
                 aria-current={isActive ? 'page' : undefined}
               >
                 <NotaTooltip>
                   <NotaTooltipTrigger
                     delay={750}
-                    render={
-                      <div className="min-w-0 truncate font-medium">
-                        {noteLabel}
-                      </div>
-                    }
+                    render={<div className="min-w-0 truncate">{noteLabel}</div>}
                   />
                   <NotaTooltipPortal>
                     <NotaTooltipPositioner side="top" sideOffset={6}>
@@ -366,9 +364,8 @@ function FolderRow(options: {
           render={
             <div
               className={cn(
-                'flex transform-gpu items-center gap-1 rounded-md py-1 pr-1.5 pl-0.5 text-muted-foreground transition-[background-color,box-shadow,transform,color] duration-200 ease-out',
-                isDropTarget &&
-                  'scale-[1.01] bg-muted/90 text-foreground ring-1 ring-border/50 shadow-sm',
+                notesSidebarTreeFolderRowVariants({ dragOver: isDropTarget }),
+                'px-1.5 text-muted-foreground',
               )}
               data-folder-tint={folder.tint ?? ''}
               style={{
@@ -408,11 +405,9 @@ function FolderRow(options: {
                 void moveDraggedNoteToFolder(folder.id);
               }}
             >
-              <NotaButton
+              <button
                 type="button"
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 shrink-0 bg-transparent text-muted-foreground"
+                className={notesSidebarTreeFolderTriggerClass}
                 aria-label={
                   isCollapsed
                     ? t('Expand folder {folderName}', {
@@ -427,33 +422,6 @@ function FolderRow(options: {
                 onClick={() => {
                   toggleFolderCollapsed(folder.id);
                 }}
-              >
-                <HugeiconsIcon
-                  icon={isCollapsed ? ArrowRight01Icon : ArrowDown01Icon}
-                  size={14}
-                  strokeWidth={1.5}
-                  aria-hidden
-                />
-              </NotaButton>
-              <span
-                className="inline-flex shrink-0"
-                style={{
-                  color: folderTintSwatchColour(folder.tint ?? null),
-                }}
-                aria-hidden
-              >
-                <HugeiconsIcon
-                  icon={Folder01Icon}
-                  size={14}
-                  strokeWidth={1.5}
-                />
-              </span>
-              <button
-                type="button"
-                className="flex min-w-0 flex-1 items-center gap-0.5 text-left"
-                onClick={() => {
-                  toggleFolderCollapsed(folder.id);
-                }}
                 onKeyDown={(event) => {
                   if (event.key !== 'F2') {
                     return;
@@ -463,6 +431,29 @@ function FolderRow(options: {
                   startRenamingFolder(folder);
                 }}
               >
+                <HugeiconsIcon
+                  icon={ArrowRight01Icon}
+                  size={14}
+                  strokeWidth={1.5}
+                  aria-hidden
+                  className={cn(
+                    notesSidebarTreeChevronClass,
+                    !isCollapsed && 'rotate-90',
+                  )}
+                />
+                <span
+                  className="inline-flex shrink-0"
+                  style={{
+                    color: folderTintSwatchColour(folder.tint ?? null),
+                  }}
+                  aria-hidden
+                >
+                  <HugeiconsIcon
+                    icon={Folder01Icon}
+                    size={14}
+                    strokeWidth={1.5}
+                  />
+                </span>
                 {renamingFolderId === folder.id ? (
                   <input
                     ref={renameInputRef}
@@ -487,7 +478,7 @@ function FolderRow(options: {
                     onBlur={() => {
                       commitFolderRename(folder);
                     }}
-                    className="min-w-0 flex-1 rounded border border-input bg-background px-1 text-xs font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                    className="relative z-0 min-w-0 flex-1 rounded border border-input bg-background px-1 text-sm text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
                     aria-label={t('Rename folder {folderName}', {
                       folderName: folder.name,
                     })}
@@ -495,9 +486,13 @@ function FolderRow(options: {
                 ) : (
                   <NotaTooltip>
                     <NotaTooltipTrigger
+                      className="min-w-0 flex-1 justify-start text-left"
                       render={
                         <span
-                          className="min-w-0 flex-1 cursor-text truncate font-medium text-foreground text-xs tracking-wide decoration-dotted underline-offset-2 hover:underline"
+                          className={cn(
+                            notesSidebarTreeFolderLabelClass,
+                            'relative z-0 cursor-text decoration-dotted underline-offset-2 hover:underline',
+                          )}
                           onDoubleClick={(event) => {
                             event.preventDefault();
                             event.stopPropagation();
@@ -897,9 +892,6 @@ export function NotesSidebarList({
       .filter((n) => n.folder_id === folder.id)
       .sort(compareNoteTitles);
 
-    const branchListClass =
-      'm-0 ml-2.5 list-none space-y-1 border-border/35 border-l py-0.5 pl-2';
-
     return (
       <FolderRow
         folder={folder}
@@ -930,22 +922,22 @@ export function NotesSidebarList({
         patchFolderInList={patchFolderInList}
       >
         {!isCollapsed ? (
-          <div id={folderContentId} className="min-w-0">
-            {children.length > 0 ? (
-              <ul className={branchListClass}>
+          <div
+            id={folderContentId}
+            className={cn(NOTA_SIDEBAR_TREE_BRANCH_CLASS, 'min-w-0 pb-1')}
+            role="group"
+          >
+            {notesInFolder.length === 0 && children.length === 0 ? (
+              <p className="ml-5 py-2 text-muted-foreground text-xs">
+                {t('No notes in this folder.')}
+              </p>
+            ) : (
+              <ul className="m-0 list-none p-0">
                 {children.map((child) => (
                   <Fragment key={child.folder.id}>
                     {renderFolderTreeNode(child)}
                   </Fragment>
                 ))}
-              </ul>
-            ) : null}
-            {notesInFolder.length === 0 && children.length === 0 ? (
-              <p className="ml-2.5 border-border/35 border-l py-1 pl-2.5 text-muted-foreground text-xs">
-                {t('No notes in this folder.')}
-              </p>
-            ) : notesInFolder.length > 0 ? (
-              <ul className="m-0 ml-2.5 list-none space-y-0.5 border-border/35 border-l py-0.5 pl-2">
                 {notesInFolder.map((n) => (
                   <NoteRow
                     key={n.id}
@@ -967,7 +959,7 @@ export function NotesSidebarList({
                   />
                 ))}
               </ul>
-            ) : null}
+            )}
           </div>
         ) : null}
       </FolderRow>
@@ -984,16 +976,19 @@ export function NotesSidebarList({
 
   return (
     <>
-      <ul className="m-0 list-none space-y-1 p-0">
+      <ul
+        className="relative m-0 list-none space-y-0.5 overflow-hidden p-2"
+        role="tree"
+      >
         {folderRoots.map((node) => (
           <Fragment key={node.folder.id}>{renderFolderTreeNode(node)}</Fragment>
         ))}
 
         <li
           className={cn(
-            'list-none rounded-md transition-[background-color,box-shadow,transform] duration-200 ease-out',
+            'list-none',
             dropTargetId === 'root' &&
-              'scale-[1.005] bg-muted/80 ring-1 ring-border/40 shadow-sm',
+              notesSidebarTreeRowVariants({ dragOver: true }),
           )}
           onDragEnter={(event) => {
             if (!draggedNoteId) {
