@@ -8,6 +8,7 @@ import {
   NOTA_PALETTE_ENTER_S,
   NOTA_PALETTE_EXIT_S,
   NOTA_SIDEBAR_S,
+  NOTA_SIDEBAR_SLIDE_PX,
 } from './nota-motion';
 
 // Arrange: calm motion band and non-snappy eases
@@ -29,6 +30,11 @@ describe('nota-motion', () => {
     expect(NOTA_MOTION_EASE_OUT).toBe('sine.out');
     expect(NOTA_MOTION_EASE_IN).toBe('sine.in');
     expect(NOTA_MOTION_EASE_IN_OUT).toBe('sine.inOut');
+  });
+
+  it('defines a modest horizontal slide for the notes sidebar', () => {
+    expect(NOTA_SIDEBAR_SLIDE_PX).toBeGreaterThan(0);
+    expect(NOTA_SIDEBAR_SLIDE_PX).toBeLessThanOrEqual(32);
   });
 
   it('keeps button press timings in a quick tactile band (0.2–0.4s)', () => {

@@ -3,7 +3,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  type CSSProperties,
   lazy,
   Suspense,
   type JSX,
@@ -37,6 +36,7 @@ import {
   useGSAP,
   usePrefersReducedMotion,
 } from '@/lib/nota-motion';
+import { getNotaSidebarAsideMotionTargets } from '@/lib/nota-sidebar-shell-motion';
 import { useNotesSidebarResize } from '@/lib/use-notes-sidebar-resize';
 import {
   NOTA_PRESSABLE_CLASS,
@@ -197,6 +197,24 @@ export function NotesShell(): JSX.Element {
     };
   }, [registerScrollRoot, resetSticky]);
 
+  const showVaultLoading = Boolean(user?.id && loading);
+  const sidebarChromeMounted = !paywalled && !showVaultLoading;
+
+  useEffect(() => {
+    if (!sidebarChromeMounted) {
+      sidebarMotionReadyRef.current = false;
+    }
+  }, [sidebarChromeMounted]);
+
+  useLayoutEffect(() => {
+    const el = asideRef.current;
+    if (!el || !sidebarChromeMounted || !open) {
+      return;
+    }
+    gsap.set(el, { width: widthPx, maxWidth: widthPx });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- widthPx + mount: not open toggle
+  }, [sidebarChromeMounted, widthPx]);
+
   useGSAP(
     () => {
       const el = asideRef.current;
@@ -204,43 +222,33 @@ export function NotesShell(): JSX.Element {
         return;
       }
 
-      const targetWidth = open ? sidebarWidthPxRef.current : 0;
+      const targets = getNotaSidebarAsideMotionTargets({
+        open,
+        widthPx: sidebarWidthPxRef.current,
+        prefersReducedMotion,
+      });
 
-      if (prefersReducedMotion) {
-        gsap.set(el, {
-          width: targetWidth,
-          opacity: open ? 1 : 0,
-        });
-        return;
-      }
+      const widthConstraint =
+        open && targets.width > 0
+          ? { maxWidth: sidebarWidthPxRef.current }
+          : { maxWidth: 'none' };
 
-      if (!sidebarMotionReadyRef.current) {
+      if (prefersReducedMotion || !sidebarMotionReadyRef.current) {
         sidebarMotionReadyRef.current = true;
-        gsap.set(el, {
-          width: targetWidth,
-          opacity: open ? 1 : 0,
-        });
+        gsap.set(el, { ...targets, ...widthConstraint });
         return;
       }
 
       gsap.to(el, {
-        width: targetWidth,
-        opacity: open ? 1 : 0,
+        ...targets,
+        ...widthConstraint,
         duration: NOTA_SIDEBAR_S,
         ease: NOTA_MOTION_EASE_IN_OUT,
         overwrite: 'auto',
       });
     },
-    { dependencies: [open, prefersReducedMotion] },
+    { dependencies: [open, prefersReducedMotion, sidebarChromeMounted] },
   );
-
-  useLayoutEffect(() => {
-    const el = asideRef.current;
-    if (!el || !open || isResizingRef.current) {
-      return;
-    }
-    gsap.set(el, { width: widthPx });
-  }, [widthPx, open]);
 
   const onCreateNote = (): void => {
     if (!user?.id) {
@@ -270,11 +278,6 @@ export function NotesShell(): JSX.Element {
     panel: 'shortcuts',
     noteId: null,
   });
-  const showVaultLoading = Boolean(user?.id && loading);
-  const sidebarWidthStyle: CSSProperties = {
-    width: open ? widthPx : 0,
-  };
-
   return (
     <>
       <ElectronMenubarBridge />
@@ -324,7 +327,6 @@ export function NotesShell(): JSX.Element {
           {!paywalled ? (
             <aside
               ref={asideRef}
-              style={sidebarWidthStyle}
               className={cn(
                 'relative flex h-full min-h-0 min-w-0 shrink-0 flex-col overflow-hidden',
                 notesSidebarChrome,

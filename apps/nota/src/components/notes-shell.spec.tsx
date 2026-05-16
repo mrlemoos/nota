@@ -50,7 +50,7 @@ vi.mock('../context/notes-data-context', () => ({
   useNotesData: vi.fn(),
 }));
 
-const mockNotesSidebarState = {
+const sidebarStoreState = vi.hoisted(() => ({
   open: true,
   setOpen: vi.fn(),
   toggle: vi.fn(),
@@ -61,15 +61,26 @@ const mockNotesSidebarState = {
   expandFolder: vi.fn(),
   expandFolderAncestors: vi.fn(),
   pruneCollapsedFolderIds: vi.fn(),
-};
+}));
+
+const gsapTo = vi.hoisted(() => vi.fn());
+
+vi.mock('@/lib/nota-motion', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/nota-motion')>();
+  return {
+    ...actual,
+    gsap: {
+      ...actual.gsap,
+      to: gsapTo,
+    },
+  };
+});
 
 vi.mock('../stores/notes-sidebar', () => ({
-  useNotesSidebarStore: <T,>(
-    selector?: (s: typeof mockNotesSidebarState) => T,
-  ) =>
+  useNotesSidebarStore: <T,>(selector?: (s: typeof sidebarStoreState) => T) =>
     selector
-      ? selector(mockNotesSidebarState)
-      : (mockNotesSidebarState as unknown as T),
+      ? selector(sidebarStoreState)
+      : (sidebarStoreState as unknown as T),
 }));
 
 vi.mock('../context/sticky-doc-title', () => ({
@@ -126,6 +137,8 @@ vi.mock('../hooks/use-audio-note-pending-drain', () => ({
 
 describe('NotesShell', () => {
   beforeEach(() => {
+    sidebarStoreState.open = true;
+    gsapTo.mockClear();
     vi.mocked(useNotesData).mockImplementation(() => ({
       notes: [notesShellTestCtx.listNote],
       folders: [],
@@ -161,6 +174,46 @@ describe('NotesShell', () => {
     expect(aside).not.toBeNull();
     expect(aside?.style.width).toBe('288px');
     expect(screen.getByText(notesShellTestCtx.longTitle)).toBeTruthy();
+  });
+
+  it('applies the stored sidebar width when vault loading finishes and the aside mounts', () => {
+    // Arrange
+    notesShellTestCtx.vaultLoading = true;
+    window.history.replaceState(null, '', '#/notes');
+    const { container, rerender } = render(<NotesShell />);
+    expect(container.querySelector('aside')).toBeNull();
+
+    // Act
+    notesShellTestCtx.vaultLoading = false;
+    rerender(<NotesShell />);
+
+    // Assert
+    const aside = container.querySelector('aside');
+    expect(aside).not.toBeNull();
+    expect(aside?.style.width).toBe('288px');
+  });
+
+  it('keeps the sidebar mounted and tweens closed instead of snapping width', () => {
+    // Arrange
+    window.history.replaceState(null, '', '#/notes');
+    const { container, rerender } = render(<NotesShell />);
+    const aside = container.querySelector('aside');
+    expect(aside).not.toBeNull();
+
+    // Act
+    sidebarStoreState.open = false;
+    rerender(<NotesShell />);
+
+    // Assert
+    expect(container.querySelector('aside')).toBe(aside);
+    expect(gsapTo).toHaveBeenCalledWith(
+      aside,
+      expect.objectContaining({
+        width: 0,
+        opacity: 0,
+        duration: expect.any(Number),
+      }),
+    );
   });
 
   it('renders a vertical resize handle when the sidebar is open', () => {
