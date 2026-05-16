@@ -7,6 +7,12 @@ import {
 } from 'react';
 import { useOrThrow } from '@nota/helper-hooks';
 
+import {
+  applyThemeColorMeta,
+  resolveThemePreference,
+  type ResolvedTheme,
+} from './theme-color.js';
+
 export type Theme = 'dark' | 'light' | 'system';
 
 interface ThemeProviderProps {
@@ -67,15 +73,16 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement;
 
-    const applyResolved = (resolved: 'dark' | 'light') => {
+    const applyResolved = (resolved: ResolvedTheme) => {
       root.classList.remove('light', 'dark');
       root.classList.add(resolved);
+      applyThemeColorMeta(resolved);
     };
 
     if (theme === 'system') {
       const mql = window.matchMedia('(prefers-color-scheme: dark)');
       const applySystem = () => {
-        applyResolved(mql.matches ? 'dark' : 'light');
+        applyResolved(resolveThemePreference('system', mql.matches));
       };
 
       applySystem();
@@ -85,7 +92,7 @@ export function ThemeProvider({
       };
     }
 
-    applyResolved(theme);
+    applyResolved(resolveThemePreference(theme, false));
     return undefined;
   }, [theme]);
 

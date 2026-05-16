@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { type JSX } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { THEME_COLOR_DARK, THEME_COLOR_LIGHT } from './theme-color.js';
 import { ThemeProvider, useTheme } from './theme.js';
 
 type ChangeCallback = (event: { matches: boolean }) => void;
@@ -86,7 +87,16 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     document.documentElement.classList.remove('light', 'dark');
+    document.head
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((node) => {
+        node.remove();
+      });
   });
+
+  function themeColorMeta(): HTMLMetaElement | null {
+    return document.querySelector('meta[name="theme-color"]');
+  }
 
   it('updates document class when prefers-color-scheme changes while theme is system', () => {
     // Arrange
@@ -102,6 +112,7 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
     // Assert
     expect(document.documentElement.classList.contains('light')).toBe(true);
     expect(document.documentElement.classList.contains('dark')).toBe(false);
+    expect(themeColorMeta()?.content).toBe(THEME_COLOR_LIGHT);
 
     // Act
     mqlState.matches = true;
@@ -110,6 +121,7 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
     // Assert
     expect(document.documentElement.classList.contains('dark')).toBe(true);
     expect(document.documentElement.classList.contains('light')).toBe(false);
+    expect(themeColorMeta()?.content).toBe(THEME_COLOR_DARK);
   });
 
   it('removes prefers-color-scheme listener when leaving system theme', () => {

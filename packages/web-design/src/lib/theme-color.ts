@@ -1,0 +1,60 @@
+import type { Theme } from './theme.js';
+
+/** Hex equivalents of `:root` / `.dark` `--background` in app styles (Safari ignores oklch in meta). */
+export const THEME_COLOR_LIGHT = '#ffffff';
+export const THEME_COLOR_DARK = '#0a0a0a';
+
+export type ResolvedTheme = 'light' | 'dark';
+
+export function themeColorForResolved(resolved: ResolvedTheme): string {
+  return resolved === 'dark' ? THEME_COLOR_DARK : THEME_COLOR_LIGHT;
+}
+
+/** Resolves stored preference + system appearance to a paint theme. */
+export function resolveStoredTheme(
+  stored: string | null,
+  systemDark: boolean,
+  defaultTheme: Theme = 'system',
+): ResolvedTheme {
+  if (stored === 'dark') return 'dark';
+  if (stored === 'light') return 'light';
+  if (stored === 'system') return systemDark ? 'dark' : 'light';
+  if (defaultTheme === 'dark') return 'dark';
+  if (defaultTheme === 'light') return 'light';
+  return systemDark ? 'dark' : 'light';
+}
+
+export function resolveThemePreference(
+  theme: Theme,
+  systemDark: boolean,
+): ResolvedTheme {
+  if (theme === 'dark') return 'dark';
+  if (theme === 'light') return 'light';
+  return systemDark ? 'dark' : 'light';
+}
+
+const THEME_COLOR_META = 'theme-color';
+const THEME_COLOR_META_ID = 'nota-theme-color';
+
+/** Updates (or creates) the document `theme-color` meta for Safari / mobile browser chrome. */
+export function applyThemeColorMeta(resolved: ResolvedTheme): void {
+  if (typeof document === 'undefined') return;
+
+  const content = themeColorForResolved(resolved);
+  let meta =
+    document.getElementById(THEME_COLOR_META_ID) ??
+    document.querySelector<HTMLMetaElement>(
+      `meta[name="${THEME_COLOR_META}"]:not([media])`,
+    ) ??
+    document.querySelector<HTMLMetaElement>(`meta[name="${THEME_COLOR_META}"]`);
+
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = THEME_COLOR_META;
+    meta.id = THEME_COLOR_META_ID;
+    document.head.appendChild(meta);
+  }
+
+  meta.setAttribute('content', content);
+  meta.removeAttribute('media');
+}

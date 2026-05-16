@@ -881,6 +881,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+html.light {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

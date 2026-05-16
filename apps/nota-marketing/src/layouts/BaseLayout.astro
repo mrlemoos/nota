@@ -51,6 +51,17 @@ const socialDescription = ogDescription ?? description;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#0a0a0a"
+      media="(prefers-color-scheme: dark)"
+    />
     <meta name="theme-color" content={themeColor} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalUrl} />
