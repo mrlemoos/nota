@@ -6,6 +6,7 @@ import {
   formatBlogDate,
   isBlogPostPublished,
 } from '@/lib/blog';
+import { NOTA_AUTHOR_NAME, NOTA_AUTHOR_URL } from '@/lib/site';
 import { getCollection, render } from 'astro:content';
 
 export async function getStaticPaths() {
@@ -54,7 +55,10 @@ const structuredData = {
       description: post.data.description,
       datePublished: post.data.pubDate.toISOString(),
       dateModified: displayDate.toISOString(),
-      author: { '@type': 'Organization', name: post.data.author },
+      author:
+        post.data.author === NOTA_AUTHOR_NAME
+          ? { '@type': 'Person', name: post.data.author, url: NOTA_AUTHOR_URL }
+          : { '@type': 'Organization', name: post.data.author },
       publisher: { '@type': 'Organization', name: 'Nota', url: siteRoot },
       mainEntityOfPage: { '@type': 'WebPage', '@id': postUrl },
       url: postUrl,
@@ -73,15 +77,17 @@ const structuredData = {
   <main id="main-content">
     <SiteHeader />
     <article class="mx-auto max-w-3xl px-6 py-16 md:px-10 md:py-24">
-      <header class="mb-10 border-b border-border/60 pb-10">
+      <header class="mb-10 border-b border-border/60 pb-10 text-center">
         <p class="text-sm text-muted-foreground">
           <a href="/blog" class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground">
             Blog
           </a>
         </p>
-        <h1 class="mt-4 font-serif text-4xl font-normal text-foreground md:text-5xl">{post.data.title}</h1>
-        <p class="mt-4 max-w-2xl text-lg text-muted-foreground">{post.data.description}</p>
-        <p class="mt-6 text-sm text-muted-foreground">
+        <h1 class="mx-auto mt-8 max-w-4xl font-serif text-5xl font-normal leading-[1.1] text-balance text-foreground md:mt-10 md:text-6xl lg:text-7xl">
+          {post.data.title}
+        </h1>
+        <p class="mx-auto mt-10 max-w-2xl text-lg text-muted-foreground md:mt-12 md:text-xl">{post.data.description}</p>
+        <p class="mt-10 text-sm text-muted-foreground md:mt-12">
           <time datetime={displayDate.toISOString()}>{formatBlogDate(displayDate)}</time>
           {
             post.data.updatedDate && (
@@ -95,11 +101,25 @@ const structuredData = {
             )
           }
           {' '}
-          · {post.data.author}
+          ·{' '}
+          {
+            post.data.author === NOTA_AUTHOR_NAME ? (
+              <a
+                href={NOTA_AUTHOR_URL}
+                class="mkt-focus underline decoration-border underline-offset-4 hover:text-foreground"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {post.data.author}
+              </a>
+            ) : (
+              post.data.author
+            )
+          }
         </p>
         {
           post.data.tags.length > 0 && (
-            <ul class="mt-4 flex flex-wrap gap-2" aria-label="Tags">
+            <ul class="mt-8 flex flex-wrap justify-center gap-2 md:mt-10" aria-label="Tags">
               {post.data.tags.map((tag) => (
                 <li>
                   <span class="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{tag}</span>

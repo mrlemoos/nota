@@ -9,6 +9,6 @@ tags:
 
 Nota is a native Mac app for writing and linking notes. No feeds, no nudges—just a quiet place to think.
 
-This blog is where we will share product updates, design notes, and occasional essays on note-taking without the noise. If you use Nota today, thank you; if you are curious, [download the Mac app](https://github.com/mrlemoos/nota/releases/latest) and subscribe in-app when you are ready.
+This blog is where we will share product updates, design notes, and occasional essays on note-taking without the noise. Start with [Introducing Nota](/blog/introducing-nota) if you want the story behind the app. If you use Nota today, thank you; if you are curious, [download the Mac app](https://github.com/mrlemoos/nota/releases/latest) and subscribe in-app when you are ready.
 
 We will keep posts short and useful. See you here when there is something worth saying.

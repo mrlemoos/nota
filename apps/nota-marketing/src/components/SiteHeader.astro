@@ -7,6 +7,21 @@ interface Props {
 }
 
 const { borderless = false } = Astro.props;
+
+/** Homepage hero: surface Blog beside Download in the sticky bar first. Other pages keep Download first (GitHub releases). */
+const navLinks = borderless
+  ? [
+      { href: '/blog', label: 'Blog' },
+      { href: NOTA_GITHUB_LATEST, label: 'Download' },
+      { href: '/pricing', label: 'Pricing' },
+      { href: '/#faq', label: 'FAQ' },
+    ]
+  : [
+      { href: NOTA_GITHUB_LATEST, label: 'Download' },
+      { href: '/blog', label: 'Blog' },
+      { href: '/pricing', label: 'Pricing' },
+      { href: '/#faq', label: 'FAQ' },
+    ];
 ---
 
 <header
@@ -18,12 +33,13 @@ const { borderless = false } = Astro.props;
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-6">
     <a href="/" class="mkt-focus font-serif text-xl tracking-tight text-foreground"> Nota </a>
     <nav class="flex flex-wrap items-center justify-end gap-x-6 gap-y-2 text-sm font-medium">
-      <a href={NOTA_GITHUB_LATEST} class="mkt-focus text-muted-foreground transition hover:text-foreground">
-        Download
-      </a>
-      <a href="/blog" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Blog </a>
-      <a href="/pricing" class="mkt-focus text-muted-foreground transition hover:text-foreground"> Pricing </a>
-      <a href="/#faq" class="mkt-focus text-muted-foreground transition hover:text-foreground"> FAQ </a>
+      {
+        navLinks.map(({ href, label }) => (
+          <a href={href} class="mkt-focus text-muted-foreground transition hover:text-foreground">
+            {label}
+          </a>
+        ))
+      }
       <a
         href={NOTA_GITHUB_REPO}
         class="mkt-focus inline-flex size-9 items-center justify-center rounded-[var(--radius-sm)] text-muted-foreground transition hover:bg-muted hover:text-foreground"
