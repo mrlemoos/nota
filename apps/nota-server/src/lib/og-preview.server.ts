@@ -257,7 +257,9 @@ export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
   let current = assertUrlSafeForOgFetch(rawUrl).href;
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
 
   const fetchOpts = {
     signal: controller.signal,

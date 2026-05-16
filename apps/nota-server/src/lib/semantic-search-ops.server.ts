@@ -17,7 +17,7 @@ export function buildSearchDocument(options: {
   contentJson: unknown;
 }): string {
   const plain = extractPlainTextFromDocJson(contentJson);
-  const parts = [`${options.title.trim()}`.trim()];
+  const parts = [options.title.trim().trim()];
   if (plain.length > 0) {
     parts.push(plain);
   }

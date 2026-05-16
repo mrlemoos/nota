@@ -19,7 +19,8 @@
     "generate:nota-icons": "node apps/nota/scripts/generate-nota-icons.mjs",
     "test": "nx run-many -t test",
     "postinstall": "husky",
-    "format": "nx format:write"
+    "format": "nx format:write",
+    "lint": "nx run-many -t lint"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs,cjs}": [

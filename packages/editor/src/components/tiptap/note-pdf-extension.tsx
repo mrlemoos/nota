@@ -527,182 +527,180 @@ export function NotePdfNodeView(props: NodeViewProps) {
               </div>
             </div>
           ) : (
-            <>
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-                <button
-                  type="button"
-                  aria-label={`Open preview for ${displayName}`}
-                  data-testid="note-pdf-stack"
-                  onClick={() => void openPreview()}
-                  className={cn(
-                    'relative isolate block w-full shrink-0 overflow-visible rounded-2xl text-left outline-none transition-transform duration-300 ease-out transform-gpu',
-                    'sm:w-[11rem]',
-                    'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
-                    'focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
-                  )}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+              <button
+                type="button"
+                aria-label={`Open preview for ${displayName}`}
+                data-testid="note-pdf-stack"
+                onClick={() => void openPreview()}
+                className={cn(
+                  'relative isolate block w-full shrink-0 overflow-visible rounded-2xl text-left outline-none transition-transform duration-300 ease-out transform-gpu',
+                  'sm:w-[11rem]',
+                  'hover:-translate-y-0.5 focus-visible:-translate-y-0.5',
+                  'focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                )}
+              >
+                <div
+                  className="pointer-events-none absolute inset-0"
+                  data-testid="note-pdf-stack-sheets"
                 >
                   <div
-                    className="pointer-events-none absolute inset-0"
-                    data-testid="note-pdf-stack-sheets"
-                  >
-                    <div
-                      aria-hidden
-                      className={cn(
-                        'absolute inset-0 rounded-2xl border border-transparent bg-transparent shadow-none transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out transform-gpu',
-                        'translate-x-2 translate-y-2 rotate-[4deg] opacity-30',
-                        'group-hover:border-border/60 group-hover:bg-background group-hover:shadow-md',
-                        'group-focus-within:border-border/60 group-focus-within:bg-background group-focus-within:shadow-md',
-                        'group-hover:translate-x-6 group-hover:translate-y-5 group-hover:rotate-[9deg]',
-                        'group-focus-within:translate-x-6 group-focus-within:translate-y-5 group-focus-within:rotate-[9deg]',
-                      )}
-                    />
-                    <div
-                      aria-hidden
-                      className={cn(
-                        'absolute inset-0 rounded-2xl border border-transparent bg-transparent shadow-none transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out transform-gpu',
-                        'translate-x-1 translate-y-1 rotate-[2deg] opacity-45',
-                        'group-hover:border-border/60 group-hover:bg-background group-hover:shadow-md',
-                        'group-focus-within:border-border/60 group-focus-within:bg-background group-focus-within:shadow-md',
-                        'group-hover:translate-x-4 group-hover:translate-y-3 group-hover:rotate-[6deg]',
-                        'group-focus-within:translate-x-4 group-focus-within:translate-y-3 group-focus-within:rotate-[6deg]',
-                      )}
-                    />
-                    <div
-                      aria-hidden
-                      className={cn(
-                        'absolute inset-0 rounded-2xl border border-transparent bg-transparent shadow-none transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out transform-gpu',
-                        'translate-x-0 translate-y-0 rotate-0 opacity-70',
-                        'group-hover:border-border/70 group-hover:bg-background group-hover:shadow-md',
-                        'group-focus-within:border-border/70 group-focus-within:bg-background group-focus-within:shadow-md',
-                        'group-hover:translate-x-2 group-hover:translate-y-1 group-hover:rotate-[3deg]',
-                        'group-focus-within:translate-x-2 group-focus-within:translate-y-1 group-focus-within:rotate-[3deg]',
-                      )}
-                    />
-                  </div>
-
-                  <div className="relative z-10 overflow-hidden rounded-2xl border border-transparent bg-transparent shadow-none transition-[border-color,background-color,box-shadow] duration-300 ease-out group-hover:border-border/80 group-hover:bg-background group-hover:shadow-lg group-focus-within:border-border/80 group-focus-within:bg-background group-focus-within:shadow-lg">
-                    <div className="relative aspect-[8.5/11] bg-transparent p-2">
-                      <NotePdfThumbnailFrame
-                        phase={thumbnailPhase}
-                        canvasRef={thumbnailCanvasRef}
-                      />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-background/80 to-transparent" />
-                    </div>
-                  </div>
-                </button>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    {renaming && attachment ? (
-                      <input
-                        ref={renameInputRef}
-                        type="text"
-                        value={draftFilename}
-                        onChange={(e) => {
-                          setDraftFilename(e.target.value);
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            void applyRename();
-                          }
-                          if (e.key === 'Escape') {
-                            e.preventDefault();
-                            cancelRename();
-                          }
-                        }}
-                        onBlur={() => {
-                          void applyRename();
-                        }}
-                        maxLength={MAX_ATTACHMENT_FILENAME_LEN}
-                        className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                        aria-label="PDF display name"
-                      />
-                    ) : (
-                      <NotaTooltip>
-                        <NotaTooltipTrigger
-                          render={
-                            <span
-                              className="min-w-0 flex-1 cursor-text truncate text-sm font-medium text-foreground"
-                              onDoubleClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                startRename();
-                              }}
-                            >
-                              {displayName}
-                            </span>
-                          }
-                        />
-                        <NotaTooltipPortal>
-                          <NotaTooltipPositioner side="top" sideOffset={6}>
-                            <NotaTooltipPopup>
-                              Double-click to rename
-                            </NotaTooltipPopup>
-                          </NotaTooltipPositioner>
-                        </NotaTooltipPortal>
-                      </NotaTooltip>
+                    aria-hidden
+                    className={cn(
+                      'absolute inset-0 rounded-2xl border border-transparent bg-transparent shadow-none transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out transform-gpu',
+                      'translate-x-2 translate-y-2 rotate-[4deg] opacity-30',
+                      'group-hover:border-border/60 group-hover:bg-background group-hover:shadow-md',
+                      'group-focus-within:border-border/60 group-focus-within:bg-background group-focus-within:shadow-md',
+                      'group-hover:translate-x-6 group-hover:translate-y-5 group-hover:rotate-[9deg]',
+                      'group-focus-within:translate-x-6 group-focus-within:translate-y-5 group-focus-within:rotate-[9deg]',
                     )}
-                  </div>
+                  />
+                  <div
+                    aria-hidden
+                    className={cn(
+                      'absolute inset-0 rounded-2xl border border-transparent bg-transparent shadow-none transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out transform-gpu',
+                      'translate-x-1 translate-y-1 rotate-[2deg] opacity-45',
+                      'group-hover:border-border/60 group-hover:bg-background group-hover:shadow-md',
+                      'group-focus-within:border-border/60 group-focus-within:bg-background group-focus-within:shadow-md',
+                      'group-hover:translate-x-4 group-hover:translate-y-3 group-hover:rotate-[6deg]',
+                      'group-focus-within:translate-x-4 group-focus-within:translate-y-3 group-focus-within:rotate-[6deg]',
+                    )}
+                  />
+                  <div
+                    aria-hidden
+                    className={cn(
+                      'absolute inset-0 rounded-2xl border border-transparent bg-transparent shadow-none transition-[transform,border-color,background-color,box-shadow,opacity] duration-300 ease-out transform-gpu',
+                      'translate-x-0 translate-y-0 rotate-0 opacity-70',
+                      'group-hover:border-border/70 group-hover:bg-background group-hover:shadow-md',
+                      'group-focus-within:border-border/70 group-focus-within:bg-background group-focus-within:shadow-md',
+                      'group-hover:translate-x-2 group-hover:translate-y-1 group-hover:rotate-[3deg]',
+                      'group-focus-within:translate-x-2 group-focus-within:translate-y-1 group-focus-within:rotate-[3deg]',
+                    )}
+                  />
+                </div>
 
-                  <div className="mt-2 flex flex-wrap items-center gap-1">
-                    <NotaButton
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground hover:text-foreground"
-                      onClick={() => void openPreview()}
-                    >
-                      Preview
-                    </NotaButton>
-                    <NotaButton
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground hover:text-foreground"
-                      onClick={() => void handleDownload()}
-                    >
-                      Download
-                    </NotaButton>
+                <div className="relative z-10 overflow-hidden rounded-2xl border border-transparent bg-transparent shadow-none transition-[border-color,background-color,box-shadow] duration-300 ease-out group-hover:border-border/80 group-hover:bg-background group-hover:shadow-lg group-focus-within:border-border/80 group-focus-within:bg-background group-focus-within:shadow-lg">
+                  <div className="relative aspect-[8.5/11] bg-transparent p-2">
+                    <NotePdfThumbnailFrame
+                      phase={thumbnailPhase}
+                      canvasRef={thumbnailCanvasRef}
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-background/80 to-transparent" />
+                  </div>
+                </div>
+              </button>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  {renaming && attachment ? (
+                    <input
+                      ref={renameInputRef}
+                      type="text"
+                      value={draftFilename}
+                      onChange={(e) => {
+                        setDraftFilename(e.target.value);
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          void applyRename();
+                        }
+                        if (e.key === 'Escape') {
+                          e.preventDefault();
+                          cancelRename();
+                        }
+                      }}
+                      onBlur={() => {
+                        void applyRename();
+                      }}
+                      maxLength={MAX_ATTACHMENT_FILENAME_LEN}
+                      className="min-w-0 flex-1 rounded border border-border bg-background px-1.5 py-0.5 text-sm font-medium text-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                      aria-label="PDF display name"
+                    />
+                  ) : (
                     <NotaTooltip>
                       <NotaTooltipTrigger
                         render={
-                          <NotaButton
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                            aria-label={`Remove ${displayName}`}
-                            onClick={() => void handleRemove()}
+                          <span
+                            className="min-w-0 flex-1 cursor-text truncate text-sm font-medium text-foreground"
+                            onDoubleClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              startRename();
+                            }}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="h-4 w-4"
-                              aria-hidden
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                              />
-                            </svg>
-                          </NotaButton>
+                            {displayName}
+                          </span>
                         }
                       />
                       <NotaTooltipPortal>
                         <NotaTooltipPositioner side="top" sideOffset={6}>
-                          <NotaTooltipPopup>Remove PDF</NotaTooltipPopup>
+                          <NotaTooltipPopup>
+                            Double-click to rename
+                          </NotaTooltipPopup>
                         </NotaTooltipPositioner>
                       </NotaTooltipPortal>
                     </NotaTooltip>
-                  </div>
+                  )}
+                </div>
+
+                <div className="mt-2 flex flex-wrap items-center gap-1">
+                  <NotaButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => void openPreview()}
+                  >
+                    Preview
+                  </NotaButton>
+                  <NotaButton
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-foreground"
+                    onClick={() => void handleDownload()}
+                  >
+                    Download
+                  </NotaButton>
+                  <NotaTooltip>
+                    <NotaTooltipTrigger
+                      render={
+                        <NotaButton
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          aria-label={`Remove ${displayName}`}
+                          onClick={() => void handleRemove()}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="h-4 w-4"
+                            aria-hidden
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                            />
+                          </svg>
+                        </NotaButton>
+                      }
+                    />
+                    <NotaTooltipPortal>
+                      <NotaTooltipPositioner side="top" sideOffset={6}>
+                        <NotaTooltipPopup>Remove PDF</NotaTooltipPopup>
+                      </NotaTooltipPositioner>
+                    </NotaTooltipPortal>
+                  </NotaTooltip>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
           {actionError ? (

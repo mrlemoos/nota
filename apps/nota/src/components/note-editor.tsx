@@ -142,7 +142,7 @@ function NoteEditorImpl({
 
   const storageOps = useMemo(
     () => buildStorageOps(note.id, user?.id ?? ''),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [note.id, user?.id],
   );
 
