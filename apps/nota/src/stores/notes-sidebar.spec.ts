@@ -13,7 +13,11 @@ describe('notes sidebar store (folder expand/collapse)', () => {
     } catch {
       // ignore
     }
-    useNotesSidebarStore.setState({ open: true, collapsedFolderIds: [] });
+    useNotesSidebarStore.setState({
+      open: true,
+      collapsedFolderIds: [],
+      widthPx: 288,
+    });
   });
 
   it('toggles a folder in and out of collapsedFolderIds', () => {
@@ -69,7 +73,18 @@ describe('notes sidebar store (folder expand/collapse)', () => {
     ]);
   });
 
-  it('partializeNotesSidebarForStorage serialises only open and collapsedFolderIds (reload contract)', () => {
+  it('clamps setSidebarWidthPx to the allowed sidebar band', () => {
+    // Arrange
+    const s = useNotesSidebarStore.getState();
+    // Act
+    s.setSidebarWidthPx(900);
+    // Assert
+    expect(useNotesSidebarStore.getState().widthPx).toBe(480);
+    s.setSidebarWidthPx(100);
+    expect(useNotesSidebarStore.getState().widthPx).toBe(240);
+  });
+
+  it('partializeNotesSidebarForStorage serialises open, width, and collapsed folders (reload contract)', () => {
     // Arrange
     const s0 = useNotesSidebarStore.getState();
     // Act
@@ -79,7 +94,11 @@ describe('notes sidebar store (folder expand/collapse)', () => {
       useNotesSidebarStore.getState(),
     );
     // Assert
-    expect(a).toEqual({ open: true, collapsedFolderIds: [] });
-    expect(a2).toEqual({ open: true, collapsedFolderIds: ['folder-x'] });
+    expect(a).toEqual({ open: true, collapsedFolderIds: [], widthPx: 288 });
+    expect(a2).toEqual({
+      open: true,
+      collapsedFolderIds: ['folder-x'],
+      widthPx: 288,
+    });
   });
 });

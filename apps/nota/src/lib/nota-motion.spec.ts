@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  NOTA_BUTTON_PRESS_S,
+  NOTA_BUTTON_RELEASE_S,
   NOTA_MOTION_EASE_IN,
   NOTA_MOTION_EASE_IN_OUT,
   NOTA_MOTION_EASE_OUT,
@@ -27,5 +29,12 @@ describe('nota-motion', () => {
     expect(NOTA_MOTION_EASE_OUT).toBe('sine.out');
     expect(NOTA_MOTION_EASE_IN).toBe('sine.in');
     expect(NOTA_MOTION_EASE_IN_OUT).toBe('sine.inOut');
+  });
+
+  it('keeps button press timings in a quick tactile band (0.2–0.4s)', () => {
+    expect(NOTA_BUTTON_PRESS_S).toBeGreaterThanOrEqual(0.2);
+    expect(NOTA_BUTTON_PRESS_S).toBeLessThanOrEqual(0.4);
+    expect(NOTA_BUTTON_RELEASE_S).toBeGreaterThanOrEqual(0.2);
+    expect(NOTA_BUTTON_RELEASE_S).toBeLessThanOrEqual(0.4);
   });
 });

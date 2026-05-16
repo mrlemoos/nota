@@ -78,12 +78,15 @@ import {
   useGSAP,
   usePrefersReducedMotion,
 } from '@/lib/nota-motion';
+import { NOTA_CMDK_ITEM_CLASS } from '@/lib/nota-interaction';
 
 const groupHeadingClassName =
   'px-1 py-1 text-muted-foreground text-xs [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5';
 
-const commandItemRowClass =
-  'flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm outline-none select-none';
+const commandItemRowClass = cn(
+  NOTA_CMDK_ITEM_CLASS,
+  'flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 text-sm outline-none select-none',
+);
 
 /** Scrollable list: keep overflow but hide scrollbar (WebKit / Firefox / legacy Edge). */
 const commandListClassName = cn(

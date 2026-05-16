@@ -62,6 +62,7 @@ import {
 } from '../lib/app-navigation';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { createTypewriterScrollUserGuard } from '@/lib/nota-typewriter-scroll-guard';
+import { NOTA_SAVE_PULSE_CLASS } from '@/lib/nota-interaction';
 
 function buildStorageOps(noteId: string, userId: string): AttachmentStorageOps {
   const client = getBrowserClient();
@@ -798,7 +799,10 @@ function NoteEditorImpl({
           />
           {saveStatus === 'saving' && (
             <span
-              className="mt-1 inline-block h-2.5 w-2.5 rounded-full bg-foreground/50"
+              className={cn(
+                NOTA_SAVE_PULSE_CLASS,
+                'mt-1 inline-block h-2.5 w-2.5 rounded-full bg-foreground/50',
+              )}
               role="status"
               aria-label="Saving"
             />

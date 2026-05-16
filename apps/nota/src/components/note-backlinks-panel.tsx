@@ -2,6 +2,10 @@ import { buildNoteLinkGraph, notesToIdMap } from '@nota/note-link-graph';
 import { useDeferredValue, useMemo, type JSX } from 'react';
 import { cn } from '@/lib/utils';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
+import {
+  NOTA_PRESSABLE_CLASS,
+  NOTA_SHELL_NAV_ITEM_CLASS,
+} from '@/lib/nota-interaction';
 import { useNotesDataVault } from '../context/notes-data-context';
 import { useAppNavigationScreen } from '../hooks/use-app-navigation-screen';
 import { noteHashHref } from './note-detail-panel';
@@ -53,7 +57,9 @@ export function NoteBacklinksPanel({
                 <a
                   href={noteHashHref(id)}
                   className={cn(
-                    'block rounded-md px-2 py-1.5 text-sm transition-colors',
+                    NOTA_SHELL_NAV_ITEM_CLASS,
+                    NOTA_PRESSABLE_CLASS,
+                    'block rounded-md px-2 py-1.5 text-sm',
                     isActive
                       ? 'bg-muted font-medium text-foreground'
                       : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',

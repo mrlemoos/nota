@@ -54,9 +54,12 @@ const mockNotesSidebarState = {
   open: true,
   setOpen: vi.fn(),
   toggle: vi.fn(),
+  widthPx: 288,
+  setSidebarWidthPx: vi.fn(),
   collapsedFolderIds: [] as string[],
   toggleFolderCollapsed: vi.fn(),
   expandFolder: vi.fn(),
+  expandFolderAncestors: vi.fn(),
   pruneCollapsedFolderIds: vi.fn(),
 };
 
@@ -145,7 +148,7 @@ describe('NotesShell', () => {
     notesShellTestCtx.vaultLoading = false;
   });
 
-  it('caps the notes sidebar width on first paint so long titles do not expand the column', () => {
+  it('fixes the notes sidebar width on first paint so long titles do not expand the column', () => {
     // Arrange
     const navigationHash = '#/notes';
     window.history.replaceState(null, '', navigationHash);
@@ -156,8 +159,23 @@ describe('NotesShell', () => {
     // Assert
     const aside = container.querySelector('aside');
     expect(aside).not.toBeNull();
-    expect(aside?.className.includes('max-w-[288px]')).toBe(true);
+    expect(aside?.style.width).toBe('288px');
     expect(screen.getByText(notesShellTestCtx.longTitle)).toBeTruthy();
+  });
+
+  it('renders a vertical resize handle when the sidebar is open', () => {
+    // Arrange
+    window.history.replaceState(null, '', '#/notes');
+
+    // Act
+    const { container } = render(<NotesShell />);
+
+    // Assert
+    expect(
+      container.querySelector(
+        '[role="separator"][aria-orientation="vertical"]',
+      ),
+    ).not.toBeNull();
   });
 
   it('opens the new folder dialog from the menubar request event', async () => {

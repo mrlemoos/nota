@@ -51,6 +51,7 @@ export const CHROME_UI_ES: Record<string, string> = {
   'Loading shortcuts\u2026': 'Cargando atajos\u2026',
   'Close sidebar': 'Cerrar barra lateral',
   'Open sidebar': 'Abrir barra lateral',
+  'Resize sidebar': 'Cambiar tama\u00f1o de la barra lateral',
   'Select a note': 'Selecciona una nota',
   'Choose a note from the sidebar or create a new one.':
     'Elige una nota en la barra lateral o crea una nueva.',
@@ -133,6 +134,7 @@ export const CHROME_UI_PT: Record<string, string> = {
   'Loading shortcuts\u2026': 'Carregando atalhos\u2026',
   'Close sidebar': 'Fechar barra lateral',
   'Open sidebar': 'Abrir barra lateral',
+  'Resize sidebar': 'Redimensionar barra lateral',
   'Select a note': 'Selecione uma nota',
   'Choose a note from the sidebar or create a new one.':
     'Escolha uma nota na barra lateral ou crie uma nova.',
@@ -216,6 +218,7 @@ export const CHROME_UI_FR: Record<string, string> = {
   'Loading shortcuts\u2026': 'Chargement des raccourcis\u2026',
   'Close sidebar': 'Fermer la barre lat\u00e9rale',
   'Open sidebar': 'Ouvrir la barre lat\u00e9rale',
+  'Resize sidebar': 'Redimensionner la barre lat\u00e9rale',
   'Select a note': 'S\u00e9lectionnez une note',
   'Choose a note from the sidebar or create a new one.':
     'Choisissez une note dans la barre lat\u00e9rale ou cr\u00e9ez-en une.',

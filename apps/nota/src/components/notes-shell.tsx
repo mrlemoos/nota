@@ -3,6 +3,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  type CSSProperties,
   lazy,
   Suspense,
   type JSX,
@@ -33,10 +34,14 @@ import {
   gsap,
   NOTA_MOTION_EASE_IN_OUT,
   NOTA_SIDEBAR_S,
-  NOTA_SIDEBAR_WIDTH_PX,
   useGSAP,
   usePrefersReducedMotion,
 } from '@/lib/nota-motion';
+import { useNotesSidebarResize } from '@/lib/use-notes-sidebar-resize';
+import {
+  NOTA_PRESSABLE_CLASS,
+  NOTA_SHELL_NAV_ITEM_CLASS,
+} from '@/lib/nota-interaction';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
 import { useRootLoaderData } from '../context/session-context';
 import { useNotesData } from '../context/notes-data-context';
@@ -62,6 +67,7 @@ import {
   ShellPanel,
   SidebarToggle,
 } from './notes-shell-parts';
+import { NotesSidebarResizeHandle } from './notes-sidebar-resize-handle';
 
 const NotesGraphRoute = lazy(async () => import('../routes/notes.graph'));
 const NotesSettingsRoute = lazy(async () => import('../routes/notes.settings'));
@@ -92,10 +98,18 @@ export function NotesShell(): JSX.Element {
     removeFolderFromList,
     setUserPreferencesInState,
   } = useNotesData();
-  const { open } = useNotesSidebarStore();
+  const { open, widthPx, setSidebarWidthPx } = useNotesSidebarStore();
   const asideRef = useRef<HTMLElement>(null);
+  const sidebarWidthPxRef = useRef(widthPx);
+  sidebarWidthPxRef.current = widthPx;
   const prefersReducedMotion = usePrefersReducedMotion();
   const sidebarMotionReadyRef = useRef(false);
+  const { isResizingRef, onResizePointerDown } = useNotesSidebarResize({
+    asideRef,
+    open,
+    widthPx,
+    setSidebarWidthPx,
+  });
   const { user } = useRootLoaderData();
   const shellReady = !loading;
   const paywalled = Boolean(user && shellReady && !notaProEntitled);
@@ -190,9 +204,11 @@ export function NotesShell(): JSX.Element {
         return;
       }
 
+      const targetWidth = open ? sidebarWidthPxRef.current : 0;
+
       if (prefersReducedMotion) {
         gsap.set(el, {
-          maxWidth: open ? NOTA_SIDEBAR_WIDTH_PX : 0,
+          width: targetWidth,
           opacity: open ? 1 : 0,
         });
         return;
@@ -201,14 +217,14 @@ export function NotesShell(): JSX.Element {
       if (!sidebarMotionReadyRef.current) {
         sidebarMotionReadyRef.current = true;
         gsap.set(el, {
-          maxWidth: open ? NOTA_SIDEBAR_WIDTH_PX : 0,
+          width: targetWidth,
           opacity: open ? 1 : 0,
         });
         return;
       }
 
       gsap.to(el, {
-        maxWidth: open ? NOTA_SIDEBAR_WIDTH_PX : 0,
+        width: targetWidth,
         opacity: open ? 1 : 0,
         duration: NOTA_SIDEBAR_S,
         ease: NOTA_MOTION_EASE_IN_OUT,
@@ -217,6 +233,14 @@ export function NotesShell(): JSX.Element {
     },
     { dependencies: [open, prefersReducedMotion] },
   );
+
+  useLayoutEffect(() => {
+    const el = asideRef.current;
+    if (!el || !open || isResizingRef.current) {
+      return;
+    }
+    gsap.set(el, { width: widthPx });
+  }, [widthPx, open]);
 
   const onCreateNote = (): void => {
     if (!user?.id) {
@@ -247,6 +271,10 @@ export function NotesShell(): JSX.Element {
     noteId: null,
   });
   const showVaultLoading = Boolean(user?.id && loading);
+  const sidebarWidthStyle: CSSProperties = {
+    width: open ? widthPx : 0,
+  };
+
   return (
     <>
       <ElectronMenubarBridge />
@@ -296,10 +324,9 @@ export function NotesShell(): JSX.Element {
           {!paywalled ? (
             <aside
               ref={asideRef}
+              style={sidebarWidthStyle}
               className={cn(
-                'flex h-full min-h-0 min-w-0 shrink-0 flex-col overflow-hidden',
-                // Match NOTA_SIDEBAR_WIDTH_PX so first paint is capped before GSAP applies inline maxWidth.
-                open ? 'max-w-[288px]' : 'max-w-0',
+                'relative flex h-full min-h-0 min-w-0 shrink-0 flex-col overflow-hidden',
                 notesSidebarChrome,
                 !open && 'pointer-events-none',
               )}
@@ -388,7 +415,9 @@ export function NotesShell(): JSX.Element {
                       <a
                         href={graphHref}
                         className={cn(
-                          'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                          NOTA_SHELL_NAV_ITEM_CLASS,
+                          NOTA_PRESSABLE_CLASS,
+                          'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                           panel === 'graph'
                             ? 'bg-muted font-medium text-foreground'
                             : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
@@ -402,7 +431,9 @@ export function NotesShell(): JSX.Element {
                       <a
                         href={shortcutsHref}
                         className={cn(
-                          'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                          NOTA_SHELL_NAV_ITEM_CLASS,
+                          NOTA_PRESSABLE_CLASS,
+                          'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                           panel === 'shortcuts'
                             ? 'bg-muted font-medium text-foreground'
                             : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
@@ -416,7 +447,9 @@ export function NotesShell(): JSX.Element {
                       <a
                         href={settingsHref}
                         className={cn(
-                          'flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors',
+                          NOTA_SHELL_NAV_ITEM_CLASS,
+                          NOTA_PRESSABLE_CLASS,
+                          'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
                           panel === 'settings'
                             ? 'bg-muted font-medium text-foreground'
                             : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
@@ -431,6 +464,12 @@ export function NotesShell(): JSX.Element {
                   </footer>
                 ) : null}
               </NotaTooltipProvider>
+              {open ? (
+                <NotesSidebarResizeHandle
+                  ariaLabel={t('Resize sidebar')}
+                  onPointerDown={onResizePointerDown}
+                />
+              ) : null}
             </aside>
           ) : null}
 

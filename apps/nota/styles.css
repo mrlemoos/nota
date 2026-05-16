@@ -60,6 +60,105 @@
   }
 }
 
+/*
+ * App micro-interactions — tactile feedback on press, not hover drift.
+ * Keeps focus on reading/writing; honours prefers-reduced-motion.
+ */
+.nota-pressable {
+  transition-property:
+    transform, opacity, color, background-color, border-color, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nota-pressable:active {
+    transform: scale(0.98);
+  }
+}
+
+.nota-shell-nav-item {
+  transition:
+    background-color 200ms ease-out,
+    color 200ms ease-out;
+}
+
+.nota-sidebar-row {
+  transition:
+    background-color 200ms ease-out,
+    color 200ms ease-out,
+    opacity 200ms ease-out;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nota-sidebar-row:active {
+    opacity: 0.88;
+  }
+}
+
+.nota-cmdk-item {
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+@keyframes nota-save-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.nota-save-pulse {
+  animation: nota-save-pulse 1.2s ease-in-out infinite;
+}
+
+/* Notes sidebar — drag handle on the inner edge (right). */
+.nota-sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 50;
+  height: 100%;
+  width: 6px;
+  transform: translateX(50%);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.nota-sidebar-resize-handle::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background-color: transparent;
+  transition: background-color 150ms ease-out;
+}
+
+.nota-sidebar-resize-handle:hover::after,
+.nota-sidebar-resize-handle:focus-visible::after {
+  background-color: color-mix(in oklch, var(--border) 80%, var(--foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nota-pressable:active {
+    transform: none;
+  }
+
+  .nota-sidebar-row:active {
+    opacity: 1;
+  }
+
+  .nota-save-pulse {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
 /* Editor caret visuals */
 .nota-caret-surface textarea,
 .nota-caret-surface .tiptap-editor .ProseMirror {

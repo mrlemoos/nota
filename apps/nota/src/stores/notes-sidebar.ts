@@ -1,10 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import {
+  clampNotaSidebarWidthPx,
+  NOTA_SIDEBAR_DEFAULT_WIDTH_PX,
+} from '@/lib/nota-sidebar-width';
 
 export interface NotesSidebarState {
   open: boolean;
   setOpen: (open: boolean) => void;
   toggle: () => void;
+  widthPx: number;
+  setSidebarWidthPx: (widthPx: number) => void;
   /** Folders the user has collapsed; absence from this list = expanded. */
   collapsedFolderIds: string[];
   toggleFolderCollapsed: (folderId: string) => void;
@@ -19,10 +25,11 @@ export interface NotesSidebarState {
 /** Exposed for tests: must stay aligned with `persist` `partialize` (reload safety). */
 export function partializeNotesSidebarForStorage(
   state: NotesSidebarState,
-): Pick<NotesSidebarState, 'open' | 'collapsedFolderIds'> {
+): Pick<NotesSidebarState, 'open' | 'collapsedFolderIds' | 'widthPx'> {
   return {
     open: state.open,
     collapsedFolderIds: state.collapsedFolderIds,
+    widthPx: state.widthPx,
   };
 }
 
@@ -32,6 +39,9 @@ export const useNotesSidebarStore = create<NotesSidebarState>()(
       open: true,
       setOpen: (open) => set({ open }),
       toggle: () => set((s) => ({ open: !s.open })),
+      widthPx: NOTA_SIDEBAR_DEFAULT_WIDTH_PX,
+      setSidebarWidthPx: (widthPx) =>
+        set({ widthPx: clampNotaSidebarWidthPx(widthPx) }),
 
       collapsedFolderIds: [],
       toggleFolderCollapsed: (folderId) =>
@@ -72,6 +82,16 @@ export const useNotesSidebarStore = create<NotesSidebarState>()(
     {
       name: 'nota-notes-sidebar',
       partialize: (state) => partializeNotesSidebarForStorage(state),
+      merge: (persisted, current) => {
+        const p = persisted as Partial<NotesSidebarState> | undefined;
+        return {
+          ...current,
+          ...p,
+          widthPx: clampNotaSidebarWidthPx(
+            typeof p?.widthPx === 'number' ? p.widthPx : current.widthPx,
+          ),
+        };
+      },
     },
   ),
 );

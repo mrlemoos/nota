@@ -43,6 +43,7 @@ import {
 } from '@nota/web-design/tooltip';
 import { cn } from '@/lib/utils';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
+import { NOTA_SIDEBAR_ROW_CLASS } from '@/lib/nota-interaction';
 import type { Folder, Note, UserPreferences } from '~/types/database.types';
 import type { NotesShellPanel } from '../lib/app-navigation';
 import { noteHashHref } from './note-detail-panel';
@@ -139,7 +140,8 @@ function NoteRow(options: {
           render={
             <div
               className={cn(
-                'flex transform-gpu items-center gap-0 rounded-md transition-[transform,colors,opacity] duration-300 ease-in-out hover:scale-[1.01]',
+                NOTA_SIDEBAR_ROW_CLASS,
+                'flex transform-gpu items-center gap-0 rounded-md',
                 isActive ? 'bg-muted' : 'text-foreground hover:bg-muted/60',
                 noteIsDragged && 'opacity-60',
               )}
