@@ -44,7 +44,7 @@
     "@nx/eslint-plugin": "^22.6.5",
     "@nx/js": "22.7.0",
     "@nx/react": "22.7.0",
-    "@nx/vite": "22.6.5",
+    "@nx/vite": "22.7.2",
     "@nx/vitest": "22.6.1",
     "@nx/web": "22.6.5",
     "@nx/workspace": "22.6.1",
