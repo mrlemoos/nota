@@ -1,0 +1,185 @@
+import { useMemo, type JSX } from 'react';
+import { cn } from '@/lib/utils';
+import { buildJournalCalendarCells } from '@/lib/journal-calendar';
+import { localDateKey } from '@/lib/todays-note';
+import { useNotaTranslator } from '@/lib/use-nota-translator';
+
+const WEEKDAY_KEYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
+
+const navButtonClass = cn(
+  'inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground',
+  'transition-colors hover:bg-muted/60 hover:text-foreground',
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+);
+
+export function JournalCalendar({
+  year,
+  month,
+  dateKeysWithNotes,
+  selectedDateKey,
+  onSelectDateKey,
+  onMonthChange,
+}: {
+  year: number;
+  month: number;
+  dateKeysWithNotes: ReadonlySet<string>;
+  selectedDateKey: string | null;
+  onSelectDateKey: (dateKey: string | null) => void;
+  onMonthChange: (year: number, month: number) => void;
+}): JSX.Element {
+  const { t } = useNotaTranslator();
+  const cells = useMemo(
+    () => buildJournalCalendarCells(year, month),
+    [month, year],
+  );
+
+  const monthLabel = useMemo(() => {
+    return new Date(year, month, 1).toLocaleDateString(undefined, {
+      month: 'long',
+      year: 'numeric',
+    });
+  }, [month, year]);
+
+  const todayKey = useMemo(() => localDateKey(new Date()), []);
+
+  const goMonth = (delta: number): void => {
+    const next = new Date(year, month + delta, 1);
+    onMonthChange(next.getFullYear(), next.getMonth());
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="font-serif text-lg font-semibold tracking-normal text-foreground">
+          {monthLabel}
+        </h2>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              goMonth(-1);
+            }}
+            className={navButtonClass}
+            aria-label={t('Previous month')}
+          >
+            <ChevronLeft />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              goMonth(1);
+            }}
+            className={navButtonClass}
+            aria-label={t('Next month')}
+          >
+            <ChevronRight />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+        {WEEKDAY_KEYS.map((key) => (
+          <span key={key} className="py-1">
+            {t(key)}
+          </span>
+        ))}
+      </div>
+
+      <div
+        className="grid grid-cols-7 gap-1"
+        role="grid"
+        aria-label={t('Journal calendar')}
+      >
+        {cells.map((cell) => {
+          const hasNote = dateKeysWithNotes.has(cell.dateKey);
+          const isSelected = selectedDateKey === cell.dateKey;
+          const isToday = cell.dateKey === todayKey;
+          const day = cell.date.getDate();
+
+          return (
+            <button
+              key={cell.dateKey}
+              type="button"
+              role="gridcell"
+              aria-selected={isSelected}
+              disabled={!cell.inMonth}
+              onClick={() => {
+                if (!cell.inMonth) {
+                  return;
+                }
+                onSelectDateKey(isSelected ? null : cell.dateKey);
+              }}
+              className={cn(
+                'relative flex min-h-[2.75rem] flex-col items-center justify-center rounded-lg px-0.5 py-1 text-sm transition-colors',
+                cell.inMonth
+                  ? 'text-foreground hover:bg-muted/50'
+                  : 'pointer-events-none text-transparent',
+                isSelected &&
+                  cell.inMonth &&
+                  'bg-muted/80 ring-1 ring-border/80',
+                isToday &&
+                  cell.inMonth &&
+                  !isSelected &&
+                  'ring-1 ring-primary/40',
+              )}
+            >
+              <span
+                className={cn(
+                  'tabular-nums',
+                  !cell.inMonth && 'opacity-0',
+                  isToday && cell.inMonth && 'font-semibold text-primary',
+                )}
+              >
+                {day}
+              </span>
+              {hasNote && cell.inMonth ? (
+                <span
+                  className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.45)]"
+                  aria-hidden
+                />
+              ) : (
+                <span className="mt-0.5 h-1 w-1 shrink-0" aria-hidden />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function ChevronLeft(): JSX.Element {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+function ChevronRight(): JSX.Element {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-4 w-4"
+      aria-hidden
+    >
+      <path
+        fillRule="evenodd"
+        d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}

@@ -137,6 +137,36 @@ describe('parseAppNavFromLocation', () => {
     });
   });
 
+  it('returns notes journal when hash is #/notes/journal', () => {
+    // Arrange
+    stubWindowHash('#/notes/journal');
+
+    // Act
+    const result = parseAppNavFromLocation();
+
+    // Assert
+    expect(result).toEqual({
+      kind: 'notes',
+      panel: 'journal',
+      noteId: null,
+    });
+  });
+
+  it('hashForScreen maps journal to #/notes/journal', () => {
+    // Arrange
+    const screen = {
+      kind: 'notes' as const,
+      panel: 'journal' as const,
+      noteId: null,
+    };
+
+    // Act
+    const href = hashForScreen(screen);
+
+    // Assert
+    expect(href).toBe('#/notes/journal');
+  });
+
   it('returns notes graph when hash is #/notes/graph', () => {
     // Arrange
     stubWindowHash('#/notes/graph');

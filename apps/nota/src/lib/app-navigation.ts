@@ -10,6 +10,7 @@ export type NotesShellPanel =
   | 'list'
   | 'note'
   | 'graph'
+  | 'journal'
   | 'settings'
   | 'shortcuts';
 
@@ -73,6 +74,9 @@ export function parseAppNavFromLocation(): AppNavScreen {
   if (path === '/notes/graph' || path === '/notes/graph/') {
     return { kind: 'notes', panel: 'graph', noteId: null };
   }
+  if (path === '/notes/journal' || path === '/notes/journal/') {
+    return { kind: 'notes', panel: 'journal', noteId: null };
+  }
   if (path === '/notes/settings' || path === '/notes/settings/') {
     return { kind: 'notes', panel: 'settings', noteId: null };
   }
@@ -112,6 +116,8 @@ export function hashForScreen(screen: AppNavScreen): string {
           return '#/notes';
         case 'graph':
           return '#/notes/graph';
+        case 'journal':
+          return '#/notes/journal';
         case 'settings':
           return '#/notes/settings';
         case 'shortcuts':
@@ -171,6 +177,10 @@ export function navigateFromLegacyPath(to: string): void {
   }
   if (t.startsWith('/notes/graph')) {
     setAppHash({ kind: 'notes', panel: 'graph', noteId: null });
+    return;
+  }
+  if (t.startsWith('/notes/journal')) {
+    setAppHash({ kind: 'notes', panel: 'journal', noteId: null });
     return;
   }
   if (t.startsWith('/notes/settings')) {

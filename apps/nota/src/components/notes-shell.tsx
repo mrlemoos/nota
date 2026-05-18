@@ -8,6 +8,7 @@ import {
   type JSX,
 } from 'react';
 import {
+  Calendar03Icon,
   Flowchart01Icon,
   Settings01Icon,
   SparklesIcon,
@@ -38,6 +39,7 @@ import {
 } from '@/lib/nota-motion';
 import { getNotaSidebarAsideMotionTargets } from '@/lib/nota-sidebar-shell-motion';
 import { useNotesSidebarResize } from '@/lib/use-notes-sidebar-resize';
+import { hasJournalNotes } from '@/lib/journal-notes';
 import {
   NOTA_PRESSABLE_CLASS,
   NOTA_SHELL_NAV_ITEM_CLASS,
@@ -70,6 +72,7 @@ import {
 import { NotesSidebarResizeHandle } from './notes-sidebar-resize-handle';
 
 const NotesGraphRoute = lazy(async () => import('../routes/notes.graph'));
+const NotesJournalRoute = lazy(async () => import('../routes/notes.journal'));
 const NotesSettingsRoute = lazy(async () => import('../routes/notes.settings'));
 const NotesShortcutsRoute = lazy(
   async () => import('../routes/notes.shortcuts'),
@@ -178,6 +181,7 @@ export function NotesShell(): JSX.Element {
     void import('../routes/notes.settings');
     void import('../routes/notes.shortcuts');
     void import('../routes/notes.graph');
+    void import('../routes/notes.journal');
   }, []);
 
   useLayoutEffect(() => {
@@ -278,6 +282,13 @@ export function NotesShell(): JSX.Element {
     panel: 'shortcuts',
     noteId: null,
   });
+  const journalHref = hashForScreen({
+    kind: 'notes',
+    panel: 'journal',
+    noteId: null,
+  });
+  const showJournalNav = hasJournalNotes(notes);
+
   return (
     <>
       <ElectronMenubarBridge />
@@ -462,6 +473,24 @@ export function NotesShell(): JSX.Element {
                         </span>
                         {t('Settings')}
                       </a>
+                      {showJournalNav ? (
+                        <a
+                          href={journalHref}
+                          className={cn(
+                            NOTA_SHELL_NAV_ITEM_CLASS,
+                            NOTA_PRESSABLE_CLASS,
+                            'flex items-center gap-2 rounded-md px-3 py-2 text-sm',
+                            panel === 'journal'
+                              ? 'bg-muted font-medium text-foreground'
+                              : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground',
+                          )}
+                        >
+                          <span className="inline-flex shrink-0" aria-hidden>
+                            <HugeiconsIcon icon={Calendar03Icon} size={16} />
+                          </span>
+                          {t('Journal')}
+                        </a>
+                      ) : null}
                     </div>
                   </footer>
                 ) : null}
@@ -520,6 +549,18 @@ export function NotesShell(): JSX.Element {
                 }
               >
                 <NotesGraphRoute />
+              </Suspense>
+            </ShellPanel>
+            <ShellPanel
+              active={panel === 'journal'}
+              panelId="nota-panel-journal"
+            >
+              <Suspense
+                fallback={
+                  <LazyNotesRouteFallback label={t('Loading journal…')} />
+                }
+              >
+                <NotesJournalRoute />
               </Suspense>
             </ShellPanel>
             <ShellPanel

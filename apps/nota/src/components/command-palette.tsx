@@ -14,6 +14,7 @@ import type { DialogRoot } from '@base-ui/react/dialog';
 import { Command, defaultFilter } from 'cmdk';
 import {
   AiAudioIcon,
+  Calendar03Icon,
   ComputerIcon,
   Flowchart01Icon,
   Logout01Icon,
@@ -53,6 +54,7 @@ import {
 import type { Folder } from '~/types/database.types';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
 import { flattenFoldersWithPathLabels } from '../lib/folder-tree';
+import { hasJournalNotes } from '../lib/journal-notes';
 import {
   FOLDER_TINT_PALETTE_PRESETS,
   FOLDER_TINT_PRESET_LABEL_KEY,
@@ -157,6 +159,7 @@ export function CommandPalette(): JSX.Element {
     () => flattenFoldersWithPathLabels(folders, pathSep),
     [folders, pathSep],
   );
+  const showJournalCommand = hasJournalNotes(notes);
   const { user } = useRootLoaderData();
   const { signOut } = useClerk();
   const openTodaysNoteShortcut = useNotaPreferencesStore(
@@ -1412,6 +1415,36 @@ export function CommandPalette(): JSX.Element {
                         />
                         <span className="min-w-0 flex-1">Open note graph</span>
                       </Command.Item>
+                      {showJournalCommand ? (
+                        <Command.Item
+                          value="open-journal"
+                          keywords={[
+                            'journal',
+                            'calendar',
+                            'diary',
+                            'dates',
+                            'timeline',
+                            'day',
+                          ]}
+                          onSelect={() => {
+                            navigateFromLegacyPath('/notes/journal');
+                            closePalette();
+                          }}
+                          className={cn(
+                            commandItemRowClass,
+                            'group text-foreground',
+                            'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                          )}
+                        >
+                          <PaletteItemIcon
+                            icon={Calendar03Icon}
+                            className="text-muted-foreground group-aria-selected:text-accent-foreground"
+                          />
+                          <span className="min-w-0 flex-1">
+                            {t('Open journal')}
+                          </span>
+                        </Command.Item>
+                      ) : null}
                       <Command.Item
                         value="study-notes-from-recording"
                         disabled={busy || startingAudioNote}
