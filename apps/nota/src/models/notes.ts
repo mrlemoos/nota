@@ -49,8 +49,6 @@ export async function createNote(
   content: unknown = { type: 'doc', content: [{ type: 'paragraph' }] },
   options?: {
     id?: string;
-    due_at?: string | null;
-    is_deadline?: boolean;
     editor_settings?: Json;
     folder_id?: string | null;
   },
@@ -60,10 +58,6 @@ export async function createNote(
     title,
     content: content as Json,
     ...(options?.id ? { id: options.id } : {}),
-    ...(options?.due_at !== undefined ? { due_at: options.due_at } : {}),
-    ...(options?.is_deadline !== undefined
-      ? { is_deadline: options.is_deadline }
-      : {}),
     ...(options?.editor_settings !== undefined
       ? { editor_settings: options.editor_settings }
       : {}),

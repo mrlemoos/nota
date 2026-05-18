@@ -42,18 +42,3 @@ export {
   tryConfirmNoteMention,
 } from './tiptap-note-mention-flow';
 export type { NoteMentionConfirmRefs } from './tiptap-note-mention-flow';
-
-export {
-  allDateSpansInText,
-  dateSpanContainingOffset,
-  firstDateFromText,
-  parseNaturalDueDate,
-} from './lib/parse-natural-due-date';
-
-export {
-  NoteDueDatePickerPanel,
-  dueInstantIsLocalStartOfDay,
-  initialIncludeTimeFromPersisted,
-  isInteractiveBubbleTarget,
-  keepBubbleSelectionUnlessTextField,
-} from './components/note-due-date-picker-panel';

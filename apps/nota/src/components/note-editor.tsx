@@ -547,68 +547,6 @@ function NoteEditorImpl({
     [scheduleContentSave, scheduleTypewriterScroll],
   );
 
-  const persistDueDate = useCallback(
-    async (dueAt: string | null, isDeadline: boolean) => {
-      const userId = userIdRef.current;
-      if (!userId) {
-        return;
-      }
-      const n = noteRef.current;
-      const titleForRow = persistedDisplayTitle(titleRef.current);
-      const contentForRow = (pendingContentRef.current ??
-        lastSavedContent.current) as Json;
-      setSaveStatus('saving');
-      try {
-        await saveLocalNoteDraft(userId, {
-          id: n.id,
-          title: titleForRow,
-          content: contentForRow,
-          user_id: n.user_id,
-          created_at: n.created_at,
-          due_at: dueAt,
-          is_deadline: isDeadline,
-          editor_settings: n.editor_settings,
-        });
-        if (isLikelyOnline() && notaProEntitledRef.current) {
-          const client = getBrowserClient();
-          const updatedNote = await updateNote(client, n.id, {
-            due_at: dueAt,
-            is_deadline: isDeadline,
-          });
-          await markNoteSyncedFromServer(userId, updatedNote);
-          onNoteUpdatedRef.current?.(
-            mergeUpdatedNoteLocalContent(
-              updatedNote,
-              pendingContentRef.current,
-              lastSavedContent.current,
-            ),
-          );
-        } else {
-          onNoteUpdatedRef.current?.(
-            mergeUpdatedNoteLocalContent(
-              {
-                ...n,
-                due_at: dueAt,
-                is_deadline: isDeadline,
-                updated_at: new Date().toISOString(),
-              },
-              pendingContentRef.current,
-              lastSavedContent.current,
-            ),
-          );
-        }
-        setSaveStatus('saved');
-      } catch (error) {
-        console.error('Failed to save due date:', error);
-        setSaveStatus('error');
-        if (notaProEntitledRef.current) {
-          void drainNotesOutbox(userId);
-        }
-      }
-    },
-    [],
-  );
-
   const persistEditorSettings = useCallback(
     async (next: NoteEditorSettings) => {
       const userId = userIdRef.current;
@@ -823,9 +761,6 @@ function NoteEditorImpl({
           userId={user?.id ?? ''}
           noteMentionCandidates={noteMentionCandidates}
           attachments={attachments}
-          dueAt={note.due_at}
-          isDeadline={note.is_deadline}
-          onSaveDueDate={persistDueDate}
           bodyEditorRef={bodyEditorRef}
           proEntitled={notaProEntitled}
           emojiReplacerEnabled={emojiReplacerEnabled}

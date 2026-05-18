@@ -2,8 +2,6 @@
 
 @import '@nota/web-design/theme-chrome.css';
 
-@import 'react-day-picker/style.css';
-
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
@@ -17,26 +15,6 @@
 
 .electron-window-no-drag {
   -webkit-app-region: no-drag;
-}
-
-/* Due date popover calendar — semantic tokens (avoid hard-coded greys) */
-.nota-due-day-picker .rdp-root {
-  --rdp-accent-color: var(--primary);
-  --rdp-accent-background-color: color-mix(
-    in oklch,
-    var(--muted) 80%,
-    transparent
-  );
-  --rdp-today-color: var(--primary);
-  color: var(--foreground);
-}
-
-.nota-due-day-picker .rdp-weekday {
-  color: var(--muted-foreground);
-}
-
-.nota-due-day-picker .rdp-outside {
-  opacity: 0.45;
 }
 
 /* Note open — gentle reveal when switching notes */
@@ -211,13 +189,6 @@
 .tiptap-editor .ProseMirror {
   outline: none;
   min-height: min(50vh, 480px);
-}
-
-.tiptap-editor .nota-nl-due-date-hit {
-  color: var(--primary);
-  text-decoration: underline;
-  text-decoration-style: dotted;
-  text-underline-offset: 2px;
 }
 
 .tiptap-editor .note-pdf-block[data-drag-handle] {

@@ -110,27 +110,6 @@ describe('mergeNoteWithLocal', () => {
     // Assert
     expect(merged.folder_id).toBe(folderB);
   });
-
-  it('prefers local due_at and is_deadline when local is dirty', () => {
-    // Arrange
-    const server = makeNote({
-      due_at: '2025-01-01T12:00:00Z',
-      is_deadline: false,
-    });
-    const local = makeStored({
-      dirty: true,
-      due_at: '2025-06-15T09:00:00Z',
-      is_deadline: true,
-      updated_at: '2020-01-03T00:00:00Z',
-    });
-
-    // Act
-    const merged = mergeNoteWithLocal(server, local);
-
-    // Assert
-    expect(merged.due_at).toBe('2025-06-15T09:00:00Z');
-    expect(merged.is_deadline).toBe(true);
-  });
 });
 
 describe('mergeNoteLists', () => {

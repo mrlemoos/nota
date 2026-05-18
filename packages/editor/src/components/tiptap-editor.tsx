@@ -44,8 +44,6 @@ import {
 import { setNotaSmilieReplacerEnabled } from '../lib/nota-smilie-replacer-gate';
 import { NotaSmilieReplacer } from './tiptap/nota-smilie-replacer-extension';
 import { TableEditorMenu } from './tiptap/table-editor-menu';
-import { NoteDueDateBubbleMenu } from './note-due-date-bubble-menu';
-import { NotaDueDateInteraction } from './tiptap/nota-due-date-interaction';
 import { persistedDisplayTitle } from '../lib/note-title';
 import { findNoteMentionTrigger } from '../lib/tiptap-note-mention';
 import { NoteLinkMentionMenu } from './tiptap/note-link-mention-menu';
@@ -99,9 +97,6 @@ export interface TipTapEditorProps {
   userId: string;
   noteMentionCandidates: Note[];
   attachments: NoteAttachment[];
-  dueAt?: string | null;
-  isDeadline?: boolean;
-  onSaveDueDate?: (dueAt: string | null, isDeadline: boolean) => Promise<void>;
   bodyEditorRef?: MutableRefObject<Editor | null>;
 
   proEntitled?: boolean;
@@ -125,9 +120,6 @@ export function TipTapEditor({
   userId,
   noteMentionCandidates,
   attachments,
-  dueAt = null,
-  isDeadline = false,
-  onSaveDueDate,
   bodyEditorRef,
   proEntitled = false,
   emojiReplacerEnabled = false,
@@ -258,9 +250,8 @@ export function TipTapEditor({
       TableRow,
       TableHeader,
       TableCell,
-      ...(onSaveDueDate ? [NotaDueDateInteraction] : []),
     ],
-    [onSaveDueDate, placeholder],
+    [placeholder],
   );
 
   const stableEditorProps = useMemo(
@@ -675,15 +666,6 @@ export function TipTapEditor({
           }
         >
           <TableEditorMenu editor={editor} />
-          {onSaveDueDate ? (
-            <NoteDueDateBubbleMenu
-              editor={editor}
-              dueAt={dueAt}
-              isDeadline={isDeadline}
-              disabled={!userId}
-              onSaveDueDate={onSaveDueDate}
-            />
-          ) : null}
           <EditorContent editor={editor} />
         </div>
         <NoteLinkMentionMenu
