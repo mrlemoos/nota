@@ -54,7 +54,7 @@ describe('notes-sidebar-tree-styles', () => {
     // Assert
     expect(folderRow).toContain('py-1');
     expect(folderRow).toContain('before:h-7');
-    expect(noteRow).toContain('py-2');
+    expect(noteRow).toContain('py-1.5');
     expect(noteRow).not.toContain('before:h-8');
   });
 

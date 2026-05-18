@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority';
 export const NOTA_SIDEBAR_TREE_BRANCH_CLASS = 'ml-4 overflow-hidden pl-1';
 
 const treeNoteRowBase =
-  'group flex w-full min-w-0 cursor-pointer items-center rounded-lg py-2 text-left transition-colors';
+  'group flex w-full min-w-0 cursor-pointer items-center rounded-lg py-1.5 text-left transition-colors';
 
 const treeFolderRowBase =
   'group relative flex w-full min-w-0 cursor-pointer items-center rounded-md py-1 text-left transition-all before:absolute before:inset-y-0 before:left-0 before:-z-10 before:h-7 before:w-full before:rounded-md before:bg-accent/70 before:opacity-0 before:transition-opacity hover:before:opacity-100';
@@ -56,7 +56,7 @@ export const notesSidebarTreeChevronClass =
 
 /** Note leaf row inside a folder branch. */
 export const notesSidebarTreeLeafRowVariants = cva(
-  `${treeNoteRowBase} ml-5 items-start gap-0`,
+  `${treeNoteRowBase} ml-5 gap-0`,
   {
     variants: {
       selected: {

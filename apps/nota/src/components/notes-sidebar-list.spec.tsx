@@ -23,6 +23,52 @@ describe('NotesSidebarList', () => {
     useNotesSidebarStore.setState({ open: true, collapsedFolderIds: [] });
   });
 
+  it('renders note title only without the last updated date', () => {
+    // Arrange
+    const updatedAt = '2026-04-15T12:00:00.000Z';
+    const formattedDate = new Date(updatedAt).toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    });
+
+    render(
+      <NotesSidebarList
+        notes={[
+          {
+            id: 'note-1',
+            user_id: 'user-1',
+            title: 'Alpha note',
+            content: {},
+            created_at: updatedAt,
+            updated_at: updatedAt,
+            due_at: null,
+            is_deadline: false,
+            editor_settings: {},
+            banner_attachment_id: null,
+            folder_id: null,
+          },
+        ]}
+        folders={[]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    // Assert
+    expect(screen.getByText('Alpha note')).toBeTruthy();
+    expect(screen.queryByText(formattedDate)).toBeNull();
+  });
+
   it('allows inline folder rename on double click and commits on blur', () => {
     // Arrange
     const patchFolderInList = vi.fn();

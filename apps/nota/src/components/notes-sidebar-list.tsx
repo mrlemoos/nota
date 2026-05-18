@@ -179,12 +179,6 @@ function NoteRow(options: {
                     </NotaTooltipPositioner>
                   </NotaTooltipPortal>
                 </NotaTooltip>
-                <div className="mt-0.5 text-xs text-muted-foreground">
-                  {new Date(note.updated_at).toLocaleDateString(undefined, {
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </div>
               </a>
             </div>
           }
