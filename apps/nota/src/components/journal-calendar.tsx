@@ -134,7 +134,11 @@ export function JournalCalendar({
               </span>
               {hasNote && cell.inMonth ? (
                 <span
-                  className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.45)]"
+                  className={cn(
+                    'mt-0.5 h-1 w-1 shrink-0 rounded-full',
+                    'bg-foreground shadow-[0_0_4px_rgba(0,0,0,0.2)]',
+                    'dark:bg-white dark:shadow-[0_0_6px_rgba(255,255,255,0.45)]',
+                  )}
                   aria-hidden
                 />
               ) : (
