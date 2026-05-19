@@ -28,6 +28,12 @@
       "import": "./dist/context-menu.js",
       "default": "./dist/context-menu.js"
     },
+    "./hover-card": {
+      "@nota/source": "./src/components/hover-card.tsx",
+      "types": "./dist/components/hover-card.d.ts",
+      "import": "./dist/hover-card.js",
+      "default": "./dist/hover-card.js"
+    },
     "./spinner": {
       "@nota/source": "./src/components/spinner.tsx",
       "types": "./dist/components/spinner.d.ts",

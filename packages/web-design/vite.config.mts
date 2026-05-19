@@ -10,6 +10,7 @@ const libEntries = {
   button: path.join(root, 'src/components/button.tsx'),
   card: path.join(root, 'src/components/card.tsx'),
   tooltip: path.join(root, 'src/components/tooltip.tsx'),
+  'hover-card': path.join(root, 'src/components/hover-card.tsx'),
   spinner: path.join(root, 'src/components/spinner.tsx'),
   'nota-tint-circle': path.join(root, 'src/components/nota-tint-circle.tsx'),
   utils: path.join(root, 'src/lib/utils.ts'),
