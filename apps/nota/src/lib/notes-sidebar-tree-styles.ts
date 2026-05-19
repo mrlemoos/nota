@@ -10,7 +10,7 @@ const treeFolderRowBase =
   'group relative flex w-full min-w-0 cursor-pointer items-center rounded-md py-1 text-left transition-all before:absolute before:inset-y-0 before:left-0 before:-z-10 before:h-7 before:w-full before:rounded-md before:bg-accent/70 before:opacity-0 before:transition-opacity hover:before:opacity-100';
 
 /**
- * Note row highlight — selected state only (no hover background).
+ * Note row highlight :  selected state only (no hover background).
  */
 export const notesSidebarTreeRowVariants = cva(treeNoteRowBase, {
   variants: {
@@ -29,7 +29,7 @@ export const notesSidebarTreeRowVariants = cva(treeNoteRowBase, {
   },
 });
 
-/** Folder row — slimmer than note rows. */
+/** Folder row :  slimmer than note rows. */
 export const notesSidebarTreeFolderRowVariants = cva(treeFolderRowBase, {
   variants: {
     dragOver: {
@@ -50,7 +50,7 @@ export const notesSidebarTreeFolderTriggerClass =
 export const notesSidebarTreeFolderLabelClass =
   'block min-w-0 flex-1 truncate text-left text-sm leading-tight';
 
-/** Chevron on folder rows — rotates when expanded. */
+/** Chevron on folder rows :  rotates when expanded. */
 export const notesSidebarTreeChevronClass =
   'mr-0.5 size-3.5 shrink-0 text-muted-foreground/50 transition-transform duration-200';
 

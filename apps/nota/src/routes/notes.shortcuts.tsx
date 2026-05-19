@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { notaKbdReferenceValueClass } from '@/lib/nota-kbd-styles';
 import {
   filterShortcutCatalogSections,
+  NOTA_SHORTCUT_PLACEHOLDER_KEY,
   NOTA_SHORTCUT_SECTIONS,
 } from '@/lib/nota-shortcuts-catalogue';
 import { navigatorLooksLikeApplePlatform } from '@/lib/navigator-apple-platform';
@@ -53,7 +54,7 @@ export default function NotesShortcuts(): JSX.Element {
             <ul className="divide-y divide-border/60 rounded-lg border border-border/60 bg-muted/20">
               {section.rows.map((row, rowIndex) => {
                 const keys = isApple ? row.keysApple : row.keysOther;
-                const showKbd = keys !== '—';
+                const showKbd = keys !== NOTA_SHORTCUT_PLACEHOLDER_KEY;
                 return (
                   <li
                     key={`${section.id}-${rowIndex}`}

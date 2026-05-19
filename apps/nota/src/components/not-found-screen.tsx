@@ -43,7 +43,7 @@ export function NotFoundScreen({
         />
       </div>
 
-      {/* Oversized numeral — editorial margin, not a shouty error chrome */}
+      {/* Oversized numeral :  editorial margin, not a shouty error chrome */}
       <div
         className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
         aria-hidden

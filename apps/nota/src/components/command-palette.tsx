@@ -317,12 +317,12 @@ export function CommandPalette(): JSX.Element {
     }
     if (moveFlow === 'pickNote') {
       return moveMultiSelectActive
-        ? 'Move notes — pick notes'
-        : 'Move note — pick note';
+        ? 'Move notes: pick notes'
+        : 'Move note: pick note';
     }
     return moveTargetNoteIds.length > 1
-      ? `Move ${moveTargetNoteIds.length} notes — destination`
-      : 'Move note — destination';
+      ? `Move ${moveTargetNoteIds.length} notes: destination`
+      : 'Move note: destination';
   }, [busyAction, moveFlow, moveMultiSelectActive, moveTargetNoteIds.length]);
 
   const commandFilter = useCallback(
@@ -696,7 +696,7 @@ export function CommandPalette(): JSX.Element {
                   onValueChange={setPaletteSearch}
                   placeholder={
                     semanticSearchEnabled
-                      ? 'Commands and Semantic Search — use quotes for exact phrases…'
+                      ? 'Commands and Semantic Search: use quotes for exact phrases…'
                       : 'Type a command…'
                   }
                   className={cn(
@@ -876,7 +876,7 @@ export function CommandPalette(): JSX.Element {
                   ) : null}
                   {notaProEntitled && deleteFolderPickerOpen ? (
                     <Command.Group
-                      heading="Delete folder — pick folder"
+                      heading="Delete folder: pick folder"
                       className={groupHeadingClassName}
                     >
                       {foldersWithPaths.map(({ folder: f, pathLabel }) => (
@@ -923,7 +923,7 @@ export function CommandPalette(): JSX.Element {
                   ) : null}
                   {notaProEntitled && renameFolderPickerOpen ? (
                     <Command.Group
-                      heading="Rename folder — pick folder"
+                      heading="Rename folder: pick folder"
                       className={groupHeadingClassName}
                     >
                       {foldersWithPaths.map(({ folder: f, pathLabel }) => (
@@ -971,7 +971,7 @@ export function CommandPalette(): JSX.Element {
                   ) : null}
                   {notaProEntitled && tintFolderFlow === 'pickFolder' ? (
                     <Command.Group
-                      heading={t('Tint folder — pick folder')}
+                      heading={t('Tint folder: pick folder')}
                       className={groupHeadingClassName}
                     >
                       {foldersWithPaths.map(({ folder: f, pathLabel }) => (
@@ -1023,7 +1023,7 @@ export function CommandPalette(): JSX.Element {
                   tintFolderFlow === 'pickColour' &&
                   tintFolderId ? (
                     <Command.Group
-                      heading={t('Tint folder — choose colour')}
+                      heading={t('Tint folder: choose colour')}
                       className={groupHeadingClassName}
                     >
                       {FOLDER_TINT_PALETTE_PRESETS.map((preset) => (

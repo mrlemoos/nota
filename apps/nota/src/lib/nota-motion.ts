@@ -8,13 +8,13 @@ export const NOTA_MOTION_EASE_OUT = 'sine.out';
 export const NOTA_MOTION_EASE_IN = 'sine.in';
 export const NOTA_MOTION_EASE_IN_OUT = 'sine.inOut';
 
-/** Calm motion band ~300–500ms — palette, shell chrome. */
+/** Calm motion band ~300–500ms :  palette, shell chrome. */
 export const NOTA_PALETTE_ENTER_S = 0.4;
 export const NOTA_PALETTE_EXIT_S = 0.35;
 
 export const NOTA_SIDEBAR_S = 0.45;
 export const NOTA_SIDEBAR_WIDTH_PX = 288;
-/** Horizontal slide (px) when the notes sidebar closes — content exits to the left. */
+/** Horizontal slide (px) when the notes sidebar closes :  content exits to the left. */
 export const NOTA_SIDEBAR_SLIDE_PX = 20;
 
 export const NOTA_BUTTON_PRESS_S = 0.25;

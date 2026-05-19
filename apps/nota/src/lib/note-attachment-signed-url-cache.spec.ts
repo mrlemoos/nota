@@ -46,7 +46,7 @@ describe('note-attachment-signed-url-cache', () => {
     setCachedNoteAttachmentSignedUrl(id, path, 'https://x.test/u', 3600);
     const safetyMarginMs = Math.max(60_000, Math.floor(3600 * 0.15 * 1000));
 
-    // Act — valid while now < expiresAt - safetyMargin
+    // Act :  valid while now < expiresAt - safetyMargin
     vi.setSystemTime(t0 + 3600 * 1000 - safetyMarginMs + 1);
     const got = getCachedNoteAttachmentSignedUrl(id, path);
 

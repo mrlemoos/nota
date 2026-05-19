@@ -703,7 +703,7 @@ export function NotesSidebarList({
   }, [renamingFolderId]);
 
   // Expand the folder when the user opens a note inside a collapsed section (e.g. palette, graph),
-  // not when they manually collapse with the same note open—deps omit collapsed state on purpose.
+  // not when they manually collapse with the same note open: deps omit collapsed state on purpose.
   useEffect(() => {
     if (panel !== 'note' || !routeNoteId) {
       return;

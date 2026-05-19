@@ -73,7 +73,7 @@ describe('NotaClerkSignIn auth flow', () => {
     const emailCodeBlock = extractStrategyBlock(source, 'email_code');
     const emailLinkBlock = extractStrategyBlock(source, 'email_link');
 
-    // The choose-strategy step must exist — SupportedStrategy only works there
+    // The choose-strategy step must exist :  SupportedStrategy only works there
     // because STRATEGY.UPDATE is only handled by the XState inner machine in
     // ChooseStrategy state, not in Pending.
     const hasChooseStrategyStep = source.includes(

@@ -26,17 +26,17 @@ export function formatStudyNoteTitle(
   const base = `Study note: ${dailyNoteDisplayTitle(d)}`;
   const topic = modelTitle.trim();
   if (isUsableTopicTitle(topic)) {
-    return `${base} — ${topic}`;
+    return `${base}: ${topic}`;
   }
   return base;
 }
 
 /** Title shown while recording before generation completes (uses today’s local date). */
 export function studyNotePlaceholderRecordingTitle(): string {
-  return `Study note: ${dailyNoteDisplayTitle(new Date())} — recording`;
+  return `Study note: ${dailyNoteDisplayTitle(new Date())}: recording`;
 }
 
 /** Title when the job is queued offline for sync. */
 export function studyNotePlaceholderQueuedTitle(): string {
-  return `Study note: ${dailyNoteDisplayTitle(new Date())} — queued for sync`;
+  return `Study note: ${dailyNoteDisplayTitle(new Date())}: queued for sync`;
 }

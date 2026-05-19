@@ -57,7 +57,7 @@ export function NoteDetailPanel({
     null,
   );
 
-  /** List row for the open id — avoids an empty state flash while the full fetch runs after a note switch. */
+  /** List row for the open id :  avoids an empty state flash while the full fetch runs after a note switch. */
   const noteFromList = notes.find((n) => n.id === noteId) ?? null;
   const displayNote = note?.id === noteId ? note : noteFromList;
 

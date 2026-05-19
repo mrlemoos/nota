@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils';
 
 /**
  * Clerk can default `needs_first_factor` to `reset_password_email_code` when both
- * password and reset are supported — wrong for normal sign-in. Only honour reset
+ * password and reset are supported :  wrong for normal sign-in. Only honour reset
  * after the user explicitly taps "Send reset code" on the forgot-password step.
  */
 const notaSignInPasswordPreferGate = {
@@ -42,7 +42,7 @@ const rootStackClass = 'flex flex-col gap-6';
 
 /**
  * `STRATEGY.UPDATE` is only handled by the Clerk Elements XState inner machine in
- * `ChooseStrategy` state — in `Pending` it is silently dropped. `<SignIn.SupportedStrategy>`
+ * `ChooseStrategy` state :  in `Pending` it is silently dropped. `<SignIn.SupportedStrategy>`
  * must therefore be placed inside `<SignIn.Step name="choose-strategy">`, which is only
  * active when the outer router is in `ChoosingStrategy` sub-state.
  *
@@ -295,7 +295,7 @@ export function NotaClerkSignIn(): JSX.Element {
 
         {/*
          * `STRATEGY.UPDATE` is only handled in the inner machine's `ChooseStrategy` state.
-         * `<SignIn.SupportedStrategy>` must live here — inside choose-strategy — where the
+         * `<SignIn.SupportedStrategy>` must live here, inside choose-strategy, where the
          * XState machine accepts the event. Auto-select password via useLayoutEffect so the
          * transition fires before the browser paints.
          */}

@@ -17,7 +17,7 @@
   -webkit-app-region: no-drag;
 }
 
-/* Note open — gentle reveal when switching notes */
+/* Note open :  gentle reveal when switching notes */
 @keyframes nota-note-open-fade {
   from {
     opacity: 0;
@@ -39,7 +39,7 @@
 }
 
 /*
- * App micro-interactions — tactile feedback on press, not hover drift.
+ * App micro-interactions :  tactile feedback on press, not hover drift.
  * Keeps focus on reading/writing; honours prefers-reduced-motion.
  */
 .nota-pressable {
@@ -94,7 +94,7 @@
   animation: nota-save-pulse 1.2s ease-in-out infinite;
 }
 
-/* Notes sidebar — drag handle on the inner edge (right). */
+/* Notes sidebar :  drag handle on the inner edge (right). */
 .nota-sidebar-resize-handle {
   position: absolute;
   top: 0;
@@ -207,7 +207,7 @@
   cursor: grabbing;
 }
 
-/* Note image: no frame — ProseMirror’s default selected-node outline reads as a border. */
+/* Note image: no frame :  ProseMirror’s default selected-node outline reads as a border. */
 .tiptap-editor .note-image-block.ProseMirror-selectednode {
   outline: none;
 }
@@ -219,7 +219,7 @@
   font-size: inherit;
 }
 
-/* lowlight / highlight.js tokens — light */
+/* lowlight / highlight.js tokens :  light */
 .tiptap-editor .tiptap-code-block pre code.hljs {
   color: var(--foreground);
 }
@@ -296,7 +296,7 @@
   font-weight: 600;
 }
 
-/* lowlight / highlight.js tokens — dark */
+/* lowlight / highlight.js tokens :  dark */
 .dark .tiptap-editor .tiptap-code-block .hljs-comment,
 .dark .tiptap-editor .tiptap-code-block .hljs-quote,
 .dark .tiptap-editor .tiptap-code-block .hljs-doctag {
@@ -439,7 +439,7 @@
   margin: 0.25em 0;
 }
 
-/* Task lists — custom checkbox + animated strike (CSS only; no GSAP on the document surface) */
+/* Task lists :  custom checkbox + animated strike (CSS only; no GSAP on the document surface) */
 .tiptap-editor .ProseMirror ul.nota-task-list,
 .tiptap-editor .ProseMirror ul[data-type='taskList'] {
   list-style: none;
@@ -743,7 +743,7 @@
 
 /*
  * TipTap’s table view inserts `<colgroup>` before `<thead>` / `<tbody>`, so
- * `table > :first-child` is never a row group — top borders and radii must target
+ * `table > :first-child` is never a row group :  top borders and radii must target
  * `thead` / `tbody` explicitly.
  */
 .tiptap-editor .ProseMirror .tableWrapper table thead tr:first-child > th,

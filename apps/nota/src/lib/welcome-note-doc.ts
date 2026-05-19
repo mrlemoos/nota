@@ -4,7 +4,7 @@ export const WELCOME_NOTE_TITLE = 'Welcome to Nota';
 
 /**
  * TipTap JSON for the seeded welcome note. Uses only StarterKit-style nodes
- * (headings, paragraphs, bullet lists, bold) — matches the live editor schema.
+ * (headings, paragraphs, bullet lists, bold): matches the live editor schema.
  */
 export const WELCOME_NOTE_CONTENT: Json = {
   type: 'doc',
@@ -57,7 +57,7 @@ export const WELCOME_NOTE_CONTENT: Json = {
                 },
                 {
                   type: 'text',
-                  text: ' — Press ⌘K to jump to a note, create one, or sign out.',
+                  text: ': Press ⌘K to jump to a note, create one, or sign out.',
                 },
               ],
             },
@@ -72,7 +72,7 @@ export const WELCOME_NOTE_CONTENT: Json = {
                 { type: 'text', marks: [{ type: 'bold' }], text: 'Sidebar' },
                 {
                   type: 'text',
-                  text: ' — Press ⌘S to toggle the note list sidebar.',
+                  text: ': Press ⌘S to toggle the note list sidebar.',
                 },
               ],
             },
@@ -95,7 +95,7 @@ export const WELCOME_NOTE_CONTENT: Json = {
                 },
                 {
                   type: 'text',
-                  text: ' shortcut (⌘D) — turn it on under Settings when you want a dated note for the day.',
+                  text: ' shortcut (⌘D): turn it on under Settings when you want a dated note for the day.',
                 },
               ],
             },
@@ -232,7 +232,7 @@ export const WELCOME_NOTE_CONTENT: Json = {
       content: [
         {
           type: 'text',
-          text: 'Delete this note whenever you like — your vault is yours.',
+          text: 'Delete this note whenever you like; your vault is yours.',
         },
       ],
     },

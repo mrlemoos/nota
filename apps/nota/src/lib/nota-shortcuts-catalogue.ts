@@ -1,3 +1,6 @@
+/** Shown in the shortcut column when there is no chord (pointer-only, markdown input, etc.). */
+export const NOTA_SHORTCUT_PLACEHOLDER_KEY = '\u2013';
+
 export type ShortcutCatalogRow = {
   description: string;
   /** Extra context shown below the description in smaller type. */
@@ -128,7 +131,7 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
   },
   {
     id: 'mention',
-    title: 'Note editor — link to note (@)',
+    title: 'Note editor: link to note (@)',
     rows: [
       {
         description: 'Open the note picker after typing @',
@@ -155,7 +158,7 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
   },
   {
     id: 'links',
-    title: 'Note editor — links in the body',
+    title: 'Note editor: links in the body',
     rows: [
       {
         description: 'Follow an internal note link',
@@ -176,7 +179,7 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
   },
   {
     id: 'richtext',
-    title: 'Note editor — rich text',
+    title: 'Note editor: rich text',
     rows: [
       {
         description: 'Undo',
@@ -272,14 +275,14 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
       {
         description: 'Horizontal rule',
         detail: 'At the start of a line, type ---, ***, or ___ then Enter.',
-        keysApple: '—',
-        keysOther: '—',
+        keysApple: NOTA_SHORTCUT_PLACEHOLDER_KEY,
+        keysOther: NOTA_SHORTCUT_PLACEHOLDER_KEY,
       },
     ],
   },
   {
     id: 'tables',
-    title: 'Note editor — tables',
+    title: 'Note editor: tables',
     rows: [
       {
         description: 'Next cell',
@@ -307,8 +310,8 @@ export const NOTA_SHORTCUT_SECTIONS: ShortcutCatalogSection[] = [
       {
         description: 'Add or remove rows and columns',
         detail: 'Use the floating toolbar above the table (pointer).',
-        keysApple: '—',
-        keysOther: '—',
+        keysApple: NOTA_SHORTCUT_PLACEHOLDER_KEY,
+        keysOther: NOTA_SHORTCUT_PLACEHOLDER_KEY,
       },
     ],
   },

@@ -34,7 +34,7 @@ export type NotaSpinnerProps = {
  * Indeterminate circular progress indicator (CSS spin).
  *
  * @remarks
- * Renders a `span` with `aria-hidden` — it does not expose an accessible name. Pair with visible copy or use {@link NotaLoadingStatus} for `role="status"`.
+ * Renders a `span` with `aria-hidden`; it does not expose an accessible name. Pair with visible copy or use {@link NotaLoadingStatus} for `role="status"`.
  *
  * @example
  * ```tsx

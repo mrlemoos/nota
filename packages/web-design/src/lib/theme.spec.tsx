@@ -144,7 +144,7 @@ describe('ThemeProvider (system + prefers-color-scheme)', () => {
     expect(document.documentElement.classList.contains('light')).toBe(true);
     expect(changeListeners.length).toBe(0);
 
-    // Act — stale system listener would flip to dark when matches is true
+    // Act: stale system listener would flip to dark when matches is true
     mqlState.matches = true;
     firePrefersColorSchemeChange();
 

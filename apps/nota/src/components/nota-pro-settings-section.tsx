@@ -71,7 +71,7 @@ export function NotaProSettingsSection(): JSX.Element {
                 ? 'Refreshing…'
                 : notaProEntitled
                   ? 'Refresh subscription status'
-                  : 'I completed checkout — refresh'}
+                  : 'I completed checkout :  refresh'}
             </NotaButton>
           </div>
         )}

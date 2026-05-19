@@ -56,7 +56,7 @@ export function audioBufferToWav(buffer: AudioBuffer): Blob {
 
 /**
  * Only formats we trust xAI to accept from arbitrary bytes. Do **not** match
- * `audio/ogg;codecs=opus` via broad `.includes('ogg')` — that was passing Ogg
+ * `audio/ogg;codecs=opus` via broad `.includes('ogg')` :  that was passing Ogg
  * through and triggered STT header errors.
  */
 export function shouldPassThroughToXaiStt(mime: string): boolean {

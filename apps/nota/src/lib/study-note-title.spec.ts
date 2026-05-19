@@ -30,7 +30,7 @@ describe('formatStudyNoteTitle', () => {
     const title = formatStudyNoteTitle(created, modelTitle);
 
     // Assert
-    expect(title).toBe(`Study note: ${day} — Thermodynamics`);
+    expect(title).toBe(`Study note: ${day}: Thermodynamics`);
   });
 
   it('omits generic fallback title', () => {

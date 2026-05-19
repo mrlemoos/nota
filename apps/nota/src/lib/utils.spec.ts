@@ -14,7 +14,7 @@ describe('cn / tailwind-merge layout safety', () => {
     expect(merged).toBe('min-h-dvh');
   });
 
-  it('keeps both h-dvh and min-h-0 (different groups — safe for viewport + flex overflow)', () => {
+  it('keeps both h-dvh and min-h-0 (different groups :  safe for viewport + flex overflow)', () => {
     // Arrange
     const classList = 'flex h-dvh min-h-0 flex-col';
 

@@ -103,7 +103,7 @@ function renderPalette(): ReturnType<typeof render> {
 
 describe('CommandPalette', () => {
   it('clears the search input when the user starts the move flow (Move note…)', async () => {
-    // Arrange — open palette and type a filter before choosing Move note…
+    // Arrange: open palette and type a filter before choosing Move note…
     renderPalette();
     fireEvent.keyDown(document, { key: 'k', metaKey: true, bubbles: true });
     const input = await screen.findByPlaceholderText('Type a command…');
@@ -112,10 +112,10 @@ describe('CommandPalette', () => {
     const dialog = await screen.findByRole('dialog');
     const moveItem = within(dialog).getByText('Move note…');
 
-    // Act — enter move flow (pick note)
+    // Act: enter move flow (pick note)
     fireEvent.click(moveItem);
 
-    // Assert — search field must not keep the previous filter
+    // Assert: search field must not keep the previous filter
     expect(input).toBeInstanceOf(HTMLInputElement);
     expect((input as HTMLInputElement).value).toBe('');
   });
@@ -166,6 +166,6 @@ describe('CommandPalette', () => {
     });
 
     // Assert
-    expect(await screen.findByText('Move note — pick note')).toBeTruthy();
+    expect(await screen.findByText('Move note: pick note')).toBeTruthy();
   });
 });

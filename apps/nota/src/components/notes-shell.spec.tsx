@@ -5,7 +5,7 @@ import { NOTA_MENUBAR_NEW_FOLDER_REQUEST_EVENT } from '../lib/electron-menubar-e
 import { useNotesData } from '../context/notes-data-context';
 
 const notesShellTestCtx = vi.hoisted(() => {
-  const longTitle = 'Study note: 15 April 2026 — '.padEnd(120, 'x');
+  const longTitle = 'Study note: 15 April 2026: '.padEnd(120, 'x');
   const listNote = {
     id: 'note-1',
     user_id: 'user-1',

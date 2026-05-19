@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { NotaCodeBlock, NotaLink } from '@nota/editor';
 import { convertLinkOnlyParagraphs } from '../../../../packages/editor/src/components/tiptap/link-preview-scan';
 
-/** Minimal `linkPreview` node — avoids React node views from the real extension. */
+/** Minimal `linkPreview` node :  avoids React node views from the real extension. */
 const LinkPreviewTestNode = Node.create({
   name: 'linkPreview',
   group: 'block',

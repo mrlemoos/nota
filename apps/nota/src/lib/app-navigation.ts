@@ -1,6 +1,6 @@
 /**
  * Hash-based SPA navigation: single source of truth for notes shell view + active note id.
- * Grammar: #/ | #/sign-in | #/sign-up | #/login | #/signup (legacy) | #/notes | … | #/404 — unknown paths resolve to `notFound`.
+ * Grammar: #/ | #/sign-in | #/sign-up | #/login | #/signup (legacy) | #/notes | … | #/404 :  unknown paths resolve to `notFound`.
  */
 
 /** Fired after `history.pushState` / `replaceState` (same tick as `scheduleNavigationSync`). */
@@ -234,7 +234,7 @@ function notify(): void {
 let navigationSyncQueued = false;
 
 /**
- * Run `notify` after the current stack — required when `history.pushState` / `replaceState` fire
+ * Run `notify` after the current stack :  required when `history.pushState` / `replaceState` fire
  * from inside another library’s render path (e.g. Clerk). Synchronous `setState` there would
  * violate React’s rules and can blank the whole tree.
  */
@@ -272,7 +272,7 @@ export function bootstrapAppNavigation(): void {
   /**
    * `history.pushState` / `replaceState` do not fire `hashchange` and do not fire `popstate`.
    * Clerk (and other code) updates the URL this way, which left React on a stale `kind` while
-   * every `AppShellPanel` was `hidden` — `#root` collapsed to zero height and Electron showed a
+   * every `AppShellPanel` was `hidden` :  `#root` collapsed to zero height and Electron showed a
    * blank grey window (transparent shell).
    */
   const patchKey = '__notaHistoryNavigationPatched';

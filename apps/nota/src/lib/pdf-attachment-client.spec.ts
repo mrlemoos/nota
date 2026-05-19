@@ -159,7 +159,7 @@ describe('getOrFetchNoteAttachmentSignedUrl', () => {
     expect(first).toEqual({ ok: true, signedUrl: 'https://cdn.example/new' });
     expect(createSignedUrlMock).toHaveBeenCalledTimes(1);
 
-    // Act — second call uses cache
+    // Act :  second call uses cache
     const second = await getOrFetchNoteAttachmentSignedUrl(id, path);
 
     // Assert

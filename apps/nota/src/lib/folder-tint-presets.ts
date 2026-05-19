@@ -1,6 +1,6 @@
 import type { TranslationKey } from '@nota/i18n';
 
-/** Persisted folder tint keys — must match supabase check constraint `folders_tint_valid`. */
+/** Persisted folder tint keys :  must match supabase check constraint `folders_tint_valid`. */
 export const FOLDER_TINT_DB_VALUES = [
   'blue',
   'green',
@@ -136,7 +136,7 @@ export function folderTintOptionForPersisted(
   return byPersisted.get(tint) ?? DEFAULT_PRESET;
 }
 
-/** Options shown in the context menu (swatches only) — includes default. */
+/** Options shown in the context menu (swatches only) :  includes default. */
 export const FOLDER_TINT_SWATCH_PRESETS: readonly FolderTintOption[] =
   FOLDER_TINT_PRESETS;
 

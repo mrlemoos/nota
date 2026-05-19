@@ -29,7 +29,7 @@ function openDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE)) {
         db.createObjectStore(STORE, { keyPath: 'id' });
       }
-      // v2: optional `append` on jobs — existing rows omit it (replace behaviour).
+      // v2: optional `append` on jobs :  existing rows omit it (replace behaviour).
     };
   });
 }

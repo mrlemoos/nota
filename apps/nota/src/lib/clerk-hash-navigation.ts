@@ -166,7 +166,7 @@ function isAllowedAuthHashQueryKey(key: string): boolean {
   return CLERK_AUTH_HASH_QUERY_KEY.test(key);
 }
 
-/** Decoded key names should not contain URL/path characters — indicates a parse artefact. */
+/** Decoded key names should not contain URL/path characters :  indicates a parse artefact. */
 function isPathologicalAuthHashQueryKey(key: string): boolean {
   return /[#/?]/.test(key);
 }
@@ -336,7 +336,7 @@ export function clerkFullNotesUrl(): string {
 }
 
 /**
- * After a successful sign-in/up, Clerk calls `routerPush(signInForceRedirectUrl)` —
+ * After a successful sign-in/up, Clerk calls `routerPush(signInForceRedirectUrl)` :
  * e.g. `http://localhost:4200#/notes`. `mapClerkToHashFragment` only handles auth paths
  * and returns null for `/notes`, so without this fallback the navigation silently drops.
  * Extract the hash path from any same-origin URL so post-auth redirects land correctly.
