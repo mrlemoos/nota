@@ -1,13 +1,14 @@
-// Regenerates derived brand assets from source PNGs.
+// Regenerates derived brand assets from source SVG/PNG files.
 //
 // Usage (repo root): `pnpm run generate:nota-icons`
 //
 // Inputs:
-// - `../nota-electron/buildResources/icon.png` (light dock / .icns source)
+// - `public/favicon.svg` (light dock / .icns source)
 // - `../nota-electron/buildResources/icon-dark.svg` (dark dock raster source)
 // - `public/apple-touch-icon.png`
 //
 // Outputs:
+// - `../nota-electron/buildResources/icon.png` (light dock / .icns source)
 // - `../nota-electron/buildResources/icon.icns` (macOS only, via iconutil)
 // - `../nota-electron/buildResources/icon-dark.png` (1024; Electron dock via nativeTheme)
 //
@@ -36,6 +37,8 @@ const ICON_DARK_SVG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon-dark.svg');
 const ICON_DARK_PNG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon-dark.png');
 const APPLE_TOUCH_ICON_PATH = path.join(PUBLIC_DIR, 'apple-touch-icon.png');
 const FAVICON_SVG_PATH = path.join(PUBLIC_DIR, 'favicon.svg');
+const ELECTRON_ICON_SIZE_PX = 1024;
+const ELECTRON_ICON_VISIBLE_SCALE = 0.82;
 
 const ICONSET_SIZES = [
   ['icon_16x16.png', 16],
@@ -50,16 +53,46 @@ const ICONSET_SIZES = [
   ['icon_512x512@2x.png', 1024],
 ];
 
-async function writeIconDarkPng() {
-  if (!fs.existsSync(ICON_DARK_SVG_PATH)) {
-    console.warn('Skipping icon-dark.png (missing', ICON_DARK_SVG_PATH, ')');
+async function renderPaddedIconPng(inputPath, outputPath, label) {
+  if (!fs.existsSync(inputPath)) {
+    console.warn(`Skipping ${label} (missing ${inputPath})`);
     return;
   }
-  await sharp(ICON_DARK_SVG_PATH)
-    .resize(1024, 1024)
+
+  const innerSize = Math.round(
+    ELECTRON_ICON_SIZE_PX * ELECTRON_ICON_VISIBLE_SCALE,
+  );
+  const inset = Math.floor((ELECTRON_ICON_SIZE_PX - innerSize) / 2);
+  const icon = await sharp(inputPath)
+    .resize(innerSize, innerSize, { fit: 'contain' })
     .png()
-    .toFile(ICON_DARK_PNG_PATH);
-  console.log('Wrote', ICON_DARK_PNG_PATH);
+    .toBuffer();
+
+  await sharp({
+    create: {
+      width: ELECTRON_ICON_SIZE_PX,
+      height: ELECTRON_ICON_SIZE_PX,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([{ input: icon, left: inset, top: inset }])
+    .png()
+    .toFile(outputPath);
+
+  console.log('Wrote', outputPath);
+}
+
+async function writeIconPng() {
+  await renderPaddedIconPng(FAVICON_SVG_PATH, ICON_PNG_PATH, 'icon.png');
+}
+
+async function writeIconDarkPng() {
+  await renderPaddedIconPng(
+    ICON_DARK_SVG_PATH,
+    ICON_DARK_PNG_PATH,
+    'icon-dark.png',
+  );
 }
 
 async function writeIcns() {
@@ -104,6 +137,7 @@ async function writeFaviconSvg() {
   console.log('Wrote public/favicon.svg');
 }
 
+await writeIconPng();
 await writeIconDarkPng();
 await writeIcns();
 if (process.env.NOTA_REGENERATE_EMBEDDED_FAVICON === '1') {
