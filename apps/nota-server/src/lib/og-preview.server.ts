@@ -1,6 +1,17 @@
 import * as dns from 'node:dns/promises';
 import * as net from 'node:net';
 import { z } from 'zod';
+import {
+  buildRedditPostPreview,
+  buildRedditSubPreview,
+  buildYoutubeChannelPreview,
+  buildYoutubeVideoPreview,
+  parseRedditUrl,
+  parseYoutubeUrl,
+  redditPostJsonUrl,
+  stripYoutubeChannelTitleSuffix,
+  type PlatformLinkPreview,
+} from '@nota/link-platform-preview';
 
 const urlSchema = z.string().url();
 
@@ -16,6 +27,7 @@ export type OgPreviewResult = {
   title: string | null;
   description: string | null;
   image: string | null;
+  platform: PlatformLinkPreview | null;
 };
 
 function isBlockedIpv4(hostname: string): boolean {
@@ -207,7 +219,246 @@ export function parseOgFromHtml(
     title,
     description,
     image,
+    platform: null,
   };
+}
+
+type RedditListingChild = {
+  data?: {
+    children?: { data?: Record<string, unknown> }[];
+  };
+};
+
+function pickString(v: unknown): string | undefined {
+  return typeof v === 'string' && v.trim() ? v.trim() : undefined;
+}
+
+function httpsImageFromMeta(
+  raw: string | undefined,
+  pageUrl: string,
+): string | undefined {
+  if (!raw?.trim()) return undefined;
+  return sanitizeOgImageUrl(raw.trim(), pageUrl) ?? undefined;
+}
+
+function parseRedditPostJson(
+  payload: unknown,
+  pageUrl: string,
+): {
+  author: string;
+  title: string;
+  subreddit: string;
+  subredditAvatarUrl?: string;
+  userAvatarUrl?: string;
+} | null {
+  if (!Array.isArray(payload) || payload.length === 0) return null;
+  const listing = payload[0] as RedditListingChild;
+  const post = listing.data?.children?.[0]?.data;
+  if (!post) return null;
+  const author = pickString(post['author']);
+  const title = pickString(post['title']);
+  const subreddit = pickString(post['subreddit']) ?? '';
+  if (!author || !title) return null;
+
+  const subredditAvatarRaw =
+    pickString(post['community_icon']) ??
+    pickString(post['subreddit_icon']) ??
+    pickString(post['subreddit_img']);
+  const userAvatarRaw =
+    pickString(post['snoovatar_img']) ?? pickString(post['author_icon']);
+
+  return {
+    author,
+    title,
+    subreddit,
+    subredditAvatarUrl: httpsImageFromMeta(subredditAvatarRaw, pageUrl),
+    userAvatarUrl: httpsImageFromMeta(userAvatarRaw, pageUrl),
+  };
+}
+
+async function fetchRedditSubredditIcon(
+  subreddit: string,
+): Promise<string | undefined> {
+  if (!subreddit.trim()) return undefined;
+  const aboutUrl = `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/about.json?raw_json=1`;
+  try {
+    const payload = (await fetchJsonForPlatform(aboutUrl)) as {
+      data?: { community_icon?: string; icon_img?: string };
+    };
+    const d = payload.data;
+    if (!d) return undefined;
+    const raw = d.community_icon ?? d.icon_img;
+    return httpsImageFromMeta(raw, aboutUrl);
+  } catch {
+    return undefined;
+  }
+}
+
+async function fetchRedditUserIcon(
+  username: string,
+): Promise<string | undefined> {
+  const clean = username.replace(/^u\//i, '').trim();
+  if (!clean || clean === '[deleted]') return undefined;
+  const aboutUrl = `https://www.reddit.com/user/${encodeURIComponent(clean)}/about.json?raw_json=1`;
+  try {
+    const payload = (await fetchJsonForPlatform(aboutUrl)) as {
+      data?: { snoovatar_img?: string; icon_img?: string };
+    };
+    const d = payload.data;
+    if (!d) return undefined;
+    const raw = d.snoovatar_img ?? d.icon_img;
+    return httpsImageFromMeta(raw, aboutUrl);
+  } catch {
+    return undefined;
+  }
+}
+
+async function fetchJsonForPlatform(url: string): Promise<unknown> {
+  const parsed = assertUrlSafeForOgFetch(url);
+  await assertResolvedAddressesSafeForOgFetch(parsed.hostname);
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    controller.abort();
+  }, FETCH_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(parsed.href, {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json',
+        'User-Agent':
+          'NotaLinkPreview/1.0 (link preview; contact: https://nota.mrlemoos.dev)',
+      },
+    });
+    if (!res.ok) {
+      throw new Error(`Fetch failed: ${res.status}`);
+    }
+    return (await res.json()) as unknown;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchRedditPostPlatformPreview(
+  subreddit: string,
+  postId: string,
+): Promise<PlatformLinkPreview | null> {
+  const jsonUrl = redditPostJsonUrl(subreddit, postId);
+  const payload = await fetchJsonForPlatform(jsonUrl);
+  const post = parseRedditPostJson(payload, jsonUrl);
+  if (!post) return null;
+  const subName = post.subreddit || subreddit || 'reddit';
+
+  const [subFromAbout, userFromAbout] = await Promise.all([
+    post.subredditAvatarUrl
+      ? Promise.resolve(undefined)
+      : fetchRedditSubredditIcon(subName),
+    post.userAvatarUrl
+      ? Promise.resolve(undefined)
+      : fetchRedditUserIcon(post.author),
+  ]);
+
+  return buildRedditPostPreview({
+    op: post.author,
+    postTitle: post.title,
+    subreddit: subName,
+    subredditAvatarUrl: post.subredditAvatarUrl ?? subFromAbout,
+    userAvatarUrl: post.userAvatarUrl ?? userFromAbout,
+  });
+}
+
+type YoutubeOEmbed = {
+  title?: string;
+  author_name?: string;
+  thumbnail_url?: string;
+  author_url?: string;
+};
+
+async function fetchYoutubeVideoPlatformPreview(
+  videoUrl: string,
+): Promise<PlatformLinkPreview | null> {
+  const oembedUrl = `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(videoUrl)}`;
+  const payload = (await fetchJsonForPlatform(oembedUrl)) as YoutubeOEmbed;
+  const videoTitle = payload.title?.trim();
+  const channelName = payload.author_name?.trim();
+  if (!videoTitle || !channelName) return null;
+
+  const thumbnailUrl = httpsImageFromMeta(
+    payload.thumbnail_url?.trim(),
+    oembedUrl,
+  );
+
+  let channelAvatarUrl: string | undefined;
+  const authorUrl = payload.author_url?.trim();
+  if (authorUrl) {
+    try {
+      const u = assertUrlSafeForOgFetch(authorUrl);
+      const og = await fetchOgHtmlPreview(u.href);
+      channelAvatarUrl = httpsImageFromMeta(og.image ?? undefined, u.href);
+    } catch {
+      channelAvatarUrl = undefined;
+    }
+  }
+
+  return buildYoutubeVideoPreview({
+    videoTitle,
+    channelName,
+    thumbnailUrl,
+    channelAvatarUrl,
+  });
+}
+
+async function tryFetchPlatformLinkPreview(
+  rawUrl: string,
+): Promise<PlatformLinkPreview | null> {
+  const reddit = parseRedditUrl(rawUrl);
+  if (reddit?.kind === 'subreddit') {
+    let subredditAvatarUrl: string | undefined;
+    try {
+      subredditAvatarUrl = await fetchRedditSubredditIcon(reddit.subreddit);
+    } catch {
+      subredditAvatarUrl = undefined;
+    }
+    return buildRedditSubPreview(rawUrl.trim(), {
+      subreddit: reddit.subreddit,
+      subredditAvatarUrl,
+    });
+  }
+  if (reddit?.kind === 'post') {
+    try {
+      return await fetchRedditPostPlatformPreview(
+        reddit.subreddit,
+        reddit.postId,
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  const youtube = parseYoutubeUrl(rawUrl);
+  if (!youtube) return null;
+
+  if (youtube.kind === 'video') {
+    try {
+      return await fetchYoutubeVideoPlatformPreview(rawUrl);
+    } catch {
+      return null;
+    }
+  }
+
+  try {
+    const og = await fetchOgHtmlPreview(rawUrl);
+    const channelTitle = stripYoutubeChannelTitleSuffix(og.title ?? '');
+    if (!channelTitle) return null;
+    const img = httpsImageFromMeta(og.image ?? undefined, rawUrl);
+    return buildYoutubeChannelPreview(channelTitle, {
+      thumbnailUrl: img,
+      channelAvatarUrl: img,
+    });
+  } catch {
+    return null;
+  }
 }
 
 async function readBodyWithCap(
@@ -253,7 +504,7 @@ async function drainResponseBody(response: Response): Promise<void> {
   await response.body?.cancel();
 }
 
-export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
+async function fetchOgHtmlPreview(rawUrl: string): Promise<OgPreviewResult> {
   let current = assertUrlSafeForOgFetch(rawUrl).href;
 
   const controller = new AbortController();
@@ -309,6 +560,7 @@ export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
           title: null,
           description: null,
           image: null,
+          platform: null,
         };
       }
 
@@ -318,4 +570,20 @@ export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+export async function fetchOgPreview(rawUrl: string): Promise<OgPreviewResult> {
+  const platform = await tryFetchPlatformLinkPreview(rawUrl);
+  if (platform) {
+    return {
+      url: rawUrl,
+      title: null,
+      description: null,
+      image: null,
+      platform,
+    };
+  }
+
+  const og = await fetchOgHtmlPreview(rawUrl);
+  return { ...og, platform: null };
 }

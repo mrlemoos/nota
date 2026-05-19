@@ -13,6 +13,7 @@
     "validate:billing": "bun run scripts/validate-clerk-billing-alignment.ts"
   },
   "dependencies": {
+    "@nota/link-platform-preview": "workspace:*",
     "@clerk/backend": "^3.2.7",
     "@supabase/supabase-js": "catalog:",
     "cors": "^2.8.5",

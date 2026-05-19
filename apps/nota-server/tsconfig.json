@@ -10,5 +10,9 @@
     "types": ["node", "bun-types"]
   },
   "include": ["src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../../packages/link-platform-preview"
+    }
+  ]
 }

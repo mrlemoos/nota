@@ -1,10 +1,13 @@
 import { getClerkAccessToken } from './clerk-token-ref';
 
+import type { PlatformLinkPreview } from '@nota/link-platform-preview';
+
 export type OgPreviewJson = {
   url: string;
   title: string | null;
   description: string | null;
   image: string | null;
+  platform: PlatformLinkPreview | null;
 };
 
 type OgErrorJson = {

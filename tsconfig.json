@@ -44,6 +44,9 @@
     },
     {
       "path": "./packages/note-link-graph"
+    },
+    {
+      "path": "./packages/link-platform-preview"
     }
   ]
 }

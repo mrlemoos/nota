@@ -29,6 +29,7 @@ import { pdfPreviewSrc } from '../../lib/pdf-preview-url';
 import { PdfJsModalPreview } from '../pdf-js-modal-preview';
 import { NotePdfThumbnailFrame } from './note-pdf-thumbnail-frame';
 import type { NoteAttachment } from '@nota/database-types';
+import type { PlatformLinkPreview } from '@nota/link-platform-preview';
 import pdfjsWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 export type CachedSignedUrlEntry = {
@@ -44,6 +45,7 @@ export type OgPreviewData = {
   title?: string | null;
   description?: string | null;
   image?: string | null;
+  platform?: PlatformLinkPreview | null;
 };
 
 export type NoteImagePreviewRequest = {

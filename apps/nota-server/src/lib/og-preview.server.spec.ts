@@ -74,6 +74,52 @@ describe('parseOgFromHtml', () => {
 
     // Assert
     expect(r.image).toBe('https://cdn.example.com/x.png');
+    expect(r.platform).toBeNull();
+  });
+});
+
+describe('tryFetchPlatformLinkPreview via fetchOgPreview', () => {
+  let lookupSpy: ReturnType<typeof spyOn>;
+
+  beforeEach(() => {
+    lookupSpy = spyOn(dns, 'lookup').mockImplementation(async () => [
+      { address: '8.8.8.8', family: 4 },
+    ]);
+  });
+
+  afterEach(() => {
+    lookupSpy.mockRestore();
+  });
+
+  it('returns reddit sub preview without HTML fetch', async () => {
+    // Arrange
+    const url = 'https://www.reddit.com/r/programming';
+    const orig = globalThis.fetch;
+    globalThis.fetch = async () =>
+      new Response(
+        JSON.stringify({
+          data: {
+            community_icon: 'https://styles.redditmedia.com/t5_2qh0z/icon.png',
+          },
+        }),
+        { status: 200, headers: { 'content-type': 'application/json' } },
+      );
+
+    try {
+      // Act
+      const r = await fetchOgPreview(url);
+
+      // Assert
+      expect(r.platform).toMatchObject({
+        kind: 'reddit-sub',
+        displayText: url,
+        subreddit: 'programming',
+        subredditAvatarUrl: 'https://styles.redditmedia.com/t5_2qh0z/icon.png',
+      });
+      expect(r.title).toBeNull();
+    } finally {
+      globalThis.fetch = orig;
+    }
   });
 });
 

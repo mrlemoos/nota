@@ -11,6 +11,11 @@ import { cn } from '@nota/web-design/utils';
 import { safeOgImageSrcForPreview } from '../../lib/og-image-url';
 import { revertLinkPreviewToParagraph } from './link-preview-scan';
 import { useNotePdfDocContext } from './note-pdf-extension';
+import {
+  PlatformLinkPreviewLabel,
+  platformAttrsFromPreview,
+  platformPreviewFromAttrs,
+} from './platform-link-preview-label';
 
 function stringifyPreviewAttr(value: unknown): string {
   if (value == null) return '';
@@ -23,12 +28,30 @@ function stringifyPreviewAttr(value: unknown): string {
 function linkPreviewHasPersistedMeta(node: {
   attrs: Record<string, unknown>;
 }): boolean {
+  if (platformPreviewFromAttrs(node.attrs)) return true;
   return Boolean(
     stringifyPreviewAttr(node.attrs['title']).trim() ||
       stringifyPreviewAttr(node.attrs['description']).trim() ||
       stringifyPreviewAttr(node.attrs['image']).trim(),
   );
 }
+
+const platformAttrDefaults = {
+  platformKind: '',
+  platformLogo: '',
+  platformBold: '',
+  platformPrefix: '',
+  platformSuffix: '',
+  platformDisplayText: '',
+  platformThumbnailUrl: '',
+  platformChannelName: '',
+  platformChannelAvatarUrl: '',
+  platformSubreddit: '',
+  platformSubredditAvatarUrl: '',
+  platformPostTitle: '',
+  platformOp: '',
+  platformUserAvatarUrl: '',
+};
 
 function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   const ctx = useNotePdfDocContext();
@@ -39,7 +62,11 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   const imageAttr = (props.node.attrs['image'] as string) || '';
   const safeImageSrc = safeOgImageSrcForPreview(imageAttr);
 
-  const hasMeta = Boolean(titleAttr || descriptionAttr || imageAttr);
+  const platform = platformPreviewFromAttrs(
+    props.node.attrs as Record<string, unknown>,
+  );
+  const hasOgMeta = Boolean(titleAttr || descriptionAttr || imageAttr);
+  const hasMeta = Boolean(platform || hasOgMeta);
   const [loading, setLoading] = useState(() => Boolean(href) && !hasMeta);
   const [error, setError] = useState<string | null>(null);
   const [refreshNonce, setRefreshNonce] = useState(0);
@@ -60,13 +87,25 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
       try {
         const data = await fetchOgPreview(href);
         if (cancelled) return;
-        const title = (data.title ?? '').trim();
-        const desc = (data.description ?? '').trim();
-        const image = (data.image ?? '').trim();
+
         const pos = getPosRef.current();
         if (typeof pos !== 'number') return;
         const current = editorRef.current.state.doc.nodeAt(pos);
         if (!current || current.type.name !== 'linkPreview') return;
+
+        if (data.platform) {
+          updateAttributesRef.current({
+            ...platformAttrsFromPreview(data.platform),
+            title: '',
+            description: '',
+            image: '',
+          });
+          return;
+        }
+
+        const title = (data.title ?? '').trim();
+        const desc = (data.description ?? '').trim();
+        const image = (data.image ?? '').trim();
 
         if (!title && !desc && !image) {
           if (!linkPreviewHasPersistedMeta(current)) {
@@ -75,6 +114,7 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
           return;
         }
         updateAttributesRef.current({
+          ...platformAttrDefaults,
           title: data.title ?? '',
           description: data.description ?? '',
           image: data.image ?? '',
@@ -102,14 +142,17 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   const displayTitle = titleAttr || href;
   const displayLinkLabel = linkTextAttr.trim() || href;
 
+  const selectionRing =
+    props.selected &&
+    'rounded-sm ring-2 ring-ring/40 ring-offset-2 ring-offset-background';
+
   if (loading && !hasMeta) {
     return (
       <NodeViewWrapper
         as="div"
         className={cn(
           'link-preview-loading my-3 flex min-w-0 items-center gap-2',
-          props.selected &&
-            'rounded-sm ring-2 ring-ring/40 ring-offset-2 ring-offset-background',
+          selectionRing,
         )}
         data-drag-handle
         aria-busy="true"
@@ -133,13 +176,29 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
     );
   }
 
+  if (platform) {
+    return (
+      <NodeViewWrapper
+        as="div"
+        className={cn('link-preview-platform my-3 min-w-0', selectionRing)}
+        data-drag-handle
+      >
+        <PlatformLinkPreviewLabel href={href} platform={platform} />
+        {error ? (
+          <p className="mt-1 text-xs text-destructive" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </NodeViewWrapper>
+    );
+  }
+
   return (
     <NodeViewWrapper
       as="div"
       className={cn(
         'link-preview-block my-4 overflow-hidden rounded-md border border-border/60 bg-muted/20',
-        props.selected &&
-          'ring-2 ring-ring/40 ring-offset-2 ring-offset-background',
+        selectionRing,
       )}
       data-drag-handle
     >
@@ -237,6 +296,123 @@ export const LinkPreview = Node.create({
         parseHTML: (el) => el.getAttribute('data-image') ?? '',
         renderHTML: (attrs) =>
           attrs.image ? { 'data-image': attrs.image } : {},
+      },
+      platformKind: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-kind') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformKind
+            ? { 'data-platform-kind': attrs.platformKind }
+            : {},
+      },
+      platformLogo: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-logo') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformLogo
+            ? { 'data-platform-logo': attrs.platformLogo }
+            : {},
+      },
+      platformBold: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-bold') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformBold
+            ? { 'data-platform-bold': attrs.platformBold }
+            : {},
+      },
+      platformPrefix: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-prefix') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformPrefix
+            ? { 'data-platform-prefix': attrs.platformPrefix }
+            : {},
+      },
+      platformSuffix: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-suffix') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformSuffix
+            ? { 'data-platform-suffix': attrs.platformSuffix }
+            : {},
+      },
+      platformDisplayText: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-display') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformDisplayText
+            ? { 'data-platform-display': attrs.platformDisplayText }
+            : {},
+      },
+      platformThumbnailUrl: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-thumbnail') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformThumbnailUrl
+            ? { 'data-platform-thumbnail': attrs.platformThumbnailUrl }
+            : {},
+      },
+      platformChannelName: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-channel-name') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformChannelName
+            ? { 'data-platform-channel-name': attrs.platformChannelName }
+            : {},
+      },
+      platformChannelAvatarUrl: {
+        default: '',
+        parseHTML: (el) =>
+          el.getAttribute('data-platform-channel-avatar') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformChannelAvatarUrl
+            ? {
+                'data-platform-channel-avatar': attrs.platformChannelAvatarUrl,
+              }
+            : {},
+      },
+      platformSubreddit: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-subreddit') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformSubreddit
+            ? { 'data-platform-subreddit': attrs.platformSubreddit }
+            : {},
+      },
+      platformSubredditAvatarUrl: {
+        default: '',
+        parseHTML: (el) =>
+          el.getAttribute('data-platform-subreddit-avatar') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformSubredditAvatarUrl
+            ? {
+                'data-platform-subreddit-avatar':
+                  attrs.platformSubredditAvatarUrl,
+              }
+            : {},
+      },
+      platformPostTitle: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-post-title') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformPostTitle
+            ? { 'data-platform-post-title': attrs.platformPostTitle }
+            : {},
+      },
+      platformOp: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-op') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformOp ? { 'data-platform-op': attrs.platformOp } : {},
+      },
+      platformUserAvatarUrl: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-user-avatar') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformUserAvatarUrl
+            ? { 'data-platform-user-avatar': attrs.platformUserAvatarUrl }
+            : {},
       },
     };
   },

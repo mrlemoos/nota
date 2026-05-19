@@ -670,6 +670,12 @@
   color: color-mix(in oklch, var(--primary) 88%, var(--foreground));
 }
 
+.tiptap-editor .ProseMirror a[data-platform-link-preview],
+.tiptap-editor .ProseMirror a[data-platform-link-preview]:hover {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
 .tiptap-editor .ProseMirror code {
   background-color: var(--muted);
   color: var(--foreground);
