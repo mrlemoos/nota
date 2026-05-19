@@ -113,6 +113,10 @@ Store these as **repository** secrets or under the same **Production** environme
 
 With `APPLE_CERTIFICATE_BASE64` unset, CI still produces **unsigned** artefacts. Set **`mac.notarize: true`** in `electron-builder.yml` when the Apple ID secrets above are configured.
 
+## macOS Dock icon
+
+The Dock icon follows **system light/dark**: [`buildResources/icon.png`](buildResources/icon.png) (unchanged) for light appearance, and [`buildResources/icon-dark.png`](buildResources/icon-dark.png) rasterised from [`buildResources/icon-dark.svg`](buildResources/icon-dark.svg) (same mark and colours as the dark branch of the web [`favicon.svg`](../nota/public/favicon.svg)). Run **`pnpm run generate:nota-icons`** from the repo root after editing the SVG; [`src/main.ts`](src/main.ts) applies **`app.dock.setIcon`** on launch and when **`nativeTheme`** changes. The app bundle **`.icns`** remains built from **`icon.png`**.
+
 ## Architecture
 
 - **Dev mode**: Loads from `http://localhost:4200` (Vite dev server).

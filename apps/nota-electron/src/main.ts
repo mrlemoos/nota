@@ -5,6 +5,7 @@ import {
   dialog,
   Menu,
   nativeImage,
+  nativeTheme,
   shell,
   Tray,
   type WebContents,
@@ -148,6 +149,45 @@ function resolveTrayIconPath(): string | null {
     '[nota-electron] TrayTemplate.png not found; menu bar extra disabled.',
   );
   return null;
+}
+
+function dockIconFileName(): 'icon-dark.png' | 'icon.png' {
+  return nativeTheme.shouldUseDarkColors ? 'icon-dark.png' : 'icon.png';
+}
+
+/**
+ * macOS Dock icon: follow system light/dark (same mark as web `favicon.svg` dark branch).
+ * Bundle `.icns` stays the light asset; this overrides the Dock at runtime.
+ */
+function resolveDockIconPath(): string | null {
+  const name = dockIconFileName();
+  const devPath = path.join(__dirname, '../buildResources', name);
+  if (existsSync(devPath)) {
+    return devPath;
+  }
+  const packagedPath = path.join(process.resourcesPath, name);
+  if (existsSync(packagedPath)) {
+    return packagedPath;
+  }
+  return null;
+}
+
+function applyDockIcon(): void {
+  if (!isDarwin || !app.dock) {
+    return;
+  }
+  const iconPath = resolveDockIconPath();
+  if (!iconPath) {
+    return;
+  }
+  const image = nativeImage.createFromPath(iconPath);
+  if (image.isEmpty()) {
+    console.warn(
+      `[nota-electron] Dock icon could not be loaded from ${iconPath}.`,
+    );
+    return;
+  }
+  app.dock.setIcon(image);
 }
 
 function ensureMainWindow(): BrowserWindow {
@@ -467,6 +507,8 @@ if (!gotTheLock) {
       createWindow();
       installApplicationMenu();
       createTray();
+      applyDockIcon();
+      nativeTheme.on('updated', applyDockIcon);
       await startPackagedNotaUpdater();
     } catch (error) {
       console.error('Failed to start app:', error);

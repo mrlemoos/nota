@@ -3,12 +3,16 @@
 // Usage (repo root): `pnpm run generate:nota-icons`
 //
 // Inputs:
-// - `../nota-electron/buildResources/icon.png`
+// - `../nota-electron/buildResources/icon.png` (light dock / .icns source)
+// - `../nota-electron/buildResources/icon-dark.svg` (dark dock raster source)
 // - `public/apple-touch-icon.png`
 //
 // Outputs:
 // - `../nota-electron/buildResources/icon.icns` (macOS only, via iconutil)
-// - `public/favicon.svg` (SVG wrapper embedding apple-touch-icon.png)
+// - `../nota-electron/buildResources/icon-dark.png` (1024; Electron dock via nativeTheme)
+//
+// Optional (`NOTA_REGENERATE_EMBEDDED_FAVICON=1`): overwrite `public/favicon.svg` with a PNG
+// embedding of `apple-touch-icon.png`. The committed favicon is hand-authored; default is skip.
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -28,6 +32,8 @@ const ELECTRON_BUILD_RESOURCES = path.resolve(
 );
 
 const ICON_PNG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon.png');
+const ICON_DARK_SVG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon-dark.svg');
+const ICON_DARK_PNG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon-dark.png');
 const APPLE_TOUCH_ICON_PATH = path.join(PUBLIC_DIR, 'apple-touch-icon.png');
 const FAVICON_SVG_PATH = path.join(PUBLIC_DIR, 'favicon.svg');
 
@@ -43,6 +49,18 @@ const ICONSET_SIZES = [
   ['icon_512x512.png', 512],
   ['icon_512x512@2x.png', 1024],
 ];
+
+async function writeIconDarkPng() {
+  if (!fs.existsSync(ICON_DARK_SVG_PATH)) {
+    console.warn('Skipping icon-dark.png (missing', ICON_DARK_SVG_PATH, ')');
+    return;
+  }
+  await sharp(ICON_DARK_SVG_PATH)
+    .resize(1024, 1024)
+    .png()
+    .toFile(ICON_DARK_PNG_PATH);
+  console.log('Wrote', ICON_DARK_PNG_PATH);
+}
 
 async function writeIcns() {
   if (process.platform !== 'darwin') {
@@ -86,5 +104,12 @@ async function writeFaviconSvg() {
   console.log('Wrote public/favicon.svg');
 }
 
+await writeIconDarkPng();
 await writeIcns();
-await writeFaviconSvg();
+if (process.env.NOTA_REGENERATE_EMBEDDED_FAVICON === '1') {
+  await writeFaviconSvg();
+} else {
+  console.log(
+    'Skipping public/favicon.svg (set NOTA_REGENERATE_EMBEDDED_FAVICON=1 to embed apple-touch-icon).',
+  );
+}
