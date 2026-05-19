@@ -52,10 +52,11 @@ export const CHROME_UI_ES: Record<string, string> = {
   'Loading journal\u2026': 'Cargando diario\u2026',
   Journal: 'Diario',
   'Open journal': 'Abrir diario',
-  'Notes titled with a date \u2014 browse by calendar or scroll the timeline.':
+  'Notes titled with a date, browse by calendar or scroll the timeline.':
     'Notas con fecha en el t\u00edtulo: explora en el calendario o en la lista.',
   'Previous month': 'Mes anterior',
   'Next month': 'Mes siguiente',
+  'Go to today': 'Ir a hoy',
   'Journal calendar': 'Calendario del diario',
   'Journal entries': 'Entradas del diario',
   'All entries': 'Todas las entradas',
@@ -155,10 +156,11 @@ export const CHROME_UI_PT: Record<string, string> = {
   'Loading journal\u2026': 'A carregar di\u00e1rio\u2026',
   Journal: 'Di\u00e1rio',
   'Open journal': 'Abrir di\u00e1rio',
-  'Notes titled with a date \u2014 browse by calendar or scroll the timeline.':
-    'Notas com data no t\u00edtulo \u2014 navegue no calend\u00e1rio ou na lista.',
+  'Notes titled with a date, browse by calendar or scroll the timeline.':
+    'Notas com data no t\u00edtulo, navegue no calend\u00e1rio ou na lista.',
   'Previous month': 'M\u00eas anterior',
   'Next month': 'M\u00eas seguinte',
+  'Go to today': 'Ir para hoje',
   'Journal calendar': 'Calend\u00e1rio do di\u00e1rio',
   'Journal entries': 'Entradas do di\u00e1rio',
   'All entries': 'Todas as entradas',
@@ -259,10 +261,11 @@ export const CHROME_UI_FR: Record<string, string> = {
   'Loading journal\u2026': 'Chargement du journal\u2026',
   Journal: 'Journal',
   'Open journal': 'Ouvrir le journal',
-  'Notes titled with a date \u2014 browse by calendar or scroll the timeline.':
-    'Notes dat\u00e9es dans le titre \u2014 parcourez le calendrier ou la liste.',
+  'Notes titled with a date, browse by calendar or scroll the timeline.':
+    'Notes dat\u00e9es dans le titre, parcourez le calendrier ou la liste.',
   'Previous month': 'Mois pr\u00e9c\u00e9dent',
   'Next month': 'Mois suivant',
+  'Go to today': "Aller \u00e0 aujourd'hui",
   'Journal calendar': 'Calendrier du journal',
   'Journal entries': 'Entr\u00e9es du journal',
   'All entries': 'Toutes les entr\u00e9es',

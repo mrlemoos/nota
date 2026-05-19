@@ -1,4 +1,5 @@
 import { useMemo, type JSX } from 'react';
+import { NotaButton } from '@nota/web-design/button';
 import { cn } from '@/lib/utils';
 import { buildJournalCalendarCells } from '@/lib/journal-calendar';
 import { localDateKey } from '@/lib/todays-note';
@@ -19,6 +20,7 @@ export function JournalCalendar({
   selectedDateKey,
   onSelectDateKey,
   onMonthChange,
+  onJumpToToday,
 }: {
   year: number;
   month: number;
@@ -26,6 +28,7 @@ export function JournalCalendar({
   selectedDateKey: string | null;
   onSelectDateKey: (dateKey: string | null) => void;
   onMonthChange: (year: number, month: number) => void;
+  onJumpToToday: () => void;
 }): JSX.Element {
   const { t } = useNotaTranslator();
   const cells = useMemo(
@@ -41,6 +44,11 @@ export function JournalCalendar({
   }, [month, year]);
 
   const todayKey = useMemo(() => localDateKey(new Date()), []);
+
+  const isViewingCurrentMonth = useMemo(() => {
+    const now = new Date();
+    return year === now.getFullYear() && month === now.getMonth();
+  }, [month, year]);
 
   const goMonth = (delta: number): void => {
     const next = new Date(year, month + delta, 1);
@@ -76,6 +84,18 @@ export function JournalCalendar({
           </button>
         </div>
       </div>
+
+      {!isViewingCurrentMonth ? (
+        <NotaButton
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full text-xs font-medium"
+          onClick={onJumpToToday}
+        >
+          {t('Go to today')}
+        </NotaButton>
+      ) : null}
 
       <div className="grid grid-cols-7 gap-1 text-center text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
         {WEEKDAY_KEYS.map((key) => (

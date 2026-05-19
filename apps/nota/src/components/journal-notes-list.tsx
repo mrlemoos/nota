@@ -4,7 +4,13 @@ import { cn } from '@/lib/utils';
 import type { JournalEntry } from '@/lib/journal-notes';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
 
-const ROW_HEIGHT_PX = 56;
+/** Initial row height before `measureElement` runs (title-only vs title + preview). */
+function estimateJournalRowHeight(entry: JournalEntry | undefined): number {
+  if (!entry) {
+    return 32;
+  }
+  return entry.bodyPreview ? 36 : 24;
+}
 
 export function JournalNotesList({
   entries,
@@ -19,7 +25,8 @@ export function JournalNotesList({
   const virtualizer = useVirtualizer({
     count: entries.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => ROW_HEIGHT_PX,
+    estimateSize: (index) => estimateJournalRowHeight(entries[index]),
+    getItemKey: (index) => entries[index]?.noteId ?? index,
     overscan: 8,
   });
 
@@ -38,39 +45,45 @@ export function JournalNotesList({
     >
       <div
         className="relative w-full"
-        style={{ height: `${virtualizer.getTotalSize()}px` }}
+        style={{ height: `${String(virtualizer.getTotalSize())}px` }}
       >
         {virtualizer.getVirtualItems().map((virtualRow) => {
-          const entry = entries[virtualRow.index]!;
-          const label = entry.date.toLocaleDateString(undefined, {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          });
+          const entry = entries.at(virtualRow.index);
+          if (entry === undefined) {
+            return null;
+          }
 
           return (
-            <button
+            <div
               key={entry.noteId}
-              type="button"
-              onClick={() => {
-                onOpenNote(entry.noteId);
-              }}
-              className={cn(
-                'absolute inset-x-0 flex w-full flex-col items-start gap-0.5 rounded-lg px-3 py-2.5 text-left',
-                'transition-colors hover:bg-muted/50',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              )}
+              data-index={virtualRow.index}
+              ref={virtualizer.measureElement}
+              className="absolute top-0 left-0 w-full"
               style={{
-                height: `${virtualRow.size}px`,
-                transform: `translateY(${virtualRow.start}px)`,
+                transform: `translateY(${String(virtualRow.start)}px)`,
               }}
             >
-              <span className="text-xs text-muted-foreground">{label}</span>
-              <span className="line-clamp-1 text-sm font-medium text-foreground">
-                {entry.title}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenNote(entry.noteId);
+                }}
+                className={cn(
+                  'flex w-full flex-col items-start gap-0 rounded-md px-2 py-1 text-left',
+                  'transition-colors hover:bg-muted/50',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                )}
+              >
+                <span className="line-clamp-1 text-sm font-medium leading-snug text-foreground">
+                  {entry.title}
+                </span>
+                {entry.bodyPreview ? (
+                  <span className="line-clamp-1 w-full text-xs leading-snug text-pretty text-muted-foreground">
+                    {entry.bodyPreview}
+                  </span>
+                ) : null}
+              </button>
+            </div>
           );
         })}
       </div>

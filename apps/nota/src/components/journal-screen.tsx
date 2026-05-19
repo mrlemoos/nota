@@ -1,4 +1,4 @@
-import { useMemo, useState, type JSX } from 'react';
+import { useCallback, useMemo, useState, type JSX } from 'react';
 import { cn } from '@/lib/utils';
 import {
   buildJournalEntriesFromNotes,
@@ -9,6 +9,7 @@ import { navigateFromLegacyPath } from '@/lib/app-navigation';
 import { useNotesDataVault } from '@/context/notes-data-context';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
 import { parseDateKey } from '@/lib/journal-calendar';
+import { localDateKey } from '@/lib/todays-note';
 import { JournalCalendar } from './journal-calendar';
 import { JournalNotesList } from './journal-notes-list';
 
@@ -38,6 +39,12 @@ export function JournalScreen(): JSX.Element {
     [entries, selectedDateKey],
   );
 
+  const jumpToToday = useCallback(() => {
+    const now = new Date();
+    setVisibleMonth({ year: now.getFullYear(), month: now.getMonth() });
+    setSelectedDateKey(localDateKey(now));
+  }, []);
+
   const listHeading = selectedDateKey
     ? (() => {
         const { year, month, day } = parseDateKey(selectedDateKey);
@@ -51,22 +58,29 @@ export function JournalScreen(): JSX.Element {
     : t('All entries');
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col px-4 py-8">
-      <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8">
-        <header>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden px-4 py-4 sm:py-6">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col gap-4 sm:gap-6">
+        <header className="shrink-0">
           <h1 className="font-serif text-2xl font-semibold tracking-normal text-foreground">
             {t('Journal')}
           </h1>
           <p className="mt-1 max-w-xl text-sm text-pretty text-muted-foreground">
             {t(
-              'Notes titled with a date — browse by calendar or scroll the timeline.',
+              'Notes titled with a date, browse by calendar or scroll the timeline.',
             )}
           </p>
         </header>
 
-        <div className="grid min-h-0 flex-1 gap-6 lg:grid-cols-[minmax(0,20rem)_1fr] lg:gap-8">
+        <div
+          className={cn(
+            'grid min-h-0 flex-1 gap-6 overflow-hidden',
+            'grid-rows-[minmax(0,min(40dvh,26rem))_minmax(0,1fr)]',
+            'lg:grid-rows-1 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-8',
+          )}
+        >
           <section
             className={cn(
+              'flex min-h-0 flex-col overflow-y-auto overflow-x-hidden',
               'rounded-xl border border-border/60 bg-muted/15 p-4',
               'backdrop-blur-md dark:bg-black/20',
             )}
@@ -81,12 +95,13 @@ export function JournalScreen(): JSX.Element {
               onMonthChange={(year, month) => {
                 setVisibleMonth({ year, month });
               }}
+              onJumpToToday={jumpToToday}
             />
           </section>
 
           <section
             className={cn(
-              'flex min-h-[min(24rem,50vh)] flex-col rounded-xl border border-border/60',
+              'flex min-h-0 flex-col overflow-hidden rounded-xl border border-border/60',
               'bg-background/40 p-4 backdrop-blur-md dark:bg-background/25',
             )}
             aria-label={t('Journal entries')}

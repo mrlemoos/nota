@@ -88,7 +88,7 @@ export function ShellPanel({
   return (
     <div
       id={panelId}
-      className={cn(!active && 'hidden')}
+      className={cn('h-full min-h-0', !active && 'hidden')}
       aria-hidden={!active}
       inert={!active ? true : undefined}
     >

@@ -2,11 +2,13 @@ import {
   journalDateKeyFromTitle,
   parseJournalDateFromTitle,
 } from './journal-date-from-title';
+import { extractJournalNoteListPreviewFromDocJson } from './note-doc-plain-text';
 
 export type JournalNoteSource = {
   id: string;
   title: string;
   updated_at: string;
+  content?: unknown;
 };
 
 export type JournalEntry = {
@@ -15,6 +17,7 @@ export type JournalEntry = {
   date: Date;
   dateKey: string;
   updatedAt: string;
+  bodyPreview: string;
 };
 
 export function buildJournalEntriesFromNotes(
@@ -34,6 +37,7 @@ export function buildJournalEntriesFromNotes(
       date,
       dateKey,
       updatedAt: note.updated_at,
+      bodyPreview: extractJournalNoteListPreviewFromDocJson(note.content),
     });
   }
 
