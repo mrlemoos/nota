@@ -258,4 +258,15 @@ describe('NotesShell', () => {
     expect(screen.queryByText(notesShellTestCtx.longTitle)).toBeNull();
     expect(container.querySelector('aside')).toBeNull();
   });
+
+  it('does not render a header plus button to create notes', () => {
+    // Arrange
+    window.history.replaceState(null, '', '#/notes');
+
+    // Act
+    render(<NotesShell />);
+
+    // Assert
+    expect(screen.queryByLabelText('Create new note')).toBeNull();
+  });
 });

@@ -4,6 +4,7 @@ import { NotesSidebarList } from './notes-sidebar-list';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
 import { clientRenameFolder } from '../lib/rename-folder-client';
 import { clientMoveNoteToFolder } from '../lib/move-note-folder-client';
+import { clientCreateNote } from '../lib/create-note-client';
 
 vi.mock('../lib/rename-folder-client', () => ({
   clientRenameFolder: vi.fn(() => Promise.resolve()),
@@ -15,6 +16,10 @@ vi.mock('../lib/move-note-folder-client', () => ({
 
 vi.mock('../lib/update-folder-tint-client', () => ({
   clientUpdateFolderTint: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock('../lib/create-note-client', () => ({
+  clientCreateNote: vi.fn(() => Promise.resolve()),
 }));
 
 describe('NotesSidebarList', () => {
@@ -620,5 +625,191 @@ describe('NotesSidebarList', () => {
 
     // Assert
     expect(document.querySelector('[data-folder-tint="blue"]')).toBeTruthy();
+  });
+
+  it('does not apply a tinted row background on folders with a persisted tint', () => {
+    // Arrange
+    render(
+      <NotesSidebarList
+        notes={[]}
+        folders={[
+          {
+            id: 'folder-1',
+            user_id: 'user-1',
+            name: 'Tinted folder',
+            parent_id: null,
+            tint: 'blue',
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    // Act
+    const row = document.querySelector(
+      '[data-folder-tint="blue"]',
+    ) as HTMLDivElement;
+
+    // Assert
+    expect(row).toBeTruthy();
+    expect(row.style.background).toBe('');
+  });
+
+  it('applies tint accent class to the folder icon and name when tinted', () => {
+    // Arrange
+    render(
+      <NotesSidebarList
+        notes={[]}
+        folders={[
+          {
+            id: 'folder-1',
+            user_id: 'user-1',
+            name: 'Tinted folder',
+            parent_id: null,
+            tint: 'green',
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    // Act
+    const label = screen.getByText('Tinted folder');
+    const iconWrapper = label
+      .closest('button')
+      ?.querySelector('.nota-folder-tint-accent');
+
+    // Assert
+    expect(label.className).toContain('nota-folder-tint-accent');
+    expect(iconWrapper).toBeTruthy();
+  });
+
+  it('shows Create note in the folder context menu and creates a note in that folder', async () => {
+    // Arrange
+    render(
+      <NotesSidebarList
+        notes={[]}
+        folders={[
+          {
+            id: 'folder-1',
+            user_id: 'user-1',
+            name: 'Computer Science Study',
+            parent_id: null,
+            tint: null,
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    const folderRow = screen.getByText('Computer Science Study').closest('li')
+      ?.firstElementChild as HTMLDivElement;
+
+    // Act
+    fireEvent.contextMenu(folderRow);
+    fireEvent.click(await screen.findByText('Create note'));
+
+    // Assert
+    await waitFor(() => {
+      expect(clientCreateNote).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'user-1',
+          folderId: 'folder-1',
+          notaProEntitled: true,
+        }),
+      );
+    });
+  });
+
+  it('shows Create note and Create folder on the root container context menu', async () => {
+    // Arrange
+    render(
+      <NotesSidebarList
+        notes={[]}
+        folders={[
+          {
+            id: 'folder-1',
+            user_id: 'user-1',
+            name: 'Top folder',
+            parent_id: null,
+            tint: null,
+            created_at: '2026-04-25T00:00:00.000Z',
+            updated_at: '2026-04-25T00:00:00.000Z',
+          },
+        ]}
+        panel="list"
+        routeNoteId={null}
+        userId="user-1"
+        notaProEntitled
+        userPreferences={null}
+        insertNoteAtFront={vi.fn()}
+        insertFolderSorted={vi.fn()}
+        patchNoteInList={vi.fn()}
+        patchFolderInList={vi.fn()}
+        removeNoteFromList={vi.fn()}
+        removeFolderFromList={vi.fn()}
+        refreshNotesList={vi.fn(() => Promise.resolve())}
+      />,
+    );
+
+    const tree = screen.getByRole('tree');
+    const rootLi = tree.querySelector(':scope > li:last-child');
+    const rootTrigger = rootLi?.firstElementChild as HTMLDivElement;
+
+    // Act
+    fireEvent.contextMenu(rootTrigger);
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('Create note')).toBeTruthy();
+      expect(screen.getByText('Create folder')).toBeTruthy();
+    });
+
+    // Act
+    fireEvent.click(screen.getByText('Create folder'));
+
+    // Assert
+    await waitFor(() => {
+      expect(screen.getByText('New folder')).toBeTruthy();
+    });
   });
 });

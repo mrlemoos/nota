@@ -16,6 +16,7 @@ import {
   Folder01Icon,
   FolderAddIcon,
   Home01Icon,
+  NoteAddIcon,
   PencilEdit01Icon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
@@ -53,6 +54,7 @@ import {
 import type { Folder, Note, UserPreferences } from '~/types/database.types';
 import type { NotesShellPanel } from '../lib/app-navigation';
 import { noteHashHref } from './note-detail-panel';
+import { clientCreateNote } from '../lib/create-note-client';
 import { clientDeleteNoteById } from '../lib/delete-note-client';
 import { clientMoveNoteToFolder } from '../lib/move-note-folder-client';
 import {
@@ -62,8 +64,7 @@ import {
 import {
   FOLDER_TINT_PRESET_LABEL_KEY,
   FOLDER_TINT_SWATCH_PRESETS,
-  folderTintRowBackground,
-  folderTintSwatchColour,
+  folderHasPersistedTint,
 } from '../lib/folder-tint-presets';
 import { clientRenameFolder } from '../lib/rename-folder-client';
 import { clientUpdateFolderTint } from '../lib/update-folder-tint-client';
@@ -320,6 +321,7 @@ function FolderRow(options: {
   setFolderDeleteTarget: (folder: Folder) => void;
   moveDraggedNoteToFolder: (folderId: string) => Promise<void>;
   onRequestNewSubfolder: (folder: Folder) => void;
+  onCreateNoteInFolder: (folderId: string) => void;
   userId: string;
   notaProEntitled: boolean;
   patchFolderInList: (id: string, patch: Partial<Folder>) => void;
@@ -345,11 +347,14 @@ function FolderRow(options: {
     setFolderDeleteTarget,
     moveDraggedNoteToFolder,
     onRequestNewSubfolder,
+    onCreateNoteInFolder,
     userId,
     notaProEntitled,
     patchFolderInList,
     children,
   } = options;
+
+  const hasTint = folderHasPersistedTint(folder.tint ?? null);
 
   return (
     <li className="list-none">
@@ -361,12 +366,7 @@ function FolderRow(options: {
                 notesSidebarTreeFolderRowVariants({ dragOver: isDropTarget }),
                 'px-1.5 text-muted-foreground',
               )}
-              data-folder-tint={folder.tint ?? ''}
-              style={{
-                background: isDropTarget
-                  ? undefined
-                  : folderTintRowBackground(folder.tint ?? null),
-              }}
+              data-folder-tint={hasTint ? folder.tint : undefined}
               onDragEnter={(event) => {
                 if (!draggedNoteId) {
                   return;
@@ -436,10 +436,10 @@ function FolderRow(options: {
                   )}
                 />
                 <span
-                  className="inline-flex shrink-0"
-                  style={{
-                    color: folderTintSwatchColour(folder.tint ?? null),
-                  }}
+                  className={cn(
+                    'inline-flex shrink-0',
+                    hasTint && 'nota-folder-tint-accent',
+                  )}
                   aria-hidden
                 >
                   <HugeiconsIcon
@@ -486,6 +486,7 @@ function FolderRow(options: {
                           className={cn(
                             notesSidebarTreeFolderLabelClass,
                             'relative z-0 cursor-text decoration-dotted underline-offset-2 hover:underline',
+                            hasTint && 'nota-folder-tint-accent',
                           )}
                           onDoubleClick={(event) => {
                             event.preventDefault();
@@ -529,6 +530,21 @@ function FolderRow(options: {
                   />
                   <span>{t('Rename')}</span>
                 </NotaContextMenuItem>
+                {notaProEntitled ? (
+                  <NotaContextMenuItem
+                    label={t('Create note')}
+                    onClick={() => {
+                      onCreateNoteInFolder(folder.id);
+                    }}
+                  >
+                    <HugeiconsIcon
+                      icon={NoteAddIcon}
+                      size={16}
+                      className="shrink-0 text-muted-foreground"
+                    />
+                    <span>{t('Create note')}</span>
+                  </NotaContextMenuItem>
+                ) : null}
                 <NotaContextMenuItem
                   label={t('New subfolder')}
                   onClick={() => {
@@ -801,6 +817,43 @@ export function NotesSidebarList({
     setFolderCreateOpen(true);
   }, []);
 
+  const openCreateFolderDialog = useCallback(
+    (parentFolderId: string | null) => {
+      setFolderCreateParentId(parentFolderId);
+      setFolderCreateOpen(true);
+    },
+    [],
+  );
+
+  const createNoteAtFolder = useCallback(
+    (folderId: string | null): void => {
+      if (!notaProEntitled || !uid) {
+        return;
+      }
+      if (folderId !== null) {
+        const chain = [...ancestorFolderIds(folderId, folders), folderId];
+        expandFolderAncestors(chain);
+      }
+      void clientCreateNote({
+        userId: uid,
+        folderId,
+        insertNoteAtFront,
+        refreshNotesList,
+        notaProEntitled,
+        notes,
+      });
+    },
+    [
+      expandFolderAncestors,
+      folders,
+      insertNoteAtFront,
+      notaProEntitled,
+      notes,
+      refreshNotesList,
+      uid,
+    ],
+  );
+
   const handleNewFolderCreated = useCallback(
     async (folder: Folder): Promise<void> => {
       const pending = pendingNewFolderNote;
@@ -908,8 +961,10 @@ export function NotesSidebarList({
         }}
         moveDraggedNoteToFolder={moveDraggedNoteToFolder}
         onRequestNewSubfolder={(f) => {
-          setFolderCreateParentId(f.id);
-          setFolderCreateOpen(true);
+          openCreateFolderDialog(f.id);
+        }}
+        onCreateNoteInFolder={(folderId) => {
+          createNoteAtFolder(folderId);
         }}
         userId={uid}
         notaProEntitled={notaProEntitled}
@@ -978,69 +1033,119 @@ export function NotesSidebarList({
           <Fragment key={node.folder.id}>{renderFolderTreeNode(node)}</Fragment>
         ))}
 
-        <li
-          className={cn(
-            'list-none',
-            dropTargetId === 'root' &&
-              notesSidebarTreeRowVariants({ dragOver: true }),
-          )}
-          onDragEnter={(event) => {
-            if (!draggedNoteId) {
-              return;
-            }
-            event.preventDefault();
-            setDropTargetId('root');
-          }}
-          onDragOver={(event) => {
-            if (!draggedNoteId) {
-              return;
-            }
-            event.preventDefault();
-            event.dataTransfer.dropEffect = 'move';
-            setDropTargetId('root');
-          }}
-          onDragLeave={(event) => {
-            if (
-              event.relatedTarget instanceof Node &&
-              event.currentTarget.contains(event.relatedTarget)
-            ) {
-              return;
-            }
-            setDropTargetId((current) => (current === 'root' ? null : current));
-          }}
-          onDrop={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            void moveDraggedNoteToFolder(null);
-          }}
-        >
-          {rootNotes.length > 0 ? (
-            <ul className="m-0 list-none space-y-0.5 p-0">
-              {rootNotes.map((note) => (
-                <NoteRow
-                  key={note.id}
-                  note={note}
-                  isActive={panel === 'note' && routeNoteId === note.id}
-                  userId={uid}
-                  notaProEntitled={notaProEntitled}
-                  userPreferences={userPreferences}
-                  removeNoteFromList={removeNoteFromList}
-                  removeFolderFromList={removeFolderFromList}
-                  refreshNotesList={refreshNotesList}
-                  draggedNoteId={draggedNoteId}
-                  setDraggedNoteId={setDraggedNoteId}
-                  setDropTargetId={setDropTargetId}
-                  folderMoveTargets={folderMoveTargets}
-                  onMoveNoteToFolder={moveNoteToFolder}
-                  onMoveNoteToNewFolder={startCreatingFolderForNote}
-                />
-              ))}
-            </ul>
-          ) : draggedNoteId ? (
-            <p className="px-3 py-2 text-xs text-muted-foreground">
-              Drop here to move to root.
-            </p>
-          ) : null}
+        <li className="list-none">
+          <NotaContextMenu>
+            <NotaContextMenuTrigger
+              render={
+                <div
+                  className={cn(
+                    'min-h-0',
+                    dropTargetId === 'root' &&
+                      notesSidebarTreeRowVariants({ dragOver: true }),
+                  )}
+                  onDragEnter={(event) => {
+                    if (!draggedNoteId) {
+                      return;
+                    }
+                    event.preventDefault();
+                    setDropTargetId('root');
+                  }}
+                  onDragOver={(event) => {
+                    if (!draggedNoteId) {
+                      return;
+                    }
+                    event.preventDefault();
+                    event.dataTransfer.dropEffect = 'move';
+                    setDropTargetId('root');
+                  }}
+                  onDragLeave={(event) => {
+                    if (
+                      event.relatedTarget instanceof Node &&
+                      event.currentTarget.contains(event.relatedTarget)
+                    ) {
+                      return;
+                    }
+                    setDropTargetId((current) =>
+                      current === 'root' ? null : current,
+                    );
+                  }}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    void moveDraggedNoteToFolder(null);
+                  }}
+                >
+                  {rootNotes.length > 0 ? (
+                    <ul className="m-0 list-none space-y-0.5 p-0">
+                      {rootNotes.map((note) => (
+                        <NoteRow
+                          key={note.id}
+                          note={note}
+                          isActive={panel === 'note' && routeNoteId === note.id}
+                          userId={uid}
+                          notaProEntitled={notaProEntitled}
+                          userPreferences={userPreferences}
+                          removeNoteFromList={removeNoteFromList}
+                          removeFolderFromList={removeFolderFromList}
+                          refreshNotesList={refreshNotesList}
+                          draggedNoteId={draggedNoteId}
+                          setDraggedNoteId={setDraggedNoteId}
+                          setDropTargetId={setDropTargetId}
+                          folderMoveTargets={folderMoveTargets}
+                          onMoveNoteToFolder={moveNoteToFolder}
+                          onMoveNoteToNewFolder={startCreatingFolderForNote}
+                        />
+                      ))}
+                    </ul>
+                  ) : draggedNoteId ? (
+                    <p className="px-3 py-2 text-xs text-muted-foreground">
+                      Drop here to move to root.
+                    </p>
+                  ) : null}
+                </div>
+              }
+            />
+            {notaProEntitled ? (
+              <NotaContextMenuPortal>
+                <NotaContextMenuPositioner
+                  side="right"
+                  align="start"
+                  sideOffset={4}
+                >
+                  <NotaContextMenuPopup>
+                    <NotaContextMenuViewport>
+                      <NotaContextMenuItem
+                        label={t('Create note')}
+                        onClick={() => {
+                          createNoteAtFolder(null);
+                        }}
+                      >
+                        <HugeiconsIcon
+                          icon={NoteAddIcon}
+                          size={16}
+                          className="shrink-0 text-muted-foreground"
+                        />
+                        <span>{t('Create note')}</span>
+                      </NotaContextMenuItem>
+                      <NotaContextMenuItem
+                        label={t('Create folder')}
+                        onClick={() => {
+                          openCreateFolderDialog(null);
+                        }}
+                      >
+                        <HugeiconsIcon
+                          icon={FolderAddIcon}
+                          size={16}
+                          className="shrink-0 text-muted-foreground"
+                        />
+                        <span>{t('Create folder')}</span>
+                      </NotaContextMenuItem>
+                    </NotaContextMenuViewport>
+                  </NotaContextMenuPopup>
+                </NotaContextMenuPositioner>
+              </NotaContextMenuPortal>
+            ) : null}
+          </NotaContextMenu>
         </li>
       </ul>
 

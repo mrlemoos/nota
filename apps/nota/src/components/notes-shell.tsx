@@ -14,7 +14,6 @@ import {
   SparklesIcon,
 } from '@hugeicons/core-free-icons';
 import { HugeiconsIcon } from '@hugeicons/react';
-import { NotaButton } from '@nota/web-design/button';
 import { NotaTooltipProvider } from '@nota/web-design/tooltip';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import { ELECTRON_WINDOW_NO_DRAG_CLASS } from '@/lib/electron-window-chrome';
@@ -361,28 +360,6 @@ export function NotesShell(): JSX.Element {
                     Notes
                   </h2>
                   <div className="flex items-center gap-2">
-                    <NotaButton
-                      type="button"
-                      size="icon-lg"
-                      variant="default"
-                      aria-label="Create new note"
-                      onClick={onCreateNote}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-5 w-5"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M12 4.5v15m7.5-7.5h-15"
-                        />
-                      </svg>
-                    </NotaButton>
                     <SidebarToggle />
                   </div>
                 </div>

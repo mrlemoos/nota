@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  folderHasPersistedTint,
   folderTintRowBackground,
   folderTintSwatchColour,
   folderTintOptionForPersisted,
@@ -39,5 +40,13 @@ describe('folder-tint-presets', () => {
     // Assert
     expect(bg).not.toBe('transparent');
     expect(bg).toContain('color-mix');
+  });
+
+  it('folderHasPersistedTint is true only for valid DB tint keys', () => {
+    // Assert
+    expect(folderHasPersistedTint('blue')).toBe(true);
+    expect(folderHasPersistedTint(null)).toBe(false);
+    expect(folderHasPersistedTint('')).toBe(false);
+    expect(folderHasPersistedTint('nope')).toBe(false);
   });
 });

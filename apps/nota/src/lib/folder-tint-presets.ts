@@ -102,6 +102,13 @@ function isFolderTintDbValue(value: string): value is FolderTintDbValue {
   return (FOLDER_TINT_DB_VALUES as readonly string[]).includes(value);
 }
 
+/** Whether the folder row should use CSS tint accents on icon and name. */
+export function folderHasPersistedTint(
+  tint: string | null,
+): tint is FolderTintDbValue {
+  return tint !== null && tint !== '' && isFolderTintDbValue(tint);
+}
+
 /** Swatch / icon colour for a DB `tint` value. */
 export function folderTintSwatchColour(tint: string | null): string {
   if (tint === null || tint === '') {

@@ -51,6 +51,8 @@ const LOCALE_LANGUAGE_TO_CODES: Map<string, readonly SupportedLocale[]> =
 const FOLDER_CORE_ES: LocaleDictionary = {
   Folder: 'Carpeta',
   'Move folder': 'Mover carpeta',
+  'Create note': 'Crear nota',
+  'Create folder': 'Crear carpeta',
   'New folder': 'Nueva carpeta',
   'New subfolder': 'Nueva subcarpeta',
   'Tint folder': 'Teñir carpeta',
@@ -83,6 +85,8 @@ const FOLDER_CORE_ES: LocaleDictionary = {
 const FOLDER_CORE_PT: LocaleDictionary = {
   Folder: 'Pasta',
   'Move folder': 'Mover pasta',
+  'Create note': 'Criar nota',
+  'Create folder': 'Criar pasta',
   'New folder': 'Nova pasta',
   'New subfolder': 'Nova subpasta',
   'Tint folder': 'Colorir pasta',
@@ -115,6 +119,8 @@ const FOLDER_CORE_PT: LocaleDictionary = {
 const FOLDER_CORE_FR: LocaleDictionary = {
   Folder: 'Dossier',
   'Move folder': 'Déplacer le dossier',
+  'Create note': 'Créer une note',
+  'Create folder': 'Créer un dossier',
   'New folder': 'Nouveau dossier',
   'New subfolder': 'Nouveau sous-dossier',
   'Tint folder': 'Teinte du dossier',
