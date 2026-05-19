@@ -14,7 +14,7 @@ function readDistHtml(relativePath) {
     return readFileSync(htmlPath, 'utf8');
   } catch {
     console.error(
-      `verify-marketing-hero: missing dist/${relativePath} — run astro build first`,
+      `verify-marketing-hero: missing dist/${relativePath}; run astro build first`,
     );
     process.exit(1);
   }

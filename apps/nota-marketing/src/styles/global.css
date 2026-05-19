@@ -66,7 +66,7 @@ html.dark {
   --btn-active-scale: 0.98;
 }
 
-/* Radial lift behind hero content — barely perceptible, avoids flat void */
+/* Radial lift behind hero content: barely perceptible; avoids flat void */
 .mkt-hero-shell {
   background-image:
     radial-gradient(

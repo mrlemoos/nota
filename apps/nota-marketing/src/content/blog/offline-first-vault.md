@@ -8,6 +8,6 @@ tags:
 draft: true
 ---
 
-_Draft — part of the Nota feature series. To be published after [Introducing Nota](/blog/introducing-nota)._
+_Draft: part of the Nota feature series. To be published after [Introducing Nota](/blog/introducing-nota)._
 
 Your vault should be usable on a train, in a café with bad Wi‑Fi, or when you simply do not want the network in the loop. This post will explain device-first storage, cloud sync with Nota Pro, and what happens to pending work when you reconnect.

@@ -16,7 +16,7 @@ const priceMonthlyUsd = '2.49';
 const priceAnnualUsd = '19.49';
 const priceAnnualMonthlyUsd = (Number.parseFloat(priceAnnualUsd) / 12).toFixed(2);
 
-const pricingTitle = 'Nota Pricing — From $2.49/month';
+const pricingTitle = 'Nota pricing: from $2.49/month';
 const pricingDescription =
   'Nota is a paid Mac notes app: subscribe in-app for cloud sync and backup. Guide prices $19.49/year or $2.49/month (USD); lifetime offered when available in checkout.';
 
@@ -51,7 +51,7 @@ const structuredData = {
       offers: [
         {
           '@type': 'Offer',
-          name: 'Nota — annual',
+          name: 'Nota, annual',
           price: priceAnnualUsd,
           priceCurrency: 'USD',
           description: 'Full app access; billed annually. Subscribe from Settings in the macOS app.',
@@ -60,7 +60,7 @@ const structuredData = {
         },
         {
           '@type': 'Offer',
-          name: 'Nota — monthly',
+          name: 'Nota, monthly',
           price: priceMonthlyUsd,
           priceCurrency: 'USD',
           description: 'Full app access; billed monthly. Subscribe from Settings in the macOS app.',

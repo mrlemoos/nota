@@ -9,6 +9,6 @@ tags:
 draft: true
 ---
 
-_Draft — part of the Nota feature series. To be published after [Introducing Nota](/blog/introducing-nota)._
+_Draft: part of the Nota feature series. To be published after [Introducing Nota](/blog/introducing-nota)._
 
 On Mac, Nota is not trying to look like a web dashboard. This post will cover the glass sidebar, system appearance (including macOS auto light/dark), and why transparency matters for a calm notes app.

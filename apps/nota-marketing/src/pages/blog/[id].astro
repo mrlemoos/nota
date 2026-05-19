@@ -28,7 +28,7 @@ const blogUrl = new URL('/blog', site).href;
 const postUrl = new URL(blogPostUrl(post.id), site).href;
 
 const displayDate = post.data.updatedDate ?? post.data.pubDate;
-const pageTitle = `${post.data.title} — Nota`;
+const pageTitle = `${post.data.title} | Nota`;
 const pageDescription = post.data.description;
 
 const { Content } = await render(post);
