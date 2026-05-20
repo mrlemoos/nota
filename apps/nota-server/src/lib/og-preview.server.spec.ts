@@ -121,6 +121,48 @@ describe('tryFetchPlatformLinkPreview via fetchOgPreview', () => {
       globalThis.fetch = orig;
     }
   });
+
+  it('returns wikipedia article preview from the REST summary API', async () => {
+    // Arrange
+    const url = 'https://en.wikipedia.org/wiki/Alan_Turing';
+    const orig = globalThis.fetch;
+    globalThis.fetch = async (input) => {
+      const target = String(input);
+      if (target.includes('/api/rest_v1/page/summary/Alan_Turing')) {
+        return new Response(
+          JSON.stringify({
+            title: 'Alan Turing',
+            extract: 'English mathematician and computer scientist.',
+            thumbnail: {
+              source:
+                'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Alan_Turing_Aged_16.jpg/320px-Alan_Turing_Aged_16.jpg',
+            },
+          }),
+          { status: 200, headers: { 'content-type': 'application/json' } },
+        );
+      }
+      throw new Error(`Unexpected fetch: ${target}`);
+    };
+
+    try {
+      // Act
+      const r = await fetchOgPreview(url);
+
+      // Assert
+      expect(r.platform).toMatchObject({
+        kind: 'wikipedia-article',
+        boldText: 'Alan Turing',
+        suffixText: ' on Wikipedia',
+        extract: 'English mathematician and computer scientist.',
+        thumbnailUrl:
+          'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Alan_Turing_Aged_16.jpg/320px-Alan_Turing_Aged_16.jpg',
+      });
+      expect(r.platform?.logoUrl).toContain('wikipedia.svg');
+      expect(r.title).toBeNull();
+    } finally {
+      globalThis.fetch = orig;
+    }
+  });
 });
 
 describe('sanitizeOgImageUrl', () => {

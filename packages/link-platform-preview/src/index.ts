@@ -1,4 +1,9 @@
-export { SVGL_REDDIT_LOGO_URL, SVGL_YOUTUBE_LOGO_URL } from './lib/logos.js';
+export {
+  SVGL_REDDIT_LOGO_URL,
+  SVGL_WIKIPEDIA_LOGO_URL,
+  SVGL_YOUTUBE_LOGO_URL,
+  WIKIPEDIA_LOGO_URL,
+} from './lib/logos.js';
 export type {
   OgPreviewWithPlatform,
   PlatformLinkPreview,
@@ -7,9 +12,11 @@ export type {
 export {
   buildRedditPostPreview,
   buildRedditSubPreview,
+  buildWikipediaArticlePreview,
   buildYoutubeChannelPreview,
   buildYoutubeVideoPreview,
   stripYoutubeChannelTitleSuffix,
+  WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY,
 } from './lib/build-platform-preview.js';
 export {
   isRedditUrl,
@@ -26,3 +33,10 @@ export {
   type ParsedYoutubeUrl,
   type ParsedYoutubeVideo,
 } from './lib/parse-youtube-url.js';
+export {
+  isWikipediaArticleUrl,
+  parseWikipediaUrl,
+  wikipediaSummaryApiUrl,
+  wikipediaTitleFromSlug,
+  type ParsedWikipediaArticle,
+} from './lib/parse-wikipedia-url.js';

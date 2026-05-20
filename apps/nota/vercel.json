@@ -5,7 +5,7 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|platform-logos/|favicon\\.svg|.*\\.(?:svg|png|ico|woff2?|txt|webmanifest)$).*)",
       "destination": "/index.html"
     }
   ],

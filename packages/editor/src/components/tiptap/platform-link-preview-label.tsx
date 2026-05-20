@@ -1,5 +1,8 @@
 import type { JSX } from 'react';
-import type { PlatformLinkPreview } from '@nota/link-platform-preview';
+import {
+  WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY,
+  type PlatformLinkPreview,
+} from '@nota/link-platform-preview';
 import {
   NotaHoverCard,
   NotaHoverCardPortal,
@@ -9,6 +12,7 @@ import {
 } from '@nota/web-design/hover-card';
 import { cn } from '@nota/web-design/utils';
 import { safeOgImageSrcForPreview } from '../../lib/og-image-url';
+import { useNotePdfDocContext } from './note-pdf-extension';
 
 export type PlatformLinkPreviewAttrs = {
   platformKind: string;
@@ -25,6 +29,7 @@ export type PlatformLinkPreviewAttrs = {
   platformPostTitle: string;
   platformOp: string;
   platformUserAvatarUrl: string;
+  platformExtract: string;
 };
 
 export function platformAttrsFromPreview(
@@ -45,6 +50,7 @@ export function platformAttrsFromPreview(
     platformPostTitle: platform.postTitle ?? '',
     platformOp: platform.op ?? '',
     platformUserAvatarUrl: platform.userAvatarUrl ?? '',
+    platformExtract: platform.extract ?? '',
   };
 }
 
@@ -73,6 +79,7 @@ export function platformPreviewFromAttrs(
     postTitle: stringifyAttr(attrs['platformPostTitle']) || undefined,
     op: stringifyAttr(attrs['platformOp']) || undefined,
     userAvatarUrl: stringifyAttr(attrs['platformUserAvatarUrl']) || undefined,
+    extract: stringifyAttr(attrs['platformExtract']) || undefined,
   };
 }
 
@@ -83,6 +90,19 @@ function stringifyAttr(value: unknown): string {
     return String(value);
   }
   return '';
+}
+
+function displayPlatformSuffix(
+  platform: PlatformLinkPreview,
+  translateUi?: (key: string) => string,
+): string {
+  if (platform.kind === 'wikipedia-article') {
+    const translated =
+      translateUi?.(WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY) ??
+      WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY;
+    return ` ${translated}`;
+  }
+  return platform.suffixText;
 }
 
 function PlatformLinkHoverDetails({
@@ -166,6 +186,34 @@ function PlatformLinkHoverDetails({
     );
   }
 
+  if (platform.kind === 'wikipedia-article') {
+    return (
+      <div className="flex flex-col">
+        {thumb ? (
+          <img
+            src={thumb}
+            alt=""
+            className="aspect-[4/3] w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : null}
+        <div className="p-3">
+          {platform.boldText ? (
+            <p className="text-sm font-semibold leading-snug text-foreground">
+              {platform.boldText}
+            </p>
+          ) : null}
+          {platform.extract ? (
+            <p className="mt-2 line-clamp-4 text-xs text-muted-foreground">
+              {platform.extract}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   if (platform.kind === 'reddit-post') {
     return (
       <div className="flex flex-col gap-2 p-3">
@@ -243,7 +291,9 @@ export function PlatformLinkPreviewLabel({
   href: string;
   platform: PlatformLinkPreview;
 }): JSX.Element {
+  const ctx = useNotePdfDocContext();
   const displayText = platform.displayText?.trim();
+  const suffixText = displayPlatformSuffix(platform, ctx?.translateUi);
 
   const anchorClass = cn(
     'inline-flex min-w-0 max-w-full items-center gap-1.5 text-base font-normal text-foreground',
@@ -286,8 +336,8 @@ export function PlatformLinkPreviewLabel({
                       {platform.boldText}
                     </strong>
                   ) : null}
-                  {platform.suffixText ? (
-                    <span className="font-normal">{platform.suffixText}</span>
+                  {suffixText ? (
+                    <span className="font-normal">{suffixText}</span>
                   ) : null}
                 </>
               )}

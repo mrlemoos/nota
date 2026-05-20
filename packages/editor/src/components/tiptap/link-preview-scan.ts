@@ -97,6 +97,7 @@ export function convertLinkOnlyParagraphs(editor: Editor): void {
         platformPostTitle: '',
         platformOp: '',
         platformUserAvatarUrl: '',
+        platformExtract: '',
       }),
     );
   }

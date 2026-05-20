@@ -80,6 +80,7 @@ export type NotePdfDocContextValue = {
   ) => Promise<void>;
   signedUrlTtlSec: number;
   fetchOgPreview?: (href: string) => Promise<OgPreviewData>;
+  translateUi?: (key: string) => string;
   onImagePreviewRequest?: (request: NoteImagePreviewRequest) => void;
 };
 

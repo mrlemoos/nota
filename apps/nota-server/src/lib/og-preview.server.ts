@@ -4,12 +4,16 @@ import { z } from 'zod';
 import {
   buildRedditPostPreview,
   buildRedditSubPreview,
+  buildWikipediaArticlePreview,
   buildYoutubeChannelPreview,
   buildYoutubeVideoPreview,
   parseRedditUrl,
+  parseWikipediaUrl,
   parseYoutubeUrl,
   redditPostJsonUrl,
   stripYoutubeChannelTitleSuffix,
+  wikipediaSummaryApiUrl,
+  wikipediaTitleFromSlug,
   type PlatformLinkPreview,
 } from '@nota/link-platform-preview';
 
@@ -375,6 +379,40 @@ type YoutubeOEmbed = {
   author_url?: string;
 };
 
+type WikipediaSummary = {
+  title?: string;
+  extract?: string;
+  thumbnail?: { source?: string };
+};
+
+async function fetchWikipediaArticlePlatformPreview(
+  parsed: NonNullable<ReturnType<typeof parseWikipediaUrl>>,
+): Promise<PlatformLinkPreview | null> {
+  const apiUrl = wikipediaSummaryApiUrl(parsed.lang, parsed.titleSlug);
+  const fallbackTitle = wikipediaTitleFromSlug(parsed.titleSlug);
+
+  try {
+    const payload = (await fetchJsonForPlatform(apiUrl)) as WikipediaSummary;
+    const articleTitle = payload.title?.trim() || fallbackTitle;
+    if (!articleTitle) return null;
+
+    const extract = payload.extract?.trim() || undefined;
+    const thumbnailUrl = httpsImageFromMeta(
+      payload.thumbnail?.source?.trim(),
+      apiUrl,
+    );
+
+    return buildWikipediaArticlePreview({
+      articleTitle,
+      extract,
+      thumbnailUrl,
+    });
+  } catch {
+    if (!fallbackTitle) return null;
+    return buildWikipediaArticlePreview({ articleTitle: fallbackTitle });
+  }
+}
+
 async function fetchYoutubeVideoPlatformPreview(
   videoUrl: string,
 ): Promise<PlatformLinkPreview | null> {
@@ -412,6 +450,15 @@ async function fetchYoutubeVideoPlatformPreview(
 async function tryFetchPlatformLinkPreview(
   rawUrl: string,
 ): Promise<PlatformLinkPreview | null> {
+  const wikipedia = parseWikipediaUrl(rawUrl);
+  if (wikipedia?.kind === 'article') {
+    try {
+      return await fetchWikipediaArticlePlatformPreview(wikipedia);
+    } catch {
+      return null;
+    }
+  }
+
   const reddit = parseRedditUrl(rawUrl);
   if (reddit?.kind === 'subreddit') {
     let subredditAvatarUrl: string | undefined;

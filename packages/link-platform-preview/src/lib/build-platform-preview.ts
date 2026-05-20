@@ -1,5 +1,12 @@
-import { SVGL_REDDIT_LOGO_URL, SVGL_YOUTUBE_LOGO_URL } from './logos.js';
+import {
+  SVGL_REDDIT_LOGO_URL,
+  SVGL_YOUTUBE_LOGO_URL,
+  WIKIPEDIA_LOGO_URL,
+} from './logos.js';
 import type { PlatformLinkPreview } from './platform-preview-types.js';
+
+/** British English i18n key for the Wikipedia article suffix. */
+export const WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY = 'on Wikipedia';
 
 export function buildRedditPostPreview(input: {
   op: string;
@@ -76,4 +83,21 @@ export function buildYoutubeChannelPreview(
 /** Strip a trailing " - YouTube" from channel OG titles. */
 export function stripYoutubeChannelTitleSuffix(title: string): string {
   return title.replace(/\s*[-–|]\s*YouTube\s*$/i, '').trim();
+}
+
+export function buildWikipediaArticlePreview(input: {
+  articleTitle: string;
+  extract?: string;
+  thumbnailUrl?: string;
+}): PlatformLinkPreview {
+  return {
+    kind: 'wikipedia-article',
+    logoUrl: WIKIPEDIA_LOGO_URL,
+    prefixText: '',
+    boldText: input.articleTitle,
+    suffixText: ` ${WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY}`,
+    articleTitle: input.articleTitle,
+    extract: input.extract,
+    thumbnailUrl: input.thumbnailUrl,
+  };
 }

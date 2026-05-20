@@ -2,7 +2,8 @@ export type PlatformPreviewKind =
   | 'reddit-post'
   | 'reddit-sub'
   | 'youtube-video'
-  | 'youtube-channel';
+  | 'youtube-channel'
+  | 'wikipedia-article';
 
 /** Compact hyperlink preview payload (server → editor). */
 export type PlatformLinkPreview = {
@@ -27,6 +28,8 @@ export type PlatformLinkPreview = {
   postTitle?: string;
   op?: string;
   userAvatarUrl?: string;
+  articleTitle?: string;
+  extract?: string;
 };
 
 export type OgPreviewWithPlatform = {

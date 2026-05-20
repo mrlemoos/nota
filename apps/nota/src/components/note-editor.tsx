@@ -55,6 +55,7 @@ import {
   updateNoteAttachmentFilename,
 } from '../models/note-attachments';
 import { fetchOgPreviewForEditor } from '../lib/og-preview-client';
+import { useNotaTranslator } from '../lib/use-nota-translator';
 import { parseNoteLinkPath, hrefForNote } from '../lib/internal-note-link';
 import {
   absoluteUrlForNote,
@@ -64,7 +65,11 @@ import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { createTypewriterScrollUserGuard } from '@/lib/nota-typewriter-scroll-guard';
 import { NOTA_SAVE_PULSE_CLASS } from '@/lib/nota-interaction';
 
-function buildStorageOps(noteId: string, userId: string): AttachmentStorageOps {
+function buildStorageOps(
+  noteId: string,
+  userId: string,
+  translateUi: (key: string) => string,
+): AttachmentStorageOps {
   const client = getBrowserClient();
   return {
     signedUrlTtlSec: ATTACHMENT_SIGNED_URL_TTL_SEC,
@@ -99,6 +104,7 @@ function buildStorageOps(noteId: string, userId: string): AttachmentStorageOps {
       await updateNoteAttachmentFilename(client, attachmentId, newFilename);
     },
     fetchOgPreview: fetchOgPreviewForEditor,
+    translateUi,
   };
 }
 
@@ -140,10 +146,11 @@ function NoteEditorImpl({
     useState<NoteImageLightboxImage | null>(null);
   const [title, setTitle] = useState(() => note.title || '');
 
+  const { t } = useNotaTranslator();
   const storageOps = useMemo(
-    () => buildStorageOps(note.id, user?.id ?? ''),
+    () => buildStorageOps(note.id, user?.id ?? '', t),
 
-    [note.id, user?.id],
+    [note.id, user?.id, t],
   );
 
   const titleRowRef = useRef<HTMLDivElement>(null);

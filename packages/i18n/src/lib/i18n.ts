@@ -263,6 +263,18 @@ const ELECTRON_UPDATE_FR: LocaleDictionary = {
     'Les mises à jour ne sont vérifiées que dans l’application Mac empaquetée.',
 };
 
+const PLATFORM_LINK_PREVIEW_ES: LocaleDictionary = {
+  'on Wikipedia': 'en Wikipedia',
+};
+
+const PLATFORM_LINK_PREVIEW_PT: LocaleDictionary = {
+  'on Wikipedia': 'na Wikipédia',
+};
+
+const PLATFORM_LINK_PREVIEW_FR: LocaleDictionary = {
+  'on Wikipedia': 'sur Wikipédia',
+};
+
 /**
  * Translation dictionary for each supported locale
  * (en-GB and en-CA use the key as-is).
@@ -279,6 +291,7 @@ const TRANSLATIONS: Record<
     ...NOTE_GRAPH_ES,
     ...NOTE_BACKLINKS_ES,
     ...ELECTRON_UPDATE_ES,
+    ...PLATFORM_LINK_PREVIEW_ES,
   },
   'pt-BR': {
     ...SHORTCUT_TRANSLATIONS_PT,
@@ -287,6 +300,7 @@ const TRANSLATIONS: Record<
     ...NOTE_GRAPH_PT,
     ...NOTE_BACKLINKS_PT,
     ...ELECTRON_UPDATE_PT,
+    ...PLATFORM_LINK_PREVIEW_PT,
   },
   'fr-CA': {
     ...SHORTCUT_TRANSLATIONS_FR,
@@ -295,6 +309,7 @@ const TRANSLATIONS: Record<
     ...NOTE_GRAPH_FR,
     ...NOTE_BACKLINKS_FR,
     ...ELECTRON_UPDATE_FR,
+    ...PLATFORM_LINK_PREVIEW_FR,
   },
 };
 

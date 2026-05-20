@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   buildRedditPostPreview,
   buildYoutubeVideoPreview,
+  buildWikipediaArticlePreview,
   stripYoutubeChannelTitleSuffix,
+  WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY,
 } from './build-platform-preview.js';
 
 describe('buildRedditPostPreview', () => {
@@ -62,5 +64,29 @@ describe('stripYoutubeChannelTitleSuffix', () => {
 
     // Assert
     expect(stripped).toBe('Nota Labs');
+  });
+});
+
+describe('buildWikipediaArticlePreview', () => {
+  it('bolds the article title before the Wikipedia suffix', () => {
+    // Arrange
+    const input = {
+      articleTitle: 'Alan Turing',
+      extract: 'English mathematician and computer scientist.',
+      thumbnailUrl:
+        'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Alan_Turing_Aged_16.jpg/320px-Alan_Turing_Aged_16.jpg',
+    };
+
+    // Act
+    const preview = buildWikipediaArticlePreview(input);
+
+    // Assert
+    expect(preview.kind).toBe('wikipedia-article');
+    expect(preview.prefixText).toBe('');
+    expect(preview.boldText).toBe('Alan Turing');
+    expect(preview.suffixText).toBe(` ${WIKIPEDIA_ARTICLE_SUFFIX_I18N_KEY}`);
+    expect(preview.logoUrl).toContain('wikipedia.svg');
+    expect(preview.extract).toBe(input.extract);
+    expect(preview.thumbnailUrl).toBe(input.thumbnailUrl);
   });
 });

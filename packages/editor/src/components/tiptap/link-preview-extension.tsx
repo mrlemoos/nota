@@ -51,6 +51,7 @@ const platformAttrDefaults = {
   platformPostTitle: '',
   platformOp: '',
   platformUserAvatarUrl: '',
+  platformExtract: '',
 };
 
 function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
@@ -412,6 +413,14 @@ export const LinkPreview = Node.create({
         renderHTML: (attrs) =>
           attrs.platformUserAvatarUrl
             ? { 'data-platform-user-avatar': attrs.platformUserAvatarUrl }
+            : {},
+      },
+      platformExtract: {
+        default: '',
+        parseHTML: (el) => el.getAttribute('data-platform-extract') ?? '',
+        renderHTML: (attrs) =>
+          attrs.platformExtract
+            ? { 'data-platform-extract': attrs.platformExtract }
             : {},
       },
     };
