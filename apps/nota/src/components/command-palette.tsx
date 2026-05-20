@@ -2,7 +2,6 @@ import {
   useCallback,
   useEffect,
   useEffectEvent,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -43,7 +42,7 @@ import { clientCreateNote } from '../lib/create-note-client';
 import { clientDeleteNoteById } from '../lib/delete-note-client';
 import { clientMoveNoteToFolder } from '../lib/move-note-folder-client';
 import { dispatchRenameFolderRequest } from '../lib/folder-rename-request';
-import { navigatorLooksLikeApplePlatform } from '../lib/navigator-apple-platform';
+import { useMetaShortcutKey } from '@nota/helper-hooks';
 import { movePickEnterAction } from '../lib/move-pick-enter';
 import {
   parseMovePickNoteId,
@@ -179,13 +178,7 @@ export function CommandPalette(): JSX.Element {
     canInsertTaskList,
   } = useNoteEditorCommands();
   const commandInputRef = useRef<HTMLInputElement | null>(null);
-  const [newNoteHotkeyLabel, setNewNoteHotkeyLabel] = useState('⌘N');
-  const [todaysNoteHotkeyLabel, setTodaysNoteHotkeyLabel] = useState('⌘D');
-  const [historyBackHotkeyLabel, setHistoryBackHotkeyLabel] = useState('⌘[');
-  const [historyForwardHotkeyLabel, setHistoryForwardHotkeyLabel] =
-    useState('⌘]');
-  const [createFolderHotkeyLabel, setCreateFolderHotkeyLabel] = useState('⇧⌘N');
-  const [moveNoteHotkeyLabel] = useState('⌘M');
+  const { formatShortcut } = useMetaShortcutKey();
   const [openingTodaysNote, setOpeningTodaysNote] = useState(false);
   const [startingAudioNote, setStartingAudioNote] = useState(false);
   const [paletteValue, setPaletteValue] = useState('');
@@ -468,17 +461,6 @@ export function CommandPalette(): JSX.Element {
     },
     { dependencies: [open, prefersReducedMotion] },
   );
-
-  useLayoutEffect(() => {
-    const isApple =
-      navigatorLooksLikeApplePlatform() ||
-      /\bMac OS X\b/i.test(navigator.userAgent);
-    setNewNoteHotkeyLabel(isApple ? '⌘N' : 'Ctrl+N');
-    setTodaysNoteHotkeyLabel(isApple ? '⌘D' : 'Ctrl+D');
-    setHistoryBackHotkeyLabel(isApple ? '⌘[' : 'Ctrl+[');
-    setHistoryForwardHotkeyLabel(isApple ? '⌘]' : 'Ctrl+]');
-    setCreateFolderHotkeyLabel(isApple ? '⇧⌘N' : 'Ctrl+Shift+N');
-  }, []);
 
   const paletteValueRef = useRef('');
   paletteValueRef.current = paletteValue;
@@ -1110,7 +1092,7 @@ export function CommandPalette(): JSX.Element {
                       >
                         <span className="min-w-0 flex-1">Create folder</span>
                         <span className={notaKbdHintClass}>
-                          {createFolderHotkeyLabel}
+                          {formatShortcut({ key: 'N', shift: true })}
                         </span>
                       </Command.Item>
                       <Command.Item
@@ -1136,7 +1118,7 @@ export function CommandPalette(): JSX.Element {
                       >
                         <span className="min-w-0 flex-1">Move note…</span>
                         <span className={notaKbdHintClass}>
-                          {moveNoteHotkeyLabel}
+                          {formatShortcut({ key: 'M' })}
                         </span>
                       </Command.Item>
                       <Command.Item
@@ -1256,7 +1238,7 @@ export function CommandPalette(): JSX.Element {
                             : 'Create new note'}
                         </span>
                         <span className={notaKbdHintClass}>
-                          {newNoteHotkeyLabel}
+                          {formatShortcut({ key: 'N' })}
                         </span>
                       </Command.Item>
                       {newNoteFolderPickerOpen ? (
@@ -1385,7 +1367,7 @@ export function CommandPalette(): JSX.Element {
                               : 'Open today’s note'}
                           </span>
                           <span className={notaKbdHintClass}>
-                            {todaysNoteHotkeyLabel}
+                            {formatShortcut({ key: 'D' })}
                           </span>
                         </Command.Item>
                       ) : null}
@@ -1931,13 +1913,13 @@ export function CommandPalette(): JSX.Element {
                   <span>
                     Back{' '}
                     <span className={notaKbdFooterClass}>
-                      {historyBackHotkeyLabel}
+                      {formatShortcut({ key: '[' })}
                     </span>
                   </span>
                   <span>
                     Forward{' '}
                     <span className={notaKbdFooterClass}>
-                      {historyForwardHotkeyLabel}
+                      {formatShortcut({ key: ']' })}
                     </span>
                   </span>
                 </div>
