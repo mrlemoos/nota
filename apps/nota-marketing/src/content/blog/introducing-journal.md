@@ -1,5 +1,5 @@
 ---
-title: Introducing Journal
+title: Bringing journal to Nota
 description: 'A calm view for notes titled like dates: a calendar, timeline, and one tap back to today when you have wandered months away.'
 pubDate: 2026-05-22
 author: Leonardo Lemos
