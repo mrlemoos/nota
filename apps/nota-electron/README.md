@@ -115,7 +115,7 @@ With `APPLE_CERTIFICATE_BASE64` unset, CI still produces **unsigned** artefacts.
 
 ## macOS Dock icon
 
-The Dock icon follows **system light/dark**: [`buildResources/icon.png`](buildResources/icon.png) (unchanged) for light appearance, and [`buildResources/icon-dark.png`](buildResources/icon-dark.png) rasterised from [`buildResources/icon-dark.svg`](buildResources/icon-dark.svg) (same mark and colours as the dark branch of the web [`favicon.svg`](../nota/public/favicon.svg)). Run **`pnpm run generate:nota-icons`** from the repo root after editing the SVG; [`src/main.ts`](src/main.ts) applies **`app.dock.setIcon`** on launch and when **`nativeTheme`** changes. The app bundle **`.icns`** remains built from **`icon.png`**.
+The Dock icon follows **system light/dark**: [`buildResources/icon.png`](buildResources/icon.png) from [`icon-light.svg`](buildResources/icon-light.svg) (Tahoe-safe margins and light chrome), and [`buildResources/icon-dark.png`](buildResources/icon-dark.png) from [`icon-dark.svg`](buildResources/icon-dark.svg). Run **`pnpm run generate:nota-icons`** from the repo root after editing either SVG; [`src/main.ts`](src/main.ts) applies **`app.dock.setIcon`** on launch and when **`nativeTheme`** changes. The app bundle **`.icns`** remains built from **`icon.png`**. Vitest checks the committed PNG safe zone in [`../nota/scripts/dock-icon-metrics.spec.mjs`](../nota/scripts/dock-icon-metrics.spec.mjs).
 
 ## Architecture
 

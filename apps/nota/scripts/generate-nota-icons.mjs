@@ -3,7 +3,7 @@
 // Usage (repo root): `pnpm run generate:nota-icons`
 //
 // Inputs:
-// - `public/favicon.svg` (light dock / .icns source)
+// - `../nota-electron/buildResources/icon-light.svg` (light dock / .icns source)
 // - `../nota-electron/buildResources/icon-dark.svg` (dark dock raster source)
 // - `public/apple-touch-icon.png`
 //
@@ -21,6 +21,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
+import {
+  DOCK_ICON_MAX_CONTENT_FILL_RATIO,
+  measureDockIconPng,
+} from './dock-icon-metrics.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const NOTA_APP_ROOT = path.resolve(__dirname, '..');
@@ -33,12 +37,17 @@ const ELECTRON_BUILD_RESOURCES = path.resolve(
 );
 
 const ICON_PNG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon.png');
+const ICON_LIGHT_SVG_PATH = path.join(
+  ELECTRON_BUILD_RESOURCES,
+  'icon-light.svg',
+);
 const ICON_DARK_SVG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon-dark.svg');
 const ICON_DARK_PNG_PATH = path.join(ELECTRON_BUILD_RESOURCES, 'icon-dark.png');
 const APPLE_TOUCH_ICON_PATH = path.join(PUBLIC_DIR, 'apple-touch-icon.png');
 const FAVICON_SVG_PATH = path.join(PUBLIC_DIR, 'favicon.svg');
 const ELECTRON_ICON_SIZE_PX = 1024;
-const ELECTRON_ICON_VISIBLE_SCALE = 0.82;
+/** macOS 26 Tahoe: ~12% transparent margin per side so opaque pixels avoid squircle jail. */
+export const ELECTRON_ICON_VISIBLE_SCALE = DOCK_ICON_MAX_CONTENT_FILL_RATIO;
 
 const ICONSET_SIZES = [
   ['icon_16x16.png', 16],
@@ -63,7 +72,7 @@ async function renderPaddedIconPng(inputPath, outputPath, label) {
     ELECTRON_ICON_SIZE_PX * ELECTRON_ICON_VISIBLE_SCALE,
   );
   const inset = Math.floor((ELECTRON_ICON_SIZE_PX - innerSize) / 2);
-  const icon = await sharp(inputPath)
+  const icon = await sharp(inputPath, { density: 288 })
     .resize(innerSize, innerSize, { fit: 'contain' })
     .png()
     .toBuffer();
@@ -84,7 +93,22 @@ async function renderPaddedIconPng(inputPath, outputPath, label) {
 }
 
 async function writeIconPng() {
-  await renderPaddedIconPng(FAVICON_SVG_PATH, ICON_PNG_PATH, 'icon.png');
+  await renderPaddedIconPng(ICON_LIGHT_SVG_PATH, ICON_PNG_PATH, 'icon.png');
+}
+
+async function assertDockIconSafeZone(pngPath, label) {
+  const { outerBandOpaqueCount, contentFillRatio } =
+    await measureDockIconPng(pngPath);
+  if (outerBandOpaqueCount > 0) {
+    throw new Error(
+      `${label}: ${outerBandOpaqueCount} opaque pixels in outer Tahoe margin band`,
+    );
+  }
+  if (contentFillRatio > DOCK_ICON_MAX_CONTENT_FILL_RATIO + 0.005) {
+    throw new Error(
+      `${label}: content fill ${(contentFillRatio * 100).toFixed(1)}% exceeds Tahoe safe zone`,
+    );
+  }
 }
 
 async function writeIconDarkPng() {
@@ -139,6 +163,8 @@ async function writeFaviconSvg() {
 
 await writeIconPng();
 await writeIconDarkPng();
+await assertDockIconSafeZone(ICON_PNG_PATH, 'icon.png');
+await assertDockIconSafeZone(ICON_DARK_PNG_PATH, 'icon-dark.png');
 await writeIcns();
 if (process.env.NOTA_REGENERATE_EMBEDDED_FAVICON === '1') {
   await writeFaviconSvg();
