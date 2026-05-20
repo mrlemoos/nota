@@ -1,7 +1,9 @@
 import { NotaButton } from '@nota/web-design/button';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import { cn } from '@/lib/utils';
+import { ELECTRON_WINDOW_NO_DRAG_CLASS } from '@/lib/electron-window-chrome';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
+import { useIsElectron } from '@/lib/use-is-electron';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
 import type { JSX, ReactNode } from 'react';
 
@@ -30,6 +32,7 @@ export function SidebarToggle({
 }): JSX.Element {
   const { open, toggle } = useNotesSidebarStore();
   const { t } = useNotaTranslator();
+  const isElectron = useIsElectron();
 
   return (
     <NotaButton
@@ -37,7 +40,11 @@ export function SidebarToggle({
       variant="ghost"
       size="icon-lg"
       onClick={toggle}
-      className={cn('text-foreground', className)}
+      className={cn(
+        'relative z-40 text-foreground',
+        isElectron && ELECTRON_WINDOW_NO_DRAG_CLASS,
+        className,
+      )}
       aria-label={open ? t('Close sidebar') : t('Open sidebar')}
       aria-expanded={open}
     >

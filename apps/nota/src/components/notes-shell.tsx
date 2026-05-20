@@ -326,11 +326,7 @@ export function NotesShell(): JSX.Element {
               )}
             >
               <SidebarToggle
-                className={cn(
-                  'text-foreground',
-                  isElectron &&
-                    cn('pointer-events-auto', ELECTRON_WINDOW_NO_DRAG_CLASS),
-                )}
+                className={cn(isElectron && 'pointer-events-auto')}
               />
             </div>
           ) : null}
@@ -339,6 +335,7 @@ export function NotesShell(): JSX.Element {
               ref={asideRef}
               className={cn(
                 'relative flex h-full min-h-0 min-w-0 shrink-0 flex-col overflow-hidden',
+                isElectron && 'z-[35]',
                 notesSidebarChrome,
                 !open && 'pointer-events-none',
               )}
