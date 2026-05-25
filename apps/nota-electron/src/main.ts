@@ -24,6 +24,10 @@ import {
   ssoCallbackBaseUrl,
 } from './app-load-url.js';
 import {
+  installClerkFapiCorsPatch,
+  isClerkFapiHostname,
+} from './clerk-fapi-cors.js';
+import {
   registerNotaUpdaterIpc,
   startPackagedNotaUpdater,
 } from './nota-updater.js';
@@ -358,17 +362,6 @@ function queueOrDeliverSsoFromNotaProtocol(protocolUrl: string): void {
  * Clerk `signIn.sso` assigns `window.location` to the hosted OAuth URL. In Electron, Apple / passkey
  * flows must run in the **system browser**; intercept main-window navigations to HTTPS IdP/Clerk OAuth.
  */
-function isClerkRelatedHttpsHost(hostname: string): boolean {
-  const h = hostname.toLowerCase();
-  return (
-    h.endsWith('.clerk.accounts.dev') ||
-    h.endsWith('.clerk.accounts.com') ||
-    h === 'clerk.com' ||
-    h.endsWith('.clerk.com') ||
-    h === 'clerk.nota.mrlemoos.dev'
-  );
-}
-
 function shouldOpenHttpsNavigationInSystemBrowser(url: string): boolean {
   if (shouldOpenStripeHostedPageInSystemBrowser(url)) {
     return true;
@@ -384,7 +377,7 @@ function shouldOpenHttpsNavigationInSystemBrowser(url: string): boolean {
       h === 'id.apple.com' ||
       h === 'accounts.google.com' ||
       h === 'github.com' ||
-      isClerkRelatedHttpsHost(h)
+      isClerkFapiHostname(h)
     );
   } catch {
     return false;
@@ -503,6 +496,7 @@ if (!gotTheLock) {
         });
       }
 
+      installClerkFapiCorsPatch();
       await startServer();
       createWindow();
       installApplicationMenu();
