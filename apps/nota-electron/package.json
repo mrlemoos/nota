@@ -46,6 +46,12 @@
       },
       "dev": {
         "executor": "nx:run-commands",
+        "dependsOn": [
+          {
+            "target": "build",
+            "projects": "@nota/clerk-oauth-protocol"
+          }
+        ],
         "options": {
           "commands": [
             "echo 'Loads http://localhost:4200 — run `nx run-many -t dev` to start Vite and Electron together.'",

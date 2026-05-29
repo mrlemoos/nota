@@ -1073,6 +1073,33 @@ html.nota-electron .nota-notes-root {
   background-image: none;
 }
 
+/* Banner notes: let the cover image read through the expanded sidebar. */
+.nota-notes-root.nota-notes-root--banner {
+  background-color: transparent;
+}
+
+.nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome {
+  background-color: color-mix(in oklch, var(--sidebar) 28%, transparent);
+  -webkit-backdrop-filter: blur(34px) saturate(1.7) contrast(1.04);
+  backdrop-filter: blur(34px) saturate(1.7) contrast(1.04);
+  box-shadow:
+    inset -1px 0 0 color-mix(in oklch, var(--border) 54%, transparent),
+    inset 1px 0 0 rgba(255, 255, 255, 0.16);
+}
+
+.dark .nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome {
+  background-color: rgb(0 0 0 / 20%);
+  box-shadow:
+    inset -1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.nota-notes-root.nota-notes-root--banner .nota-notes-main-chrome {
+  background-color: color-mix(in oklch, var(--background) 42%, transparent);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 /*
  * Notes shell: users who disable transparency (macOS / Windows) should get solid surfaces
  * instead of backdrop blur. Unlayered so these override Tailwind backdrop utilities.

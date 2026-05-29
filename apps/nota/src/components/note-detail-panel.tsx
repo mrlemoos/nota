@@ -342,22 +342,25 @@ export function NoteDetailPanel({
     };
   }, [bannerAttachmentId, bannerAttachment?.storage_path]);
 
-  // Paint the banner as a viewport-fixed background on <main>. Using
-  // background-attachment:fixed sidesteps the containing-block issue caused
-  // by main's backdrop-filter (which scopes `position:fixed` descendants).
+  // Paint the banner on the shared notes root so the image continues beneath
+  // the translucent sidebar instead of stopping at the main panel edge.
   useEffect(() => {
     const main = scrollRootRef.current;
     if (!main) return;
     if (!bannerSignedUrl) return;
-    main.style.backgroundImage = `url("${bannerSignedUrl}")`;
-    main.style.backgroundSize = 'cover';
-    main.style.backgroundPosition = 'center';
-    main.style.backgroundAttachment = 'fixed';
+    const root = main.closest<HTMLElement>('.nota-notes-root');
+    if (!root) return;
+    root.classList.add('nota-notes-root--banner');
+    root.style.backgroundImage = `url(${JSON.stringify(bannerSignedUrl)})`;
+    root.style.backgroundSize = 'cover';
+    root.style.backgroundPosition = 'center';
+    root.style.backgroundAttachment = 'fixed';
     return () => {
-      main.style.backgroundImage = '';
-      main.style.backgroundSize = '';
-      main.style.backgroundPosition = '';
-      main.style.backgroundAttachment = '';
+      root.classList.remove('nota-notes-root--banner');
+      root.style.backgroundImage = '';
+      root.style.backgroundSize = '';
+      root.style.backgroundPosition = '';
+      root.style.backgroundAttachment = '';
     };
   }, [bannerSignedUrl, scrollRootRef]);
 
