@@ -1397,6 +1397,38 @@ export function CommandPalette(): JSX.Element {
                         />
                         <span className="min-w-0 flex-1">Open note graph</span>
                       </Command.Item>
+                      <Command.Item
+                        value="view-writing-activity"
+                        keywords={[
+                          'activity',
+                          'streak',
+                          'graph',
+                          'writing',
+                          'heatmap',
+                          'contribution',
+                        ]}
+                        onSelect={() => {
+                          setAppHash({
+                            kind: 'notes',
+                            panel: 'list',
+                            noteId: null,
+                          });
+                          closePalette();
+                        }}
+                        className={cn(
+                          commandItemRowClass,
+                          'group text-foreground',
+                          'aria-selected:bg-accent aria-selected:text-accent-foreground',
+                        )}
+                      >
+                        <PaletteItemIcon
+                          icon={TaskDaily01Icon}
+                          className="text-muted-foreground group-aria-selected:text-accent-foreground"
+                        />
+                        <span className="min-w-0 flex-1">
+                          View writing activity
+                        </span>
+                      </Command.Item>
                       {showJournalCommand ? (
                         <Command.Item
                           value="open-journal"

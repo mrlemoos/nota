@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserPreferences } from '~/types/database.types';
+import type { WritingActivityColor } from '@/lib/writing-activity';
 
 export type CursorVisualStyle = 'line' | 'block';
 
@@ -16,6 +17,10 @@ interface NotaPreferencesState {
   lastServerUpdatedAt: string | null;
   /** Local calendar date (YYYY-MM-DD) → note id; device-local only. */
   dailyNoteIdByLocalDate: Record<string, string>;
+
+  showWritingActivityGraph: boolean;
+  writingActivityColor: WritingActivityColor;
+  writingActivityDays: Record<string, number>;
 
   setOpenTodaysNoteShortcut: (
     value: boolean,
@@ -38,6 +43,12 @@ interface NotaPreferencesState {
     options?: { pendingSync?: boolean },
   ) => void;
   setCursorVisualStyle: (value: CursorVisualStyle) => void;
+  setShowWritingActivityGraph: (
+    value: boolean,
+    options?: { pendingSync?: boolean },
+  ) => void;
+  setWritingActivityColor: (value: WritingActivityColor) => void;
+  setWritingActivityDays: (days: Record<string, number>) => void;
   hydratePreferencesFromServer: (prefs: UserPreferences) => void;
   markPreferencesSynced: (prefs: UserPreferences) => void;
   setDailyNoteForLocalDate: (dateKey: string, noteId: string) => void;
@@ -56,6 +67,9 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
       preferencesPendingSync: false,
       lastServerUpdatedAt: null,
       dailyNoteIdByLocalDate: {},
+      showWritingActivityGraph: false,
+      writingActivityColor: 'blue',
+      writingActivityDays: {},
 
       setOpenTodaysNoteShortcut: (value, options) =>
         set({
@@ -97,6 +111,25 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
           cursorVisualStyle: value,
         }),
 
+      setShowWritingActivityGraph: (value, options) =>
+        set({
+          showWritingActivityGraph: value,
+          preferencesPendingSync:
+            options?.pendingSync !== undefined ? options.pendingSync : true,
+        }),
+
+      setWritingActivityColor: (value) =>
+        set({
+          writingActivityColor: value,
+          preferencesPendingSync: true,
+        }),
+
+      setWritingActivityDays: (days) =>
+        set({
+          writingActivityDays: days,
+          preferencesPendingSync: true,
+        }),
+
       hydratePreferencesFromServer: (prefs) => {
         if (get().preferencesPendingSync) {
           return;
@@ -107,6 +140,11 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
           showNoteBacklinks: prefs.show_note_backlinks,
           semanticSearchEnabled: prefs.semantic_search_enabled,
           emojiReplacerEnabled: prefs.emoji_replacer_enabled,
+          showWritingActivityGraph: prefs.show_writing_activity_graph ?? false,
+          writingActivityColor:
+            (prefs.writing_activity_color as WritingActivityColor) ?? 'blue',
+          writingActivityDays:
+            (prefs.writing_activity_days as Record<string, number>) ?? {},
           lastServerUpdatedAt: prefs.updated_at,
         });
       },
@@ -118,6 +156,11 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
           showNoteBacklinks: prefs.show_note_backlinks,
           semanticSearchEnabled: prefs.semantic_search_enabled,
           emojiReplacerEnabled: prefs.emoji_replacer_enabled,
+          showWritingActivityGraph: prefs.show_writing_activity_graph ?? false,
+          writingActivityColor:
+            (prefs.writing_activity_color as WritingActivityColor) ?? 'blue',
+          writingActivityDays:
+            (prefs.writing_activity_days as Record<string, number>) ?? {},
           preferencesPendingSync: false,
           lastServerUpdatedAt: prefs.updated_at,
         }),
@@ -149,6 +192,9 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
         preferencesPendingSync: state.preferencesPendingSync,
         lastServerUpdatedAt: state.lastServerUpdatedAt,
         dailyNoteIdByLocalDate: state.dailyNoteIdByLocalDate,
+        showWritingActivityGraph: state.showWritingActivityGraph,
+        writingActivityColor: state.writingActivityColor,
+        writingActivityDays: state.writingActivityDays,
       }),
     },
   ),

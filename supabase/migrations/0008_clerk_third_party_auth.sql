@@ -1,6 +1,13 @@
 -- Clerk third-party auth: user_id stores Clerk user ids (text). RLS uses auth.jwt()->>'sub'.
 -- Run Supabase Dashboard: Authentication → Third-party → Clerk with your Clerk domain.
 -- Backfill legacy UUID user_id values via public.supabase_clerk_account_link + UPDATE scripts.
+--
+-- NOTE (2026 fix): The original ordering of DROP POLICY + ALTER COLUMN statements caused
+-- "cannot alter type of a column used in a policy definition" errors during `supabase db reset`,
+-- `db diff --linked`, and `db push` (because policies on note_attachments/storage had subqueries
+-- referencing notes.user_id). We now drop all dependent policies *before* any ALTER COLUMN user_id.
+-- This makes the full migration history replayable again. The change is safe (all statements use
+-- IF EXISTS / IF NOT EXISTS).
 
 -- Staging table for one-time Supabase Auth UUID → Clerk user id mapping (no end-user policies).
 CREATE TABLE IF NOT EXISTS public.supabase_clerk_account_link (
@@ -23,17 +30,25 @@ DROP POLICY IF EXISTS "Users can insert own notes" ON public.notes;
 DROP POLICY IF EXISTS "Users can update own notes" ON public.notes;
 DROP POLICY IF EXISTS "Users can delete own notes" ON public.notes;
 
+-- Must drop *all* policies that contain subqueries on notes.user_id before we
+-- change the column type on notes (otherwise Postgres refuses the ALTER).
+-- These drops were moved earlier in 2026 to fix replay errors in db reset / db diff / db push.
+DROP POLICY IF EXISTS "Users can view attachments for own notes" ON public.note_attachments;
+DROP POLICY IF EXISTS "Users can insert attachments for own notes" ON public.note_attachments;
+DROP POLICY IF EXISTS "Users can delete own note attachments" ON public.note_attachments;
+DROP POLICY IF EXISTS "Users can update own note attachments" ON public.note_attachments;
+
+DROP POLICY IF EXISTS "note-pdfs select own objects" ON storage.objects;
+DROP POLICY IF EXISTS "note-pdfs insert own objects" ON storage.objects;
+DROP POLICY IF EXISTS "note-pdfs update own objects" ON storage.objects;
+DROP POLICY IF EXISTS "note-pdfs delete own objects" ON storage.objects;
+
 ALTER TABLE public.notes DROP CONSTRAINT IF EXISTS notes_user_id_fkey;
 
 ALTER TABLE public.notes
     ALTER COLUMN user_id TYPE TEXT USING user_id::text;
 
 -- note_attachments
-DROP POLICY IF EXISTS "Users can view attachments for own notes" ON public.note_attachments;
-DROP POLICY IF EXISTS "Users can insert attachments for own notes" ON public.note_attachments;
-DROP POLICY IF EXISTS "Users can delete own note attachments" ON public.note_attachments;
-DROP POLICY IF EXISTS "Users can update own note attachments" ON public.note_attachments;
-
 ALTER TABLE public.note_attachments DROP CONSTRAINT IF EXISTS note_attachments_user_id_fkey;
 
 ALTER TABLE public.note_attachments
@@ -48,12 +63,6 @@ ALTER TABLE public.user_preferences DROP CONSTRAINT IF EXISTS user_preferences_u
 
 ALTER TABLE public.user_preferences
     ALTER COLUMN user_id TYPE TEXT USING user_id::text;
-
--- Storage: note-pdfs policies
-DROP POLICY IF EXISTS "note-pdfs select own objects" ON storage.objects;
-DROP POLICY IF EXISTS "note-pdfs insert own objects" ON storage.objects;
-DROP POLICY IF EXISTS "note-pdfs update own objects" ON storage.objects;
-DROP POLICY IF EXISTS "note-pdfs delete own objects" ON storage.objects;
 
 -- notes RLS (Clerk JWT sub)
 CREATE POLICY "Users can view own notes"

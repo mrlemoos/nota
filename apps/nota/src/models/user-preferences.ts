@@ -28,6 +28,9 @@ export async function getUserPreferences(
     emoji_replacer_enabled: true,
     welcome_seeded: false,
     delete_empty_folders: true,
+    show_writing_activity_graph: false,
+    writing_activity_color: 'blue',
+    writing_activity_days: {},
     updated_at: new Date(0).toISOString(),
   };
 }
@@ -43,6 +46,9 @@ export async function upsertUserPreferences(
     emoji_replacer_enabled?: boolean;
     welcome_seeded?: boolean;
     delete_empty_folders?: boolean;
+    show_writing_activity_graph?: boolean;
+    writing_activity_color?: string;
+    writing_activity_days?: Record<string, number>;
   },
 ): Promise<UserPreferences> {
   const current = await getUserPreferences(client, userId);
@@ -73,6 +79,18 @@ export async function upsertUserPreferences(
       patch.delete_empty_folders !== undefined
         ? patch.delete_empty_folders
         : current.delete_empty_folders,
+    show_writing_activity_graph:
+      patch.show_writing_activity_graph !== undefined
+        ? patch.show_writing_activity_graph
+        : current.show_writing_activity_graph,
+    writing_activity_color:
+      patch.writing_activity_color !== undefined
+        ? patch.writing_activity_color
+        : current.writing_activity_color,
+    writing_activity_days:
+      patch.writing_activity_days !== undefined
+        ? patch.writing_activity_days
+        : current.writing_activity_days,
   };
 
   const { data, error } = await client

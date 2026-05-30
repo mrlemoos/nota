@@ -5,6 +5,21 @@ import { ELECTRON_WINDOW_NO_DRAG_CLASS } from '@/lib/electron-window-chrome';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
 import { useIsElectron } from '@/lib/use-is-electron';
 import { useNotesSidebarStore } from '../stores/notes-sidebar';
+import { useNotaPreferencesStore } from '../stores/nota-preferences';
+import {
+  buildActivityGridCells,
+  computeCurrentStreak,
+  computeLongestStreak,
+  ACTIVITY_LEVEL_CLASSES,
+  type WritingActivityColor,
+} from '@/lib/writing-activity';
+import {
+  NotaTooltip,
+  NotaTooltipPortal,
+  NotaTooltipPositioner,
+  NotaTooltipPopup,
+  NotaTooltipTrigger,
+} from '@nota/web-design/tooltip';
 import type { JSX, ReactNode } from 'react';
 
 /** Avoid `fallback={null}`: paywall redirect hits Settings before the chunk loads; Electron notes root is transparent so an empty main reads as a blank screen. */
@@ -110,9 +125,18 @@ export function NotesIndexPanel({
   onCreate: () => void;
 }): JSX.Element {
   const { t } = useNotaTranslator();
+  const showGraph = useNotaPreferencesStore((s) => s.showWritingActivityGraph);
+  const color = useNotaPreferencesStore((s) => s.writingActivityColor);
+  const days = useNotaPreferencesStore((s) => s.writingActivityDays);
+
+  // Show a more compact recent window in the empty state (last ~20 weeks)
+  const allCells = buildActivityGridCells(days);
+  const cells = allCells.slice(-140);
+  const current = computeCurrentStreak(days);
+  const longest = computeLongestStreak(days);
 
   return (
-    <div className="flex h-full flex-col items-center justify-center px-4 py-16">
+    <div className="flex h-full flex-col items-center justify-center px-4 py-10">
       <div className="max-w-md text-center">
         <div className="mb-6 flex justify-center">
           <svg
@@ -146,6 +170,71 @@ export function NotesIndexPanel({
           {t('Create New Note')}
         </NotaButton>
       </div>
+
+      {showGraph && (
+        <div className="mt-10 w-full max-w-[620px] px-2">
+          <div className="mb-2 flex items-baseline justify-between text-xs text-muted-foreground">
+            <div>
+              Current streak:{' '}
+              <span className="font-medium text-foreground">{current}</span>
+              <span className="ml-3">
+                Longest:{' '}
+                <span className="font-medium text-foreground">{longest}</span>
+              </span>
+            </div>
+            <button
+              onClick={() =>
+                replaceAppHash({
+                  kind: 'notes',
+                  panel: 'settings',
+                  noteId: null,
+                })
+              }
+              className="underline decoration-border underline-offset-2 hover:decoration-foreground"
+            >
+              {t('Settings')}
+            </button>
+          </div>
+
+          <div className="grid auto-cols-[10px] grid-flow-col grid-rows-7 gap-[2px] overflow-x-auto rounded bg-border/30 p-2">
+            {cells.map((cell) => (
+              <NotaTooltip key={cell.dateKey}>
+                <NotaTooltipTrigger asChild>
+                  <div
+                    className={cn(
+                      'h-[10px] w-[10px] rounded-[1px]',
+                      ACTIVITY_LEVEL_CLASSES[color as WritingActivityColor]?.[
+                        cell.level
+                      ] ?? 'bg-muted/20',
+                    )}
+                  />
+                </NotaTooltipTrigger>
+                <NotaTooltipPortal>
+                  <NotaTooltipPositioner side="top" sideOffset={4}>
+                    <NotaTooltipPopup>
+                      {cell.count} on{' '}
+                      {cell.date.toLocaleDateString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </NotaTooltipPopup>
+                  </NotaTooltipPositioner>
+                </NotaTooltipPortal>
+              </NotaTooltip>
+            ))}
+          </div>
+
+          {cells.every((c) => c.count === 0) ? (
+            <div className="mt-1 text-[10px] text-muted-foreground text-center">
+              Start writing to light up your activity graph.
+            </div>
+          ) : (
+            <div className="mt-1 text-[10px] text-muted-foreground">
+              Your writing activity
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

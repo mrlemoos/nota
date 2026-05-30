@@ -52,6 +52,18 @@ export default function NotesSettings(): JSX.Element {
   const setCursorVisualStyle = useNotaPreferencesStore(
     (s) => s.setCursorVisualStyle,
   );
+  const showWritingActivityGraph = useNotaPreferencesStore(
+    (s) => s.showWritingActivityGraph,
+  );
+  const setShowWritingActivityGraph = useNotaPreferencesStore(
+    (s) => s.setShowWritingActivityGraph,
+  );
+  const writingActivityColor = useNotaPreferencesStore(
+    (s) => s.writingActivityColor,
+  );
+  const setWritingActivityColor = useNotaPreferencesStore(
+    (s) => s.setWritingActivityColor,
+  );
   const { t } = useNotaTranslator();
   const isElectron = useIsElectron();
   const cursorStyleOptions = useMemo(
@@ -380,6 +392,36 @@ export default function NotesSettings(): JSX.Element {
         ) : null}
 
         {user ? <NotaProSettingsSection /> : null}
+
+        {user && notaProEntitled && (
+          <section className="space-y-3">
+            <h2 className="text-sm font-medium text-foreground">
+              {t('Writing activity')}
+            </h2>
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm">
+              <input
+                type="checkbox"
+                checked={showWritingActivityGraph}
+                onChange={(e) => {
+                  const checked = e.target.checked;
+                  setShowWritingActivityGraph(checked);
+                  submitUserPreferencesPatch(
+                    { show_writing_activity_graph: checked },
+                    user.id,
+                    setUserPreferencesInState,
+                    true,
+                  );
+                }}
+                className="size-4 accent-primary"
+              />
+              <span>Show writing activity graph when no note is open</span>
+            </label>
+            <div className="text-xs text-muted-foreground">
+              Appears below when you have no note selected. Cmd+K → "View
+              writing activity" to jump there.
+            </div>
+          </section>
+        )}
 
         {user ? (
           <section className="space-y-3">

@@ -42,7 +42,12 @@ export function useSyncUserPreferences(
       hydratedLoaderRef.current.emoji_replacer_enabled ===
         userPreferencesFromServer.emoji_replacer_enabled &&
       hydratedLoaderRef.current.delete_empty_folders ===
-        userPreferencesFromServer.delete_empty_folders
+        userPreferencesFromServer.delete_empty_folders &&
+      hydratedLoaderRef.current.show_writing_activity_graph ===
+        userPreferencesFromServer.show_writing_activity_graph &&
+      hydratedLoaderRef.current.writing_activity_color ===
+        userPreferencesFromServer.writing_activity_color
+      // writing_activity_days intentionally omitted from cheap equality (large + mutated separately)
     ) {
       return;
     }
@@ -62,6 +67,8 @@ export function useSyncUserPreferences(
         showNoteBacklinks,
         semanticSearchEnabled,
         emojiReplacerEnabled,
+        showWritingActivityGraph,
+        writingActivityColor,
       } = useNotaPreferencesStore.getState();
       if (!preferencesPendingSync) {
         return;
@@ -75,6 +82,8 @@ export function useSyncUserPreferences(
             show_note_backlinks: showNoteBacklinks,
             semantic_search_enabled: semanticSearchEnabled,
             emoji_replacer_enabled: emojiReplacerEnabled,
+            show_writing_activity_graph: showWritingActivityGraph,
+            writing_activity_color: writingActivityColor,
           });
           markPreferencesSynced(row);
           onServerRowCommitted?.(row);
@@ -103,6 +112,8 @@ export type UserPreferencesSyncPatch = Pick<
   | 'semantic_search_enabled'
   | 'emoji_replacer_enabled'
   | 'delete_empty_folders'
+  | 'show_writing_activity_graph'
+  | 'writing_activity_color'
 >;
 
 /**
