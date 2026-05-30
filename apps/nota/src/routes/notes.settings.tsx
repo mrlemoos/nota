@@ -396,7 +396,10 @@ export default function NotesSettings(): JSX.Element {
         {user && notaProEntitled && (
           <section className="space-y-3">
             <h2 className="text-sm font-medium text-foreground">
-              {t('Writing activity')}
+              {t('Writing activity')}{' '}
+              <span className="text-xs font-normal text-muted-foreground">
+                (Beta)
+              </span>
             </h2>
             <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm">
               <input
