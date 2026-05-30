@@ -69,6 +69,7 @@ export function useSyncUserPreferences(
         emojiReplacerEnabled,
         showWritingActivityGraph,
         writingActivityColor,
+        writingActivityDays,
       } = useNotaPreferencesStore.getState();
       if (!preferencesPendingSync) {
         return;
@@ -84,6 +85,7 @@ export function useSyncUserPreferences(
             emoji_replacer_enabled: emojiReplacerEnabled,
             show_writing_activity_graph: showWritingActivityGraph,
             writing_activity_color: writingActivityColor,
+            writing_activity_days: writingActivityDays,
           });
           markPreferencesSynced(row);
           onServerRowCommitted?.(row);
@@ -114,6 +116,7 @@ export type UserPreferencesSyncPatch = Pick<
   | 'delete_empty_folders'
   | 'show_writing_activity_graph'
   | 'writing_activity_color'
+  | 'writing_activity_days'
 >;
 
 /**

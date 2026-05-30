@@ -2,6 +2,7 @@ import { getBrowserClient } from './supabase/browser';
 import { createLocalOnlyNote, isLikelyOnline } from './notes-offline';
 import { createNote } from '../models/notes';
 import { setAppHash } from './app-navigation';
+import { recordWritingActivityToday } from './writing-activity-tracking';
 import type { Note } from '~/types/database.types';
 
 export async function clientCreateNote(options: {
@@ -28,6 +29,10 @@ export async function clientCreateNote(options: {
     setAppHash({ kind: 'notes', panel: 'note', noteId: id });
   }
 
+  function recordNoteCreated(): void {
+    recordWritingActivityToday();
+  }
+
   const targetFolderId = folderId === undefined ? null : folderId;
 
   if (targetFolderId !== null) {
@@ -38,6 +43,7 @@ export async function clientCreateNote(options: {
         undefined,
         targetFolderId,
       );
+      recordNoteCreated();
       goToNote(id);
       await options.refreshNotesList({ silent: true });
       return;
@@ -48,6 +54,7 @@ export async function clientCreateNote(options: {
         folder_id: targetFolderId,
       });
       options.insertNoteAtFront(row);
+      recordNoteCreated();
       goToNote(row.id);
       await options.refreshNotesList({ silent: true });
     } catch {
@@ -57,6 +64,7 @@ export async function clientCreateNote(options: {
         undefined,
         targetFolderId,
       );
+      recordNoteCreated();
       goToNote(id);
       await options.refreshNotesList({ silent: true });
     }
@@ -65,6 +73,7 @@ export async function clientCreateNote(options: {
 
   if (!isLikelyOnline()) {
     const id = await createLocalOnlyNote(userId, undefined, undefined, null);
+    recordNoteCreated();
     goToNote(id);
     await options.refreshNotesList({ silent: true });
     return;
@@ -75,10 +84,12 @@ export async function clientCreateNote(options: {
       folder_id: null,
     });
     options.insertNoteAtFront(row);
+    recordNoteCreated();
     goToNote(row.id);
     await options.refreshNotesList({ silent: true });
   } catch {
     const id = await createLocalOnlyNote(userId, undefined, undefined, null);
+    recordNoteCreated();
     goToNote(id);
     await options.refreshNotesList({ silent: true });
   }

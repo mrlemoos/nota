@@ -3,6 +3,7 @@ import { clientCreateNote } from './create-note-client';
 
 import { createLocalOnlyNote, isLikelyOnline } from './notes-offline';
 import { createNote } from '../models/notes';
+import { recordWritingActivityToday } from './writing-activity-tracking';
 
 const insertNoteAtFront = vi.fn();
 const refreshNotesList = vi.fn();
@@ -40,6 +41,10 @@ vi.mock('../models/notes', () => ({
 
 vi.mock('./app-navigation', () => ({
   setAppHash: vi.fn(),
+}));
+
+vi.mock('./writing-activity-tracking', () => ({
+  recordWritingActivityToday: vi.fn(),
 }));
 
 describe('clientCreateNote', () => {
@@ -83,6 +88,7 @@ describe('clientCreateNote', () => {
     // Assert
     expect(createNote).toHaveBeenCalled();
     expect(insertNoteAtFront).toHaveBeenCalled();
+    expect(recordWritingActivityToday).toHaveBeenCalledOnce();
   });
 
   it('creates untitled note at root on server when online', async () => {
@@ -108,6 +114,7 @@ describe('clientCreateNote', () => {
     );
     expect(insertNoteAtFront).toHaveBeenCalled();
     expect(refreshNotesList).toHaveBeenCalled();
+    expect(recordWritingActivityToday).toHaveBeenCalledOnce();
   });
 
   it('creates untitled note at root locally when offline', async () => {
@@ -132,6 +139,7 @@ describe('clientCreateNote', () => {
     );
     expect(createNote).not.toHaveBeenCalled();
     expect(refreshNotesList).toHaveBeenCalled();
+    expect(recordWritingActivityToday).toHaveBeenCalledOnce();
   });
 
   it('does nothing when offline and not entitled', async () => {
@@ -150,5 +158,6 @@ describe('clientCreateNote', () => {
     // Assert
     expect(createNote).not.toHaveBeenCalled();
     expect(createLocalOnlyNote).not.toHaveBeenCalled();
+    expect(recordWritingActivityToday).not.toHaveBeenCalled();
   });
 });

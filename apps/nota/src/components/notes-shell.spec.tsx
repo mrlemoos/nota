@@ -103,8 +103,19 @@ vi.mock('../context/session-context', () => ({
 
 vi.mock('../stores/nota-preferences', () => ({
   useNotaPreferencesStore: <T,>(
-    selector: (s: { openTodaysNoteShortcut: boolean }) => T,
-  ): T => selector({ openTodaysNoteShortcut: false }),
+    selector: (s: {
+      openTodaysNoteShortcut: boolean;
+      showWritingActivityGraph: boolean;
+      writingActivityColor: 'blue';
+      writingActivityDays: Record<string, number>;
+    }) => T,
+  ): T =>
+    selector({
+      openTodaysNoteShortcut: false,
+      showWritingActivityGraph: false,
+      writingActivityColor: 'blue',
+      writingActivityDays: {},
+    }),
 }));
 
 vi.mock('../lib/use-sync-user-preferences', () => ({

@@ -64,6 +64,7 @@ import {
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { createTypewriterScrollUserGuard } from '@/lib/nota-typewriter-scroll-guard';
 import { NOTA_SAVE_PULSE_CLASS } from '@/lib/nota-interaction';
+import { createWritingActivitySessionRecorder } from '@/lib/writing-activity-tracking';
 
 function buildStorageOps(
   noteId: string,
@@ -172,6 +173,9 @@ function NoteEditorImpl({
     () => createTypewriterScrollUserGuard(),
     [],
   );
+  const writingActivityRecorderRef = useRef(
+    createWritingActivitySessionRecorder(),
+  );
   noteRef.current = note;
   onNoteUpdatedRef.current = onNoteUpdated;
   userIdRef.current = user?.id;
@@ -213,6 +217,7 @@ function NoteEditorImpl({
       typewriterRafRef.current = null;
     }
     typewriterScrollGuard.reset();
+    writingActivityRecorderRef.current.reset();
   }, [note.id, resetSticky, typewriterScrollGuard]);
 
   const syncTitleTextareaHeight = useCallback(() => {
@@ -388,6 +393,7 @@ function NoteEditorImpl({
       setTitle(v);
       titleRef.current = v;
       setSaveStatus('saving');
+      writingActivityRecorderRef.current.record();
       scheduleTitleSave();
     },
     [scheduleTitleSave],
@@ -548,6 +554,7 @@ function NoteEditorImpl({
   const handleUpdate = useCallback(
     (content: unknown) => {
       pendingContentRef.current = content;
+      writingActivityRecorderRef.current.record();
       scheduleContentSave();
       scheduleTypewriterScroll();
     },
