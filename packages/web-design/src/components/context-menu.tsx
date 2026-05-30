@@ -80,12 +80,25 @@ const DEFAULT_CONTEXT_MENU_SEPARATOR_CLASS = 'my-1 h-px bg-border/70';
 export const NotaContextMenu = BaseContextMenu.Root;
 export const NotaContextMenuTrigger = BaseContextMenu.Trigger;
 export const NotaContextMenuPortal = BaseContextMenu.Portal;
-export const NotaContextMenuPositioner = BaseContextMenu.Positioner;
 export const NotaContextMenuSubmenuRoot = BaseContextMenu.SubmenuRoot;
 export const NotaContextMenuRadioGroup = BaseContextMenu.RadioGroup;
 export const NotaContextMenuRadioItem = BaseContextMenu.RadioItem;
 export const NotaContextMenuRadioItemIndicator =
   BaseContextMenu.RadioItemIndicator;
+
+export function NotaContextMenuPositioner({
+  className,
+  ref,
+  ...props
+}: NotaContextMenuPositionerProps) {
+  return (
+    <BaseContextMenu.Positioner
+      ref={ref}
+      className={cn('z-50', className)}
+      {...props}
+    />
+  );
+}
 
 export function NotaContextMenuViewport({
   className,
