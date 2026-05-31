@@ -33,15 +33,20 @@
   },
   "dependencies": {
     "electron": "catalog:",
+    "expo": "~54.0.0",
+    "node-abort-controller": "^3.1.1",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "react-native": "0.81.5"
   },
   "devDependencies": {
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@eslint/js": "^9.8.0",
+    "@expo/cli": "~54.0.16",
     "@nx/eslint": "^22.6.5",
     "@nx/eslint-plugin": "^22.6.5",
+    "@nx/expo": "22.6.1",
     "@nx/js": "22.7.0",
     "@nx/react": "22.7.0",
     "@nx/vite": "22.6.5",
@@ -71,10 +76,13 @@
     "eslint-plugin-jsx-a11y": "6.10.1",
     "eslint-plugin-react": "7.35.0",
     "eslint-plugin-react-hooks": "5.0.0",
+    "getenv": "^2.0.0",
     "husky": "^9.1.7",
     "jiti": "2.4.2",
     "jsdom": "catalog:",
     "lint-staged": "^16.4.0",
+    "metro-config": "~0.83.0",
+    "metro-resolver": "~0.83.0",
     "nx": "22.6.1",
     "postcss": "catalog:",
     "prettier": "~3.6.2",
@@ -90,6 +98,7 @@
   },
   "pnpm": {
     "overrides": {
+      "react-dom": "19.1.0",
       "@clerk/elements>@clerk/shared": "^4.8.1",
       "jpeg-js@<0.4.4": ">=0.4.4",
       "jpeg-js@<0.4.0": ">=0.4.0",
@@ -118,6 +127,20 @@
       "astro@<6.1.10": ">=6.1.10",
       "devalue@>=5.6.3 <=5.8.0": ">=5.8.1",
       "brace-expansion@>=5.0.0 <5.0.6": ">=5.0.6",
+      "metro": "0.83.3",
+      "metro-config": "0.83.3",
+      "metro-cache": "0.83.3",
+      "metro-core": "0.83.3",
+      "metro-file-map": "0.83.3",
+      "metro-resolver": "0.83.3",
+      "metro-runtime": "0.83.3",
+      "metro-source-map": "0.83.3",
+      "metro-transform-worker": "0.83.3",
+      "metro-symbolicate": "0.83.3",
+      "metro-babel-transformer": "0.83.3",
+      "metro-cache-key": "0.83.3",
+      "metro-minify-terser": "0.83.3",
+      "@expo/metro": "54.2.0",
       "ws@>=8.0.0 <8.20.1": ">=8.20.1"
     },
     "onlyBuiltDependencies": [
@@ -125,6 +148,8 @@
       "@swc/core",
       "bufferutil",
       "core-js",
+      "detox",
+      "dtrace-provider",
       "electron",
       "electron-winstaller",
       "esbuild",
@@ -132,6 +157,7 @@
       "nx",
       "protobufjs",
       "sharp",
+      "unrs-resolver",
       "utf-8-validate"
     ]
   },

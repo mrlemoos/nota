@@ -57,4 +57,24 @@ apps/nota-marketing/.astro/
 # Marketing site local env (see apps/nota-marketing/.env.example)
 apps/nota-marketing/.env
 apps/nota-marketing/.env.local
+
+# Mobile app local env (see apps/nota-mobile/.env.example)
+apps/nota-mobile/.env
+apps/nota-mobile/.env.local
 .nx/polygraph
+
+# Expo
+node_modules/
+.expo/
+.yarn/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+cache/
+
