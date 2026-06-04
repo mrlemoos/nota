@@ -1,6 +1,7 @@
 import { NotaButton } from '@nota/web-design/button';
 import { NotaLoadingStatus } from '@nota/web-design/spinner';
 import { cn } from '@/lib/utils';
+import { replaceAppHash } from '@/lib/app-navigation';
 import { ELECTRON_WINDOW_NO_DRAG_CLASS } from '@/lib/electron-window-chrome';
 import { useNotaTranslator } from '@/lib/use-nota-translator';
 import { useIsElectron } from '@/lib/use-is-electron';
@@ -11,7 +12,6 @@ import {
   computeCurrentStreak,
   computeLongestStreak,
   ACTIVITY_LEVEL_CLASSES,
-  type WritingActivityColor,
 } from '@/lib/writing-activity';
 import {
   NotaTooltip,
@@ -183,13 +183,13 @@ export function NotesIndexPanel({
               </span>
             </div>
             <button
-              onClick={() =>
+              onClick={() => {
                 replaceAppHash({
                   kind: 'notes',
                   panel: 'settings',
                   noteId: null,
-                })
-              }
+                });
+              }}
               className="underline decoration-border underline-offset-2 hover:decoration-foreground"
             >
               {t('Settings')}
@@ -203,9 +203,7 @@ export function NotesIndexPanel({
                   <div
                     className={cn(
                       'h-[10px] w-[10px] rounded-[1px]',
-                      ACTIVITY_LEVEL_CLASSES[color as WritingActivityColor]?.[
-                        cell.level
-                      ] ?? 'bg-muted/20',
+                      ACTIVITY_LEVEL_CLASSES[color][cell.level],
                     )}
                   />
                 </NotaTooltipTrigger>

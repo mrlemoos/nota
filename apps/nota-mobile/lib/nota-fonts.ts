@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment -- expo-font expects require() for bundled font assets */
 import {
   noteSurfaceFonts,
   type NoteEditorSettings,
@@ -26,7 +27,7 @@ const SYSTEM_MONO =
     ios: 'Menlo',
     android: 'monospace',
     default: 'monospace',
-  }) ?? 'monospace';
+  }) || 'monospace';
 
 export function useNotaFonts(): boolean {
   const [loaded] = useFonts(NOTA_FONT_SOURCES);

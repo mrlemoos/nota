@@ -1,6 +1,8 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
+import { NoteImageLightbox } from './note-image-lightbox';
+
 const { isElectronMock } = vi.hoisted(() => ({
   isElectronMock: vi.fn(() => false),
 }));
@@ -8,9 +10,6 @@ const { isElectronMock } = vi.hoisted(() => ({
 vi.mock('@/lib/use-is-electron', () => ({
   useIsElectron: () => isElectronMock(),
 }));
-
-// eslint-disable-next-line import/first -- Vitest: vi.mock is hoisted; SUT must load after mock factory.
-import { NoteImageLightbox } from './note-image-lightbox';
 
 describe('NoteImageLightbox', () => {
   it('renders full-screen image metadata and closes on close button', () => {

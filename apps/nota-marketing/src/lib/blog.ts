@@ -4,10 +4,13 @@ export type BlogPost = CollectionEntry<'blog'>;
 
 /** Published posts for the current environment (drafts hidden in production builds). */
 export function isBlogPostPublished(entry: BlogPost): boolean {
-  return import.meta.env.PROD ? entry.data.draft !== true : true;
+  if (!import.meta.env.PROD) {
+    return true;
+  }
+  return entry.data.draft !== true;
 }
 
-export function sortBlogPostsByDate(posts: BlogPost[]): BlogPost[] {
+export function sortBlogPostsByDate(posts: readonly BlogPost[]): BlogPost[] {
   return [...posts].sort(
     (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
   );

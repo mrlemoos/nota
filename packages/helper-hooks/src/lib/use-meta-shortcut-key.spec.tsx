@@ -1,15 +1,13 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   detectAppleShortcutPlatform,
   formatMetaShortcut,
   useMetaShortcutKey,
 } from './use-meta-shortcut-key.js';
 
-const originalNavigator = globalThis.navigator;
-
-afterEach(() => {
-  vi.stubGlobal('navigator', originalNavigator);
+beforeEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe('formatMetaShortcut', () => {

@@ -36,7 +36,7 @@ export function useNotesSidebarResize(options: {
     liveWidthRef.current = next;
     const el = options.asideRef.current;
     if (el) {
-      el.style.width = `${next}px`;
+      el.style.width = `${String(next)}px`;
     }
     options.setSidebarWidthPx(next);
   };
@@ -51,7 +51,7 @@ export function useNotesSidebarResize(options: {
       liveWidthRef.current = next;
       const el = options.asideRef.current;
       if (el) {
-        el.style.width = `${next}px`;
+        el.style.width = `${String(next)}px`;
       }
     };
 
@@ -72,6 +72,8 @@ export function useNotesSidebarResize(options: {
       window.removeEventListener('pointercancel', onPointerUp);
       clearResizeSession();
     };
+    // commitWidth reads refs + aside width; listing it would rebind window listeners every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- commitWidth
   }, [options.asideRef, options.setSidebarWidthPx]);
 
   const onResizePointerDown = (

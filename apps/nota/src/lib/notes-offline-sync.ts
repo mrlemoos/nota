@@ -69,42 +69,40 @@ async function drainNotesOutboxInner(userId: string): Promise<boolean> {
       continue;
     }
 
-    if (entry.kind === 'upsert') {
-      if (!stored || stored.pending_delete) {
-        await removeOutboxEntry(userId, entry.noteId);
-        continue;
-      }
-      try {
-        if (stored.pending_create) {
-          const created = await createNote(
-            client,
-            userId,
-            stored.title,
-            stored.content,
-            {
-              id: stored.id,
-              due_at: stored.due_at,
-              is_deadline: stored.is_deadline,
-              editor_settings: stored.editor_settings,
-              folder_id: stored.folder_id ?? null,
-            },
-          );
-          await markNoteSyncedFromServer(userId, created);
-        } else {
-          const updated = await updateNote(client, stored.id, {
-            title: stored.title,
-            content: stored.content,
+    if (!stored || stored.pending_delete) {
+      await removeOutboxEntry(userId, entry.noteId);
+      continue;
+    }
+    try {
+      if (stored.pending_create) {
+        const created = await createNote(
+          client,
+          userId,
+          stored.title,
+          stored.content,
+          {
+            id: stored.id,
             due_at: stored.due_at,
             is_deadline: stored.is_deadline,
             editor_settings: stored.editor_settings,
             folder_id: stored.folder_id ?? null,
-          });
-          await markNoteSyncedFromServer(userId, updated);
-        }
-        progressed = true;
-      } catch (e) {
-        console.error('Offline sync: upsert failed', e);
+          },
+        );
+        await markNoteSyncedFromServer(userId, created);
+      } else {
+        const updated = await updateNote(client, stored.id, {
+          title: stored.title,
+          content: stored.content,
+          due_at: stored.due_at,
+          is_deadline: stored.is_deadline,
+          editor_settings: stored.editor_settings,
+          folder_id: stored.folder_id ?? null,
+        });
+        await markNoteSyncedFromServer(userId, updated);
       }
+      progressed = true;
+    } catch (e) {
+      console.error('Offline sync: upsert failed', e);
     }
   }
 

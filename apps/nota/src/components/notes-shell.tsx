@@ -106,7 +106,7 @@ export function NotesShell(): JSX.Element {
   sidebarWidthPxRef.current = widthPx;
   const prefersReducedMotion = usePrefersReducedMotion();
   const sidebarMotionReadyRef = useRef(false);
-  const { isResizingRef, onResizePointerDown } = useNotesSidebarResize({
+  const { onResizePointerDown } = useNotesSidebarResize({
     asideRef,
     open,
     widthPx,

@@ -126,8 +126,13 @@ describe('tryFetchPlatformLinkPreview via fetchOgPreview', () => {
     // Arrange
     const url = 'https://en.wikipedia.org/wiki/Alan_Turing';
     const orig = globalThis.fetch;
-    globalThis.fetch = async (input) => {
-      const target = String(input);
+    globalThis.fetch = async (input: string | URL) => {
+      const target =
+        typeof input === 'string'
+          ? input
+          : input instanceof URL
+            ? input.href
+            : input.url;
       if (target.includes('/api/rest_v1/page/summary/Alan_Turing')) {
         return new Response(
           JSON.stringify({

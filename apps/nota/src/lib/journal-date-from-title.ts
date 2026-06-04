@@ -11,8 +11,8 @@ export function parseJournalDateFromTitle(title: string): Date | null {
   }
 
   const results = chrono.parse(trimmed, new Date(), { forwardDate: false });
-  const first = results[0];
-  if (!first) {
+  const first = results.at(0);
+  if (first === undefined) {
     return null;
   }
 

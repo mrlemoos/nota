@@ -9,19 +9,12 @@ import {
   postSearchReindexAll as postSearchReindexAllRequest,
 } from '@nota/nota-server-client';
 import { getClerkAccessToken } from './clerk-token-ref';
-
-function notaServerBase(): string | undefined {
-  const b = import.meta.env.VITE_NOTA_SERVER_API_URL;
-  if (typeof b !== 'string' || !b.trim()) {
-    return undefined;
-  }
-  return b.replace(/\/$/, '');
-}
+import { notaServerBaseUrl } from './vite-env';
 
 /** `GET` on nota-server; Bearer Clerk session JWT. Missing `VITE_NOTA_SERVER_API_URL` → 401 without calling the network. */
 export async function fetchNotaProEntitled(): Promise<Response> {
   return fetchNotaProEntitledRequest(
-    notaServerBase(),
+    notaServerBaseUrl(),
     await getClerkAccessToken(),
   );
 }
@@ -29,7 +22,7 @@ export async function fetchNotaProEntitled(): Promise<Response> {
 /** `POST` on nota-server; same Bearer auth as `fetchNotaProEntitled`. */
 export async function postNotaProInvalidate(): Promise<Response> {
   return postNotaProInvalidateRequest(
-    notaServerBase(),
+    notaServerBaseUrl(),
     await getClerkAccessToken(),
   );
 }
@@ -39,7 +32,7 @@ export async function postSemanticSearch(body: {
   query: string;
 }): Promise<Response> {
   return postSemanticSearchRequest(
-    notaServerBase(),
+    notaServerBaseUrl(),
     await getClerkAccessToken(),
     body,
   );
@@ -50,7 +43,7 @@ export async function postSearchIndexNote(body: {
   noteId: string;
 }): Promise<Response> {
   return postSearchIndexNoteRequest(
-    notaServerBase(),
+    notaServerBaseUrl(),
     await getClerkAccessToken(),
     body,
   );
@@ -59,7 +52,7 @@ export async function postSearchIndexNote(body: {
 /** Full vault semantic reindex (`POST /api/search/reindex-all`). */
 export async function postSearchReindexAll(): Promise<Response> {
   return postSearchReindexAllRequest(
-    notaServerBase(),
+    notaServerBaseUrl(),
     await getClerkAccessToken(),
   );
 }
@@ -67,7 +60,7 @@ export async function postSearchReindexAll(): Promise<Response> {
 /** Recent release notes (`GET /api/releases`). */
 export async function fetchReleases(limit = 5): Promise<Response> {
   return fetchReleasesRequest(
-    notaServerBase(),
+    notaServerBaseUrl(),
     await getClerkAccessToken(),
     limit,
   );

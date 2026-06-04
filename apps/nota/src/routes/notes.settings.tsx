@@ -58,12 +58,6 @@ export default function NotesSettings(): JSX.Element {
   const setShowWritingActivityGraph = useNotaPreferencesStore(
     (s) => s.setShowWritingActivityGraph,
   );
-  const writingActivityColor = useNotaPreferencesStore(
-    (s) => s.writingActivityColor,
-  );
-  const setWritingActivityColor = useNotaPreferencesStore(
-    (s) => s.setWritingActivityColor,
-  );
   const { t } = useNotaTranslator();
   const isElectron = useIsElectron();
   const cursorStyleOptions = useMemo(

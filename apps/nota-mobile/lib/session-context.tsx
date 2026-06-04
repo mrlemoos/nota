@@ -179,10 +179,10 @@ export function MobileSessionProvider({
   }, [clerkLoaded, isSignedIn, userId, checkEntitlement]);
 
   const memoUser = useMemo<MobileUser | null>(() => {
-    if (!isSignedIn || !userId) return null;
+    if (!isSignedIn || !userId || !user) return null;
     const primaryEmail =
-      user?.primaryEmailAddress?.emailAddress ??
-      user?.emailAddresses?.[0]?.emailAddress ??
+      user.primaryEmailAddress.emailAddress ||
+      user.emailAddresses[0]?.emailAddress ||
       null;
     return { id: userId, email: primaryEmail };
   }, [isSignedIn, userId, user]);

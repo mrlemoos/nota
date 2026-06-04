@@ -14,7 +14,7 @@ function dispatchOnline(): void {
  */
 export function subscribeOnline(listener: OnlineListener): () => void {
   if (typeof window === 'undefined') {
-    return () => {};
+    return () => undefined;
   }
   onlineListeners.add(listener);
   if (!onlineListenerAttached) {

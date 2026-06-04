@@ -6,14 +6,10 @@ import {
   computeCurrentStreak,
   computeLongestStreak,
   ACTIVITY_LEVEL_CLASSES,
-  type WritingActivityColor,
   type ActivityLevel,
-} from '@/lib/writing-activity';
-import { replaceAppHash } from '@/lib/app-navigation';
-import {
-  useNotaPreferencesStore,
   type WritingActivityColor,
-} from '../stores/nota-preferences';
+} from '@/lib/writing-activity';
+import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { submitUserPreferencesPatch } from '@/lib/use-sync-user-preferences';
 import {
   useNotesDataActions,
@@ -79,7 +75,9 @@ export function WritingActivitySection(): JSX.Element {
           <input
             type="checkbox"
             checked={show}
-            onChange={(e) => handleShowChange(e.target.checked)}
+            onChange={(e) => {
+              handleShowChange(e.target.checked);
+            }}
             className="size-3.5 accent-primary"
           />
           {t('Show')}
@@ -116,7 +114,7 @@ export function WritingActivitySection(): JSX.Element {
                       'h-[10px] w-[10px] rounded-[2px]',
                       ACTIVITY_LEVEL_CLASSES[color][cell.level],
                     )}
-                    aria-label={`${cell.count} contributions on ${cell.date.toLocaleDateString()}`}
+                    aria-label={`${String(cell.count)} contributions on ${cell.date.toLocaleDateString()}`}
                   />
                 </NotaTooltipTrigger>
                 <NotaTooltipPortal>
@@ -156,7 +154,9 @@ export function WritingActivitySection(): JSX.Element {
               {COLOR_FAMILIES.map((c) => (
                 <button
                   key={c}
-                  onClick={() => handleColorChange(c)}
+                  onClick={() => {
+                    handleColorChange(c);
+                  }}
                   className={cn(
                     'rounded px-1.5 py-0.5 capitalize',
                     color === c && 'bg-muted text-foreground',

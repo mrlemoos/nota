@@ -23,7 +23,9 @@ export default function OAuthCallback() {
       router.replace('/(auth)/sign-in');
     }, 1200);
 
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+    };
   }, [router]);
 
   return (

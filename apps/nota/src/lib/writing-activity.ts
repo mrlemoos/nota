@@ -6,6 +6,41 @@ export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 /** Supported colour families for the activity graph (Tailwind ramps). */
 export type WritingActivityColor = 'blue' | 'red' | 'pink' | 'rose';
 
+const WRITING_ACTIVITY_COLORS: readonly WritingActivityColor[] = [
+  'blue',
+  'red',
+  'pink',
+  'rose',
+];
+
+export function parseWritingActivityColor(
+  value: string | null | undefined,
+): WritingActivityColor {
+  if (
+    value !== undefined &&
+    value !== null &&
+    (WRITING_ACTIVITY_COLORS as readonly string[]).includes(value)
+  ) {
+    return value;
+  }
+  return 'blue';
+}
+
+export function parseWritingActivityDays(
+  value: unknown,
+): Record<string, number> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {};
+  }
+  const out: Record<string, number> = {};
+  for (const [key, count] of Object.entries(value)) {
+    if (typeof count === 'number') {
+      out[key] = count;
+    }
+  }
+  return out;
+}
+
 /** Tailwind classes for each level per colour family. */
 export const ACTIVITY_LEVEL_CLASSES: Record<
   WritingActivityColor,

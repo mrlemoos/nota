@@ -77,10 +77,10 @@ export default function NoteScreen() {
           return;
         }
         setNote(row);
-        setTitle(row.title ?? '');
-        setContent((row.content as Json) ?? EMPTY_DOC);
-        lastSavedTitle.current = row.title ?? '';
-        lastSavedContent.current = (row.content as Json) ?? EMPTY_DOC;
+        setTitle(row.title);
+        setContent(row.content);
+        lastSavedTitle.current = row.title;
+        lastSavedContent.current = row.content;
         noteIdRef.current = row.id;
       } catch (err) {
         if (!cancelled) {
@@ -127,8 +127,8 @@ export default function NoteScreen() {
           updates.content = nextContent;
         }
         const saved = await updateNote(client, noteIdRef.current, updates);
-        lastSavedTitle.current = saved.title ?? '';
-        lastSavedContent.current = (saved.content as Json) ?? EMPTY_DOC;
+        lastSavedTitle.current = saved.title;
+        lastSavedContent.current = saved.content;
         setSaveState('saved');
       } catch {
         setSaveState('error');
@@ -167,7 +167,11 @@ export default function NoteScreen() {
       <SafeAreaView style={sharedStyles.screen}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>Invalid note link</Text>
-          <Pressable onPress={() => router.back()}>
+          <Pressable
+            onPress={() => {
+              router.back();
+            }}
+          >
             <Text style={styles.backLink}>Go back</Text>
           </Pressable>
         </View>
@@ -190,7 +194,11 @@ export default function NoteScreen() {
       <SafeAreaView style={sharedStyles.screen}>
         <View style={styles.centered}>
           <Text style={styles.errorText}>{error ?? 'Note unavailable'}</Text>
-          <Pressable onPress={() => router.back()}>
+          <Pressable
+            onPress={() => {
+              router.back();
+            }}
+          >
             <Text style={styles.backLink}>Back to notes</Text>
           </Pressable>
         </View>
@@ -218,7 +226,12 @@ export default function NoteScreen() {
         keyboardVerticalOffset={8}
       >
         <View style={styles.toolbar}>
-          <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Pressable
+            onPress={() => {
+              router.back();
+            }}
+            hitSlop={12}
+          >
             <Text style={styles.backLink}>Notes</Text>
           </Pressable>
           {saveLabel ? (

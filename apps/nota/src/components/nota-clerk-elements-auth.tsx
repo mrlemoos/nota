@@ -83,7 +83,7 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
   const navigateBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const sid = clerk.client?.signIn?.id ?? '';
+    const sid = clerk.client.signIn.id ?? '';
     if (!sid) return;
 
     if (notaSignInPasswordPreferGate.explicitPasswordResetRequest) {
@@ -98,9 +98,12 @@ function SignInResetEmailCodeStrategyAutoPreferPassword(): JSX.Element {
     notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = sid;
 
     queueMicrotask(() => {
-      navigateBtnRef.current?.click();
+      const btn = navigateBtnRef.current;
+      if (btn) {
+        btn.click();
+      }
     });
-  }, [clerk.client?.signIn?.id]);
+  }, [clerk.client.signIn.id]);
 
   return (
     <div className="flex flex-col gap-3 border-b border-border/50 pb-4">
@@ -134,7 +137,7 @@ function SignInOtpStrategyAutoPreferPassword(): JSX.Element {
   const navigateBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const sid = clerk.client?.signIn?.id ?? '';
+    const sid = clerk.client.signIn.id ?? '';
     if (!sid) return;
     if (
       notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId === sid
@@ -143,9 +146,12 @@ function SignInOtpStrategyAutoPreferPassword(): JSX.Element {
     }
     notaSignInPasswordPreferGate.lastAutoPasswordStrategyClickSignInId = sid;
     queueMicrotask(() => {
-      navigateBtnRef.current?.click();
+      const btn = navigateBtnRef.current;
+      if (btn) {
+        btn.click();
+      }
     });
-  }, [clerk.client?.signIn?.id]);
+  }, [clerk.client.signIn.id]);
 
   return (
     <SignIn.Action

@@ -13,12 +13,12 @@ export function formatNoteUpdatedAt(iso: string): string {
     return 'Just now';
   }
   if (diffMins < 60) {
-    return `${diffMins}m ago`;
+    return `${String(diffMins)}m ago`;
   }
 
   const diffHours = Math.floor(diffMins / 60);
   if (diffHours < 24) {
-    return `${diffHours}h ago`;
+    return `${String(diffHours)}h ago`;
   }
 
   return date.toLocaleDateString('en-GB', {

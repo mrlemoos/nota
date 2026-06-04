@@ -4,14 +4,7 @@ import {
   ensureBlobForXaiStt,
   filenameForSttUpload,
 } from './audio-to-xai-stt-format';
-
-function notaServerBase(): string | undefined {
-  const b = import.meta.env.VITE_NOTA_SERVER_API_URL;
-  if (typeof b !== 'string' || !b.trim()) {
-    return undefined;
-  }
-  return b.replace(/\/$/, '');
-}
+import { notaServerBaseUrl } from './vite-env';
 
 export type AudioToNoteSseEvent =
   | { event: 'transcript'; data: { text: string; duration: number } }
@@ -32,7 +25,7 @@ export async function postAudioToNoteStream(
     onEvent?: (ev: AudioToNoteSseEvent) => void;
   } = {},
 ): Promise<AudioNoteStudyResult> {
-  const base = notaServerBase();
+  const base = notaServerBaseUrl();
   if (!base) {
     throw new Error(
       'Audio-to-note requires VITE_NOTA_SERVER_API_URL (apps/nota-server).',
@@ -66,7 +59,7 @@ export async function postAudioToNoteStream(
 
   if (!res.ok) {
     const t = await res.text();
-    throw new Error(t || `Request failed: ${res.status}`);
+    throw new Error(t || `Request failed: ${String(res.status)}`);
   }
 
   const body = res.body;
@@ -79,14 +72,15 @@ export async function postAudioToNoteStream(
   let carry = '';
   let result: AudioNoteStudyResult | null = null;
 
-  while (true) {
+  for (;;) {
     const { done, value } = await reader.read();
     if (done) {
       break;
     }
     carry += decoder.decode(value, { stream: true });
     const blocks = carry.split('\n\n');
-    carry = blocks.pop() ?? '';
+    const remainder = blocks.pop();
+    carry = remainder === undefined ? '' : remainder;
 
     for (const block of blocks) {
       const ev = parseSseBlock(block);

@@ -1,7 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { UserPreferences } from '~/types/database.types';
-import type { WritingActivityColor } from '@/lib/writing-activity';
+import {
+  parseWritingActivityColor,
+  parseWritingActivityDays,
+  type WritingActivityColor,
+} from '@/lib/writing-activity';
 
 export type CursorVisualStyle = 'line' | 'block';
 
@@ -140,11 +144,13 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
           showNoteBacklinks: prefs.show_note_backlinks,
           semanticSearchEnabled: prefs.semantic_search_enabled,
           emojiReplacerEnabled: prefs.emoji_replacer_enabled,
-          showWritingActivityGraph: prefs.show_writing_activity_graph ?? false,
-          writingActivityColor:
-            (prefs.writing_activity_color as WritingActivityColor) ?? 'blue',
-          writingActivityDays:
-            (prefs.writing_activity_days as Record<string, number>) ?? {},
+          showWritingActivityGraph: prefs.show_writing_activity_graph,
+          writingActivityColor: parseWritingActivityColor(
+            prefs.writing_activity_color,
+          ),
+          writingActivityDays: parseWritingActivityDays(
+            prefs.writing_activity_days,
+          ),
           lastServerUpdatedAt: prefs.updated_at,
         });
       },
@@ -156,11 +162,13 @@ export const useNotaPreferencesStore = create<NotaPreferencesState>()(
           showNoteBacklinks: prefs.show_note_backlinks,
           semanticSearchEnabled: prefs.semantic_search_enabled,
           emojiReplacerEnabled: prefs.emoji_replacer_enabled,
-          showWritingActivityGraph: prefs.show_writing_activity_graph ?? false,
-          writingActivityColor:
-            (prefs.writing_activity_color as WritingActivityColor) ?? 'blue',
-          writingActivityDays:
-            (prefs.writing_activity_days as Record<string, number>) ?? {},
+          showWritingActivityGraph: prefs.show_writing_activity_graph,
+          writingActivityColor: parseWritingActivityColor(
+            prefs.writing_activity_color,
+          ),
+          writingActivityDays: parseWritingActivityDays(
+            prefs.writing_activity_days,
+          ),
           preferencesPendingSync: false,
           lastServerUpdatedAt: prefs.updated_at,
         }),

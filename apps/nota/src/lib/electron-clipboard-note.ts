@@ -106,7 +106,7 @@ export async function createNoteFromMenubarClipboard(options: {
     try {
       const record = await uploadNoteAttachmentFile(row.id, userId, file);
       const updated = await updateNote(c, row.id, {
-        content: noteImageDoc(record.id, record.filename ?? 'clipboard.png'),
+        content: noteImageDoc(record.id, record.filename || 'clipboard.png'),
       });
       patchNoteInList(row.id, { content: updated.content });
       await refreshNotesList({ silent: true });

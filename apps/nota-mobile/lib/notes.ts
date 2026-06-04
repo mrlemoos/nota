@@ -17,7 +17,7 @@ export async function listNotes(client: TypedSupabaseClient): Promise<Note[]> {
     throw new Error(`Failed to list notes: ${error.message}`);
   }
 
-  return data ?? [];
+  return data;
 }
 
 export async function getNote(

@@ -28,5 +28,5 @@ export function ClerkSupabaseBridge({ children }: { children: ReactNode }) {
     };
   }, [isLoaded]);
 
-  return <>{children}</>;
+  return children;
 }

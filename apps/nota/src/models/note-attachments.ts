@@ -54,7 +54,7 @@ export async function listNoteAttachments(
     throw new Error(`Failed to list note attachments: ${error.message}`);
   }
 
-  return (data ?? []) as NoteAttachment[];
+  return data as NoteAttachment[];
 }
 
 export async function createNoteAttachmentRecord(

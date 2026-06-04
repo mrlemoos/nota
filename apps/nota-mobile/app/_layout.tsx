@@ -40,6 +40,8 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ClerkProvider
         publishableKey={clerkPublishableKey}
+        // TokenCache type from @clerk/expo resolves as error in ESLint project service
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- runtime tokenCache matches Clerk TokenCache
         tokenCache={tokenCache}
       >
         <MobileSessionProvider>

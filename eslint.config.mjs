@@ -42,7 +42,7 @@ export default tseslint.config(
             },
             {
               sourceTag: 'platform:mobile',
-              onlyDependOnLibsWithTags: ['platform:shared'],
+              onlyDependOnLibsWithTags: ['platform:shared', 'platform:mobile'],
             },
           ],
         },

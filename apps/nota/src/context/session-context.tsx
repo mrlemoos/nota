@@ -34,7 +34,7 @@ export function AppSessionProvider({
     }
     const primary =
       user?.primaryEmailAddress?.emailAddress ??
-      user?.emailAddresses?.[0]?.emailAddress ??
+      user?.emailAddresses[0]?.emailAddress ??
       null;
     return {
       user: { id: userId, email: primary },

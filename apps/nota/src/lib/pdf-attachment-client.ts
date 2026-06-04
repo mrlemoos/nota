@@ -37,7 +37,7 @@ export async function getOrFetchNoteAttachmentSignedUrl(
     .from(NOTE_PDFS_BUCKET)
     .createSignedUrl(storagePath, ATTACHMENT_SIGNED_URL_TTL_SEC);
 
-  if (error || !data?.signedUrl) {
+  if (error || !data.signedUrl) {
     return {
       ok: false,
       error: error?.message ?? 'Could not create signed URL',

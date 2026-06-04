@@ -18,6 +18,7 @@ describe('safeOgImageSrcForPreview', () => {
 
   it('rejects non-http(s) schemes', () => {
     // Arrange
+    // eslint-disable-next-line no-script-url -- deliberate unsafe URL for filter test
     const jsUrl = 'javascript:alert(1)';
     const dataUrl = 'data:image/png;base64,abc';
 

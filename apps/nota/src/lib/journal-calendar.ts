@@ -10,9 +10,9 @@ export type JournalCalendarCell = {
 };
 
 function padDateKey(year: number, month: number, day: number): string {
-  const mm = month < 10 ? `0${month}` : `${month}`;
-  const dd = day < 10 ? `0${day}` : `${day}`;
-  return `${year}-${mm}-${dd}`;
+  const mm = String(month).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${String(year)}-${mm}-${dd}`;
 }
 
 export function dateKeyFromParts(

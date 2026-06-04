@@ -185,8 +185,8 @@ export function NoteDetailPanel({
       return;
     }
 
-    let cancelled = false;
     const uid = user.id;
+    const gen = ++openNoteFetchGenerationRef.current;
 
     void (async () => {
       try {
@@ -194,10 +194,11 @@ export function NoteDetailPanel({
         const merged = mergeNoteWithLocal(noteFromList, local);
         const client = getBrowserClient();
         const atts = await listNoteAttachments(client, noteId);
-        if (!cancelled) {
-          setNote(merged);
-          setAttachments(atts);
+        if (gen !== openNoteFetchGenerationRef.current) {
+          return;
         }
+        setNote(merged);
+        setAttachments(atts);
       } catch (e) {
         if (isLikelyOnline()) {
           console.error(e);
@@ -206,7 +207,7 @@ export function NoteDetailPanel({
     })();
 
     return () => {
-      cancelled = true;
+      openNoteFetchGenerationRef.current += 1;
     };
   }, [
     fetchSettled,
@@ -256,6 +257,7 @@ export function NoteDetailPanel({
   const bannerRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const openNoteFetchGenerationRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -313,7 +315,7 @@ export function NoteDetailPanel({
         .from(NOTE_PDFS_BUCKET)
         .createSignedUrl(bannerStoragePath, ATTACHMENT_SIGNED_URL_TTL_SEC);
       if (cancelled) return;
-      if (error || !data?.signedUrl) {
+      if (error || !data.signedUrl) {
         setBannerSignedUrl(null);
         return;
       }

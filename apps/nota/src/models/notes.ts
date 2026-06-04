@@ -22,7 +22,7 @@ export async function listNotes(client: TypedSupabaseClient) {
     throw new Error(`Failed to list notes: ${error.message}`);
   }
 
-  return data ?? [];
+  return data;
 }
 
 export async function getNote(client: TypedSupabaseClient, id: string) {
@@ -111,7 +111,7 @@ export async function listNoteIdsInFolder(
     throw new Error(`Failed to list notes in folder: ${error.message}`);
   }
 
-  return (data ?? []).map((r) => r.id);
+  return data.map((r) => r.id);
 }
 
 export async function moveAllNotesBetweenFolders(
@@ -148,7 +148,7 @@ export async function listNoteIdsInFolderSubtree(
     throw new Error(`Failed to list notes in folder subtree: ${error.message}`);
   }
 
-  return (data ?? []).map((r) => r.id);
+  return data.map((r) => r.id);
 }
 
 export async function moveAllNotesInFolderSubtree(

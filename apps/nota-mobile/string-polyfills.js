@@ -2,7 +2,6 @@
  * Hermes lacks some String.prototype methods used by webidl-conversions (USVString).
  */
 if (!String.prototype.toWellFormed) {
-  // eslint-disable-next-line no-extend-native -- intentional Hermes polyfill
   String.prototype.toWellFormed = function toWellFormed() {
     const str = String(this);
     let out = '';

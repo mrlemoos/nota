@@ -47,7 +47,7 @@ export function NoteBacklinksPanel({
           {backlinkIds.map((id) => {
             const note = byId.get(id);
             if (!note) return null;
-            const label = note.title?.trim() ? note.title : t('Untitled Note');
+            const label = note.title.trim() ? note.title : t('Untitled Note');
             const isActive =
               screen.kind === 'notes' &&
               screen.panel === 'note' &&

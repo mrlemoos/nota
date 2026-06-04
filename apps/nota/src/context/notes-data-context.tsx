@@ -152,6 +152,7 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
   const [loadError, setLoadError] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const didRetryEmptyVaultAfterWelcomeSeededRef = useRef(false);
+  const welcomeSeedGenerationRef = useRef(0);
   const refreshChainRef = useRef<Promise<void>>(Promise.resolve());
 
   useEffect(() => {
@@ -345,20 +346,20 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
     if (!userId || loading || !notaProEntitled) {
       return;
     }
-    let cancelled = false;
+    const gen = ++welcomeSeedGenerationRef.current;
     void (async () => {
       const id = await runWelcomeNoteSeedIfNeeded({
         userId,
         welcomeSeeded,
         notesCount: notes.length,
       });
-      if (cancelled) {
+      if (gen !== welcomeSeedGenerationRef.current) {
         return;
       }
       if (id) {
         didRetryEmptyVaultAfterWelcomeSeededRef.current = false;
         await refreshNotesList({ silent: true });
-        if (cancelled) {
+        if (gen !== welcomeSeedGenerationRef.current) {
           return;
         }
         setAppHash({ kind: 'notes', panel: 'note', noteId: id });
@@ -374,7 +375,7 @@ export function NotesDataProvider({ children }: { children: ReactNode }) {
       }
     })();
     return () => {
-      cancelled = true;
+      welcomeSeedGenerationRef.current += 1;
     };
   }, [
     userId,

@@ -1,8 +1,10 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '~/types/database.types';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+import { viteEnvString } from '../vite-env';
+
+const supabaseUrl = viteEnvString('VITE_SUPABASE_URL');
+const supabaseAnonKey = viteEnvString('VITE_SUPABASE_ANON_KEY');
 
 export type TypedSupabaseBrowserClient = SupabaseClient<Database>;
 
@@ -34,8 +36,9 @@ export function getSupabaseBrowserClient(): TypedSupabaseBrowserClient {
     );
   }
   if (!browserClient) {
+    const getToken = clerkGetToken;
     browserClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-      accessToken: () => clerkGetToken!(),
+      accessToken: () => getToken(),
     });
   }
   return browserClient;

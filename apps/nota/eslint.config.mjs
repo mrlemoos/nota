@@ -12,6 +12,7 @@ export default [
   notaReactStrictRules,
   {
     files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.{spec,test}.{ts,tsx}', '**/vitest.setup.ts'],
     rules: {
       '@typescript-eslint/no-unnecessary-condition': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'warn',

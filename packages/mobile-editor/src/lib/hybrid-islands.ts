@@ -35,6 +35,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { PMJSONNode } from './content-utils';
 import type { MobileNodeContract } from './node-contract';
 import { isComplexNotaNode } from './node-contract';
 
@@ -47,7 +48,7 @@ export interface HybridIslandConfig {
    * or for simpler complex nodes in future).
    */
   NativeFallback?: ComponentType<{
-    node: any; // the PM JSON node
+    node: PMJSONNode;
     noteId: string;
     userId: string;
     // ... attachment context etc.
@@ -78,7 +79,7 @@ export interface HybridIslandConfig {
   onNodeUpdate?: (
     nodeName: string,
     newAttrs: Record<string, unknown>,
-    newContent?: any,
+    newContent?: PMJSONNode[],
   ) => void;
 
   /**
@@ -177,14 +178,12 @@ registerDefaultPlaceholders();
 export interface DocRenderItem {
   id: string; // stable key, e.g. pos or uuid if we add them
   type: 'simple' | 'island';
-  node: any; // the PM node JSON
+  node: PMJSONNode;
   contract?: MobileNodeContract;
   islandConfig?: HybridIslandConfig;
 }
 
-export function buildDocRenderItems(
-  _doc: unknown /* PM JSON */,
-): DocRenderItem[] {
+export function buildDocRenderItems(): DocRenderItem[] {
   // Placeholder implementation — real version walks the content array recursively
   // (handling lists, tables, etc.) and produces flat virtualizable items.
   // Strong virtualization (react-native-reanimated + FlashList or custom) is required

@@ -44,7 +44,8 @@ export function readRequestOriginHeader(
   if (!requestHeaders) {
     return undefined;
   }
-  const raw = requestHeaders.Origin ?? requestHeaders.origin;
+  const raw =
+    'Origin' in requestHeaders ? requestHeaders.Origin : requestHeaders.origin;
   if (!raw) {
     return undefined;
   }

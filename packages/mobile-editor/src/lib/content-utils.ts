@@ -33,37 +33,46 @@ export type PMJSONDoc = {
   attrs?: Record<string, unknown>;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function readStringField(
+  obj: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = obj[key];
+  return typeof value === 'string' ? value : undefined;
+}
+
 /**
  * Normalizes arbitrary input into a safe ProseMirror document JSON shape.
  * Used both for initialContent and when receiving external updates (sync, offline, etc).
  */
 export function normalizeDocContent(input: unknown): PMJSONDoc {
-  if (!input || typeof input !== 'object') {
+  if (!isRecord(input)) {
     return { type: 'doc', content: [{ type: 'paragraph' }] };
   }
 
-  const obj = input as any;
-
-  // Already a doc?
-  if (obj.type === 'doc') {
+  if (input.type === 'doc') {
     return {
       type: 'doc',
-      content: Array.isArray(obj.content) ? obj.content : [],
-      attrs: obj.attrs,
+      content: Array.isArray(input.content)
+        ? (input.content as PMJSONNode[])
+        : [],
+      attrs: isRecord(input.attrs) ? input.attrs : undefined,
     };
   }
 
-  // Single node passed? Wrap it.
-  if (obj.type && typeof obj.type === 'string') {
-    return { type: 'doc', content: [obj] };
+  const nodeType = readStringField(input, 'type');
+  if (nodeType) {
+    return { type: 'doc', content: [input as PMJSONNode] };
   }
 
-  // Array of top level nodes?
-  if (Array.isArray(obj)) {
-    return { type: 'doc', content: obj };
+  if (Array.isArray(input)) {
+    return { type: 'doc', content: input as PMJSONNode[] };
   }
 
-  // Fallback empty doc with paragraph (matches web editor behavior)
   return { type: 'doc', content: [{ type: 'paragraph' }] };
 }
 
@@ -92,32 +101,28 @@ export function isDocContentEqual(a: unknown, b: unknown): boolean {
   return JSON.stringify(ca) === JSON.stringify(cb);
 }
 
+function isMarkLike(value: unknown): value is { type: string } {
+  return isRecord(value) && typeof value.type === 'string';
+}
+
 function canonicalizePMJSON(value: unknown): unknown {
   if (value === null || value === undefined) return value;
 
   if (Array.isArray(value)) {
-    // Special case: marks arrays — sort by mark type for stable comparison
-    if (
-      value.length > 0 &&
-      value[0] &&
-      typeof value[0] === 'object' &&
-      'type' in value[0]
-    ) {
-      return [...value]
-        .sort((x: any, y: any) =>
-          String(x?.type ?? '').localeCompare(String(y?.type ?? '')),
-        )
+    if (value.length > 0 && isMarkLike(value[0])) {
+      const marks = value.filter(isMarkLike);
+      return marks
+        .sort((x, y) => x.type.localeCompare(y.type))
         .map(canonicalizePMJSON);
     }
     return value.map(canonicalizePMJSON);
   }
 
-  if (typeof value === 'object') {
-    const obj = value as Record<string, unknown>;
-    const sortedKeys = Object.keys(obj).sort();
+  if (isRecord(value)) {
+    const sortedKeys = Object.keys(value).sort();
     const out: Record<string, unknown> = {};
     for (const key of sortedKeys) {
-      out[key] = canonicalizePMJSON(obj[key]);
+      out[key] = canonicalizePMJSON(value[key]);
     }
     return out;
   }
@@ -140,7 +145,7 @@ export function getTopLevelNodeTypes(doc: unknown): string[] {
  * handled by the fast native path (per the hybrid model).
  * Currently a heuristic; will be exact once we have full native simple impl.
  */
-export function isSimpleOnlyDoc(doc: unknown): boolean {
+export function isSimpleOnlyDoc(): boolean {
   // For foundation phase we conservatively return false (TenTap full surface is used).
   // Real impl will walk and use isSimpleNotaNode from node-contract.
   return false;

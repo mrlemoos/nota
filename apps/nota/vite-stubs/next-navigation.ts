@@ -50,6 +50,8 @@ export function useSearchParams(): ReadonlyURLSearchParams {
     const hash = window.location.hash.replace(/^#/, '');
     const query = hash.includes('?') ? hash.split('?').slice(1).join('?') : '';
     return new URLSearchParams(query) as ReadonlyURLSearchParams;
+    // Hash query is read from window; pathname is only used to re-run when navigation changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pathname intentionally triggers refresh
   }, [pathname]);
 }
 

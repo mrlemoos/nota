@@ -20,7 +20,7 @@ import { subscribeOnline } from '../lib/browser-connectivity';
  * When the device is back online, processes queued audio-to-note jobs from IndexedDB.
  */
 export function useAudioNotePendingDrain(enabled: boolean): void {
-  const { user } = useRootLoaderData() ?? {};
+  const { user } = useRootLoaderData();
   const userId = user?.id;
   const { notaProEntitled, loading } = useNotesDataMeta();
   const { patchNoteInList, refreshNotesList } = useNotesDataActions();
@@ -82,12 +82,5 @@ export function useAudioNotePendingDrain(enabled: boolean): void {
     return subscribeOnline(() => {
       void drain();
     });
-  }, [
-    enabled,
-    notaProEntitled,
-    userId,
-    loading,
-    patchNoteInList,
-    refreshNotesList,
-  ]);
+  }, [enabled, notaProEntitled, userId, loading, drain]);
 }

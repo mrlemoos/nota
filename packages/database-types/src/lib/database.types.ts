@@ -224,6 +224,7 @@ export type Database = {
           show_writing_activity_graph: boolean;
           updated_at: string;
           user_id: string;
+          welcome_seeded: boolean;
           writing_activity_color: string;
           writing_activity_days: Json;
         };
@@ -237,6 +238,7 @@ export type Database = {
           show_writing_activity_graph?: boolean;
           updated_at?: string;
           user_id: string;
+          welcome_seeded?: boolean;
           writing_activity_color?: string;
           writing_activity_days?: Json;
         };
@@ -250,6 +252,7 @@ export type Database = {
           show_writing_activity_graph?: boolean;
           updated_at?: string;
           user_id?: string;
+          welcome_seeded?: boolean;
           writing_activity_color?: string;
           writing_activity_days?: Json;
         };

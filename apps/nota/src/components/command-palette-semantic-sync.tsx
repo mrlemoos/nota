@@ -1,5 +1,5 @@
 import { useCommandState } from 'cmdk';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { postSemanticSearch } from '../lib/nota-server-client';
 
@@ -20,6 +20,7 @@ export function CommandPaletteSemanticSync(options: {
   const { enabled, onSemanticOrderedIds, onLoadingChange } = options;
   const search = useCommandState((s) => s.search);
   const [debounced, setDebounced] = useState('');
+  const cancelledRef = useRef(false);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -44,13 +45,13 @@ export function CommandPaletteSemanticSync(options: {
       return;
     }
 
-    let cancelled = false;
+    cancelledRef.current = false;
     onLoadingChange(true);
 
     void (async () => {
       try {
         const res = await postSemanticSearch({ query: debounced });
-        if (cancelled) {
+        if (cancelledRef.current) {
           return;
         }
         if (!res.ok) {
@@ -61,18 +62,18 @@ export function CommandPaletteSemanticSync(options: {
         const ids = json.results?.map((r) => r.noteId).filter(Boolean) ?? [];
         onSemanticOrderedIds(ids);
       } catch {
-        if (!cancelled) {
+        if (!cancelledRef.current) {
           onSemanticOrderedIds(null);
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelledRef.current) {
           onLoadingChange(false);
         }
       }
     })();
 
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
     };
   }, [debounced, enabled, onLoadingChange, onSemanticOrderedIds]);
 

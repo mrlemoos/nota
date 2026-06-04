@@ -121,8 +121,8 @@ export async function applyAudioNoteStudyResult(options: {
     const merged = await resolveMergedNoteRow(options.noteId, options.userId);
     patch = buildAudioNoteApplyPatch({
       mode: 'append',
-      existingTitle: merged?.title?.trim() ? merged.title : 'Untitled Note',
-      existingContent: merged?.content ?? emptyDoc,
+      existingTitle: merged.title.trim() ? merged.title : 'Untitled Note',
+      existingContent: merged.content ?? emptyDoc,
       noteCreatedAtIso: createdAtIso,
       result: options.result,
       recording: options.recording,

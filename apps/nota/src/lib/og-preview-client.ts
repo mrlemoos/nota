@@ -1,4 +1,5 @@
 import { getClerkAccessToken } from './clerk-token-ref';
+import { notaServerBaseUrl } from './vite-env';
 
 import type { PlatformLinkPreview } from '@nota/link-platform-preview';
 
@@ -15,13 +16,13 @@ type OgErrorJson = {
 };
 
 function notaServerBase(): string {
-  const b = import.meta.env.VITE_NOTA_SERVER_API_URL;
-  if (typeof b !== 'string' || !b.trim()) {
+  const base = notaServerBaseUrl();
+  if (!base) {
     throw new Error(
       'Link previews require VITE_NOTA_SERVER_API_URL (apps/nota-server) to be set.',
     );
   }
-  return b.replace(/\/$/, '');
+  return base;
 }
 
 /**

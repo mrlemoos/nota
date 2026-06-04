@@ -1,6 +1,5 @@
 export {
   SVGL_REDDIT_LOGO_URL,
-  SVGL_WIKIPEDIA_LOGO_URL,
   SVGL_YOUTUBE_LOGO_URL,
   WIKIPEDIA_LOGO_URL,
 } from './lib/logos.js';

@@ -43,10 +43,11 @@ const RECORDING_STATUS = 'Recording… press Stop when you are finished.';
 const PAUSED_STATUS = 'Paused. Resume when you are ready to continue.';
 
 export function AudioToNoteDock(): JSX.Element | null {
-  const { user } = useRootLoaderData() ?? { user: null };
+  const { user } = useRootLoaderData();
   const userId = user?.id ?? null;
   const { patchNoteInList, refreshNotesList } = useNotesDataActions();
 
+  const micSetupGenerationRef = useRef(0);
   const phase = useAudioToNoteSession((s) => s.phase);
   const recordingSessionId = useAudioToNoteSession((s) => s.recordingSessionId);
   const noteId = useAudioToNoteSession((s) => s.noteId);
@@ -262,14 +263,14 @@ export function AudioToNoteDock(): JSX.Element | null {
       return;
     }
 
-    let cancelled = false;
+    const gen = ++micSetupGenerationRef.current;
 
     void (async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
           audio: true,
         });
-        if (cancelled) {
+        if (gen !== micSetupGenerationRef.current) {
           stream.getTracks().forEach((t) => {
             t.stop();
           });
@@ -304,7 +305,7 @@ export function AudioToNoteDock(): JSX.Element | null {
     })();
 
     return () => {
-      cancelled = true;
+      micSetupGenerationRef.current += 1;
       const s = sessionRef.current;
       if (s) {
         s.stream.getTracks().forEach((t) => {

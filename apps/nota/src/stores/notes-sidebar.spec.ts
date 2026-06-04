@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   partializeNotesSidebarForStorage,
   useNotesSidebarStore,
-  type NotesSidebarState,
 } from './notes-sidebar';
 
 describe('notes sidebar store (folder expand/collapse)', () => {

@@ -26,6 +26,7 @@
     "@nota/helper-hooks": "workspace:*",
     "@nota/i18n": "workspace:*",
     "@nota/internal-note-link": "workspace:*",
+    "@nota/link-platform-preview": "workspace:*",
     "@nota/nota-server-client": "workspace:*",
     "@nota/note-graph": "workspace:*",
     "@nota/note-link-graph": "workspace:*",

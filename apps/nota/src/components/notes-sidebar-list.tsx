@@ -334,7 +334,6 @@ function FolderRow(options: {
     isCollapsed,
     isDropTarget,
     draggedNoteId,
-    setDraggedNoteId,
     setDropTargetId,
     toggleFolderCollapsed,
     renamingFolderId,
@@ -389,7 +388,7 @@ function FolderRow(options: {
                 ) {
                   return;
                 }
-                setDropTargetId((current) =>
+                setDropTargetId((current: string | null) =>
                   current === folder.id ? null : current,
                 );
               }}
@@ -910,7 +909,7 @@ export function NotesSidebarList({
   useEffect(() => {
     const onRenameRequest = (event: Event): void => {
       const customEvent = event as CustomEvent<RenameFolderRequestDetail>;
-      const folderId = customEvent.detail?.folderId;
+      const folderId = customEvent.detail.folderId;
       if (!folderId) {
         return;
       }

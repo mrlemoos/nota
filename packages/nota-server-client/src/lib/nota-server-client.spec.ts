@@ -143,7 +143,7 @@ describe('@nota/nota-server-client', () => {
       'https://ns.example/api/semantic-search',
       expect.objectContaining({
         method: 'POST',
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- Vitest nested `expect.objectContaining`
+
         headers: expect.objectContaining({
           Authorization: 'Bearer jwt',
         }),

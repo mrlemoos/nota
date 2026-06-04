@@ -17,7 +17,7 @@ export const tokenCache: TokenCache = {
       return await SecureStore.getItemAsync(fullKey, {
         keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
       });
-    } catch (err) {
+    } catch {
       // Corrupted or inaccessible entry: delete and surface null so Clerk can re-auth
       try {
         await SecureStore.deleteItemAsync(fullKey, {

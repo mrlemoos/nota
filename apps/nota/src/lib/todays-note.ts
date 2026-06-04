@@ -14,9 +14,9 @@ export function localDateKey(d: Date): string {
   const y = d.getFullYear();
   const m = d.getMonth() + 1;
   const day = d.getDate();
-  const mm = m < 10 ? `0${m}` : `${m}`;
-  const dd = day < 10 ? `0${day}` : `${day}`;
-  return `${y}-${mm}-${dd}`;
+  const mm = String(m).padStart(2, '0');
+  const dd = String(day).padStart(2, '0');
+  return `${String(y)}-${mm}-${dd}`;
 }
 
 /**

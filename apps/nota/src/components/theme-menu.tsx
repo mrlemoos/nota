@@ -60,7 +60,7 @@ export function ThemeMenu(): JSX.Element {
             <Menu.Viewport>
               <Menu.RadioGroup
                 value={theme}
-                onValueChange={(value) => {
+                onValueChange={(value: string) => {
                   if (
                     value === 'light' ||
                     value === 'dark' ||

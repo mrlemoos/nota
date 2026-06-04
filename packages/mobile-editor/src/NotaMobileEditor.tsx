@@ -60,7 +60,6 @@ export function NotaMobileEditor({
   content,
   onUpdate,
   noteId,
-  userId,
   editorBodyCss,
   placeholder = 'Start writing...',
   editable = true,
@@ -102,7 +101,7 @@ export function NotaMobileEditor({
       void editor.getJSON().then((json: unknown) => {
         // Always emit the normalized doc shape
         const normalized = normalizeDocContent(json);
-        onUpdateRef.current?.(normalized);
+        onUpdateRef.current(normalized);
       });
     },
   });
@@ -129,8 +128,6 @@ export function NotaMobileEditor({
   // External content sync — mirrors the logic in packages/editor TipTapEditor exactly
   // (isDocContentEqual guard + setContent only on real change or note switch).
   useEffect(() => {
-    if (!editor) return;
-
     const normalized = normalizeDocContent(content);
     const contentSig = JSON.stringify(normalized); // cheap signature for quick guard
 

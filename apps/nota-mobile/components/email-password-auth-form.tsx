@@ -15,6 +15,7 @@ import {
   View,
 } from 'react-native';
 
+/* eslint-disable @typescript-eslint/no-unnecessary-condition -- Clerk legacy signIn/signUp are undefined until loaded; runtime guards mirror web */
 import { clerkApiErrorMessage } from '../lib/clerk-api-error-message';
 import { colors, sharedStyles, spacing, typography } from '../lib/theme';
 

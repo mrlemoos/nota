@@ -7,8 +7,11 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import TableRow from '@tiptap/extension-table-row';
 import { describe, expect, it } from 'vitest';
-import { NotaCodeBlock, NotaLink } from '@nota/editor';
-import { convertLinkOnlyParagraphs } from '../../../../packages/editor/src/components/tiptap/link-preview-scan';
+import {
+  convertLinkOnlyParagraphs,
+  NotaCodeBlock,
+  NotaLink,
+} from '@nota/editor';
 
 /** Minimal `linkPreview` node :  avoids React node views from the real extension. */
 const LinkPreviewTestNode = Node.create({

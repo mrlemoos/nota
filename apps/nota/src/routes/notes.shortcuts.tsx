@@ -57,7 +57,7 @@ export default function NotesShortcuts(): JSX.Element {
                 const showKbd = keys !== NOTA_SHORTCUT_PLACEHOLDER_KEY;
                 return (
                   <li
-                    key={`${section.id}-${rowIndex}`}
+                    key={`${section.id}-${String(rowIndex)}`}
                     className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                   >
                     <div className="min-w-0 flex-1">

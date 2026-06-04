@@ -63,9 +63,7 @@ function LinkPreviewNodeView(props: NodeViewProps): JSX.Element {
   const imageAttr = (props.node.attrs['image'] as string) || '';
   const safeImageSrc = safeOgImageSrcForPreview(imageAttr);
 
-  const platform = platformPreviewFromAttrs(
-    props.node.attrs as Record<string, unknown>,
-  );
+  const platform = platformPreviewFromAttrs(props.node.attrs);
   const hasOgMeta = Boolean(titleAttr || descriptionAttr || imageAttr);
   const hasMeta = Boolean(platform || hasOgMeta);
   const [loading, setLoading] = useState(() => Boolean(href) && !hasMeta);

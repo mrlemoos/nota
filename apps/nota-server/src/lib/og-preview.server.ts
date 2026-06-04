@@ -338,7 +338,7 @@ async function fetchJsonForPlatform(url: string): Promise<unknown> {
     if (!res.ok) {
       throw new Error(`Fetch failed: ${res.status}`);
     }
-    return (await res.json()) as unknown;
+    return await res.json();
   } finally {
     clearTimeout(timer);
   }

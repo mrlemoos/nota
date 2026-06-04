@@ -12,7 +12,7 @@ const testFiles = [
 /** @type {import('eslint').Linter.Config[]} */
 export const notaEslintOverrides = [
   {
-    files: ['packages/database-types/src/lib/database.types.ts'],
+    files: ['**/database.types.ts'],
     rules: {
       '@typescript-eslint/no-redundant-type-constituents': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
@@ -31,6 +31,11 @@ export const notaEslintOverrides = [
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-dynamic-delete': 'off',
       '@typescript-eslint/no-unnecessary-condition': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-empty-function': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-script-url': 'off',
     },
   },
   {
@@ -38,6 +43,14 @@ export const notaEslintOverrides = [
     rules: {
       '@typescript-eslint/no-empty-function': 'off',
       '@typescript-eslint/no-unsafe-return': 'off',
+    },
+  },
+  {
+    files: ['**/nota-marketing/**/blog.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
     },
   },
 ];

@@ -314,7 +314,7 @@ export function CommandPalette(): JSX.Element {
         : 'Move note: pick note';
     }
     return moveTargetNoteIds.length > 1
-      ? `Move ${moveTargetNoteIds.length} notes: destination`
+      ? `Move ${String(moveTargetNoteIds.length)} notes: destination`
       : 'Move note: destination';
   }, [busyAction, moveFlow, moveMultiSelectActive, moveTargetNoteIds.length]);
 
@@ -779,7 +779,7 @@ export function CommandPalette(): JSX.Element {
                           <span className="min-w-0 flex-1">
                             {moveSelectedNoteIds.size === 0
                               ? 'Choose folder for selected notes…'
-                              : `Choose folder for ${moveSelectedNoteIds.size} note${moveSelectedNoteIds.size === 1 ? '' : 's'}…`}
+                              : `Choose folder for ${String(moveSelectedNoteIds.size)} note${moveSelectedNoteIds.size === 1 ? '' : 's'}…`}
                           </span>
                         </Command.Item>
                       ) : null}

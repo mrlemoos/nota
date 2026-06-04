@@ -126,7 +126,9 @@ export default function NotesHomeScreen() {
           renderItem={({ item }) => (
             <NoteListRow
               note={item}
-              onPress={() => router.push(`/notes/${item.id}`)}
+              onPress={() => {
+                router.push(`/notes/${item.id}`);
+              }}
             />
           )}
           ListEmptyComponent={renderEmpty}

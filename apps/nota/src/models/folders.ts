@@ -17,7 +17,7 @@ export async function listFolders(
     throw new Error(`Failed to list folders: ${error.message}`);
   }
 
-  return data ?? [];
+  return data;
 }
 
 export async function createFolder(

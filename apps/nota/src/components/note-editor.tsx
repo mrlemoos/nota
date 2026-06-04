@@ -82,7 +82,7 @@ function buildStorageOps(
       const { data, error } = await client.storage
         .from(NOTE_PDFS_BUCKET)
         .createSignedUrl(storagePath, ttlSec);
-      if (error || !data?.signedUrl) {
+      if (error || !data.signedUrl) {
         return {
           ok: false,
           error: error?.message ?? 'Could not create signed URL',
@@ -131,7 +131,7 @@ function NoteEditorImpl({
   onNoteUpdated,
   bannerSignedUrl,
 }: NoteEditorProps) {
-  const { user } = useRootLoaderData() ?? { user: null };
+  const { user } = useRootLoaderData();
   const { notaProEntitled } = useNotesDataMeta();
   const { refreshNotesList } = useNotesDataActions();
   const emojiReplacerEnabled = useNotaPreferencesStore(
@@ -173,6 +173,7 @@ function NoteEditorImpl({
     () => createTypewriterScrollUserGuard(),
     [],
   );
+  const editorDomBindGenerationRef = useRef(0);
   const writingActivityRecorderRef = useRef(
     createWritingActivitySessionRecorder(),
   );
@@ -182,7 +183,7 @@ function NoteEditorImpl({
   notaProEntitledRef.current = notaProEntitled;
 
   useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) {
+    if (typeof window === 'undefined') {
       return;
     }
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -218,13 +219,15 @@ function NoteEditorImpl({
     }
     typewriterScrollGuard.reset();
     writingActivityRecorderRef.current.reset();
+    // Reset local editor state when switching notes only — not on every parent refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- note.content/title sync via refs and debounced save
   }, [note.id, resetSticky, typewriterScrollGuard]);
 
   const syncTitleTextareaHeight = useCallback(() => {
     const el = titleTextareaRef.current;
     if (!el) return;
     el.style.height = 'auto';
-    el.style.height = `${el.scrollHeight}px`;
+    el.style.height = `${String(el.scrollHeight)}px`;
   }, []);
 
   useLayoutEffect(() => {
@@ -269,19 +272,19 @@ function NoteEditorImpl({
   }, [note.id, scrollRootEpoch, scrollRootRef, typewriterScrollGuard]);
 
   useLayoutEffect(() => {
-    let cancelled = false;
+    const gen = ++editorDomBindGenerationRef.current;
     let raf: number | null = null;
     let cleanupDom: (() => void) | null = null;
 
     const schedule = () => {
       raf = requestAnimationFrame(() => {
         raf = null;
-        if (cancelled) {
+        if (gen !== editorDomBindGenerationRef.current) {
           return;
         }
         const ed = bodyEditorRef.current;
         if (!ed || ed.isDestroyed) {
-          if (!cancelled) {
+          if (gen === editorDomBindGenerationRef.current) {
             schedule();
           }
           return;
@@ -305,7 +308,7 @@ function NoteEditorImpl({
     schedule();
 
     return () => {
-      cancelled = true;
+      editorDomBindGenerationRef.current += 1;
       if (raf !== null) {
         cancelAnimationFrame(raf);
       }

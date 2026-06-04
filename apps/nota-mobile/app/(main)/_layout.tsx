@@ -32,7 +32,7 @@ export default function MainProtectedLayout() {
     );
   }
 
-  if (notaProEntitled === false) {
+  if (!notaProEntitled) {
     return <Redirect href="/paywall" />;
   }
 

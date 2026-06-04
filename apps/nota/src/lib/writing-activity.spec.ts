@@ -89,11 +89,6 @@ describe('computeLongestStreak', () => {
 describe('countActiveDaysLast365', () => {
   it('counts days with activity in rolling window', () => {
     const days: Record<string, number> = {};
-    const today = new Date();
-    const keyToday = today
-      .toISOString()
-      .slice(0, 10)
-      .replace(/-/g, (m, i) => (i === 0 ? m : m)); // simplified
     // Use localDateKey logic via direct keys for test
     days['2025-01-01'] = 1; // old, ignored
     days['2026-04-01'] = 5;

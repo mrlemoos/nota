@@ -28,13 +28,13 @@ import {
 } from './lib/clerk-hash-navigation';
 import { ClerkSsoCallbackRoute } from './components/clerk-sso-callback-route';
 import { NotaApp } from './app-root';
+import { viteEnvString } from './lib/vite-env';
 
-const POSTHOG_PROJECT_TOKEN = import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN;
-
+const POSTHOG_PROJECT_TOKEN = viteEnvString(
+  'VITE_PUBLIC_POSTHOG_PROJECT_TOKEN',
+);
 const clerkPublishableKey =
-  typeof import.meta.env.VITE_CLERK_PUBLISHABLE_KEY === 'string'
-    ? import.meta.env.VITE_CLERK_PUBLISHABLE_KEY.trim()
-    : '';
+  viteEnvString('VITE_CLERK_PUBLISHABLE_KEY')?.trim() ?? '';
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {

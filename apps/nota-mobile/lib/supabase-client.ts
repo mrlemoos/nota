@@ -26,8 +26,9 @@ export function getSupabaseClient(): TypedSupabaseClient {
   }
   if (!client) {
     const { url, anonKey } = assertSupabaseEnv();
+    const getToken = boundGetToken;
     client = createClient<Database>(url, anonKey, {
-      accessToken: () => boundGetToken!(),
+      accessToken: () => getToken(),
     });
   }
   return client;

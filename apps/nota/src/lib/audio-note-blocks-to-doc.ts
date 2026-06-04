@@ -53,20 +53,19 @@ export function studyNotesBlocksToTiptapNodes(
       });
       continue;
     }
-    if (block.type === 'bulletList') {
-      content.push({
-        type: 'bulletList',
-        content: block.items.map((item) => ({
-          type: 'listItem',
-          content: [
-            {
-              type: 'paragraph',
-              content: item.trim() ? [textNode(item.trim())] : [],
-            },
-          ],
-        })),
-      });
-    }
+    // Remaining variant after heading/paragraph checks.
+    content.push({
+      type: 'bulletList',
+      content: block.items.map((item) => ({
+        type: 'listItem',
+        content: [
+          {
+            type: 'paragraph',
+            content: item.trim() ? [textNode(item.trim())] : [],
+          },
+        ],
+      })),
+    });
   }
 
   return content;

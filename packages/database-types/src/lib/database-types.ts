@@ -195,6 +195,9 @@ export interface Database {
           updated_at: string;
           welcome_seeded: boolean;
           delete_empty_folders: boolean;
+          show_writing_activity_graph: boolean;
+          writing_activity_color: string;
+          writing_activity_days: Json;
         };
         Insert: {
           user_id: string;
@@ -206,6 +209,9 @@ export interface Database {
           updated_at?: string;
           welcome_seeded?: boolean;
           delete_empty_folders?: boolean;
+          show_writing_activity_graph?: boolean;
+          writing_activity_color?: string;
+          writing_activity_days?: Json;
         };
         Update: {
           user_id?: string;
@@ -217,6 +223,9 @@ export interface Database {
           updated_at?: string;
           welcome_seeded?: boolean;
           delete_empty_folders?: boolean;
+          show_writing_activity_graph?: boolean;
+          writing_activity_color?: string;
+          writing_activity_days?: Json;
         };
         Relationships: [];
       };

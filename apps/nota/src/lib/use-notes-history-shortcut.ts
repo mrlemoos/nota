@@ -19,10 +19,7 @@ export function useNotesHistoryShortcut(
     }
 
     const t = e.target;
-    if (
-      t instanceof Node &&
-      (t as Element).closest?.('[data-nota-command-palette]')
-    ) {
+    if (t instanceof Element && t.closest('[data-nota-command-palette]')) {
       return;
     }
 
