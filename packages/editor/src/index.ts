@@ -20,8 +20,14 @@ export {
   filterNotesForNoteGraph,
   isNoteVisibleInNoteGraph,
   noteSurfaceClassNames,
+  noteSurfaceFonts,
+  noteSurfaceMaxWidthPx,
 } from './lib/note-editor-settings';
-export type { NoteEditorSettings } from './lib/note-editor-settings';
+export type {
+  NoteEditorSettings,
+  NotaSurfaceFontRole,
+  NotaSurfaceMeasure,
+} from './lib/note-editor-settings';
 
 export { parseNoteLinkPath, hrefForNote } from '@nota/internal-note-link';
 export { persistedDisplayTitle } from './lib/note-title';

@@ -61,6 +61,7 @@ export function NotaMobileEditor({
   onUpdate,
   noteId,
   userId,
+  editorBodyCss,
   placeholder = 'Start writing...',
   editable = true,
   style,
@@ -117,6 +118,13 @@ export function NotaMobileEditor({
       editor.setPlaceholder(placeholder);
     }
   }, [editor, placeholder]);
+
+  useEffect(() => {
+    if (!editorBodyCss) {
+      return;
+    }
+    editor.injectCSS(editorBodyCss, 'nota-note-body');
+  }, [editor, editorBodyCss]);
 
   // External content sync — mirrors the logic in packages/editor TipTapEditor exactly
   // (isDocContentEqual guard + setContent only on real change or note switch).

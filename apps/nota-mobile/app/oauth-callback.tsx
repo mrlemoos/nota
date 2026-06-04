@@ -16,7 +16,7 @@ export default function OAuthCallback() {
   const router = useRouter();
 
   // Optional: after a short delay, if still here push to a safe screen.
-  // The Clerk hooks in sign-in screen + auth layout normally take over via setActive.
+  // Auth layout redirects once the session is active (AuthView or legacy OAuth).
   useEffect(() => {
     const t = setTimeout(() => {
       // Fallback navigation; session state will drive real redirect via layouts

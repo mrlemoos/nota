@@ -1,27 +1,20 @@
 import { useMobileSession } from '../../lib/session-context';
 import { Redirect, Stack } from 'expo-router';
-import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+
+import { colors, typography } from '../../lib/theme';
 
 /**
  * Protected layout for entitled (Nota Pro) users.
- * - Requires sign in
- * - Requires notaProEntitled === true (otherwise redirects to /paywall)
- * - Provides the full offline vault + sync experience (future: notes list, editor, sync)
  */
 export default function MainProtectedLayout() {
-  const {
-    isLoaded,
-    isSignedIn,
-    notaProEntitled,
-    isCheckingEntitlement,
-    entitlementError,
-    refreshEntitlement,
-  } = useMobileSession();
+  const { isLoaded, isSignedIn, notaProEntitled, isCheckingEntitlement } =
+    useMobileSession();
 
   if (!isLoaded) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -30,26 +23,23 @@ export default function MainProtectedLayout() {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
-  // Still determining entitlement on launch or after refresh
   if (isCheckingEntitlement || notaProEntitled === null) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text style={styles.statusText}>Checking your Nota Pro status…</Text>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.statusText}>Checking your subscription…</Text>
       </View>
     );
   }
 
   if (notaProEntitled === false) {
-    // Non-entitled signed-in user → paywall (drive to web checkout)
     return <Redirect href="/paywall" />;
   }
 
-  // Entitled user: full app
   return (
-    <Stack screenOptions={{ headerShown: true }}>
-      <Stack.Screen name="index" options={{ title: 'Nota' }} />
-      <Stack.Screen name="notes/[id]" options={{ title: 'Note' }} />
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="notes/[id]" />
     </Stack>
   );
 }
@@ -59,12 +49,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
     padding: 24,
     gap: 12,
   },
   statusText: {
+    ...typography.caption,
     fontSize: 14,
-    color: '#555',
   },
 });

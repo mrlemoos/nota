@@ -1,106 +1,83 @@
 # Nota iPhone (mobile)
 
-This is the React Native / Expo app for Nota on iPhone. **platform:mobile** — only platform:shared packages + RN/Clerk Expo glue.
+React Native / Expo app for Nota on iPhone. **platform:mobile** — depends on `platform:shared` workspace packages plus Clerk Expo and Supabase glue.
 
-## Auth (wired)
+## What ships today
 
-- ClerkProvider + Expo Router (`expo-router/entry`)
-- Custom `tokenCache` implemented with `expo-secure-store` (AFTER_FIRST_UNLOCK, keychain)
-- Minimal custom sign-in / sign-up screens (email+pw + Google SSO via `useSSO` + `useSignIn`/`useSignUp`; **no heavy Clerk UI components**)
-- Deep links:
-  - Auth callbacks: `nota://oauth-callback`
-  - Internal notes: `nota://notes/:uuid` (powered by `@nota/internal-note-link`)
-- Entitlement check on launch (and refresh) using `@nota/nota-server-client` → `fetchNotaProEntitled(base, Clerk JWT)`
-- `MobileSessionProvider` + `useMobileSession()` provides unified state (see shape below)
-- Protected routes + paywall:
-  - Signed-out → `(auth)` group
-  - Signed-in + entitled → `(main)` full vault (editor + future sync)
-  - Signed-in + not entitled → `/paywall` (CTA opens web checkout in browser)
+- **Auth:** Clerk email/password in-app (`@clerk/expo/legacy`), SecureStore token cache, email verification when Clerk requires a code.
+- **Entitlement:** `fetchNotaProEntitled` via `EXPO_PUBLIC_NOTA_SERVER_API_URL` → paywall or full vault.
+- **Notes:** Supabase-backed list + note editor (`@nota/mobile-editor`), debounced save, same ProseMirror JSON as web.
+- **Deep links:** `nota://notes/:uuid` (`@nota/internal-note-link`).
+
+Offline sync (`@nota/notes-offline`) is web-only for now; mobile reads/writes Supabase when entitled and online.
 
 ## Environment
 
-Use `EXPO_PUBLIC_*` (never VITE\_\*):
+Copy [`.env.example`](.env.example) to `.env`. Required for a signed-in vault:
 
-```
-EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-EXPO_PUBLIC_NOTA_SERVER_API_URL=http://127.0.0.1:8787
-```
+| Variable                            | Purpose                                  |
+| ----------------------------------- | ---------------------------------------- |
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key                    |
+| `EXPO_PUBLIC_SUPABASE_URL`          | Supabase project URL                     |
+| `EXPO_PUBLIC_SUPABASE_ANON_KEY`     | Supabase anon key (RLS)                  |
+| `EXPO_PUBLIC_NOTA_SERVER_API_URL`   | Nota server base URL (no trailing slash) |
+| `EXPO_PUBLIC_WEB_APP_URL`           | Web app for Nota Pro checkout            |
 
-Add to `.env` (Expo auto-loads `EXPO_PUBLIC_` vars) and to EAS / TestFlight config.
-
-Clerk Dashboard must include `nota://oauth-callback` (and production scheme) in Allowed Redirects.
-
-## Setup (after changes)
+Start **nota-server** before signing in (entitlement runs immediately after auth):
 
 ```bash
-# From repo root
-pnpm install
-
-cd apps/nota-mobile
-pnpm nx run @nota/nota-mobile:expo:start -- --ios --clear
+pnpm exec nx dev @nota/nota-server
 ```
 
-Assets referenced in `app.json` (icon/splash) must exist for full builds (current skeleton only).
+On a **physical device**, loopback in `.env` is rewritten to your Mac’s Metro IP in dev builds. The server must be reachable on the configured port.
 
-## Auth State Shape (MobileSessionContextValue)
+## Run locally
+
+From the repo root:
+
+```bash
+pnpm install
+pnpm exec nx dev @nota/nota-mobile
+# or
+cd apps/nota-mobile && pnpm dev
+```
+
+iOS simulator / device:
+
+```bash
+cd apps/nota-mobile
+pnpm exec expo run:ios
+```
+
+Use Nx or the app directory — do not run `npx expo` from the monorepo root.
+
+If you change `polyfills.js` or `index.js`, restart Metro with `--clear`.
+
+## Routing
+
+| State                   | Screen                                    |
+| ----------------------- | ----------------------------------------- |
+| Signed out              | `(auth)/sign-in`, `sign-up`               |
+| Signed in, not entitled | `/paywall`                                |
+| Signed in, entitled     | `(main)` notes list + `notes/[id]` editor |
+
+## Session API (`useMobileSession`)
 
 ```ts
 {
-  isLoaded: boolean;              // Clerk restored from SecureStore?
+  isLoaded: boolean;
   isSignedIn: boolean;
   userId: string | null;
   user: { id: string; email: string | null } | null;
-
-  notaProEntitled: boolean | null;  // null=undetermined; false=paywall; true=full vault
+  notaProEntitled: boolean | null;
   isCheckingEntitlement: boolean;
   entitlementError: string | null;
-
-  getAccessToken: () => Promise<string | null>;  // for nota-server-client
+  getAccessToken: () => Promise<string | null>;
   refreshEntitlement: () => Promise<boolean>;
   signOut: () => Promise<void>;
 }
 ```
 
-On launch the provider automatically calls the server entitlement endpoint once a session is restored.
-
-## Files added/changed for auth
-
-(See final agent report for exhaustive list.)
-
 ## Platform
 
-This app is **iOS + Android only** (no react-native-web / web support).
-
-## Next (post auth)
-
-- Real notes list + offline-core storage adapter for mobile
-- Full editor parity in @nota/mobile-editor
-- Sync drain using notes-offline-core + server client
-- Push notifications (future skill)
-
-See:
-
-- `packages/mobile-editor/ARCHITECTURE.md`
-- `.agents/skills/clerk-expo-patterns/`
-- AGENTS.md (portable imports + EXPO*PUBLIC*\* rule)
-
-## Running the app (monorepo)
-
-Install from the **repo root** (hoisted `node_modules` + pnpm Metro overrides):
-
-```bash
-pnpm install
-```
-
-Then start the app:
-
-```bash
-cd apps/nota-mobile
-pnpm dev
-# or from the repo root:
-pnpm exec nx dev @nota/nota-mobile
-```
-
-Do not run `npx expo` from the monorepo root — always use the app directory or Nx targets above.
-
-If you change `polyfills.js` or `index.js`, restart Metro with `--clear` so the entry bundle is rebuilt.
+iOS and Android targets (no react-native-web). See `AGENTS.md` for portable `@nota/*` imports and `packages/mobile-editor/ARCHITECTURE.md` for the editor.

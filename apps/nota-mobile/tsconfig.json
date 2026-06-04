@@ -21,6 +21,9 @@
       "path": "../../packages/internal-note-link"
     },
     {
+      "path": "../../packages/note-editor-settings"
+    },
+    {
       "path": "../../packages/mobile-editor"
     }
   ]

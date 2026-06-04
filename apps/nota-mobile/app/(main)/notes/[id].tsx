@@ -1,97 +1,324 @@
-import { useLocalSearchParams, Link, useRouter } from 'expo-router';
-import { View, Text, Pressable, StyleSheet, ScrollView } from 'react-native';
-import { NotaMobileEditor } from '@nota/mobile-editor';
-import { useMobileSession } from '../../../lib/session-context';
+import type { Json, Note } from '@nota/database-types';
+import { isDocContentEqual, NotaMobileEditor } from '@nota/mobile-editor';
+import {
+  noteSurfaceMaxWidthPx,
+  parseNoteEditorSettings,
+} from '@nota/note-editor-settings';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
 import { parseNoteLinkPath } from '@nota/internal-note-link';
 
-/**
- * Dynamic note route for deep links.
- * Matches nota://notes/:id  (and /notes/:id within app)
- * Uses @nota/internal-note-link helpers (shared with desktop/web).
- */
+import { displayNoteTitle } from '../../../lib/note-title';
+import { buildNoteEditorBodyCss } from '../../../lib/note-editor-body-css';
+import { notaSurfaceFontFamilies } from '../../../lib/nota-fonts';
+import { getNote, updateNote } from '../../../lib/notes';
+import { useMobileSession } from '../../../lib/session-context';
+import { getSupabaseClient } from '../../../lib/supabase-client';
+import { useDebouncedCallback } from '../../../lib/use-debounced-callback';
+import { colors, sharedStyles, spacing, typography } from '../../../lib/theme';
+
+const EMPTY_DOC: Json = {
+  type: 'doc',
+  content: [{ type: 'paragraph' }],
+};
+
 export default function NoteScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useMobileSession();
   const router = useRouter();
+  const { userId } = useMobileSession();
 
-  // Validate via shared parser (defensive)
   const validId = id && parseNoteLinkPath(`/notes/${id}`) === id ? id : null;
+
+  const [note, setNote] = useState<Note | null>(null);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState<Json>(EMPTY_DOC);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saveState, setSaveState] = useState<
+    'idle' | 'saving' | 'saved' | 'error'
+  >('idle');
+
+  const lastSavedTitle = useRef('');
+  const lastSavedContent = useRef<Json>(EMPTY_DOC);
+  const noteIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!validId) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const client = getSupabaseClient();
+        const row = await getNote(client, validId);
+        if (cancelled) {
+          return;
+        }
+        if (!row) {
+          setError('This note could not be found.');
+          setNote(null);
+          return;
+        }
+        setNote(row);
+        setTitle(row.title ?? '');
+        setContent((row.content as Json) ?? EMPTY_DOC);
+        lastSavedTitle.current = row.title ?? '';
+        lastSavedContent.current = (row.content as Json) ?? EMPTY_DOC;
+        noteIdRef.current = row.id;
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : 'Could not load note.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [validId]);
+
+  const persistNote = useCallback(
+    async (nextTitle: string, nextContent: Json) => {
+      if (!noteIdRef.current) {
+        return;
+      }
+
+      const titleChanged = nextTitle !== lastSavedTitle.current;
+      const contentChanged = !isDocContentEqual(
+        nextContent,
+        lastSavedContent.current,
+      );
+
+      if (!titleChanged && !contentChanged) {
+        return;
+      }
+
+      setSaveState('saving');
+      try {
+        const client = getSupabaseClient();
+        const updates: { title?: string; content?: Json } = {};
+        if (titleChanged) {
+          updates.title = displayNoteTitle(nextTitle);
+        }
+        if (contentChanged) {
+          updates.content = nextContent;
+        }
+        const saved = await updateNote(client, noteIdRef.current, updates);
+        lastSavedTitle.current = saved.title ?? '';
+        lastSavedContent.current = (saved.content as Json) ?? EMPTY_DOC;
+        setSaveState('saved');
+      } catch {
+        setSaveState('error');
+      }
+    },
+    [],
+  );
+
+  const debouncedPersist = useDebouncedCallback(
+    (nextTitle: string, nextContent: Json) => {
+      void persistNote(nextTitle, nextContent);
+    },
+    600,
+  );
+
+  const handleTitleChange = (value: string) => {
+    setTitle(value);
+    debouncedPersist(value, content);
+  };
+
+  const handleContentUpdate = (next: unknown) => {
+    const nextContent = (next as Json) ?? EMPTY_DOC;
+    setContent(nextContent);
+    debouncedPersist(title, nextContent);
+  };
+
+  const editorSettings = parseNoteEditorSettings(note?.editor_settings);
+  const surfaceFonts = notaSurfaceFontFamilies(editorSettings);
+  const editorBodyCss = useMemo(
+    () => buildNoteEditorBodyCss(surfaceFonts.bodyFontFamily),
+    [surfaceFonts.bodyFontFamily],
+  );
 
   if (!validId) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.error}>Invalid note link</Text>
-        <Link href="/(main)" style={styles.back}>
-          <Text>Back to home</Text>
-        </Link>
-      </View>
+      <SafeAreaView style={sharedStyles.screen}>
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>Invalid note link</Text>
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.backLink}>Go back</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
     );
   }
 
+  if (loading) {
+    return (
+      <SafeAreaView style={sharedStyles.screen}>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !note || !userId) {
+    return (
+      <SafeAreaView style={sharedStyles.screen}>
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>{error ?? 'Note unavailable'}</Text>
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.backLink}>Back to notes</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const saveLabel =
+    saveState === 'saving'
+      ? 'Saving…'
+      : saveState === 'saved'
+        ? 'Saved'
+        : saveState === 'error'
+          ? 'Save failed'
+          : '';
+
+  const contentMaxWidth = noteSurfaceMaxWidthPx(editorSettings);
+  const isMonoTheme = editorSettings.font === 'mono';
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Note</Text>
-        <Text style={styles.id} numberOfLines={1}>
-          ID: {validId}
-        </Text>
-      </View>
+    <SafeAreaView style={sharedStyles.screen} edges={['top', 'left', 'right']}>
+      <KeyboardAvoidingView
+        style={styles.flex}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={8}
+      >
+        <View style={styles.toolbar}>
+          <Pressable onPress={() => router.back()} hitSlop={12}>
+            <Text style={styles.backLink}>Notes</Text>
+          </Pressable>
+          {saveLabel ? (
+            <Text
+              style={[
+                styles.saveStatus,
+                saveState === 'error' && styles.saveStatusError,
+              ]}
+            >
+              {saveLabel}
+            </Text>
+          ) : null}
+        </View>
 
-      <View style={styles.editorContainer}>
-        <NotaMobileEditor
-          content={{
-            type: 'doc',
-            content: [
+        <View style={[styles.noteColumn, { maxWidth: contentMaxWidth }]}>
+          <TextInput
+            value={title}
+            onChangeText={handleTitleChange}
+            placeholder="Untitled Note"
+            placeholderTextColor={colors.mutedForeground}
+            style={[
+              styles.titleInput,
               {
-                type: 'paragraph',
-                content: [{ type: 'text', text: 'Opened via deep link.' }],
+                fontFamily: surfaceFonts.titleFontFamily,
+                fontSize: isMonoTheme ? 24 : 34,
+                fontWeight: isMonoTheme ? '500' : '800',
               },
-            ],
-          }}
-          onUpdate={() => {}}
-          noteId={validId}
-          userId={user?.id ?? 'demo'}
-        />
-      </View>
+            ]}
+            multiline
+          />
 
-      <Text style={styles.note}>
-        This route is registered for Clerk OAuth callbacks (indirectly) and
-        internal note links (nota://notes/:uuid). Future: load from offline
-        store + allow editing + outbox sync.
-      </Text>
-
-      <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <Text style={styles.backButtonText}>Back</Text>
-      </Pressable>
-    </ScrollView>
+          <View style={styles.editor}>
+            <NotaMobileEditor
+              content={content}
+              onUpdate={handleContentUpdate}
+              noteId={note.id}
+              userId={userId}
+              editorBodyCss={editorBodyCss}
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: 20, gap: 16 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
-  header: { gap: 4 },
-  title: { fontSize: 24, fontWeight: '600' },
-  id: { fontSize: 12, color: '#888', fontFamily: 'Menlo' },
-  editorContainer: {
-    minHeight: 220,
+  flex: { flex: 1 },
+  toolbar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  backLink: {
+    fontSize: 16,
+    color: colors.link,
+    fontWeight: '500',
+  },
+  saveStatus: {
+    fontSize: 13,
+    color: colors.muted,
+  },
+  saveStatusError: {
+    color: colors.destructive,
+  },
+  noteColumn: {
+    flex: 1,
+    width: '100%',
+    alignSelf: 'center',
+    paddingHorizontal: spacing.md,
+  },
+  titleInput: {
+    color: colors.foreground,
+    paddingBottom: spacing.sm,
+    letterSpacing: -0.5,
+    lineHeight: 40,
+  },
+  editor: {
+    flex: 1,
+    minHeight: 200,
+    marginBottom: spacing.md,
     borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#fafafa',
+    borderColor: colors.border,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+    padding: spacing.sm,
+    overflow: 'hidden',
   },
-  note: { fontSize: 13, color: '#555', lineHeight: 20 },
-  error: { color: '#c33', fontSize: 16 },
-  back: { color: '#0066cc' },
-  backButton: {
-    marginTop: 12,
-    alignSelf: 'flex-start',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: '#f1f1f1',
-    borderRadius: 6,
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+    padding: spacing.lg,
   },
-  backButtonText: { fontSize: 15 },
+  errorText: {
+    ...typography.body,
+    color: colors.destructive,
+    textAlign: 'center',
+  },
 });

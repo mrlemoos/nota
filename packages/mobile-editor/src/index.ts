@@ -18,6 +18,8 @@ export interface MobileEditorProps {
   onUpdate: (content: unknown) => void;
   noteId: string;
   userId: string;
+  /** Injected into the TenTap WebView (note body typography). */
+  editorBodyCss?: string;
   // Future: attachments, mention candidates, storage ops, navigation callbacks, etc.
 }
 

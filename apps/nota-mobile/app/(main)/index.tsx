@@ -1,136 +1,236 @@
-import { useMobileSession } from '../../lib/session-context';
-import { Link, useRouter } from 'expo-router';
+import type { Note } from '@nota/database-types';
+import { useRouter } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  ActivityIndicator,
+  FlatList,
   Pressable,
+  RefreshControl,
   StyleSheet,
-  ScrollView,
-  Alert,
+  Text,
+  View,
 } from 'react-native';
-import { NotaMobileEditor } from '@nota/mobile-editor';
-import { hrefForNote } from '@nota/internal-note-link';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-/**
- * Main home / vault entry for entitled Nota Pro users on mobile.
- * Currently a minimal skeleton + editor demo.
- * Future: real notes list from offline-core + sync via nota-server-client.
- */
-export default function MainHome() {
-  const { user, signOut, refreshEntitlement, notaProEntitled } =
-    useMobileSession();
+import { NoteListRow } from '../../components/note-list-row';
+import { createNote, listNotes } from '../../lib/notes';
+import { useMobileSession } from '../../lib/session-context';
+import { getSupabaseClient } from '../../lib/supabase-client';
+import { colors, sharedStyles, spacing, typography } from '../../lib/theme';
+
+export default function NotesHomeScreen() {
   const router = useRouter();
+  const { user, userId, signOut } = useMobileSession();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
 
-  const demoNoteId = '00000000-0000-0000-0000-000000000001'; // stable demo uuid for deep link testing
+  const loadNotes = useCallback(
+    async (isRefresh = false) => {
+      if (!userId) {
+        return;
+      }
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
 
-  const handleOpenDemoNote = () => {
-    // Demonstrates internal /notes/:uuid deep link route + navigation
-    router.push(`/notes/${demoNoteId}`);
+      try {
+        const client = getSupabaseClient();
+        const rows = await listNotes(client);
+        setNotes(rows);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Could not load notes.');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [userId],
+  );
+
+  useEffect(() => {
+    void loadNotes();
+  }, [loadNotes]);
+
+  const handleCreateNote = async () => {
+    if (!userId || creating) {
+      return;
+    }
+    setCreating(true);
+    setError(null);
+    try {
+      const client = getSupabaseClient();
+      const note = await createNote(client, userId);
+      router.push(`/notes/${note.id}`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not create a note.');
+    } finally {
+      setCreating(false);
+    }
   };
 
-  const handleRefreshEntitlement = async () => {
-    const entitled = await refreshEntitlement();
-    Alert.alert(
-      'Entitlement refreshed',
-      entitled
-        ? 'You are entitled to the full vault.'
-        : 'Not entitled (paywall active).',
+  const renderEmpty = () => {
+    if (loading) {
+      return null;
+    }
+    return (
+      <View style={styles.empty}>
+        <Text style={styles.emptyTitle}>No notes yet</Text>
+        <Text style={styles.emptyBody}>
+          Capture your first thought. Notes sync with your Nota vault.
+        </Text>
+        <Pressable
+          style={[sharedStyles.primaryButton, styles.emptyButton]}
+          onPress={() => void handleCreateNote()}
+          disabled={creating}
+        >
+          {creating ? (
+            <ActivityIndicator color={colors.primaryForeground} />
+          ) : (
+            <Text style={sharedStyles.primaryButtonText}>New note</Text>
+          )}
+        </Pressable>
+      </View>
     );
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <SafeAreaView style={sharedStyles.screen} edges={['top', 'left', 'right']}>
       <View style={styles.header}>
-        <Text style={styles.title}>Nota</Text>
-        <Text style={styles.subtitle}>iPhone • Entitled ✓</Text>
-      </View>
-
-      {user && <Text style={styles.user}>{user.email ?? user.id}</Text>}
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Editor (TenTap skeleton)</Text>
-        <View style={styles.editorWrap}>
-          <NotaMobileEditor
-            content={{ type: 'doc', content: [] }}
-            onUpdate={() => {}}
-            noteId={demoNoteId}
-            userId={user?.id ?? 'demo'}
-          />
+        <View>
+          <Text style={typography.title}>Nota</Text>
+          {user?.email ? (
+            <Text style={typography.caption}>{user.email}</Text>
+          ) : null}
         </View>
-        <Text style={styles.editorNote}>
-          Full custom Nota nodes + hybrid islands coming in editor parity work.
-        </Text>
-      </View>
-
-      <View style={styles.actions}>
-        <Pressable style={styles.button} onPress={handleOpenDemoNote}>
-          <Text style={styles.buttonText}>Open demo note (deep link test)</Text>
-        </Pressable>
-
-        <Pressable style={styles.button} onPress={handleRefreshEntitlement}>
-          <Text style={styles.buttonText}>Re-check entitlement</Text>
-        </Pressable>
-
-        <Pressable style={[styles.button, styles.danger]} onPress={signOut}>
-          <Text style={[styles.buttonText, styles.dangerText]}>Sign out</Text>
+        <Pressable onPress={() => void signOut()} hitSlop={12}>
+          <Text style={styles.signOut}>Sign out</Text>
         </Pressable>
       </View>
 
-      <Text style={styles.footer}>
-        Deep links supported: nota://notes/:uuid (and auth callbacks).
-        {'\n'}Entitlement: {notaProEntitled ? 'active' : 'inactive'}
-      </Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
 
-      <Link href="/paywall" style={{ marginTop: 20, alignSelf: 'center' }}>
-        <Text style={{ color: '#0066cc' }}>View paywall (test)</Text>
-      </Link>
-    </ScrollView>
+      {loading && notes.length === 0 ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={colors.primary} />
+        </View>
+      ) : (
+        <FlatList
+          data={notes}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <NoteListRow
+              note={item}
+              onPress={() => router.push(`/notes/${item.id}`)}
+            />
+          )}
+          ListEmptyComponent={renderEmpty}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => void loadNotes(true)}
+            />
+          }
+          contentContainerStyle={
+            notes.length === 0 ? styles.listEmptyContainer : undefined
+          }
+        />
+      )}
+
+      {notes.length > 0 ? (
+        <Pressable
+          style={[styles.fab, creating && sharedStyles.disabled]}
+          onPress={() => void handleCreateNote()}
+          disabled={creating}
+        >
+          {creating ? (
+            <ActivityIndicator color={colors.primaryForeground} />
+          ) : (
+            <Text style={styles.fabLabel}>+</Text>
+          )}
+        </Pressable>
+      ) : null}
+
+      <SafeAreaView edges={['bottom']} />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: 20, paddingBottom: 60, gap: 24 },
-  header: { alignItems: 'center', marginTop: 12 },
-  title: { fontSize: 32, fontWeight: '700' },
-  subtitle: { fontSize: 14, color: '#2a9d4e', marginTop: 4 },
-  user: { textAlign: 'center', color: '#666', fontSize: 13, marginTop: 8 },
-  section: { marginTop: 16 },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    paddingBottom: spacing.md,
+    backgroundColor: colors.background,
   },
-  editorWrap: {
-    minHeight: 180,
-    borderWidth: 1,
-    borderColor: '#eee',
-    borderRadius: 8,
-    backgroundColor: '#fafafa',
-    padding: 12,
-  },
-  editorNote: {
-    fontSize: 11,
-    color: '#888',
+  signOut: {
+    fontSize: 14,
+    color: colors.muted,
     marginTop: 8,
-    fontStyle: 'italic',
   },
-  actions: { gap: 12, marginTop: 8 },
-  button: {
-    backgroundColor: '#111',
-    paddingVertical: 14,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
-  danger: { backgroundColor: '#c33' },
-  dangerText: { color: '#fff' },
-  footer: {
-    marginTop: 24,
-    fontSize: 12,
-    color: '#777',
+  error: {
+    color: colors.destructive,
+    fontSize: 14,
     textAlign: 'center',
-    lineHeight: 18,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listEmptyContainer: {
+    flexGrow: 1,
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: spacing.lg,
+    gap: spacing.md,
+  },
+  emptyTitle: {
+    ...typography.heading,
+    fontSize: 20,
+  },
+  emptyBody: {
+    ...typography.caption,
+    textAlign: 'center',
+    fontSize: 15,
+  },
+  emptyButton: {
+    marginTop: spacing.sm,
+    minWidth: 160,
+  },
+  fab: {
+    position: 'absolute',
+    right: spacing.md,
+    bottom: spacing.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  fabLabel: {
+    color: colors.primaryForeground,
+    fontSize: 28,
+    fontWeight: '300',
+    marginTop: -2,
   },
 });

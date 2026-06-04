@@ -567,6 +567,18 @@ importers:
       '@expo/metro-runtime':
         specifier: ~6.1.2
         version: 6.1.2(expo@54.0.35)(react-dom@19.1.0(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(bufferutil@4.1.0)(react@19.1.0))(react@19.1.0)
+      '@fontsource-variable/inter':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource-variable/source-serif-4':
+        specifier: 'catalog:'
+        version: 5.2.9
+      '@fontsource/geist-sans':
+        specifier: ^5.2.5
+        version: 5.2.5
+      '@fontsource/instrument-serif':
+        specifier: 'catalog:'
+        version: 5.2.8
       '@nota/database-types':
         specifier: workspace:*
         version: link:../../packages/database-types
@@ -579,6 +591,9 @@ importers:
       '@nota/nota-server-client':
         specifier: workspace:*
         version: link:../../packages/nota-server-client
+      '@nota/note-editor-settings':
+        specifier: workspace:*
+        version: link:../../packages/note-editor-settings
       '@nota/note-link-graph':
         specifier: workspace:*
         version: link:../../packages/note-link-graph
@@ -588,9 +603,15 @@ importers:
       '@nota/validation':
         specifier: workspace:*
         version: link:../../packages/validation
+      '@supabase/supabase-js':
+        specifier: 'catalog:'
+        version: 2.104.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       expo:
         specifier: ~54.0.0
         version: 54.0.35(@babel/core@7.29.0)(@expo/metro-runtime@6.1.2)(bufferutil@4.1.0)(expo-router@6.0.24)(graphql@16.13.2)(react-native-webview@13.15.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(bufferutil@4.1.0)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(bufferutil@4.1.0)(react@19.1.0))(react@19.1.0)(typescript@5.9.3)
+      expo-font:
+        specifier: ~14.0.12
+        version: 14.0.12(expo@54.0.35)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(bufferutil@4.1.0)(react@19.1.0))(react@19.1.0)
       expo-linking:
         specifier: ~8.0.12
         version: 8.0.12(expo@54.0.35)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(bufferutil@4.1.0)(react@19.1.0))(react@19.1.0)
@@ -719,6 +740,9 @@ importers:
       '@nota/link-platform-preview':
         specifier: workspace:*
         version: link:../link-platform-preview
+      '@nota/note-editor-settings':
+        specifier: workspace:*
+        version: link:../note-editor-settings
       '@nota/web-design':
         specifier: workspace:*
         version: link:../web-design
@@ -903,6 +927,25 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
+
+  packages/note-editor-settings:
+    dependencies:
+      '@nota/database-types':
+        specifier: workspace:*
+        version: link:../database-types
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      vite:
+        specifier: 'catalog:'
+        version: 7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
       vitest:
         specifier: 'catalog:'
         version: 4.1.5(@opentelemetry/api@1.9.1)(@types/node@25.6.0)(@vitest/coverage-v8@4.1.5)(@vitest/ui@4.1.5)(jsdom@29.0.2(@noble/hashes@1.8.0))(msw@2.13.6(@types/node@25.6.0)(typescript@5.9.3))(vite@7.3.2(@types/node@25.6.0)(jiti@2.6.1)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))

@@ -36,6 +36,9 @@
     },
     {
       "path": "../database-types/tsconfig.lib.json"
+    },
+    {
+      "path": "../note-editor-settings/tsconfig.lib.json"
     }
   ]
 }

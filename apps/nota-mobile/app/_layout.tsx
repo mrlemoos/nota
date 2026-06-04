@@ -4,7 +4,9 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
+import { NotaFontsGate } from '../components/nota-fonts-gate';
 import { MobileSessionProvider } from '../lib/session-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Call at top-level module scope for OAuth session completion (per Clerk + Expo patterns)
 WebBrowser.maybeCompleteAuthSession();
@@ -35,17 +37,23 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ClerkProvider publishableKey={clerkPublishableKey} tokenCache={tokenCache}>
-      <MobileSessionProvider>
-        <StatusBar style="auto" />
-        {/* Using Stack for future header/title control; groups + dynamic routes handle the rest */}
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" />
-          <Stack.Screen name="(main)" />
-          <Stack.Screen name="oauth-callback" />
-          <Stack.Screen name="paywall" />
-        </Stack>
-      </MobileSessionProvider>
-    </ClerkProvider>
+    <SafeAreaProvider>
+      <ClerkProvider
+        publishableKey={clerkPublishableKey}
+        tokenCache={tokenCache}
+      >
+        <MobileSessionProvider>
+          <NotaFontsGate>
+            <StatusBar style="auto" />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(main)" />
+              <Stack.Screen name="oauth-callback" />
+              <Stack.Screen name="paywall" />
+            </Stack>
+          </NotaFontsGate>
+        </MobileSessionProvider>
+      </ClerkProvider>
+    </SafeAreaProvider>
   );
 }

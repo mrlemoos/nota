@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@nota/database-types": "workspace:*",
+    "@nota/note-editor-settings": "workspace:*",
     "@nota/internal-note-link": "workspace:*",
     "@nota/link-platform-preview": "workspace:*",
     "@nota/web-design": "workspace:*",

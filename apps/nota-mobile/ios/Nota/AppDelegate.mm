@@ -2,11 +2,14 @@
 
 #import <React/RCTBundleURLProvider.h>
 #import <React/RCTLinkingManager.h>
+#import "ClerkNativeBootstrap.h"
 
 @implementation AppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+  [ClerkNativeBootstrap registerIfNeeded];
+
   self.moduleName = @"main";
 
   // You can add your custom initial props in the dictionary below.

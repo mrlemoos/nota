@@ -681,3 +681,26 @@ struct ClerkInlineProfileWrapperView: View {
       }
   }
 }
+
+// MARK: - ObjC bootstrap
+
+/// Called from `AppDelegate.mm` on launch. The @clerk/expo config plugin only patches
+/// `AppDelegate.swift`; this Expo app uses `AppDelegate.mm`, so registration must be manual.
+@objc(ClerkNativeBootstrap)
+public final class ClerkNativeBootstrap: NSObject {
+  @objc public static func registerIfNeeded() {
+    guard clerkViewFactory == nil else { return }
+
+    let work = {
+      MainActor.assumeIsolated {
+        ClerkViewFactory.register()
+      }
+    }
+
+    if Thread.isMainThread {
+      work()
+    } else {
+      DispatchQueue.main.sync(execute: work)
+    }
+  }
+}

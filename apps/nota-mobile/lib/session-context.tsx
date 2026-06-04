@@ -1,5 +1,11 @@
 import { useAuth, useUser, useClerk } from '@clerk/expo';
 import { fetchNotaProEntitled } from '@nota/nota-server-client';
+import { formatEntitlementNetworkError } from './entitlement-network-error';
+import { resolveNotaServerBaseUrl } from './resolve-nota-server-base-url';
+import {
+  bindSupabaseAccessToken,
+  resetSupabaseClient,
+} from './supabase-client';
 import {
   createContext,
   useCallback,
@@ -59,12 +65,9 @@ const MobileSessionContext = createContext<MobileSessionContextValue | null>(
   null,
 );
 
-const NOTA_SERVER_BASE_URL = process.env.EXPO_PUBLIC_NOTA_SERVER_API_URL;
-
-function normaliseBaseUrl(url: string | undefined): string | undefined {
-  if (typeof url !== 'string' || !url.trim()) return undefined;
-  return url.replace(/\/$/, '');
-}
+const NOTA_SERVER_BASE_URL = resolveNotaServerBaseUrl(
+  process.env.EXPO_PUBLIC_NOTA_SERVER_API_URL,
+);
 
 export interface MobileSessionProviderProps {
   children: ReactNode;
@@ -100,7 +103,7 @@ export function MobileSessionProvider({
       return false;
     }
 
-    const baseUrl = normaliseBaseUrl(NOTA_SERVER_BASE_URL);
+    const baseUrl = NOTA_SERVER_BASE_URL;
     if (!baseUrl) {
       // No server configured → treat as not entitled (drive to web)
       setNotaProEntitled(false);
@@ -128,11 +131,7 @@ export function MobileSessionProvider({
       setNotaProEntitled(entitled);
       return entitled;
     } catch (err) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : 'Network error during entitlement check';
-      setEntitlementError(msg);
+      setEntitlementError(formatEntitlementNetworkError(baseUrl, err));
       setNotaProEntitled(false);
       return false;
     } finally {
@@ -150,6 +149,14 @@ export function MobileSessionProvider({
     setIsCheckingEntitlement(false);
     await clerkSignOut();
   }, [clerkSignOut]);
+
+  useEffect(() => {
+    if (isSignedIn && userId) {
+      bindSupabaseAccessToken(getAccessToken);
+    } else {
+      resetSupabaseClient();
+    }
+  }, [isSignedIn, userId, getAccessToken]);
 
   // Primary effect: on Clerk session change, (re)check entitlement
   useEffect(() => {
