@@ -1079,23 +1079,37 @@ html.nota-electron .nota-notes-root {
 }
 
 .nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome {
-  background-color: color-mix(in oklch, var(--sidebar) 28%, transparent);
+  background-color: color-mix(in oklch, var(--sidebar) 72%, transparent);
   -webkit-backdrop-filter: blur(34px) saturate(1.7) contrast(1.04);
   backdrop-filter: blur(34px) saturate(1.7) contrast(1.04);
-  box-shadow:
-    inset -1px 0 0 color-mix(in oklch, var(--border) 54%, transparent),
-    inset 1px 0 0 rgba(255, 255, 255, 0.16);
+  box-shadow: inset -1px 0 0 color-mix(in oklch, var(--border) 54%, transparent);
+  color: var(--foreground);
 }
 
 .dark .nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome {
-  background-color: rgb(0 0 0 / 20%);
-  box-shadow:
-    inset -1px 0 0 rgba(255, 255, 255, 0.1),
-    inset 1px 0 0 rgba(255, 255, 255, 0.08);
+  background-color: rgb(0 0 0 / 50%);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.1);
+}
+
+.nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome nav a {
+  color: var(--foreground);
+  text-shadow:
+    0 0 10px color-mix(in oklch, var(--sidebar) 85%, transparent),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.dark
+  .nota-notes-root.nota-notes-root--banner
+  .nota-notes-sidebar-chrome
+  nav
+  a {
+  text-shadow:
+    0 0 10px rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .nota-notes-root.nota-notes-root--banner .nota-notes-main-chrome {
-  background-color: color-mix(in oklch, var(--background) 42%, transparent);
+  background-color: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
 }
@@ -1114,6 +1128,20 @@ html.nota-electron .nota-notes-root {
   .nota-notes-main-chrome {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
+    background-color: color-mix(in oklch, var(--background) 97%, transparent);
+  }
+
+  .nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: color-mix(in oklch, var(--sidebar) 96%, transparent);
+  }
+
+  .nota-notes-root.nota-notes-root--banner .nota-notes-sidebar-chrome nav a {
+    text-shadow: none;
+  }
+
+  .nota-notes-root.nota-notes-root--banner .nota-notes-main-chrome {
     background-color: color-mix(in oklch, var(--background) 97%, transparent);
   }
 }

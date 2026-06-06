@@ -34,6 +34,7 @@ import {
 import { useStickyDocTitle } from '../context/sticky-doc-title';
 import { useNotaPreferencesStore } from '../stores/nota-preferences';
 import { postSearchIndexNote } from '../lib/nota-server-client';
+import { noteBannerNoteSurfaceClass } from '../lib/note-banner-chrome';
 
 export function NoteDetailPanel({
   noteId,
@@ -427,8 +428,7 @@ export function NoteDetailPanel({
         className={cn(
           'mx-auto w-full transition-[max-width] duration-300 ease-in-out',
           layout.maxWidthClass,
-          bannerSignedUrl &&
-            'rounded-2xl bg-background/80 px-6 py-10 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.35),0_10px_30px_-12px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-2xl backdrop-saturate-150 md:px-14 md:py-16 dark:bg-background/70 dark:ring-white/10',
+          bannerSignedUrl && noteBannerNoteSurfaceClass,
         )}
       >
         <div key={displayNote.id} className="nota-note-open-fade">
