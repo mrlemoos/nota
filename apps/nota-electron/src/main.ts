@@ -31,6 +31,10 @@ import {
   registerNotaUpdaterIpc,
   startPackagedNotaUpdater,
 } from './nota-updater.js';
+import {
+  shouldOpenHttpUrlInSystemBrowser,
+  shouldOpenInAppOAuthPopupWindow,
+} from './window-open-policy.js';
 
 /** Human-readable name for menus, notifications, and `electron-updater` `{appName}` (not `package.json` `name`). */
 app.setName('Nota');
@@ -53,33 +57,6 @@ let pendingSsoHttpUrl: string | null = null;
 let mainWindow: BrowserWindow | null = null;
 
 let tray: Tray | null = null;
-
-/**
- * Clerk Billing / Stripe often uses `window.open` for checkout. Those URLs should open in
- * the user’s default browser so payments complete reliably.
- *
- * OAuth popups: Stripe stays external; other HTTPS popups use a non-sandboxed child window (see
- * `browserWindowOptionsForOAuthPopup`). **Desktop sign-in** uses `signIn.sso` + `will-navigate` to
- * open Clerk/IdP in the **system browser** and completes via `nota://oauth-callback` → `/sso-callback`.
- */
-function shouldOpenStripeHostedPageInSystemBrowser(url: string): boolean {
-  try {
-    const u = new URL(url);
-    if (u.protocol !== 'http:' && u.protocol !== 'https:') {
-      return false;
-    }
-    const { hostname } = u;
-    return (
-      hostname === 'checkout.stripe.com' ||
-      hostname === 'pay.stripe.com' ||
-      hostname === 'buy.stripe.com' ||
-      hostname === 'billing.stripe.com' ||
-      hostname === 'invoice.stripe.com'
-    );
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Clerk OAuth opens `window.open` popups (then IdPs like Apple). On macOS, Chromium’s WebAuthn /
@@ -108,14 +85,16 @@ function browserWindowOptionsForOAuthPopup(): Electron.BrowserWindowConstructorO
 
 function attachOauthPopupOpenHandler(contents: WebContents): void {
   contents.setWindowOpenHandler((details) => {
-    if (shouldOpenStripeHostedPageInSystemBrowser(details.url)) {
-      void shell.openExternal(details.url);
-      return { action: 'deny' };
+    if (shouldOpenInAppOAuthPopupWindow(details.url)) {
+      return {
+        action: 'allow',
+        overrideBrowserWindowOptions: browserWindowOptionsForOAuthPopup(),
+      };
     }
-    return {
-      action: 'allow',
-      overrideBrowserWindowOptions: browserWindowOptionsForOAuthPopup(),
-    };
+    if (shouldOpenHttpUrlInSystemBrowser(details.url)) {
+      void shell.openExternal(details.url);
+    }
+    return { action: 'deny' };
   });
 }
 
@@ -363,8 +342,20 @@ function queueOrDeliverSsoFromNotaProtocol(protocolUrl: string): void {
  * flows must run in the **system browser**; intercept main-window navigations to HTTPS IdP/Clerk OAuth.
  */
 function shouldOpenHttpsNavigationInSystemBrowser(url: string): boolean {
-  if (shouldOpenStripeHostedPageInSystemBrowser(url)) {
-    return true;
+  try {
+    const u = new URL(url);
+    const { hostname } = u;
+    if (
+      hostname === 'checkout.stripe.com' ||
+      hostname === 'pay.stripe.com' ||
+      hostname === 'buy.stripe.com' ||
+      hostname === 'billing.stripe.com' ||
+      hostname === 'invoice.stripe.com'
+    ) {
+      return true;
+    }
+  } catch {
+    return false;
   }
   try {
     const u = new URL(url);

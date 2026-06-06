@@ -44,12 +44,16 @@ export function readRequestOriginHeader(
   if (!requestHeaders) {
     return undefined;
   }
-  const raw =
-    'Origin' in requestHeaders ? requestHeaders.Origin : requestHeaders.origin;
-  if (!raw) {
-    return undefined;
+  for (const [key, value] of Object.entries(requestHeaders)) {
+    if (key.toLowerCase() !== 'origin' || value == null) {
+      continue;
+    }
+    const candidate = Array.isArray(value) ? value[0] : value;
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate;
+    }
   }
-  return Array.isArray(raw) ? raw[0] : raw;
+  return undefined;
 }
 
 function normaliseResponseHeaders(

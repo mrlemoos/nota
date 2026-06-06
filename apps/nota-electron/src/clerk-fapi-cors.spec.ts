@@ -78,4 +78,18 @@ describe('clerk-fapi-cors', () => {
     // Assert
     expect(value).toBe('http://localhost:4200');
   });
+
+  it('readRequestOriginHeader ignores an empty Origin key when lowercase origin is set', () => {
+    // Arrange
+    const headers: Record<string, string | string[]> = {
+      Origin: '',
+      origin: ['https://app.nota.mrlemoos.dev'],
+    };
+
+    // Act
+    const value = readRequestOriginHeader(headers);
+
+    // Assert
+    expect(value).toBe('https://app.nota.mrlemoos.dev');
+  });
 });
