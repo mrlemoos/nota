@@ -1,9 +1,9 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import {
-  NOTA_UPDATES_CHECK_CHANNEL,
-  NOTA_UPDATES_QUIT_INSTALL_CHANNEL,
-  NOTA_UPDATES_STATUS_CHANNEL,
-} from './nota-updater-channels.js';
+
+/** Keep in sync with `nota-updater-channels.ts` (preload cannot `require` sibling asar modules). */
+const NOTA_UPDATES_STATUS_CHANNEL = 'nota-updates:status';
+const NOTA_UPDATES_CHECK_CHANNEL = 'nota-updates:check';
+const NOTA_UPDATES_QUIT_INSTALL_CHANNEL = 'nota-updates:quit-install';
 
 const NOTA_MENUBAR_ACTION_CHANNEL = 'nota-menubar-action';
 
