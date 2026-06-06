@@ -51,7 +51,7 @@ export default defineConfig(({ mode }) => {
       conditions: ['@nota/source', 'import', 'module', 'browser', 'default'],
       // Prefer the hoisted `@clerk/shared` v4 (same React context as `ClerkProvider` from `@clerk/react`).
       // Do not alias `@clerk/shared/*` to a filesystem path :  that skips `exports` and breaks `@clerk/shared/error`, etc.
-      dedupe: ['@clerk/shared'],
+      dedupe: ['@clerk/shared', 'react', 'react-dom'],
       alias: [
         // App imports use `@/` and `~/`.
         { find: '~', replacement: srcDir },

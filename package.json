@@ -98,6 +98,7 @@
   },
   "pnpm": {
     "overrides": {
+      "react": "19.1.0",
       "react-dom": "19.1.0",
       "@clerk/elements>@clerk/shared": "^4.8.1",
       "jpeg-js@<0.4.4": ">=0.4.4",
