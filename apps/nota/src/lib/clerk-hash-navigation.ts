@@ -1,15 +1,69 @@
-import { NOTA_HASH_HISTORY_EVENT, replaceAppHash } from './app-navigation';
-
 /**
- * Clerk path/hash mode uses `/sign-in` and `/sign-up`. The SPA hash must stay on those
- * segments so `<SignIn routing="hash" />` / `<SignUp routing="hash" />` (Core 3) mount.
- * We still accept legacy `#/login` / `#/signup` in `parseAppNavFromLocation`.
- * Map same-origin Clerk navigations into the hash so we avoid the hosted Account Portal reload loop.
+ * Clerk `<SignIn path="/sign-in" />` uses path routing. PathRouter returns **null** while the
+ * URL hash starts with `#/` (`hasUrlInFragment`), so auth must live on pathname with an empty
+ * hash. Notes/landing keep hash routing (`#/notes`). Legacy `#/sign-in` bookmarks migrate at boot.
  */
+
+import { isClerkAuthPathname } from './app-navigation-auth';
+import { NOTA_HASH_HISTORY_EVENT, replaceAppHash } from './app-navigation';
 
 const AUTH_HASH_PATH = /^\/(?:sign-in|sign-up|login|signup)(?:\/|$)/;
 
-/** Clerk redirect params can recurse into megabyte-scale hashes; strip runaway query wholesale. */
+function applyClerkRouterTarget(
+  url: URL,
+  target: string,
+  write: (url: URL) => void,
+): void {
+  const normalised = target.startsWith('#') ? target.slice(1) : target;
+  const qIndex = normalised.indexOf('?');
+  const pathPart = qIndex === -1 ? normalised : normalised.slice(0, qIndex);
+  const search = qIndex === -1 ? '' : normalised.slice(qIndex);
+
+  if (AUTH_HASH_PATH.test(pathPart)) {
+    url.pathname = pathPart;
+    url.search = search;
+    url.hash = '';
+  } else {
+    url.pathname = '/';
+    url.search = '';
+    url.hash = normalised.startsWith('/')
+      ? `#${normalised}`
+      : `#/${normalised}`;
+  }
+  write(url);
+}
+
+function migrateLegacyAuthHashToPathname(): boolean {
+  const h = window.location.hash;
+  const raw = h.startsWith('#') ? h.slice(1) : h;
+  if (!raw.startsWith('/')) {
+    return false;
+  }
+  const q = raw.indexOf('?');
+  const path = q === -1 ? raw : raw.slice(0, q);
+  if (!AUTH_HASH_PATH.test(path)) {
+    return false;
+  }
+  const url = new URL(window.location.href);
+  url.pathname = path;
+  url.search = q === -1 ? '' : raw.slice(q);
+  url.hash = '';
+  window.history.replaceState(window.history.state, '', url.toString());
+  return true;
+}
+
+function stripAuthHashIfPathnameAuth(): void {
+  if (!isClerkAuthPathname(window.location.pathname)) {
+    return;
+  }
+  if (!window.location.hash.startsWith('#/')) {
+    return;
+  }
+  const url = new URL(window.location.href);
+  url.hash = '';
+  window.history.replaceState(window.history.state, '', url.toString());
+}
+
 const MAX_AUTH_HASH_QUERY_LEN = 2048;
 
 function tryMapAuthPath(pathnameOnly: string, search: string): string | null {
@@ -324,11 +378,11 @@ export function clerkSpaOriginWithPath(): string {
 }
 
 export function clerkFullSignInUrl(): string {
-  return `${clerkSpaOriginWithPath()}#/sign-in`;
+  return `${window.location.origin}/sign-in`;
 }
 
 export function clerkFullSignUpUrl(): string {
-  return `${clerkSpaOriginWithPath()}#/sign-up`;
+  return `${window.location.origin}/sign-up`;
 }
 
 export function clerkFullNotesUrl(): string {
@@ -363,16 +417,22 @@ export function clerkRouterPush(
     const hashPath = extractSameOriginHashPath(to);
     if (hashPath !== null) {
       const url = new URL(window.location.href);
-      url.hash = hashPath;
-      window.history.pushState(window.history.state, '', url.toString());
+      applyClerkRouterTarget(url, hashPath, (u) => {
+        window.history.pushState(window.history.state, '', u.toString());
+      });
     } else {
       metadata?.windowNavigate(to);
     }
     return;
   }
   const url = new URL(window.location.href);
-  url.hash = sanitizeClerkAuthHashFragment(mapped.fragment);
-  window.history.pushState(window.history.state, '', url.toString());
+  applyClerkRouterTarget(
+    url,
+    sanitizeClerkAuthHashFragment(mapped.fragment),
+    (u) => {
+      window.history.pushState(window.history.state, '', u.toString());
+    },
+  );
   // Navigation sync is scheduled by the app-navigation `history.pushState` patch (deferred, React-safe).
 }
 
@@ -385,16 +445,22 @@ export function clerkRouterReplace(
     const hashPath = extractSameOriginHashPath(to);
     if (hashPath !== null) {
       const url = new URL(window.location.href);
-      url.hash = hashPath;
-      window.history.replaceState(window.history.state, '', url.toString());
+      applyClerkRouterTarget(url, hashPath, (u) => {
+        window.history.replaceState(window.history.state, '', u.toString());
+      });
     } else {
       metadata?.windowNavigate(to);
     }
     return;
   }
   const url = new URL(window.location.href);
-  url.hash = sanitizeClerkAuthHashFragment(mapped.fragment);
-  window.history.replaceState(window.history.state, '', url.toString());
+  applyClerkRouterTarget(
+    url,
+    sanitizeClerkAuthHashFragment(mapped.fragment),
+    (u) => {
+      window.history.replaceState(window.history.state, '', u.toString());
+    },
+  );
   // Navigation sync is scheduled by the app-navigation `history.replaceState` patch (deferred, React-safe).
 }
 
@@ -405,6 +471,27 @@ export function clerkRouterReplace(
 export function repairClerkAuthLocationHash(): void {
   const h = window.location.hash;
   const raw = h.startsWith('#') ? h.slice(1) : h;
+  if (raw.startsWith('/')) {
+    const q = raw.indexOf('?');
+    const path = q === -1 ? raw : raw.slice(0, q);
+    if (AUTH_HASH_PATH.test(path)) {
+      const queryLen = q === -1 ? 0 : raw.length - q - 1;
+      if (queryLen > MAX_AUTH_HASH_QUERY_LEN) {
+        replaceAppHash(
+          path.startsWith('/sign-up') || path.startsWith('/signup')
+            ? { kind: 'signup' }
+            : { kind: 'login' },
+        );
+        return;
+      }
+    }
+  }
+
+  if (migrateLegacyAuthHashToPathname()) {
+    return;
+  }
+  stripAuthHashIfPathnameAuth();
+
   if (!raw.startsWith('/')) {
     return;
   }
@@ -413,23 +500,15 @@ export function repairClerkAuthLocationHash(): void {
   if (!AUTH_HASH_PATH.test(path)) {
     return;
   }
-  const queryLen = q === -1 ? 0 : raw.length - q - 1;
-  if (queryLen > MAX_AUTH_HASH_QUERY_LEN) {
-    replaceAppHash(
-      path.startsWith('/sign-up') || path.startsWith('/signup')
-        ? { kind: 'signup' }
-        : { kind: 'login' },
-    );
-    return;
-  }
   if (q === -1) {
     return;
   }
   const sanitized = sanitizeClerkAuthHashFragment(raw);
   if (sanitized !== raw) {
     const url = new URL(window.location.href);
-    url.hash = sanitized;
-    window.history.replaceState(window.history.state, '', url.toString());
+    applyClerkRouterTarget(url, sanitized, (u) => {
+      window.history.replaceState(window.history.state, '', u.toString());
+    });
     return;
   }
   if (isRootAuthPath(path) && authHashFragmentStillPoisoned(raw)) {

@@ -1,7 +1,8 @@
 import type { VariantProps } from 'class-variance-authority';
 import type { JSX, ReactNode } from 'react';
 import { notaButtonVariants } from '@nota/web-design/button';
-import { hashForScreen, replaceAppHash } from '@/lib/app-navigation';
+import { replaceAppHash, type AppNavScreen } from '@/lib/app-navigation';
+import { authPathnameForScreenKind } from '@/lib/app-navigation-auth';
 import { cn } from '@/lib/utils';
 
 type AuthHashTarget = 'login' | 'signup';
@@ -12,8 +13,8 @@ type AuthScreenHashLinkButtonProps = Pick<
 >;
 
 /**
- * Same-tab hash navigation for auth screens. Plain `href="#/…"` can miss React sync when
- * Clerk uses `history.replaceState`; `replaceAppHash` always notifies subscribers.
+ * Same-tab navigation for auth screens. Auth uses pathname (`/sign-in`) so Clerk path routing
+ * works; `replaceAppHash` clears `#/…` hashes that would block `<SignIn />` from mounting.
  */
 export function AuthScreenHashLink({
   target,
@@ -26,11 +27,11 @@ export function AuthScreenHashLink({
   className?: string;
   children: ReactNode;
 } & AuthScreenHashLinkButtonProps): JSX.Element {
-  const screen =
+  const screen: AppNavScreen =
     target === 'login'
       ? ({ kind: 'login' } as const)
       : ({ kind: 'signup' } as const);
-  const href = hashForScreen(screen);
+  const href = authPathnameForScreenKind(screen.kind);
 
   return (
     <a

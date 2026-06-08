@@ -7,7 +7,6 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 
 const srcDir = path.join(fileURLToPath(new URL('.', import.meta.url)), 'src');
-const viteStubsDir = path.join(import.meta.dirname, 'vite-stubs');
 
 function notaDesktopArtifactsPlugin(appRoot: string): Plugin {
   return {
@@ -56,15 +55,6 @@ export default defineConfig(({ mode }) => {
         // App imports use `@/` and `~/`.
         { find: '~', replacement: srcDir },
         { find: '@', replacement: srcDir },
-        // `@clerk/elements` imports Next.js router hooks; Nota is Vite + hash SPA only.
-        {
-          find: 'next/navigation',
-          replacement: path.join(viteStubsDir, 'next-navigation.ts'),
-        },
-        {
-          find: 'next/compat/router',
-          replacement: path.join(viteStubsDir, 'next-compat-router.ts'),
-        },
       ],
     },
     cacheDir: '../../node_modules/.vite/apps/nota',
@@ -114,9 +104,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     ssr: {
-      // `@clerk/elements` imports `next/*`; alias those to `vite-stubs/*`. Vitest must
-      // transform this package (not serve prebundled node_modules) or aliases are skipped.
-      noExternal: ['gsap', '@gsap/react', '@clerk/elements'],
+      noExternal: ['gsap', '@gsap/react'],
     },
     test: {
       name: '@nota/nota',

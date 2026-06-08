@@ -258,7 +258,7 @@ describe('sanitizeClerkAuthHashFragment', () => {
     const params = new URLSearchParams(out.slice('/sign-up?'.length));
     expect(params.get('sign_up_force_redirect_url')).toBe(notes);
     expect(params.get('sign_in_force_redirect_url')).toBe(notes);
-    expect(params.get('redirect_url')).toBe('http://localhost:4200/#/sign-in');
+    expect(params.get('redirect_url')).toBe('http://localhost:4200/sign-in');
   });
 
   it('sanitises return_url with triple-encoded segments', () => {
@@ -273,7 +273,7 @@ describe('sanitizeClerkAuthHashFragment', () => {
 
     // Assert
     const params = new URLSearchParams(out.slice('/sign-up?'.length));
-    expect(params.get('return_url')).toBe('http://localhost:4200/#/sign-in');
+    expect(params.get('return_url')).toBe('http://localhost:4200/sign-in');
   });
 
   it('strips malformed query tokens parsed as a junk key (no equals sign)', () => {
@@ -319,5 +319,34 @@ describe('repairClerkAuthLocationHash', () => {
     // Assert
     expect(replaceSpy).toHaveBeenCalledWith({ kind: 'signup' });
     replaceSpy.mockRestore();
+  });
+});
+
+describe('repairClerkAuthLocationHash', () => {
+  it('migrates legacy #/sign-in hash to pathname /sign-in with empty hash', () => {
+    // Arrange
+    const prevWindow = globalThis.window;
+    const replaceSpy = vi.fn();
+    vi.stubGlobal('window', {
+      ...prevWindow,
+      location: {
+        ...prevWindow.location,
+        origin: 'http://localhost:4200',
+        pathname: '/',
+        hash: '#/sign-in',
+        href: 'http://localhost:4200/#/sign-in',
+      },
+      history: { ...prevWindow.history, replaceState: replaceSpy, state: null },
+    });
+
+    // Act
+    repairClerkAuthLocationHash();
+
+    // Assert
+    expect(replaceSpy).toHaveBeenCalledWith(
+      null,
+      '',
+      'http://localhost:4200/sign-in',
+    );
   });
 });

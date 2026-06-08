@@ -4,6 +4,7 @@
 
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import '@clerk/ui/themes/shadcn.css';
 
 @source "../../apps";
 @source "../../packages";
@@ -36,6 +37,107 @@
     animation: none;
     opacity: 1;
   }
+}
+
+/* Auth screens — glass card entrance over landscape */
+@keyframes nota-auth-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.nota-auth-card-enter {
+  animation: nota-auth-card-enter 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nota-auth-card-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Clerk form woven into Nota auth card (overrides @clerk/ui inline card chrome) */
+.nota-auth-clerk,
+.nota-auth-clerk.cl-rootBox,
+.nota-auth-clerk .cl-rootBox,
+.nota-auth-clerk.cl-cardBox,
+.nota-auth-clerk .cl-cardBox {
+  width: 100% !important;
+  max-width: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.nota-auth-clerk .cl-card {
+  width: 100% !important;
+  max-width: none !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+  align-items: stretch !important;
+}
+
+.nota-auth-clerk .cl-header,
+.nota-auth-clerk .cl-headerTitle,
+.nota-auth-clerk .cl-headerSubtitle,
+.nota-auth-clerk .cl-footer,
+.nota-auth-clerk .cl-footerAction,
+.nota-auth-clerk .cl-footerActionText,
+.nota-auth-clerk .cl-footerActionLink {
+  display: none !important;
+}
+
+.nota-auth-clerk .cl-main,
+.nota-auth-clerk .cl-form,
+.nota-auth-clerk .cl-formFieldRow,
+.nota-auth-clerk .cl-formField,
+.nota-auth-clerk .cl-formFieldInputGroup {
+  width: 100% !important;
+  max-width: none !important;
+  text-align: left;
+  align-self: stretch !important;
+}
+
+.nota-auth-clerk .cl-main,
+.nota-auth-clerk .cl-form {
+  align-items: stretch !important;
+}
+
+.nota-auth-clerk .cl-formFieldLabel {
+  text-align: left;
+}
+
+.nota-auth-clerk .cl-formButtonPrimary,
+.nota-auth-clerk .cl-formButtonPrimary button,
+.nota-auth-clerk button[data-variant='solid'] {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.nota-auth-form-slot {
+  width: 100%;
+}
+
+.nota-auth-clerk input::placeholder {
+  color: var(--muted-foreground);
+  opacity: 0.85;
+}
+
+.nota-auth-form-slot .cl-formButtonPrimary,
+.nota-auth-form-slot [class*='formButtonPrimary'] {
+  margin-top: 0.25rem;
 }
 
 /*

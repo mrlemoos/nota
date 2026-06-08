@@ -3,14 +3,15 @@ import { hashForScreen, parseAppNavFromLocation } from './app-navigation';
 
 const SAMPLE_NOTE_ID = 'aaaaaaaa-bbbb-4ccc-dddd-eeeeeeeeeeee';
 
-function stubWindowHash(hash: string): void {
+function stubWindowHash(hash: string, pathname = '/'): void {
   const prevWindow = globalThis.window;
   vi.stubGlobal('window', {
     ...prevWindow,
     location: {
       ...prevWindow.location,
+      pathname,
       hash,
-      href: `http://localhost/${hash}`,
+      href: `http://localhost:4200${pathname}${hash}`,
     },
   });
 }
@@ -76,28 +77,37 @@ describe('parseAppNavFromLocation', () => {
     expect(href).toBe(expectedHash);
   });
 
-  it('hashForScreen maps login to Clerk hash #/sign-in', () => {
+  it('hashForScreen maps login to Clerk pathname /sign-in', () => {
     // Arrange
     const screen = { kind: 'login' as const };
-    const expectedHash = '#/sign-in';
 
     // Act
     const result = hashForScreen(screen);
 
     // Assert
-    expect(result).toBe(expectedHash);
+    expect(result).toBe('/sign-in');
   });
 
-  it('hashForScreen maps signup to Clerk hash #/sign-up', () => {
+  it('hashForScreen maps signup to Clerk pathname /sign-up', () => {
     // Arrange
     const screen = { kind: 'signup' as const };
-    const expectedHash = '#/sign-up';
 
     // Act
     const result = hashForScreen(screen);
 
     // Assert
-    expect(result).toBe(expectedHash);
+    expect(result).toBe('/sign-up');
+  });
+
+  it('returns login when pathname is /sign-in', () => {
+    // Arrange
+    stubWindowHash('', '/sign-in');
+
+    // Act
+    const result = parseAppNavFromLocation();
+
+    // Assert
+    expect(result).toEqual({ kind: 'login' });
   });
 
   it('returns login when hash is #/login', () => {

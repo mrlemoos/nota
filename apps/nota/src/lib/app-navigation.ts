@@ -1,7 +1,16 @@
 /**
  * Hash-based SPA navigation: single source of truth for notes shell view + active note id.
- * Grammar: #/ | #/sign-in | #/sign-up | #/login | #/signup (legacy) | #/notes | … | #/404 :  unknown paths resolve to `notFound`.
+ * Auth (`/sign-in`, `/sign-up`) uses **pathname** routing for Clerk `<SignIn path="…" />`.
+ * Notes/landing use hash (`#/notes`, …). Legacy `#/sign-in` bookmarks are migrated at boot.
  */
+
+import {
+  CLERK_SIGN_IN_PATH,
+  CLERK_SIGN_UP_PATH,
+  authPathnameForScreenKind,
+  isClerkAuthPathname,
+  screenKindForAuthPathname,
+} from './app-navigation-auth';
 
 /** Fired after `history.pushState` / `replaceState` (same tick as `scheduleNavigationSync`). */
 export const NOTA_HASH_HISTORY_EVENT = 'nota:hash-history' as const;
@@ -47,6 +56,14 @@ function hashRoutePath(): string {
 }
 
 export function parseAppNavFromLocation(): AppNavScreen {
+  const authFromPathname = screenKindForAuthPathname(window.location.pathname);
+  if (authFromPathname === 'login') {
+    return { kind: 'login' };
+  }
+  if (authFromPathname === 'signup') {
+    return { kind: 'signup' };
+  }
+
   const path = hashRoutePath();
 
   if (path === '/' || path === '') {
@@ -107,9 +124,9 @@ export function hashForScreen(screen: AppNavScreen): string {
     case 'notFound':
       return '#/404';
     case 'login':
-      return '#/sign-in';
+      return CLERK_SIGN_IN_PATH;
     case 'signup':
-      return '#/sign-up';
+      return CLERK_SIGN_UP_PATH;
     case 'notes': {
       switch (screen.panel) {
         case 'list':
@@ -143,7 +160,34 @@ export function absoluteUrlForNote(noteId: string): string {
   })}`;
 }
 
+function writeAppNavUrl(screen: AppNavScreen, replace: boolean): void {
+  const url = new URL(window.location.href);
+
+  if (screen.kind === 'login' || screen.kind === 'signup') {
+    url.pathname = authPathnameForScreenKind(screen.kind);
+    url.search = '';
+    url.hash = '';
+  } else {
+    if (isClerkAuthPathname(url.pathname)) {
+      url.pathname = '/';
+    }
+    const full = hashForScreen(screen);
+    url.hash = full.startsWith('#') ? full.slice(1) : full;
+  }
+
+  if (replace) {
+    window.history.replaceState(window.history.state, '', url.toString());
+  } else {
+    window.history.pushState(window.history.state, '', url.toString());
+  }
+  notify();
+}
+
 export function setAppHash(screen: AppNavScreen): void {
+  if (screen.kind === 'login' || screen.kind === 'signup') {
+    writeAppNavUrl(screen, true);
+    return;
+  }
   const full = hashForScreen(screen);
   const desiredHash = full.startsWith('#') ? full : `#${full}`;
   const current = window.location.hash || '';
@@ -154,11 +198,7 @@ export function setAppHash(screen: AppNavScreen): void {
 }
 
 export function replaceAppHash(screen: AppNavScreen): void {
-  const full = hashForScreen(screen);
-  const url = new URL(window.location.href);
-  url.hash = full.startsWith('#') ? full.slice(1) : full;
-  window.history.replaceState(window.history.state, '', url.toString());
-  notify();
+  writeAppNavUrl(screen, true);
 }
 
 /** React-router–shaped helper for code that expected `navigate("/notes/uuid")`. */
