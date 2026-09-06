@@ -44,6 +44,16 @@
       "import": "./src/nota-panel-motion.ts",
       "default": "./src/nota-panel-motion.ts"
     },
+    "./sidebar-motion-intent": {
+      "@getmadrid/source": {
+        "types": "./src/sidebar-motion-intent.ts",
+        "import": "./src/sidebar-motion-intent.ts",
+        "default": "./src/sidebar-motion-intent.ts"
+      },
+      "types": "./src/sidebar-motion-intent.ts",
+      "import": "./src/sidebar-motion-intent.ts",
+      "default": "./src/sidebar-motion-intent.ts"
+    },
     "./use-notes-sidebar-motion": {
       "@getmadrid/source": {
         "types": "./src/use-notes-sidebar-motion.ts",

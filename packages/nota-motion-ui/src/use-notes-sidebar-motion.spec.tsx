@@ -1,45 +1,11 @@
-import { act, render } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { MockInstance } from 'vitest';
+import { render } from '@testing-library/react';
 import type { JSX } from 'react';
-import { gsap, NOTA_SIDEBAR_RAIL_WIDTH_PX } from './nota-motion';
+import { describe, expect, it } from 'vitest';
+import {
+  markSidebarMotionIntent,
+  resetSidebarMotionIntent,
+} from './sidebar-motion-intent';
 import { useNotesSidebarMotion } from './use-notes-sidebar-motion';
-
-type FrameCallback = FrameRequestCallback;
-
-/**
- * Manual animation clock: `animateSprings` reads `performance.now` and
- * `requestAnimationFrame` off the globals, so stub both to step frames by hand.
- */
-function installManualClock() {
-  let time = 0;
-  let queue: FrameCallback[] = [];
-  const raf = vi.fn((cb: FrameCallback) => {
-    queue.push(cb);
-    return queue.length;
-  });
-  vi.spyOn(window, 'requestAnimationFrame').mockImplementation(raf);
-  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
-  vi.spyOn(performance, 'now').mockImplementation(() => time);
-
-  return {
-    step(ms = 16): void {
-      time += ms;
-      const pending = queue;
-      queue = [];
-      act(() => {
-        pending.forEach((cb) => {
-          cb(time);
-        });
-      });
-    },
-    runToRest(maxFrames = 400): void {
-      for (let i = 0; i < maxFrames && queue.length > 0; i += 1) {
-        this.step();
-      }
-    },
-  };
-}
 
 function Harness(props: {
   open: boolean;
@@ -63,113 +29,121 @@ function findRail(container: HTMLElement): HTMLElement {
 }
 
 describe('useNotesSidebarMotion', () => {
-  let setSpy: MockInstance<typeof gsap.set>;
-
-  beforeEach(() => {
-    setSpy = vi.spyOn(gsap, 'set');
-  });
-
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('snaps to the open layout instantly on first paint (no spring)', () => {
-    // Arrange
-    const clock = installManualClock();
-
-    // Act
+  it('keeps the first sidebar paint instant', () => {
+    // Arrange + Act
     const { container } = render(<Harness open widthPx={288} mounted />);
+    const rail = findRail(container);
 
     // Assert
+    expect(rail.style.transition).toBe('none');
+  });
+
+  it('briefly animates rail exit for a pointer close', () => {
+    // Arrange
+    resetSidebarMotionIntent();
+    const { container, rerender } = render(
+      <Harness open widthPx={288} mounted />,
+    );
+    const aside = container.querySelector('aside');
     const rail = findRail(container);
-    const aside = container.querySelector('aside');
-    expect(setSpy).toHaveBeenCalledWith(
-      rail,
-      expect.objectContaining({ x: 0, opacity: 1 }),
-    );
-    expect(setSpy).toHaveBeenCalledWith(
-      aside,
-      expect.objectContaining({ width: 288, maxWidth: 288 }),
-    );
-    expect(requestAnimationFrame).not.toHaveBeenCalled();
-    clock.runToRest();
-  });
-
-  it('snaps the clip to zero width after the close spring settles', () => {
-    // Arrange
-    const clock = installManualClock();
-    const { container, rerender } = render(
-      <Harness open widthPx={288} mounted />,
-    );
-    const aside = container.querySelector('aside');
-    setSpy.mockClear();
+    markSidebarMotionIntent('pointer');
 
     // Act
     rerender(<Harness open={false} widthPx={288} mounted />);
-    clock.runToRest();
 
-    // Assert — collapsed clip reserves no layout; icon rail overlays on hover
-    expect(setSpy).toHaveBeenCalledWith(
-      aside,
-      expect.objectContaining({
-        width: 0,
-        maxWidth: 'none',
-      }),
+    // Assert
+    expect(aside?.style.width).toBe('288px');
+    expect(rail.style.transition).toBe(
+      'transform 120ms var(--ease-out), opacity 120ms var(--ease-out)',
     );
-    expect(setSpy).not.toHaveBeenCalledWith(
-      aside,
-      expect.objectContaining({
-        width: NOTA_SIDEBAR_RAIL_WIDTH_PX,
-        maxWidth: 'none',
-      }),
-    );
+    expect(rail.style.transform).toBe('translateX(-12px)');
+    expect(rail.style.opacity).toBe('0');
   });
 
-  it('keeps the clip open when the close is interrupted by a re-open mid-spring', () => {
+  it('collapses clip when the pointer-close opacity transition ends', () => {
     // Arrange
-    const clock = installManualClock();
+    resetSidebarMotionIntent();
     const { container, rerender } = render(
       <Harness open widthPx={288} mounted />,
     );
     const aside = container.querySelector('aside');
-
-    // Act — start closing, advance a few frames, then re-open before rest
+    const rail = findRail(container);
+    markSidebarMotionIntent('pointer');
     rerender(<Harness open={false} widthPx={288} mounted />);
-    clock.step();
-    clock.step();
-    setSpy.mockClear();
+
+    // Act
+    rail.dispatchEvent(
+      Object.assign(new Event('transitionend'), { propertyName: 'opacity' }),
+    );
+
+    // Assert
+    expect(aside?.style.width).toBe('0px');
+  });
+
+  it('waits for opacity when transform transition ends first', () => {
+    // Arrange
+    resetSidebarMotionIntent();
+    const { container, rerender } = render(
+      <Harness open widthPx={288} mounted />,
+    );
+    const aside = container.querySelector('aside');
+    const rail = findRail(container);
+    markSidebarMotionIntent('pointer');
+    rerender(<Harness open={false} widthPx={288} mounted />);
+
+    // Act
+    rail.dispatchEvent(
+      Object.assign(new Event('transitionend'), { propertyName: 'transform' }),
+    );
+
+    // Assert
+    expect(aside?.style.width).toBe('288px');
+
+    // Act
+    rail.dispatchEvent(
+      Object.assign(new Event('transitionend'), { propertyName: 'opacity' }),
+    );
+
+    // Assert
+    expect(aside?.style.width).toBe('0px');
+  });
+
+  it('does not collapse after a pointer close is interrupted by re-open', () => {
+    // Arrange
+    resetSidebarMotionIntent();
+    const { container, rerender } = render(
+      <Harness open widthPx={288} mounted />,
+    );
+    const aside = container.querySelector('aside');
+    const rail = findRail(container);
+    markSidebarMotionIntent('pointer');
+    rerender(<Harness open={false} widthPx={288} mounted />);
+    markSidebarMotionIntent('pointer');
     rerender(<Harness open widthPx={288} mounted />);
-    clock.runToRest();
-
-    // Assert — re-open re-applies the open clip and never snaps to zero
-    expect(setSpy).toHaveBeenCalledWith(
-      aside,
-      expect.objectContaining({ width: 288, maxWidth: 288 }),
-    );
-    expect(setSpy).not.toHaveBeenCalledWith(
-      aside,
-      expect.objectContaining({
-        width: 0,
-        maxWidth: 'none',
-      }),
-    );
-  });
-
-  it('stops any running spring when the sidebar chrome unmounts', () => {
-    // Arrange
-    const clock = installManualClock();
-    const { rerender } = render(<Harness open widthPx={288} mounted />);
-    rerender(<Harness open={false} widthPx={288} mounted />);
-    clock.step();
 
     // Act
-    rerender(<Harness open={false} widthPx={288} mounted={false} />);
-    const framesBefore = vi.mocked(requestAnimationFrame).mock.calls.length;
-    clock.runToRest();
-
-    // Assert — no new frames scheduled after unmount reset
-    expect(vi.mocked(requestAnimationFrame).mock.calls.length).toBe(
-      framesBefore,
+    rail.dispatchEvent(
+      Object.assign(new Event('transitionend'), { propertyName: 'opacity' }),
     );
+
+    // Assert
+    expect(aside?.style.width).toBe('288px');
+  });
+
+  it('keeps keyboard close instant', () => {
+    // Arrange
+    resetSidebarMotionIntent();
+    const { container, rerender } = render(
+      <Harness open widthPx={288} mounted />,
+    );
+    const aside = container.querySelector('aside');
+    const rail = findRail(container);
+
+    // Act
+    rerender(<Harness open={false} widthPx={288} mounted />);
+
+    // Assert
+    expect(aside?.style.width).toBe('0px');
+    expect(rail.style.transition).toBe('none');
   });
 });

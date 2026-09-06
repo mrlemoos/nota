@@ -1,59 +1,13 @@
 import { useLayoutEffect, useRef } from 'react';
-import {
-  gsap,
-  NOTA_SIDEBAR_SLIDE_PX,
-  NOTA_SPRING_PRESETS,
-  useGSAP,
-} from './nota-motion';
-import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
-import {
-  animateSprings,
-  createCriticallyDampedSpringConfig,
-  type CriticallyDampedSpringConfig,
-  type SpringAnimationHandle,
-} from '@getmadrid/nota-motion-core/critically-damped-spring';
+import { NOTA_SIDEBAR_REVEAL_PX } from './nota-motion';
 import { NOTA_SIDEBAR_COLLAPSED_CLIP_WIDTH_PX } from '@getmadrid/nota-motion-core/sidebar-width';
+import { consumeSidebarMotionIntent } from './sidebar-motion-intent';
+import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 
-type NotaSidebarClipLayout = {
-  width: number;
-  maxWidth: number | 'none';
-};
-
-type NotaSidebarRailMotionTargets = {
-  x: number;
-  opacity: number;
-};
-
-/**
- * Layout width for the notes chrome sidebar clip (instant snap, not tweened).
- * Collapsed clip is zero — the icon rail overlays the note on hover.
- */
-function clipLayout(open: boolean, widthPx: number): NotaSidebarClipLayout {
-  return {
-    width: open ? widthPx : NOTA_SIDEBAR_COLLAPSED_CLIP_WIDTH_PX,
-    maxWidth: open ? widthPx : 'none',
-  };
-}
-
-/** Compositor-friendly spring targets for the inner sidebar rail. */
-function railTargets(
-  open: boolean,
-  prefersReducedMotion: boolean,
-): NotaSidebarRailMotionTargets {
-  return {
-    opacity: open ? 1 : 0,
-    x: open || prefersReducedMotion ? 0 : -NOTA_SIDEBAR_SLIDE_PX,
-  };
-}
-
-/**
- * Critically damped sidebar spring (`NOTA_SPRING_PRESETS.shell`) for open/close.
- * Animate compositor `x`/`opacity` only — never layout width under load.
- */
-function sidebarSpringConfig(): CriticallyDampedSpringConfig {
-  const preset = NOTA_SPRING_PRESETS.shell;
-  return createCriticallyDampedSpringConfig(preset.response, preset.damping);
-}
+const SIDEBAR_OPEN_TRANSITION =
+  'transform 160ms var(--ease-out), opacity 160ms var(--ease-out)';
+const SIDEBAR_CLOSE_TRANSITION =
+  'transform 120ms var(--ease-out), opacity 120ms var(--ease-out)';
 
 export type NotesSidebarMotion = {
   asideRef: React.RefObject<HTMLElement | null>;
@@ -61,11 +15,8 @@ export type NotesSidebarMotion = {
 };
 
 /**
- * Owns the notes chrome sidebar open/close motion end to end: the clip-width
- * snap, the inner rail spring (interruptible, carrying live position and
- * velocity across a mid-flight toggle), the reduced-motion instant path, and
- * teardown when the sidebar chrome unmounts. Callers attach the returned refs
- * to the `<aside>` clip and its inner rail.
+ * Pointer toggles briefly move the rail while the editor layout snaps. Keyboard
+ * and reduced-motion toggles stay instant.
  */
 export function useNotesSidebarMotion(params: {
   open: boolean;
@@ -73,106 +24,63 @@ export function useNotesSidebarMotion(params: {
   mounted: boolean;
 }): NotesSidebarMotion {
   const { open, widthPx, mounted } = params;
-
   const asideRef = useRef<HTMLElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
-  const widthPxRef = useRef(widthPx);
-  widthPxRef.current = widthPx;
-  const prefersReducedMotion = usePrefersReducedMotion();
   const motionReadyRef = useRef(false);
-  const springRef = useRef<SpringAnimationHandle | null>(null);
-  const springVelocityRef = useRef({ x: 0, opacity: 0 });
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useLayoutEffect(() => {
+    const aside = asideRef.current;
+    const rail = railRef.current;
     if (!mounted) {
       motionReadyRef.current = false;
-      springRef.current?.stop();
-      springRef.current = null;
-      springVelocityRef.current = { x: 0, opacity: 0 };
-    }
-  }, [mounted]);
-
-  useLayoutEffect(() => {
-    const clip = asideRef.current;
-    if (!clip || !mounted || !open) {
       return;
     }
-    gsap.set(clip, clipLayout(true, widthPx));
-  }, [mounted, widthPx]);
+    if (!aside || !rail) {
+      return;
+    }
 
-  useGSAP(
-    () => {
-      const clip = asideRef.current;
-      const rail = railRef.current;
-      if (!clip || !rail) {
-        return;
+    const layout = (isOpen: boolean) => {
+      aside.style.width = `${isOpen ? widthPx : NOTA_SIDEBAR_COLLAPSED_CLIP_WIDTH_PX}px`;
+      aside.style.maxWidth = isOpen ? `${widthPx}px` : 'none';
+    };
+    const setRail = (isOpen: boolean, transition: string) => {
+      rail.style.transition = transition;
+      rail.style.transform = `translateX(${isOpen ? 0 : -NOTA_SIDEBAR_REVEAL_PX}px)`;
+      rail.style.opacity = isOpen ? '1' : '0';
+    };
+    const intent = motionReadyRef.current
+      ? consumeSidebarMotionIntent()
+      : 'keyboard';
+    const pointerMotion = !prefersReducedMotion && intent === 'pointer';
+
+    motionReadyRef.current = true;
+
+    if (!pointerMotion) {
+      layout(open);
+      setRail(open, 'none');
+      return;
+    }
+
+    if (open) {
+      layout(true);
+      setRail(true, SIDEBAR_OPEN_TRANSITION);
+      return;
+    }
+
+    const onTransitionEnd = (event: TransitionEvent) => {
+      if (event.propertyName === 'opacity') {
+        rail.removeEventListener('transitionend', onTransitionEnd);
+        layout(false);
       }
+    };
 
-      const layout = clipLayout(open, widthPxRef.current);
-      const targets = railTargets(open, prefersReducedMotion);
-
-      if (prefersReducedMotion || !motionReadyRef.current) {
-        springRef.current?.stop();
-        springRef.current = null;
-        springVelocityRef.current = { x: 0, opacity: 0 };
-        motionReadyRef.current = true;
-        gsap.set(clip, layout);
-        gsap.set(rail, targets);
-        return;
-      }
-
-      const liveX = Number(gsap.getProperty(rail, 'x'));
-      const liveOpacity = Number(gsap.getProperty(rail, 'opacity'));
-      const fromX = Number.isFinite(liveX) ? liveX : targets.x;
-      const fromOpacity = Number.isFinite(liveOpacity)
-        ? liveOpacity
-        : targets.opacity;
-
-      const previous = springRef.current;
-      const velocityX =
-        previous?.getVelocity('x') ?? springVelocityRef.current.x;
-      const velocityOpacity =
-        previous?.getVelocity('opacity') ?? springVelocityRef.current.opacity;
-      previous?.stop();
-      springRef.current = null;
-
-      if (open) {
-        gsap.set(clip, layout);
-      }
-
-      springRef.current = animateSprings({
-        from: {
-          x: { value: fromX, velocity: velocityX },
-          opacity: { value: fromOpacity, velocity: velocityOpacity },
-        },
-        to: {
-          x: targets.x,
-          opacity: targets.opacity,
-        },
-        config: sidebarSpringConfig(),
-        onUpdate: (values) => {
-          gsap.set(rail, { x: values.x, opacity: values.opacity });
-          springVelocityRef.current = {
-            x: springRef.current?.getVelocity('x') ?? 0,
-            opacity: springRef.current?.getVelocity('opacity') ?? 0,
-          };
-        },
-        onComplete: () => {
-          springRef.current = null;
-          springVelocityRef.current = { x: 0, opacity: 0 };
-          if (!open) {
-            gsap.set(clip, clipLayout(false, widthPxRef.current));
-          }
-        },
-      });
-
-      return () => {
-        springRef.current?.stop();
-        springRef.current = null;
-      };
-    },
-    { dependencies: [open, prefersReducedMotion, mounted] },
-  );
+    rail.addEventListener('transitionend', onTransitionEnd);
+    setRail(false, SIDEBAR_CLOSE_TRANSITION);
+    return () => {
+      rail.removeEventListener('transitionend', onTransitionEnd);
+    };
+  }, [mounted, open, prefersReducedMotion, widthPx]);
 
   return { asideRef, railRef };
 }

@@ -11,6 +11,7 @@ import {
   resolvePanelMotion,
   type NavIntent,
 } from '@getmadrid/nota-motion-ui/panel-motion';
+import { markSidebarMotionIntent } from '@getmadrid/nota-motion-ui/sidebar-motion-intent';
 import {
   NOTA_PRESSABLE_CLASS,
   NOTA_CHROME_NAV_ITEM_CLASS,
@@ -59,7 +60,10 @@ export function SidebarToggle({
               type="button"
               variant="ghost"
               size="icon"
-              onClick={toggle}
+              onClick={() => {
+                markSidebarMotionIntent('pointer');
+                toggle();
+              }}
               className={cn(
                 'relative z-40 text-foreground',
                 NOTA_CHROME_CONTROL_COMPACT_CLASS,
@@ -195,7 +199,10 @@ export function SidebarIconRail({
           cancelLeave();
           setPointerOver(true);
         }}
-        onClick={toggle}
+        onClick={() => {
+          markSidebarMotionIntent('pointer');
+          toggle();
+        }}
         aria-label={t('Show sidebar controls')}
         style={{ width: NOTA_SIDEBAR_HOVER_EDGE_WIDTH_PX }}
         className={cn(

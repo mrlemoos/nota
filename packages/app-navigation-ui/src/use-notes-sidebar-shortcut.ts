@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent } from 'react';
 import { useNotesSidebarStore } from '@getmadrid/note-runtime/stores/sidebar';
+import { markSidebarMotionIntent } from '@getmadrid/nota-motion-ui/sidebar-motion-intent';
 
 export function useNotesSidebarShortcut(
   userId: string | undefined,
@@ -25,6 +26,7 @@ export function useNotesSidebarShortcut(
     }
 
     e.preventDefault();
+    markSidebarMotionIntent('keyboard');
     useNotesSidebarStore.getState().toggle();
   });
 

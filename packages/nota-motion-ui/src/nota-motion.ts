@@ -38,6 +38,8 @@ export const NOTA_SIDEBAR_RAIL_WIDTH_PX = NOTA_SIDEBAR_ICON_WIDTH_PX;
 export { NOTA_SIDEBAR_HOVER_EDGE_WIDTH_PX } from '@getmadrid/nota-motion-core/sidebar-width';
 /** Horizontal slide (px) when the notes sidebar closes :  content exits to the left. */
 export const NOTA_SIDEBAR_SLIDE_PX = 20;
+/** Short rail reveal on pointer sidebar toggles. */
+export const NOTA_SIDEBAR_REVEAL_PX = 12;
 
 /** Re-export press + spring tokens for app chrome consumers. */
 export {

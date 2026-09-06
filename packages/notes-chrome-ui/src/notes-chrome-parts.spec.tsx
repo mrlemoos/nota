@@ -14,6 +14,10 @@ import {
   peekNavIntent,
   resetNavIntent,
 } from '@getmadrid/nota-motion-ui/panel-motion';
+import {
+  consumeSidebarMotionIntent,
+  resetSidebarMotionIntent,
+} from '@getmadrid/nota-motion-ui/sidebar-motion-intent';
 
 vi.mock('./use-notes-chrome-translator', () => ({
   useNotesChromeTranslator: () => ({
@@ -28,6 +32,7 @@ vi.mock('@getmadrid/electron-bridge-ui/use-is-electron', () => ({
 describe('SidebarToggle', () => {
   beforeEach(() => {
     useNotesSidebarStore.setState({ open: true });
+    resetSidebarMotionIntent();
   });
 
   it('calls toggle when the button is clicked', () => {
@@ -41,6 +46,17 @@ describe('SidebarToggle', () => {
 
     // Assert
     expect(toggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('marks sidebar button clicks as pointer intent', () => {
+    // Arrange
+    render(<SidebarToggle />);
+
+    // Act
+    fireEvent.click(screen.getByRole('button', { name: 'Close sidebar' }));
+
+    // Assert
+    expect(consumeSidebarMotionIntent()).toBe('pointer');
   });
 
   it('reflects the open state in aria-expanded', () => {
@@ -217,6 +233,7 @@ describe('SidebarIconRail', () => {
 
     // Assert
     expect(toggle).toHaveBeenCalledTimes(1);
+    expect(consumeSidebarMotionIntent()).toBe('pointer');
   });
 
   it('reveals the expand toggle and text links after hovering the left edge', () => {

@@ -21,6 +21,7 @@ Self-contained execution plans from the `improve-animations` audit (@ commit `08
 | 013 | [Animate folder branch expand/collapse](./013-folder-branch-expand-motion.md)           | LOW      | TODO                   | 006, 011                                        |
 | 014 | [Crossfade journal month grid](./014-journal-month-grid-crossfade.md)                   | LOW      | TODO                   | —                                               |
 | 015 | [Extract shared popup motion class](./015-shared-popup-motion-class.md)                 | LOW      | DONE                   | 008 (optional; 015 subsumes 008 for four files) |
+| 016 | [Restore brief pointer-only sidebar rail motion](./016-sidebar-rail-pointer-motion.md)  | MEDIUM   | DONE                   | 004                                             |
 
 ## Recommended execution order
 
