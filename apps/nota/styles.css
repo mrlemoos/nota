@@ -1312,3 +1312,24 @@ html.nota-electron .nota-notes-root {
     background-color: color-mix(in oklch, var(--background) 98%, transparent);
   }
 }
+
+/*
+ * `/hero-stage` only: the backdrop and window frame the marketing hero video is
+ * filmed against. Dev-only route, but the rules are inert everywhere else.
+ */
+.hero-stage-backdrop {
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      color-mix(in oklab, #e8dcc4 22%, transparent) 0%,
+      transparent 60%
+    ),
+    linear-gradient(180deg, #221d18 0%, #12100e 100%);
+}
+
+.hero-stage-window {
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.14) inset,
+    0 40px 90px -20px rgb(0 0 0 / 0.55),
+    0 8px 24px -8px rgb(0 0 0 / 0.4);
+}

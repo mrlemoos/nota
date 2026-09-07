@@ -7,7 +7,8 @@
     "build": "astro build && node scripts/verify-marketing-pages.mjs",
     "preview": "astro preview",
     "generate:og": "node scripts/generate-og.mjs",
-    "generate:favicons": "node scripts/generate-favicons.mjs"
+    "generate:favicons": "node scripts/generate-favicons.mjs",
+    "record:hero": "node scripts/record-hero.ts"
   },
   "dependencies": {
     "@getmadrid/note-doc-plain-text": "workspace:*",

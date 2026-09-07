@@ -82,6 +82,7 @@
     "jsdom": "catalog:",
     "lint-staged": "^16.4.0",
     "nx": "23.1.1",
+    "playwright-core": "^1.63.0",
     "postcss": "catalog:",
     "prettier": "~3.6.2",
     "rimraf": "^6.0.1",

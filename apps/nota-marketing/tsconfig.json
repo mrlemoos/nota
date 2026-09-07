@@ -10,6 +10,7 @@
     "src/**/*.tsx",
     "src/**/*.astro",
     "src/content.config.ts",
+    "scripts/**/*.ts",
     "astro.config.mjs"
   ],
   "references": [
