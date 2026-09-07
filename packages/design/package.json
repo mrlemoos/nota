@@ -34,6 +34,12 @@
       "import": "./dist/hover-card.js",
       "default": "./dist/hover-card.js"
     },
+    "./popover": {
+      "@getmadrid/source": "./src/components/popover.tsx",
+      "types": "./dist/components/popover.d.ts",
+      "import": "./dist/popover.js",
+      "default": "./dist/popover.js"
+    },
     "./dialog": {
       "@getmadrid/source": "./src/components/dialog.tsx",
       "types": "./dist/components/dialog.d.ts",

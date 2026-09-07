@@ -2,12 +2,10 @@ import { useCallback, useRef, useState, type JSX } from 'react';
 import { Icon } from '@getmadrid/design/icon';
 import { Button } from '@getmadrid/design/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@getmadrid/design/dialog';
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@getmadrid/design/popover';
 import { cn } from '@getmadrid/design/utils';
 import {
   NOTE_THEME_LABEL,
@@ -70,8 +68,8 @@ export function NoteLayoutMenu({
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
         disabled={disabled}
         aria-label={t('Note layout')}
         render={
@@ -84,15 +82,14 @@ export function NoteLayoutMenu({
         }
       >
         <Icon name="mouse-pointer-2" size={18} />
-      </DialogTrigger>
-      <DialogContent
-        showCloseButton={false}
-        className="top-[22%] w-[min(100vw-2rem,18rem)] max-w-none translate-y-0 gap-0 p-3 sm:max-w-none"
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="end"
+        aria-label={t('Note layout')}
+        className="w-[min(100vw-2rem,18rem)]"
       >
-        <DialogHeader>
-          <DialogTitle>{t('Note layout')}</DialogTitle>
-        </DialogHeader>
-        <div className="mt-3 space-y-3">
+        <div className="space-y-3">
           <div>
             <label
               htmlFor="nota-note-layout-font"
@@ -229,7 +226,7 @@ export function NoteLayoutMenu({
             {t('Reset to defaults')}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </PopoverContent>
+    </Popover>
   );
 }
