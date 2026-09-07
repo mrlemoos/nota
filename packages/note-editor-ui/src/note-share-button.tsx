@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState, type JSX } from 'react';
 import { Button } from '@getmadrid/design/button';
 import { Icon } from '@getmadrid/design/icon';
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverTitle,
+  PopoverTrigger,
+} from '@getmadrid/design/popover';
 import { cn } from '@getmadrid/design/utils';
 import { getBrowserClient } from '@getmadrid/data-source/supabase/browser';
 import { useNoteEditorTranslator } from './use-note-editor-translator';
@@ -24,6 +31,7 @@ export function NoteShareButton({
   onShared,
 }: NoteShareButtonProps): JSX.Element {
   const { t } = useNoteEditorTranslator();
+  const [open, setOpen] = useState(false);
   const [token, setToken] = useState<string | null>(shareToken);
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -59,13 +67,9 @@ export function NoteShareButton({
     }
   };
 
-  const handleClick = async () => {
+  const createLink = async () => {
     if (busy) return;
     setError(null);
-    if (token) {
-      await copy(buildShareUrl(token));
-      return;
-    }
     setBusy(true);
     try {
       const result = await shareNote(getBrowserClient(), noteId, token);
@@ -79,36 +83,93 @@ export function NoteShareButton({
     }
   };
 
-  const label = token
-    ? error === 'copy'
-      ? t('Could not copy link. Try again.')
-      : copied
-        ? t('Link copied')
-        : t('Shared')
-    : error === 'share'
-      ? t('Could not share link. Try again.')
-      : busy
-        ? t('Sharing…')
-        : t('Share');
+  const url = token ? buildShareUrl(token) : null;
+  const triggerLabel = token ? t('Shared') : t('Share');
 
   return (
-    <Button
-      type="button"
-      variant={token ? 'outline' : 'ghost'}
-      size="sm"
-      disabled={disabled || busy}
-      onClick={() => {
-        void handleClick();
+    <Popover
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) setError(null);
       }}
-      aria-label={label}
-      title={token ? t('Anyone with the link can view this note.') : undefined}
-      className={cn(
-        'gap-1.5 text-muted-foreground hover:text-foreground',
-        token && 'text-foreground/80',
-      )}
     >
-      <Icon name="link" size={14} strokeWidth={2} aria-hidden />
-      {label}
-    </Button>
+      <PopoverTrigger
+        disabled={disabled}
+        aria-label={triggerLabel}
+        render={
+          <Button
+            type="button"
+            variant={token ? 'outline' : 'ghost'}
+            size="sm"
+            className={cn(
+              'gap-1.5 text-muted-foreground hover:text-foreground',
+              token && 'text-foreground/80',
+            )}
+          />
+        }
+      >
+        <Icon name="link" size={14} strokeWidth={2} aria-hidden />
+        {triggerLabel}
+      </PopoverTrigger>
+      <PopoverContent
+        side="bottom"
+        align="end"
+        aria-label={t('Share')}
+        className="w-[min(100vw-2rem,20rem)]"
+      >
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <PopoverTitle>{t('Share')}</PopoverTitle>
+            <PopoverDescription>
+              {t('Anyone with the link can view this note.')}
+            </PopoverDescription>
+          </div>
+          {url ? (
+            <div className="space-y-2">
+              <input
+                readOnly
+                value={url}
+                aria-label={t('Share')}
+                onFocus={(e) => {
+                  e.currentTarget.select();
+                }}
+                className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs text-muted-foreground outline-none focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => {
+                  void copy(url);
+                }}
+              >
+                {copied ? t('Link copied') : t('Copy link')}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              type="button"
+              size="sm"
+              className="w-full"
+              disabled={busy}
+              onClick={() => {
+                void createLink();
+              }}
+            >
+              {busy ? t('Sharing…') : t('Create link')}
+            </Button>
+          )}
+          {error && (
+            <p className="text-xs text-destructive" role="alert">
+              {error === 'copy'
+                ? t('Could not copy link. Try again.')
+                : t('Could not share link. Try again.')}
+            </p>
+          )}
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
