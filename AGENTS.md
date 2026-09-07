@@ -42,6 +42,7 @@ Must use [Conventional Commits](https://www.conventionalcommits.org/).
 - Subject: `<type>(optional scope): description`—types `feat|fix|docs|style|refactor|perf|test|build|ci|chore|…`; imperative; ~72 chars; lowercase after colon unless proper noun.
 - Body when useful; **`BREAKING CHANGE:`** footer if incompatible.
 - Reject vague subjects (`update`, `fixes`, `wip`, …); unrelated changes → split commits or scoped `chore`. Committing for user: **stage by path** if mixed.
+- **Commit straight onto `main`** — no feature branch unless the user asks for one.
 
 ## Clerk + Supabase client
 
