@@ -59,7 +59,8 @@
     "winstaller",
     "xlink",
     "xyflow",
-    "ydoc"
+    "ydoc",
+    "crossfade"
   ],
-  "tailwindcss.configPath": "./apps/nota/styles.css"
+  "tailwindCSS.experimental.configFile": "./apps/nota/styles.css"
 }
