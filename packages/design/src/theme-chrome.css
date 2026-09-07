@@ -347,3 +347,19 @@ html.nota-electron
   .nota-sheet-floating-title {
   left: 5.5rem;
 }
+
+/**
+ * A sheet opens over the Electron window drag band (`-webkit-app-region: drag`,
+ * the top 52px), and a draggable region wins the hit test regardless of paint
+ * order: everything inside the band swallows clicks unless it opts back out.
+ * The sheet's floating controls sit at `top-3`, so without this the close and
+ * "fill window" buttons are dead in the desktop app. The backdrop opts out too,
+ * so click-outside-to-dismiss still works up there.
+ *
+ * Not gated on `html.nota-electron`, which nothing currently sets; the property
+ * is inert in a browser anyway.
+ */
+.nota-sheet-popup,
+.nota-sheet-backdrop {
+  -webkit-app-region: no-drag;
+}

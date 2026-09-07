@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -67,5 +70,23 @@ describe('Sheet', () => {
 
     // Assert
     expect(screen.queryByRole('dialog', { name: 'Coastline.webp' })).toBeNull();
+  });
+});
+
+describe('Sheet chrome styles', () => {
+  it('opts the sheet out of the Electron window drag region', () => {
+    // Arrange — the floating controls sit inside the top drag band, and a
+    // draggable region eats clicks unless the surface opts back out.
+    const themeChrome = readFileSync(
+      resolve(process.cwd(), 'src/theme-chrome.css'),
+      'utf8',
+    );
+
+    // Act
+    const rule =
+      /\.nota-sheet-popup,\s*\n\.nota-sheet-backdrop\s*\{[\s\S]*?-webkit-app-region:\s*no-drag/;
+
+    // Assert
+    expect(themeChrome).toMatch(rule);
   });
 });
