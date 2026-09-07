@@ -42,6 +42,8 @@ import {
   LibraryIcon,
   LinkIcon,
   LogoutIcon,
+  MaximizeIcon,
+  MinimizeIcon,
   MoonIcon,
   MousePointer2Icon,
   PenIcon,
@@ -51,6 +53,7 @@ import {
   TrashIcon,
   UserPlusIcon,
   Volume2Icon,
+  XIcon,
 } from '../icons/index.js';
 
 /**
@@ -92,6 +95,8 @@ export const NOTA_ICONS = {
   library: LibraryIcon,
   link: LinkIcon,
   logout: LogoutIcon,
+  maximize: MaximizeIcon,
+  minimize: MinimizeIcon,
   moon: MoonIcon,
   'mouse-pointer-2': MousePointer2Icon,
   pen: PenIcon,
@@ -101,6 +106,7 @@ export const NOTA_ICONS = {
   trash: TrashIcon,
   'user-plus': UserPlusIcon,
   'volume-2': Volume2Icon,
+  x: XIcon,
 } as const satisfies Record<string, AnimatedIcon>;
 
 /**
