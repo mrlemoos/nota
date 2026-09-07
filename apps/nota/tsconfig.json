@@ -127,10 +127,13 @@
       "path": "../../packages/helper-hooks"
     },
     {
-      "path": "../../packages/electron-bridge-ui"
+      "path": "../../packages/error-boundary"
     },
     {
-      "path": "../../packages/error-boundary"
+      "path": "../../packages/env-nextjs"
+    },
+    {
+      "path": "../../packages/electron-bridge-ui"
     },
     {
       "path": "../../packages/electron-bridge-core"

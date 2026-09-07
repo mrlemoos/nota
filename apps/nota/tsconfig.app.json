@@ -133,10 +133,13 @@
       "path": "../../packages/helper-hooks/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/electron-bridge-ui/tsconfig.lib.json"
+      "path": "../../packages/error-boundary/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/error-boundary/tsconfig.lib.json"
+      "path": "../../packages/env-nextjs/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/electron-bridge-ui/tsconfig.lib.json"
     },
     {
       "path": "../../packages/electron-bridge-core/tsconfig.lib.json"
