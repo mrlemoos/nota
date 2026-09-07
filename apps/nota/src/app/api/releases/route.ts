@@ -1,3 +1,4 @@
+import grabkit from 'grabkit';
 import { requireUserId } from '@/server/route-auth';
 
 export const runtime = 'nodejs';
@@ -22,7 +23,11 @@ function readLimit(url: URL): number {
   return Math.max(1, Math.min(20, Math.trunc(value)));
 }
 
-function githubHeaders(): HeadersInit {
+/** Per-upstream grabkit factory. GitHub is plain JSON, not JSON:API. */
+const githubGrab = grabkit('https://api.github.com', { format: 'json' });
+
+/** Built per request: `GITHUB_TOKEN` is read from the environment at call time. */
+function githubHeaders(): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github+json',
     'User-Agent': 'nota',
@@ -47,17 +52,18 @@ export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const limit = readLimit(url);
   const repo = process.env.NOTA_GITHUB_REPO?.trim() || 'mrlemoos/madrid';
-  const ghUrl = `https://api.github.com/repos/${repo}/releases?per_page=${limit}`;
 
-  const ghRes = await fetch(ghUrl, { headers: githubHeaders() });
-  if (!ghRes.ok) {
+  const [data, error] = await githubGrab<GitHubRelease[]>(
+    `GET /repos/${repo}/releases?per_page=${String(limit)}`,
+    { headers: githubHeaders() },
+  );
+  if (error) {
     return Response.json(
       { error: 'Failed to load releases', releases: [] },
       { status: 502 },
     );
   }
 
-  const data = (await ghRes.json()) as GitHubRelease[];
   const releases = data
     .filter((r) => !r.draft)
     .slice(0, limit)

@@ -6,6 +6,12 @@
  * Use any provider with the same request/response shape (OpenAI, Voyage, many hosts).
  */
 
+import grabkit from 'grabkit';
+import {
+  grabErrorBody,
+  grabErrorStatus,
+} from '@getmadrid/data-source/grab-error';
+
 const DEFAULT_BASE = 'https://api.openai.com/v1';
 const DEFAULT_MODEL = 'text-embedding-3-small';
 
@@ -44,6 +50,17 @@ function embeddingsBaseUrl(): string {
   return b.replace(/\/$/, '');
 }
 
+/**
+ * Per-upstream grabkit factory, built on first use so the base URL is read from
+ * the environment at runtime rather than at import. Plain JSON, not JSON:API.
+ */
+let embeddingsGrab: ReturnType<typeof grabkit> | null = null;
+
+function embeddings(): ReturnType<typeof grabkit> {
+  embeddingsGrab ??= grabkit(embeddingsBaseUrl(), { format: 'json' });
+  return embeddingsGrab;
+}
+
 /** OpenAI-compatible embeddings response shape. */
 type EmbeddingsOk = {
   data: Array<{ embedding: number[]; index?: number }>;
@@ -60,21 +77,20 @@ export async function embedTextsForSemanticSearch(
   const apiKey = requireEmbeddingsApiKey();
   const expectedDim = embeddingDimensionsExpected();
 
-  const res = await fetch(`${embeddingsBaseUrl()}/embeddings`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ model, input: inputs }),
+  const [json, error] = await embeddings()<
+    EmbeddingsOk,
+    { model: string; input: string[] }
+  >('POST /embeddings', {
+    body: { model, input: inputs },
+    headers: { Authorization: `Bearer ${apiKey}` },
   });
 
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`semantic embeddings failed: ${res.status} ${errText}`);
+  if (error) {
+    const status = String(grabErrorStatus(error));
+    const detail = JSON.stringify(grabErrorBody(error)) || error.message;
+    throw new Error(`semantic embeddings failed: ${status} ${detail}`);
   }
 
-  const json = (await res.json()) as EmbeddingsOk;
   const rows = [...(json.data ?? [])].sort(
     (a, b) => (a.index ?? 0) - (b.index ?? 0),
   );
