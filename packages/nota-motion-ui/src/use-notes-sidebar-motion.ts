@@ -1,13 +1,14 @@
 import { useLayoutEffect, useRef } from 'react';
 import { NOTA_SIDEBAR_REVEAL_PX } from './nota-motion';
 import { NOTA_SIDEBAR_COLLAPSED_CLIP_WIDTH_PX } from '@getmadrid/nota-motion-core/sidebar-width';
-import { consumeSidebarMotionIntent } from './sidebar-motion-intent';
 import { usePrefersReducedMotion } from './use-prefers-reduced-motion';
 
 const SIDEBAR_OPEN_TRANSITION =
-  'transform 160ms var(--ease-out), opacity 160ms var(--ease-out)';
+  'transform 280ms var(--ease-in-out), opacity 160ms var(--ease-out)';
 const SIDEBAR_CLOSE_TRANSITION =
-  'transform 120ms var(--ease-out), opacity 120ms var(--ease-out)';
+  'transform 240ms var(--ease-in-out), opacity 120ms var(--ease-out)';
+const SIDEBAR_OPEN_LAYOUT_TRANSITION = 'width 280ms var(--ease-in-out)';
+const SIDEBAR_CLOSE_LAYOUT_TRANSITION = 'width 240ms var(--ease-in-out)';
 
 export type NotesSidebarMotion = {
   asideRef: React.RefObject<HTMLElement | null>;
@@ -15,8 +16,8 @@ export type NotesSidebarMotion = {
 };
 
 /**
- * Pointer toggles briefly move the rail while the editor layout snaps. Keyboard
- * and reduced-motion toggles stay instant.
+ * Visibility toggles move the sidebar boundary and rail together. Initial
+ * render and reduced-motion changes stay instant.
  */
 export function useNotesSidebarMotion(params: {
   open: boolean;
@@ -40,7 +41,8 @@ export function useNotesSidebarMotion(params: {
       return;
     }
 
-    const layout = (isOpen: boolean) => {
+    const layout = (isOpen: boolean, transition: string) => {
+      aside.style.transition = transition;
       aside.style.width = `${isOpen ? widthPx : NOTA_SIDEBAR_COLLAPSED_CLIP_WIDTH_PX}px`;
       aside.style.maxWidth = isOpen ? `${widthPx}px` : 'none';
     };
@@ -49,37 +51,30 @@ export function useNotesSidebarMotion(params: {
       rail.style.transform = `translateX(${isOpen ? 0 : -NOTA_SIDEBAR_REVEAL_PX}px)`;
       rail.style.opacity = isOpen ? '1' : '0';
     };
-    const intent = motionReadyRef.current
-      ? consumeSidebarMotionIntent()
-      : 'keyboard';
-    const pointerMotion = !prefersReducedMotion && intent === 'pointer';
+    const shouldAnimate = motionReadyRef.current && !prefersReducedMotion;
 
     motionReadyRef.current = true;
 
-    if (!pointerMotion) {
-      layout(open);
+    if (!shouldAnimate) {
+      layout(open, 'none');
       setRail(open, 'none');
       return;
     }
 
     if (open) {
-      layout(true);
+      layout(true, SIDEBAR_OPEN_LAYOUT_TRANSITION);
+      setRail(false, 'none');
+      // Commit the hidden pose before assigning its destination. Without this,
+      // React's layout-effect writes coalesce into one paint and Chromium snaps.
+      void rail.offsetWidth;
       setRail(true, SIDEBAR_OPEN_TRANSITION);
       return;
     }
 
-    const onTransitionEnd = (event: TransitionEvent) => {
-      if (event.propertyName === 'opacity') {
-        rail.removeEventListener('transitionend', onTransitionEnd);
-        layout(false);
-      }
-    };
-
-    rail.addEventListener('transitionend', onTransitionEnd);
+    layout(false, SIDEBAR_CLOSE_LAYOUT_TRANSITION);
+    setRail(true, 'none');
+    void rail.offsetWidth;
     setRail(false, SIDEBAR_CLOSE_TRANSITION);
-    return () => {
-      rail.removeEventListener('transitionend', onTransitionEnd);
-    };
   }, [mounted, open, prefersReducedMotion, widthPx]);
 
   return { asideRef, railRef };

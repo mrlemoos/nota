@@ -1,10 +1,6 @@
 import { render } from '@testing-library/react';
 import type { JSX } from 'react';
 import { describe, expect, it } from 'vitest';
-import {
-  markSidebarMotionIntent,
-  resetSidebarMotionIntent,
-} from './sidebar-motion-intent';
 import { useNotesSidebarMotion } from './use-notes-sidebar-motion';
 
 function Harness(props: {
@@ -38,101 +34,64 @@ describe('useNotesSidebarMotion', () => {
     expect(rail.style.transition).toBe('none');
   });
 
-  it('briefly animates rail exit for a pointer close', () => {
+  it('animates the sidebar boundary and rail together on close', () => {
     // Arrange
-    resetSidebarMotionIntent();
     const { container, rerender } = render(
       <Harness open widthPx={288} mounted />,
     );
     const aside = container.querySelector('aside');
     const rail = findRail(container);
-    markSidebarMotionIntent('pointer');
 
     // Act
     rerender(<Harness open={false} widthPx={288} mounted />);
 
     // Assert
-    expect(aside?.style.width).toBe('288px');
+    expect(aside?.style.width).toBe('0px');
+    expect(aside?.style.transition).toBe('width 240ms var(--ease-in-out)');
     expect(rail.style.transition).toBe(
-      'transform 120ms var(--ease-out), opacity 120ms var(--ease-out)',
+      'transform 240ms var(--ease-in-out), opacity 120ms var(--ease-out)',
     );
     expect(rail.style.transform).toBe('translateX(-12px)');
     expect(rail.style.opacity).toBe('0');
   });
 
-  it('collapses clip when the pointer-close opacity transition ends', () => {
+  it('animates the sidebar boundary and rail together on open', () => {
     // Arrange
-    resetSidebarMotionIntent();
     const { container, rerender } = render(
-      <Harness open widthPx={288} mounted />,
+      <Harness open={false} widthPx={288} mounted />,
     );
     const aside = container.querySelector('aside');
     const rail = findRail(container);
-    markSidebarMotionIntent('pointer');
-    rerender(<Harness open={false} widthPx={288} mounted />);
 
     // Act
-    rail.dispatchEvent(
-      Object.assign(new Event('transitionend'), { propertyName: 'opacity' }),
-    );
-
-    // Assert
-    expect(aside?.style.width).toBe('0px');
-  });
-
-  it('waits for opacity when transform transition ends first', () => {
-    // Arrange
-    resetSidebarMotionIntent();
-    const { container, rerender } = render(
-      <Harness open widthPx={288} mounted />,
-    );
-    const aside = container.querySelector('aside');
-    const rail = findRail(container);
-    markSidebarMotionIntent('pointer');
-    rerender(<Harness open={false} widthPx={288} mounted />);
-
-    // Act
-    rail.dispatchEvent(
-      Object.assign(new Event('transitionend'), { propertyName: 'transform' }),
-    );
-
-    // Assert
-    expect(aside?.style.width).toBe('288px');
-
-    // Act
-    rail.dispatchEvent(
-      Object.assign(new Event('transitionend'), { propertyName: 'opacity' }),
-    );
-
-    // Assert
-    expect(aside?.style.width).toBe('0px');
-  });
-
-  it('does not collapse after a pointer close is interrupted by re-open', () => {
-    // Arrange
-    resetSidebarMotionIntent();
-    const { container, rerender } = render(
-      <Harness open widthPx={288} mounted />,
-    );
-    const aside = container.querySelector('aside');
-    const rail = findRail(container);
-    markSidebarMotionIntent('pointer');
-    rerender(<Harness open={false} widthPx={288} mounted />);
-    markSidebarMotionIntent('pointer');
     rerender(<Harness open widthPx={288} mounted />);
 
-    // Act
-    rail.dispatchEvent(
-      Object.assign(new Event('transitionend'), { propertyName: 'opacity' }),
+    // Assert
+    expect(aside?.style.width).toBe('288px');
+    expect(aside?.style.transition).toBe('width 280ms var(--ease-in-out)');
+    expect(rail.style.transition).toBe(
+      'transform 280ms var(--ease-in-out), opacity 160ms var(--ease-out)',
     );
+    expect(rail.style.transform).toBe('translateX(0px)');
+    expect(rail.style.opacity).toBe('1');
+  });
+
+  it('does not collapse after a close is interrupted by re-open', () => {
+    // Arrange
+    const { container, rerender } = render(
+      <Harness open widthPx={288} mounted />,
+    );
+    const aside = container.querySelector('aside');
+    rerender(<Harness open={false} widthPx={288} mounted />);
+    rerender(<Harness open widthPx={288} mounted />);
 
     // Assert
     expect(aside?.style.width).toBe('288px');
+    expect(aside?.style.transition).toBe('width 280ms var(--ease-in-out)');
   });
 
-  it('keeps keyboard close instant', () => {
+  it('animates a shortcut-triggered close', () => {
     // Arrange
-    resetSidebarMotionIntent();
     const { container, rerender } = render(
       <Harness open widthPx={288} mounted />,
     );
@@ -144,6 +103,9 @@ describe('useNotesSidebarMotion', () => {
 
     // Assert
     expect(aside?.style.width).toBe('0px');
-    expect(rail.style.transition).toBe('none');
+    expect(aside?.style.transition).toBe('width 240ms var(--ease-in-out)');
+    expect(rail.style.transition).toBe(
+      'transform 240ms var(--ease-in-out), opacity 120ms var(--ease-out)',
+    );
   });
 });
