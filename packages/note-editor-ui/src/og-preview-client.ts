@@ -1,4 +1,6 @@
 import type { PlatformLinkPreview } from '@getmadrid/link-platform-preview';
+import { appApiGrab } from '@getmadrid/data-source/app-api-grab';
+import { grabErrorBody } from '@getmadrid/data-source/grab-error';
 
 export type OgPreviewJson = {
   url: string;
@@ -20,12 +22,18 @@ export async function fetchOgPreviewForEditor(
   href: string,
 ): Promise<OgPreviewJson> {
   const q = `url=${encodeURIComponent(href)}`;
-  const res = await fetch(`/api/og-preview?${q}`);
+  const [data, error] = await appApiGrab()<OgPreviewJson | OgErrorJson>(
+    `GET /api/og-preview?${q}`,
+  );
 
-  const data = (await res.json()) as OgPreviewJson | OgErrorJson;
-  if (!res.ok) {
-    const err = 'error' in data ? data.error : 'Request failed';
-    throw new Error(err);
+  if (error) {
+    // The route answers `{ error }` on 400; grabkit parks that body on the error.
+    const body = grabErrorBody(error);
+    const message =
+      typeof body === 'object' && body !== null && 'error' in body
+        ? (body as OgErrorJson).error
+        : 'Request failed';
+    throw new Error(message);
   }
   if ('error' in data) {
     throw new Error(data.error);

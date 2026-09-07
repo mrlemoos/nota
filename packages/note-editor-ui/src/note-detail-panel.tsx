@@ -36,18 +36,19 @@ import {
   getValidNoteAttachmentSignedUrlCacheEntry,
   setCachedNoteAttachmentSignedUrl,
 } from '@getmadrid/data-source/attachment-signed-url-cache';
+import { appApiGrab } from '@getmadrid/data-source/app-api-grab';
+import { grabErrorStatus } from '@getmadrid/data-source/grab-error';
+import type { GrabResult } from 'grabkit';
 import { useStickyDocTitle } from '@getmadrid/note-runtime/sticky-doc-title';
 import { useNotaPreferencesStore } from '@getmadrid/note-runtime/stores/preferences';
 import { noteBannerNoteSurfaceClass } from '@getmadrid/notes-chrome-core/banner-chrome';
 import { useNoteEditorTranslator } from './use-note-editor-translator';
 
 /** `POST /api/search/index-note` — same-origin Next route, Clerk cookie auth. */
-function postSearchIndexNote(body: { noteId: string }): Promise<Response> {
-  return fetch('/api/search/index-note', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+function postSearchIndexNote(body: {
+  noteId: string;
+}): Promise<GrabResult<unknown>> {
+  return appApiGrab()('POST /api/search/index-note', { body });
 }
 
 export function NoteDetailPanel({
@@ -419,9 +420,15 @@ export function NoteDetailPanel({
       semanticIndexTimerRef.current = setTimeout(() => {
         semanticIndexTimerRef.current = null;
         void (async () => {
-          const res = await postSearchIndexNote({ noteId: updatedNote.id });
-          if (!res.ok && process.env.NODE_ENV !== 'production') {
-            console.warn('[semantic-index]', res.status, await res.text());
+          const [, error] = await postSearchIndexNote({
+            noteId: updatedNote.id,
+          });
+          if (error && process.env.NODE_ENV !== 'production') {
+            console.warn(
+              '[semantic-index]',
+              grabErrorStatus(error),
+              error.message,
+            );
           }
         })();
       }, 45_000);
