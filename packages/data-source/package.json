@@ -234,6 +234,26 @@
       "import": "./src/lib/attachment-signed-url-ttl.ts",
       "default": "./src/lib/attachment-signed-url-ttl.ts"
     },
+    "./app-api-grab": {
+      "@getmadrid/source": {
+        "types": "./src/lib/app-api-grab.ts",
+        "import": "./src/lib/app-api-grab.ts",
+        "default": "./src/lib/app-api-grab.ts"
+      },
+      "types": "./src/lib/app-api-grab.ts",
+      "import": "./src/lib/app-api-grab.ts",
+      "default": "./src/lib/app-api-grab.ts"
+    },
+    "./grab-error": {
+      "@getmadrid/source": {
+        "types": "./src/lib/grab-error.ts",
+        "import": "./src/lib/grab-error.ts",
+        "default": "./src/lib/grab-error.ts"
+      },
+      "types": "./src/lib/grab-error.ts",
+      "import": "./src/lib/grab-error.ts",
+      "default": "./src/lib/grab-error.ts"
+    },
     "./package.json": "./package.json"
   },
   "nx": {
