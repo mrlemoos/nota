@@ -44,3 +44,13 @@ export const notesStickyTitleChrome = cn(
   'bg-background/90 px-3 py-1 text-center text-sm font-medium text-foreground',
   'backdrop-blur-md backdrop-saturate-150',
 );
+
+/**
+ * Scrollbar that keeps its gutter (no reflow) but stays invisible until the pointer
+ * is over the region — thumb still hit-testable for click/drag while transparent.
+ */
+export const quietScrollbar = cn(
+  '[scrollbar-width:thin] [scrollbar-color:transparent_transparent]',
+  'hover:[scrollbar-color:color-mix(in_oklab,var(--color-foreground)_28%,transparent)_transparent]',
+  'focus-within:[scrollbar-color:color-mix(in_oklab,var(--color-foreground)_28%,transparent)_transparent]',
+);

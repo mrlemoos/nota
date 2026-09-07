@@ -12,6 +12,7 @@ import {
   notesMainChrome,
   notesSidebarChrome,
   notesStickyTitleChrome,
+  quietScrollbar,
 } from '@getmadrid/notes-chrome-core/notes-chrome';
 import { cn } from '@getmadrid/design/utils';
 import { useStickyDocTitle } from '@getmadrid/note-runtime/sticky-doc-title';
@@ -317,7 +318,12 @@ export function NotesChrome({ children }: NotesChromeProps): JSX.Element {
                       </div>
                     )}
 
-                    <nav className="min-h-0 flex-1 overflow-y-auto p-2">
+                    <nav
+                      className={cn(
+                        'min-h-0 flex-1 overflow-y-auto p-2',
+                        quietScrollbar,
+                      )}
+                    >
                       <NotesSidebarList
                         notes={notes}
                         folders={folders}
@@ -369,7 +375,7 @@ export function NotesChrome({ children }: NotesChromeProps): JSX.Element {
             ref={registerScrollRoot}
             className={cn(
               'min-h-0 flex-1 overflow-auto',
-              '[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden',
+              quietScrollbar,
               notesMainChrome,
               paywalled
                 ? isElectron
