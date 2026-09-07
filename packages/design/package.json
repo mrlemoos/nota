@@ -46,6 +46,12 @@
       "import": "./dist/flight-globe.js",
       "default": "./dist/flight-globe.js"
     },
+    "./sheet": {
+      "@getmadrid/source": "./src/components/sheet.tsx",
+      "types": "./dist/components/sheet.d.ts",
+      "import": "./dist/sheet.js",
+      "default": "./dist/sheet.js"
+    },
     "./spinner": {
       "@getmadrid/source": "./src/components/spinner.tsx",
       "types": "./dist/components/spinner.d.ts",
