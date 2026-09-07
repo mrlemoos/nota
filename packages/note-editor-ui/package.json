@@ -119,6 +119,7 @@
     "@getmadrid/writing-activity-ui": "workspace:*",
     "@supabase/supabase-js": "catalog:",
     "@tiptap/core": "^2.11.5",
+    "grabkit": "catalog:",
     "react": "catalog:",
     "y-indexeddb": "catalog:",
     "yjs": "catalog:"

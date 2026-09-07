@@ -107,6 +107,7 @@
     "@getmadrid/note-runtime": "workspace:*",
     "@getmadrid/notes-offline": "workspace:*",
     "@getmadrid/design": "workspace:*",
+    "grabkit": "catalog:",
     "react": "catalog:"
   },
   "devDependencies": {

@@ -42,3 +42,4 @@ catalog:
   motion: ^12.23.12
   gsap: ^3.13.0
   '@gsap/react': ^2.1.2
+  grabkit: ^2.1.0

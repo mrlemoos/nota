@@ -260,7 +260,8 @@
     "@getmadrid/env-nextjs": "workspace:*",
     "@getmadrid/notes-offline": "workspace:*",
     "@getmadrid/notes-offline-core": "workspace:*",
-    "@supabase/supabase-js": "catalog:"
+    "@supabase/supabase-js": "catalog:",
+    "grabkit": "catalog:"
   },
   "devDependencies": {
     "typescript": "catalog:",

@@ -63,6 +63,9 @@ catalogs:
     esbuild:
       specifier: ^0.25.0
       version: 0.25.12
+    grabkit:
+      specifier: ^2.1.0
+      version: 2.1.0
     gsap:
       specifier: ^3.13.0
       version: 3.15.0
@@ -534,6 +537,9 @@ importers:
       cmdk:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      grabkit:
+        specifier: 'catalog:'
+        version: 2.1.0
       gsap:
         specifier: 'catalog:'
         version: 3.15.0
@@ -773,6 +779,9 @@ importers:
       '@supabase/supabase-js':
         specifier: 'catalog:'
         version: 2.104.1(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+      grabkit:
+        specifier: 'catalog:'
+        version: 2.1.0
     devDependencies:
       typescript:
         specifier: 'catalog:'
@@ -1047,6 +1056,9 @@ importers:
       '@getmadrid/notes-offline':
         specifier: workspace:*
         version: link:../notes-offline
+      grabkit:
+        specifier: 'catalog:'
+        version: 2.1.0
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -1398,6 +1410,9 @@ importers:
       '@tiptap/core':
         specifier: ^2.11.5
         version: 2.27.2(@tiptap/pm@2.27.2)
+      grabkit:
+        specifier: 'catalog:'
+        version: 2.1.0
       next:
         specifier: 'catalog:'
         version: 16.2.12(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.5(react@19.2.3))(react@19.2.3)(sass@1.102.0)
@@ -1710,7 +1725,7 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.5(react@19.2.3))(react@19.2.3)
       grabkit:
-        specifier: ^2.1.0
+        specifier: 'catalog:'
         version: 2.1.0
       react:
         specifier: 19.2.3

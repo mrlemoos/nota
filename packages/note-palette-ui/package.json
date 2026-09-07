@@ -65,7 +65,7 @@
     "@getmadrid/note-palette-core": "workspace:*",
     "@getmadrid/note-runtime": "workspace:*",
     "cmdk": "^1.1.1",
-    "grabkit": "^2.1.0",
+    "grabkit": "catalog:",
     "react": "catalog:"
   },
   "devDependencies": {
