@@ -1118,13 +1118,6 @@ html.nota-electron body {
   overflow: hidden;
 }
 
-html.nota-electron #root {
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  background-color: transparent;
-}
-
 html.nota-electron .nota-notes-root {
   background-color: transparent;
   background-image: none;

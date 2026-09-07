@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
+import { NOTA_ELECTRON_HTML_CLASS_SCRIPT } from '@getmadrid/electron-bridge-core/window-chrome';
 import { AppProviders } from '@/providers';
 
 // Fonts via the JS graph (Next bundles the woff2 assets), matching the former
@@ -32,6 +33,13 @@ export default function RootLayout({
 }): React.JSX.Element {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Blocking, so the Electron marker is on `<html>` before the first
+            paint; anything later shows one opaque frame over the vibrancy. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: NOTA_ELECTRON_HTML_CLASS_SCRIPT }}
+        />
+      </head>
       <body>
         <AppProviders>{children}</AppProviders>
       </body>

@@ -148,9 +148,6 @@ describe('notes chrome CSS contracts', () => {
       /html\.nota-electron\s*,\s*\nhtml\.nota-electron body\s*\{[\s\S]*?background-color:\s*transparent/,
     );
     expect(stylesCss).toMatch(
-      /html\.nota-electron #root\s*\{[\s\S]*?background-color:\s*transparent/,
-    );
-    expect(stylesCss).toMatch(
       /html\.nota-electron \.nota-notes-root\s*\{[\s\S]*?background-color:\s*transparent/,
     );
   });
