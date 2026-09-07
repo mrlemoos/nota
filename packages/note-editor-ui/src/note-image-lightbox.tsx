@@ -1,9 +1,23 @@
 import { Button } from '@getmadrid/design/button';
+import { Icon } from '@getmadrid/design/icon';
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetFloatingActions,
+  SheetFloatingTitle,
+} from '@getmadrid/design/sheet';
+import {
+  Tooltip,
+  TooltipPopup,
+  TooltipPortal,
+  TooltipPositioner,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@getmadrid/design/tooltip';
 import { cn } from '@getmadrid/design/utils';
-import { usePrefersReducedMotion } from '@getmadrid/nota-motion-ui/motion';
-import { useIsElectron } from '@getmadrid/electron-bridge-ui/use-is-electron';
-import { useEffect, useRef, useState, type JSX } from 'react';
-import { createPortal } from 'react-dom';
+import { formatPinchZoom, usePinchZoom } from '@getmadrid/editor';
+import { useRef, useState, type JSX } from 'react';
 
 export type NoteImageLightboxImage = {
   src: string;
@@ -17,146 +31,164 @@ type NoteImageLightboxProps = {
   onClose: () => void;
 };
 
-const EXIT_MS = 200;
-
+/**
+ * Full-height sheet for viewing a note image at size.
+ *
+ * @remarks
+ * The image is the whole surface: the filename and the controls float over it
+ * rather than sitting in a header band. "Fill window" widens the sheet to the
+ * app window, not the display — no native fullscreen.
+ */
 export function NoteImageLightbox({
   open,
   image,
   onClose,
 }: NoteImageLightboxProps): JSX.Element | null {
-  const isElectron = useIsElectron();
-  const reducedMotion = usePrefersReducedMotion();
+  const [expanded, setExpanded] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const present = open && image !== null;
+  const {
+    zoom,
+    readoutVisible,
+    reset: resetZoom,
+  } = usePinchZoom(scrollRef, present);
 
-  const [rendered, setRendered] = useState(present);
-  const [closing, setClosing] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
+  // The parent clears `image` as it closes; keep the last one so the exit
+  // transition animates a filled sheet rather than an empty one.
   const lastImageRef = useRef<NoteImageLightboxImage | null>(null);
   if (image) {
     lastImageRef.current = image;
   }
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [onClose, open]);
-
-  useEffect(() => {
-    let exitTimer: ReturnType<typeof setTimeout> | undefined;
-    let mountFrame: number | undefined;
-
-    if (present) {
-      setRendered(true);
-      setClosing(false);
-      setMounted(false);
-      mountFrame = requestAnimationFrame(() => {
-        setMounted(true);
-      });
-    } else if (rendered) {
-      setClosing(true);
-      setMounted(false);
-      exitTimer = setTimeout(() => {
-        setRendered(false);
-        setClosing(false);
-      }, EXIT_MS);
-    }
-
-    return () => {
-      if (mountFrame !== undefined) {
-        cancelAnimationFrame(mountFrame);
-      }
-      if (exitTimer !== undefined) {
-        clearTimeout(exitTimer);
-      }
-    };
-  }, [present, rendered]);
-
   const displayImage = lastImageRef.current;
 
-  if (!rendered || !displayImage || typeof document === 'undefined') {
+  if (!displayImage) {
     return null;
   }
 
-  const motionAttrs = {
-    'data-mounted': mounted ? 'true' : 'false',
-    'data-closing': closing ? 'true' : 'false',
-    'data-reduced-motion': reducedMotion ? 'true' : 'false',
-  } as const;
+  const close = () => {
+    setExpanded(false);
+    resetZoom();
+    onClose();
+  };
 
-  return createPortal(
-    <div
-      className="nota-image-lightbox-backdrop fixed inset-0 z-70 bg-background/90 backdrop-blur-md"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Image preview for ${displayImage.filename}`}
-      data-testid="note-image-lightbox-backdrop"
-      tabIndex={-1}
-      {...motionAttrs}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-      onKeyDown={(event) => {
-        if (event.target !== event.currentTarget) {
+  return (
+    <Sheet
+      side="right"
+      open={present}
+      onOpenChange={(nextOpen, eventDetails) => {
+        if (nextOpen) {
           return;
         }
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          onClose();
+        // macOS order of undo: Escape gives the window back first, and only
+        // closes the sheet once it is back at its normal width.
+        if (expanded && eventDetails.reason === 'escape-key') {
+          eventDetails.cancel();
+          setExpanded(false);
+          return;
         }
+        close();
       }}
     >
-      <div className="flex h-full min-h-0 flex-col">
-        <header
-          className={cn(
-            'nota-image-lightbox-chrome flex items-center justify-between gap-3 px-4 py-3 sm:px-6',
-            isElectron
-              ? 'pt-[max(0.75rem,env(safe-area-inset-top))] pl-20'
-              : 'pt-[max(0.75rem,env(safe-area-inset-top))]',
-          )}
-          {...motionAttrs}
-        >
-          <p className="min-w-0 truncate text-sm text-muted-foreground">
+      <SheetContent
+        className={cn(
+          expanded ? 'w-full rounded-none border-l-0' : 'w-[min(64rem,94vw)]',
+        )}
+        showCloseButton={false}
+        data-sheet-expanded={expanded ? '' : undefined}
+        data-testid="note-image-lightbox"
+      >
+        <TooltipProvider>
+          <SheetFloatingTitle className="font-normal text-muted-foreground">
             {displayImage.filename}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="shrink-0"
-            onClick={onClose}
-            aria-label="Close image view"
-          >
-            Close
-          </Button>
-        </header>
+          </SheetFloatingTitle>
 
-        <div className="flex min-h-0 flex-1 items-center justify-center px-4 pb-6 sm:px-8">
+          <SheetFloatingActions>
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="rounded-full"
+                    aria-label={
+                      expanded
+                        ? 'Shrink image view'
+                        : 'Fill the window with the image'
+                    }
+                    onClick={() => {
+                      setExpanded((current) => !current);
+                    }}
+                  >
+                    <Icon name={expanded ? 'minimize' : 'maximize'} size={14} />
+                  </Button>
+                }
+              />
+              <TooltipPortal>
+                <TooltipPositioner side="bottom" sideOffset={6}>
+                  <TooltipPopup>
+                    {expanded ? 'Shrink' : 'Fill window'}
+                  </TooltipPopup>
+                </TooltipPositioner>
+              </TooltipPortal>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="rounded-full"
+                    aria-label="Close image view"
+                    onClick={close}
+                  >
+                    <Icon name="x" size={14} />
+                  </Button>
+                }
+              />
+              <TooltipPortal>
+                <TooltipPositioner side="bottom" sideOffset={6}>
+                  <TooltipPopup>Close</TooltipPopup>
+                </TooltipPositioner>
+              </TooltipPortal>
+            </Tooltip>
+          </SheetFloatingActions>
+
+          <SheetBody ref={scrollRef} className="p-4 sm:p-6">
+            {/* Zoom grows the frame in both axes so the body scrolls to the
+                edges; the image keeps containing itself inside that frame. */}
+            <div
+              className="flex min-h-full min-w-full items-center justify-center"
+              style={{
+                width: formatPinchZoom(zoom),
+                height: formatPinchZoom(zoom),
+              }}
+            >
+              <img
+                src={displayImage.src}
+                alt={displayImage.alt}
+                className="max-h-full w-auto max-w-full rounded-xl object-contain shadow-2xl"
+              />
+            </div>
+          </SheetBody>
+
           <div
-            className="nota-image-lightbox-image flex max-h-full w-full max-w-full items-center justify-center"
-            {...motionAttrs}
+            aria-live="polite"
+            data-testid="note-image-zoom-readout"
+            className={cn(
+              'pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2',
+              'rounded-full bg-background/85 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur-md',
+              'transition-opacity duration-200 ease-out',
+              readoutVisible ? 'opacity-100' : 'opacity-0',
+            )}
           >
-            <img
-              src={displayImage.src}
-              alt={displayImage.alt}
-              className="max-h-full w-auto max-w-full rounded-xl object-contain shadow-2xl"
-            />
+            {formatPinchZoom(zoom)}
           </div>
-        </div>
-      </div>
-    </div>,
-    document.body,
+        </TooltipProvider>
+      </SheetContent>
+    </Sheet>
   );
 }

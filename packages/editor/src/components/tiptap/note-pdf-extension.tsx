@@ -13,8 +13,15 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { createPortal } from 'react-dom';
 import { Button } from '@getmadrid/design/button';
+import { Icon } from '@getmadrid/design/icon';
+import {
+  Sheet,
+  SheetBody,
+  SheetContent,
+  SheetFloatingActions,
+  SheetFloatingTitle,
+} from '@getmadrid/design/sheet';
 import { LoadingStatus } from '@getmadrid/design/spinner';
 import {
   Tooltip,
@@ -25,6 +32,7 @@ import {
   TooltipTrigger,
 } from '@getmadrid/design/tooltip';
 import { cn } from '@getmadrid/design/utils';
+import { formatPinchZoom, usePinchZoom } from '../../lib/pinch-zoom';
 import { pdfPreviewSrc } from '../../lib/pdf-preview-url';
 import { PdfJsModalPreview } from '../pdf-js-modal-preview';
 import { NotePdfThumbnailFrame } from './note-pdf-thumbnail-frame';
@@ -114,7 +122,6 @@ export function NotePdfDocProvider({
 
 export function NotePdfNodeView(props: NodeViewProps) {
   const ctx = useNotePdfDocContext();
-  const previewDialogRef = useRef<HTMLDialogElement>(null);
   const thumbnailCanvasRef = useRef<HTMLCanvasElement>(null);
   const thumbnailRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -126,6 +133,9 @@ export function NotePdfNodeView(props: NodeViewProps) {
   const updateAttributesRef = useRef(props.updateAttributes);
   updateAttributesRef.current = props.updateAttributes;
 
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+  const previewScrollRef = useRef<HTMLDivElement>(null);
   const [preview, setPreview] = useState<{
     filename: string;
     url: string;
@@ -139,6 +149,12 @@ export function NotePdfNodeView(props: NodeViewProps) {
   const [actionError, setActionError] = useState<string | null>(null);
   const [renaming, setRenaming] = useState(false);
   const [draftFilename, setDraftFilename] = useState('');
+
+  const {
+    zoom: previewZoom,
+    readoutVisible: zoomReadoutVisible,
+    reset: resetPreviewZoom,
+  } = usePinchZoom(previewScrollRef, previewOpen);
 
   const attachmentId = props.node.attrs.attachmentId as string | null;
   const filenameAttr = (props.node.attrs.filename as string) || 'PDF';
@@ -370,7 +386,7 @@ export function NotePdfNodeView(props: NodeViewProps) {
     setActionError(null);
     setPreviewLoading(true);
     setPreview(null);
-    previewDialogRef.current?.showModal();
+    setPreviewOpen(true);
 
     try {
       const currentUrl = signedUrl;
@@ -391,28 +407,18 @@ export function NotePdfNodeView(props: NodeViewProps) {
       setPreview({ filename: attachment.filename, url: result.signedUrl });
     } catch (e) {
       setActionError(e instanceof Error ? e.message : 'Could not open preview');
-      previewDialogRef.current?.close();
+      setPreviewOpen(false);
     } finally {
       setPreviewLoading(false);
     }
   }, [attachment, ctx, signedUrl]);
 
   const closePreview = useCallback(() => {
-    previewDialogRef.current?.close();
+    setPreviewOpen(false);
+    setPreviewExpanded(false);
+    resetPreviewZoom();
     setPreview(null);
-  }, []);
-
-  useEffect(() => {
-    const dlg = previewDialogRef.current;
-    if (!dlg) return;
-    const onClose = () => {
-      setPreview(null);
-    };
-    dlg.addEventListener('close', onClose);
-    return () => {
-      dlg.removeEventListener('close', onClose);
-    };
-  }, []);
+  }, [resetPreviewZoom]);
 
   const handleDownload = useCallback(async () => {
     if (!attachment || !ctx) return;
@@ -713,61 +719,133 @@ export function NotePdfNodeView(props: NodeViewProps) {
             </p>
           ) : null}
 
-          {typeof document !== 'undefined'
-            ? createPortal(
-                <>
-                  {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events -- native dialog backdrop click */}
-                  <dialog
-                    ref={previewDialogRef}
-                    className="fixed left-1/2 top-1/2 z-50 w-[min(100vw-2rem,56rem)] max-h-[min(100vh-2rem,90vh)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-0 shadow-lg [&::backdrop]:bg-black/50"
-                    onClick={(ev) => {
-                      if (ev.target === previewDialogRef.current) {
-                        closePreview();
-                      }
-                    }}
-                  >
-                    <div className="flex max-h-[min(100vh-2rem,90vh)] flex-col">
-                      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
-                        <h4 className="min-w-0 truncate text-sm font-medium text-foreground">
-                          {preview?.filename ?? 'Preview'}
-                        </h4>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={closePreview}
-                        >
-                          Close
-                        </Button>
-                      </div>
-                      <div className="min-h-[50vh] flex-1 bg-muted/30">
-                        {previewLoading ? (
-                          <div className="flex h-[50vh] items-center justify-center text-sm text-muted-foreground">
-                            <LoadingStatus label="Loading preview…" />
-                          </div>
-                        ) : preview ? (
-                          pdfPreviewUseIframe ? (
-                            <iframe
-                              title={preview.filename}
-                              src={pdfPreviewSrc(preview.url)}
-                              className="h-[min(80vh,720px)] w-full border-0 bg-background"
-                            />
-                          ) : (
-                            <PdfJsModalPreview
-                              url={preview.url}
-                              documentTitle={preview.filename}
-                              onRenderFailed={onPdfJsRenderFailed}
-                              className="bg-muted/30"
-                            />
-                          )
-                        ) : null}
-                      </div>
-                    </div>
-                  </dialog>
-                </>,
-                document.body,
-              )
-            : null}
+          <Sheet
+            side="right"
+            open={previewOpen}
+            onOpenChange={(nextOpen, eventDetails) => {
+              if (nextOpen) {
+                return;
+              }
+              // macOS order of undo: Escape gives the window back first, and
+              // only closes the preview once it is back at its normal width.
+              if (previewExpanded && eventDetails.reason === 'escape-key') {
+                eventDetails.cancel();
+                setPreviewExpanded(false);
+                return;
+              }
+              closePreview();
+            }}
+          >
+            <SheetContent
+              className={cn(
+                previewExpanded
+                  ? 'w-full rounded-none border-l-0'
+                  : 'w-[min(56rem,94vw)]',
+              )}
+              showCloseButton={false}
+              data-sheet-expanded={previewExpanded ? '' : undefined}
+              data-testid="note-pdf-preview-sheet"
+            >
+              <SheetFloatingTitle>
+                {preview?.filename ?? 'Preview'}
+              </SheetFloatingTitle>
+
+              <SheetFloatingActions>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="rounded-full"
+                        aria-label={
+                          previewExpanded
+                            ? 'Shrink preview'
+                            : 'Fill the window with the preview'
+                        }
+                        onClick={() => {
+                          setPreviewExpanded((expanded) => !expanded);
+                        }}
+                      >
+                        <Icon
+                          name={previewExpanded ? 'minimize' : 'maximize'}
+                          size={14}
+                        />
+                      </Button>
+                    }
+                  />
+                  <TooltipPortal>
+                    <TooltipPositioner side="bottom" sideOffset={6}>
+                      <TooltipPopup>
+                        {previewExpanded ? 'Shrink' : 'Fill window'}
+                      </TooltipPopup>
+                    </TooltipPositioner>
+                  </TooltipPortal>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        className="rounded-full"
+                        aria-label="Close preview"
+                        onClick={closePreview}
+                      >
+                        <Icon name="x" size={14} />
+                      </Button>
+                    }
+                  />
+                  <TooltipPortal>
+                    <TooltipPositioner side="bottom" sideOffset={6}>
+                      <TooltipPopup>Close</TooltipPopup>
+                    </TooltipPositioner>
+                  </TooltipPortal>
+                </Tooltip>
+              </SheetFloatingActions>
+
+              <SheetBody ref={previewScrollRef} className="bg-muted/30">
+                {previewLoading ? (
+                  <div className="flex h-full min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
+                    <LoadingStatus label="Loading preview…" />
+                  </div>
+                ) : preview ? (
+                  pdfPreviewUseIframe ? (
+                    <iframe
+                      title={preview.filename}
+                      src={pdfPreviewSrc(preview.url)}
+                      className="h-full min-h-[50vh] w-full border-0 bg-background"
+                    />
+                  ) : (
+                    <PdfJsModalPreview
+                      url={preview.url}
+                      documentTitle={preview.filename}
+                      zoom={previewZoom}
+                      onRenderFailed={onPdfJsRenderFailed}
+                      // The sheet body owns the scroll; let the pages just stack.
+                      className="min-h-0 overflow-visible bg-muted/30"
+                    />
+                  )
+                ) : null}
+              </SheetBody>
+
+              <div
+                aria-live="polite"
+                data-testid="note-pdf-zoom-readout"
+                className={cn(
+                  'pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2',
+                  'rounded-full bg-background/85 px-3 py-1 text-xs font-medium text-foreground shadow-sm backdrop-blur-md',
+                  'transition-opacity duration-200 ease-out',
+                  zoomReadoutVisible ? 'opacity-100' : 'opacity-0',
+                )}
+              >
+                {formatPinchZoom(previewZoom)}
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </TooltipProvider>
     </NodeViewWrapper>

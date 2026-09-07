@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { LoadingStatus } from '@getmadrid/design/spinner';
 import { cn } from '@getmadrid/design/utils';
+import { formatPinchZoom, PINCH_ZOOM_DEFAULT } from '../lib/pinch-zoom';
 // Asset URL for the PDF.js worker. `new URL(..., import.meta.url)` is the
 // bundler-native way to emit and reference the asset (replaces Vite's `?url`).
 const pdfjsWorkerUrl = new URL(
@@ -8,10 +9,26 @@ const pdfjsWorkerUrl = new URL(
   import.meta.url,
 ).toString();
 
+/**
+ * Render resolution of each page canvas.
+ *
+ * @remarks
+ * Pages are laid out at the container width and zoomed with CSS, so this only
+ * sets how much detail there is to zoom into: at `2` a page is ~1224px of
+ * bitmap shown across a ~900px sheet, which stays crisp on a Retina panel up to
+ * roughly 2× zoom and softens past it.
+ *
+ * ponytail: every page is rasterised up front (~7.75MB each), so a long
+ * document is heavy. Render only the pages near the viewport if that bites.
+ */
+const PDF_RENDER_SCALE = 2;
+
 type PdfJsModalPreviewProps = {
   url: string;
   documentTitle: string;
   className?: string;
+  /** Page width as a multiple of the container width. @defaultValue 1 */
+  zoom?: number;
   onRenderFailed: () => void;
 };
 
@@ -19,6 +36,7 @@ export function PdfJsModalPreview({
   url,
   documentTitle,
   className,
+  zoom = PINCH_ZOOM_DEFAULT,
   onRenderFailed,
 }: PdfJsModalPreviewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,13 +67,14 @@ export function PdfJsModalPreview({
         for (let i = 1; i <= pdf.numPages; i++) {
           if (cancelled) return;
           const page = await pdf.getPage(i);
-          const viewport = page.getViewport({ scale: 1.25 });
+          const viewport = page.getViewport({ scale: PDF_RENDER_SCALE });
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d', { alpha: false });
           if (!ctx) throw new Error('no canvas context');
           canvas.height = viewport.height;
           canvas.width = viewport.width;
-          canvas.style.maxWidth = '100%';
+          // Lay out at the container width; `zoom` scales the container, not this.
+          canvas.style.width = '100%';
           canvas.style.height = 'auto';
           canvas.className = 'mb-4 bg-white shadow-sm';
           canvas.setAttribute('aria-label', `${documentTitle} page ${i}`);
@@ -84,6 +103,7 @@ export function PdfJsModalPreview({
         'flex min-h-[min(80vh,720px)] flex-col overflow-y-auto',
         className,
       )}
+      style={{ width: formatPinchZoom(zoom), minWidth: '100%' }}
     >
       {phase === 'loading' ? (
         <div className="flex flex-1 items-center justify-center py-12 text-sm text-muted-foreground">
@@ -92,7 +112,7 @@ export function PdfJsModalPreview({
       ) : null}
       <div
         ref={containerRef}
-        className="flex flex-col items-center px-4 pb-4 pt-2"
+        className="flex flex-col items-center px-4 pt-2 pb-4"
         hidden={phase !== 'ready'}
       />
     </div>
