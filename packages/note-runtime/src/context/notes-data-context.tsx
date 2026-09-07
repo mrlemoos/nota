@@ -41,8 +41,8 @@ import { debounce } from '@getmadrid/isomorphic-helpers';
  * attachment signed-URL cache), so the app passes them in.
  */
 export type NotesDataProviderPorts = {
-  /** Fetch the Madrid Pro entitlement response from nota-server (Bearer). */
-  fetchNotaProEntitled: () => Promise<Response>;
+  /** Resolve the Madrid Pro entitlement (same-origin app route, Clerk cookie). Rejects when the route fails. */
+  fetchNotaProEntitled: () => Promise<boolean>;
   /** Seed the welcome note when the vault is empty; returns the new note id or null. */
   runWelcomeNoteSeedIfNeeded: (args: {
     userId: string;
@@ -205,16 +205,7 @@ export function NotesDataProvider({
 
         const ports: VaultLoadPorts = {
           entitlement: {
-            fetchEntitled: async () => {
-              const res = await portsRef.current.fetchNotaProEntitled();
-              if (!res.ok) {
-                throw new Error(
-                  `Entitlement fetch failed: ${String(res.status)}`,
-                );
-              }
-              const json = (await res.json()) as { entitled?: boolean };
-              return json.entitled === true;
-            },
+            fetchEntitled: () => portsRef.current.fetchNotaProEntitled(),
             readSession: readNotaServerEntitledSession,
             syncSession: syncNotaServerEntitledSession,
           },

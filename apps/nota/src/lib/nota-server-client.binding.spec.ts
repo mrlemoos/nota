@@ -1,8 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@getmadrid/data-source/clerk-token-ref', () => ({
-  getClerkAccessToken: vi.fn(),
-}));
+/**
+ * grabkit resolves relative endpoints against `window.location.origin` and calls
+ * the platform `fetch`, so stubbing the global still exercises the real binding.
+ */
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), { status });
+}
 
 describe('nota-server-client app binding', () => {
   afterEach(() => {
@@ -13,21 +17,43 @@ describe('nota-server-client app binding', () => {
   it('fetches the same-origin entitled route (Clerk cookie auth, no bearer)', async () => {
     // Arrange
     vi.resetModules();
-    const fetchMock = vi.fn().mockResolvedValue(new Response());
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ entitled: true }));
     vi.stubGlobal('fetch', fetchMock);
     const { fetchNotaProEntitled } = await import('./nota-server-client');
 
     // Act
-    await fetchNotaProEntitled();
+    const entitled = await fetchNotaProEntitled();
 
     // Assert
-    expect(fetchMock).toHaveBeenCalledWith('/api/nota-pro-entitled');
+    expect(entitled).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${window.location.origin}/api/nota-pro-entitled`,
+      { method: 'GET', body: undefined, headers: expect.any(Headers) },
+    );
+  });
+
+  it('rejects with the status when the entitled route fails', async () => {
+    // Arrange
+    vi.resetModules();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ error: 'Unauthorized' }, 401));
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchNotaProEntitled } = await import('./nota-server-client');
+
+    // Act
+    const act = fetchNotaProEntitled();
+
+    // Assert
+    await expect(act).rejects.toThrow('Entitlement fetch failed: 401');
   });
 
   it('posts the same-origin invalidate route', async () => {
     // Arrange
     vi.resetModules();
-    const fetchMock = vi.fn().mockResolvedValue(new Response());
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ok: true }));
     vi.stubGlobal('fetch', fetchMock);
     const { postNotaProInvalidate } = await import('./nota-server-client');
 
@@ -35,8 +61,9 @@ describe('nota-server-client app binding', () => {
     await postNotaProInvalidate();
 
     // Assert
-    expect(fetchMock).toHaveBeenCalledWith('/api/nota-pro-invalidate', {
-      method: 'POST',
-    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${window.location.origin}/api/nota-pro-invalidate`,
+      { method: 'POST', body: undefined, headers: expect.any(Headers) },
+    );
   });
 });
