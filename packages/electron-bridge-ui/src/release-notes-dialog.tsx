@@ -2,10 +2,16 @@ import { useEffect, useMemo, useState, type JSX } from 'react';
 import { Dialog } from '@base-ui/react/dialog';
 import { Button } from '@getmadrid/design/button';
 import { cn } from '@getmadrid/design/utils';
+import { appApiGrab } from '@getmadrid/data-source/app-api-grab';
+import type { GrabResult } from 'grabkit';
 
 /** `GET /api/releases` — same-origin Next route, Clerk cookie auth. */
-function fetchReleases(limit: number): Promise<Response> {
-  return fetch(`/api/releases?limit=${String(limit)}`);
+function fetchReleases(
+  limit: number,
+): Promise<GrabResult<{ releases?: Release[] }>> {
+  return appApiGrab()<{ releases?: Release[] }>(
+    `GET /api/releases?limit=${String(limit)}`,
+  );
 }
 
 type Release = {
@@ -53,11 +59,10 @@ export function ReleaseNotesDialog({
     setError(null);
     void (async () => {
       try {
-        const res = await fetchReleases(5);
-        if (!res.ok) {
+        const [payload, error] = await fetchReleases(5);
+        if (error) {
           throw new Error('Could not load release notes.');
         }
-        const payload = (await res.json()) as { releases?: Release[] };
         setReleases(Array.isArray(payload.releases) ? payload.releases : []);
       } catch (e) {
         setReleases([]);
