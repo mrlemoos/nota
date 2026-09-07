@@ -14,6 +14,7 @@ const libEntries = {
   'hover-card': path.join(root, 'src/components/hover-card.tsx'),
   dialog: path.join(root, 'src/components/dialog.tsx'),
   'flight-globe': path.join(root, 'src/components/flight-globe.tsx'),
+  sheet: path.join(root, 'src/components/sheet.tsx'),
   spinner: path.join(root, 'src/components/spinner.tsx'),
   'nota-tint-circle': path.join(root, 'src/components/nota-tint-circle.tsx'),
   utils: path.join(root, 'src/lib/utils.ts'),

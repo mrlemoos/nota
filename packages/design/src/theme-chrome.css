@@ -245,3 +245,105 @@ html:not(.nota-electron) body {
     opacity: 1;
   }
 }
+
+/**
+ * Sheet (Base UI Drawer) — edge-anchored, swipe-dismissable panel.
+ *
+ * Base UI writes an inline `transform` while the pointer is down, so the resting
+ * transform has to be the `transform` property too (an inline style overrides a
+ * stylesheet one; a Tailwind `translate` utility would compose with it instead).
+ * `--drawer-swipe-strength` (0.1–1) shortens the release transition after a fast
+ * flick so the sheet keeps the velocity the finger gave it.
+ */
+.nota-sheet-popup {
+  transition:
+    transform calc(400ms * var(--drawer-swipe-strength, 1))
+      cubic-bezier(0.32, 0.72, 0, 1),
+    width 300ms var(--ease-out);
+}
+
+.nota-sheet-popup[data-swiping] {
+  transition-duration: 0ms;
+}
+
+.nota-sheet-popup[data-swipe-direction='right'] {
+  transform: translateX(var(--drawer-swipe-movement-x, 0px));
+}
+
+.nota-sheet-popup[data-swipe-direction='right'][data-starting-style],
+.nota-sheet-popup[data-swipe-direction='right'][data-ending-style] {
+  transform: translateX(100%);
+}
+
+.nota-sheet-popup[data-swipe-direction='left'] {
+  transform: translateX(var(--drawer-swipe-movement-x, 0px));
+}
+
+.nota-sheet-popup[data-swipe-direction='left'][data-starting-style],
+.nota-sheet-popup[data-swipe-direction='left'][data-ending-style] {
+  transform: translateX(-100%);
+}
+
+.nota-sheet-popup[data-swipe-direction='down'] {
+  transform: translateY(
+    calc(
+      var(--drawer-snap-point-offset, 0px) + var(--drawer-swipe-movement-y, 0px)
+    )
+  );
+}
+
+.nota-sheet-popup[data-swipe-direction='down'][data-starting-style],
+.nota-sheet-popup[data-swipe-direction='down'][data-ending-style] {
+  transform: translateY(100%);
+}
+
+.nota-sheet-popup[data-swipe-direction='up'] {
+  transform: translateY(var(--drawer-swipe-movement-y, 0px));
+}
+
+.nota-sheet-popup[data-swipe-direction='up'][data-starting-style],
+.nota-sheet-popup[data-swipe-direction='up'][data-ending-style] {
+  transform: translateY(-100%);
+}
+
+.nota-sheet-backdrop {
+  opacity: calc(1 - var(--drawer-swipe-progress, 0));
+  transition: opacity 300ms var(--ease-out);
+}
+
+.nota-sheet-backdrop[data-swiping] {
+  transition-duration: 0ms;
+}
+
+.nota-sheet-backdrop[data-starting-style],
+.nota-sheet-backdrop[data-ending-style] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nota-sheet-popup {
+    transition: opacity 150ms linear;
+  }
+
+  .nota-sheet-popup[data-swipe-direction] {
+    transform: none;
+  }
+
+  .nota-sheet-popup[data-swipe-direction][data-starting-style],
+  .nota-sheet-popup[data-swipe-direction][data-ending-style] {
+    transform: none;
+    opacity: 0;
+  }
+}
+
+/**
+ * Expanded to the full window, a right-anchored sheet's top-left corner lands
+ * under the macOS traffic lights (Electron `titleBarStyle: 'hiddenInset'`), so
+ * the floating title moves clear of them. Keyed off `html.nota-electron` rather
+ * than a hook so `@getmadrid/editor` needn't depend on the Electron bridge.
+ */
+html.nota-electron
+  .nota-sheet-popup[data-sheet-expanded]
+  .nota-sheet-floating-title {
+  left: 5.5rem;
+}

@@ -33,6 +33,16 @@ export { parseNoteLinkPath, hrefForNote } from '@getmadrid/internal-note-link';
 export { persistedDisplayTitle } from './lib/note-title';
 export { safeOgImageSrcForPreview } from './lib/og-image-url';
 export { findNoteMentionTrigger } from './lib/tiptap-note-mention';
+export {
+  clampPinchZoom,
+  formatPinchZoom,
+  pinchZoomAfterWheel,
+  usePinchZoom,
+  PINCH_ZOOM_DEFAULT,
+  PINCH_ZOOM_MAX,
+  PINCH_ZOOM_MIN,
+} from './lib/pinch-zoom';
+export type { UsePinchZoomResult } from './lib/pinch-zoom';
 
 export { NotaCodeBlock } from './components/tiptap/nota-code-block';
 export { NotaLink } from './components/tiptap/nota-link';
